@@ -17,7 +17,12 @@
     "dist:win": "npm run dist -- -w",
     "dist:mac": "npm run dist -- -m",
     "dist:linux": "npm run dist -- -l",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "dev:ui": "cd src-ui && npm run dev",
+  "dev:main": "npx esbuild src-main/authHandlers.ts --bundle --platform=node --outfile=dist-main/authHandlers.js --external:electron --watch",
+  "dev:preload": "npx esbuild src-main/preload/preload.ts --bundle --platform=node --outfile=dist-main/preload/preload.js --external:electron --watch",
+  "dev:electron": "wait-on http://localhost:5173 && electron .",
+  "dev": "concurrently -n \"UI,MAIN,PRELOAD,APP\" -c \"bgBlue,bgGreen,bgMagenta,bgCyan\" \"npm run dev:ui\" \"npm run dev:main\" \"npm run dev:preload\" \"electron .\""
   },
   "engines": {
     "node": "22.x.x"
@@ -41,9 +46,12 @@
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^5.6.1",
+    "concurrently": "^9.2.1",
     "electron": "^39.2.7",
     "electron-builder": "^26.4.0",
-    "eslint": "^9.39.2"
+    "esbuild": "^0.28.0",
+    "eslint": "^9.39.2",
+    "typescript": "^6.0.3"
   },
   "repository": {
     "type": "git",

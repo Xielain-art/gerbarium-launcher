@@ -19,6 +19,8 @@ const {
 } = require("./app/assets/js/ipcconstants");
 const LangLoader = require("./app/assets/js/langloader");
 
+const helloHandler = require("./dist-main/handlers/helloHandler").default;
+
 // Setup Lang
 LangLoader.setupLanguage();
 
@@ -274,9 +276,10 @@ function createWindow() {
     icon: getPlatformIcon("SealCircle"),
     frame: false,
     webPreferences: {
-      preload: path.join(__dirname, "app", "assets", "js", "preloader.js"),
-      nodeIntegration: true,
-      contextIsolation: false,
+      //   preload: path.join(__dirname, "app", "assets", "js", "preloader.js"),
+      preload: path.join(__dirname, "dist-main", "preload", "preload.js"),
+      nodeIntegration: false,
+      contextIsolation: true,
     },
     backgroundColor: "#171614",
   });
@@ -400,8 +403,10 @@ function getPlatformIcon(filename) {
   return path.join(__dirname, "app", "assets", "images", `${filename}.${ext}`);
 }
 
-app.on("ready", createWindow);
-app.on("ready", createMenu);
+app.on("ready", () => {
+  createWindow();
+  helloHandler(app);
+});
 
 app.on("window-all-closed", () => {
   // On macOS it is common for applications and their menu bar
@@ -417,4 +422,12 @@ app.on("activate", () => {
   if (win === null) {
     createWindow();
   }
+});
+ipcMain.on("close-app", () => {
+  app.quit();
+});
+
+// Отвечаем на запрос версии
+ipcMain.handle("get-app-version", () => {
+  return app.getVersion();
 });
