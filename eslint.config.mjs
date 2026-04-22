@@ -1,55 +1,75 @@
-import js from '@eslint/js';
-import { defineConfig } from 'eslint/config';
-import stylistic from '@stylistic/eslint-plugin';
-import globals from 'globals';
+import js from "@eslint/js";
+import { defineConfig } from "eslint/config";
+import stylistic from "@stylistic/eslint-plugin";
+import globals from "globals";
 
 export default defineConfig(
   {
-    ignores: ['**/dist/**', 'node_modules', 'eslint.config.mjs'],
+    ignores: ["**/dist/**", "node_modules", "eslint.config.mjs"],
+  },
+  globalIgnores(["dist"]),
+  {
+    files: ["**/*.{ts,tsx}"],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+    },
   },
   js.configs.recommended,
   {
     languageOptions: {
       globals: globals.node,
-      ecmaVersion: 2024
-    }
+      ecmaVersion: 2024,
+    },
   },
   {
-    files: ['**/*.js'],
+    files: ["**/*.js"],
     plugins: {
-      '@stylistic': stylistic,
+      "@stylistic": stylistic,
     },
     rules: {
-      '@stylistic/semi': ['error', 'never'],
-      '@stylistic/quotes': ['error', 'single'],
-      '@stylistic/indent': ['error', 4],
-      '@stylistic/member-delimiter-style': ['error', {
-        multiline: {
-          delimiter: 'none',
-          requireLast: false
+      "@stylistic/semi": ["error", "never"],
+      "@stylistic/quotes": ["error", "single"],
+      "@stylistic/indent": ["error", 4],
+      "@stylistic/member-delimiter-style": [
+        "error",
+        {
+          multiline: {
+            delimiter: "none",
+            requireLast: false,
+          },
+          singleline: {
+            delimiter: "comma",
+            requireLast: false,
+          },
         },
-        singleline: {
-          delimiter: 'comma',
-          requireLast: false
-        }
-      }],
-      '@stylistic/linebreak-style': ['error', 'windows'],
-      'no-var': ['error'],
-      'no-control-regex': 'off',
-      'no-unused-vars': ['error', {
-        vars: 'all',
-        args: 'after-used',
-        caughtErrorsIgnorePattern: '^_',
-        ignoreRestSiblings: false,
-        argsIgnorePattern: '^_|^reject$'
-      }],
-    }
+      ],
+      "@stylistic/linebreak-style": ["error", "windows"],
+      "no-var": ["error"],
+      "no-control-regex": "off",
+      "no-unused-vars": [
+        "error",
+        {
+          vars: "all",
+          args: "after-used",
+          caughtErrorsIgnorePattern: "^_",
+          ignoreRestSiblings: false,
+          argsIgnorePattern: "^_|^reject$",
+        },
+      ],
+    },
   },
   {
-    files: ['app/assets/js/scripts/*.js'],
+    files: ["app/assets/js/scripts/*.js"],
     rules: {
-      'no-unused-vars': 'off',
-      'no-undef': 'off'
-    }
-  }
+      "no-unused-vars": "off",
+      "no-undef": "off",
+    },
+  },
 );
