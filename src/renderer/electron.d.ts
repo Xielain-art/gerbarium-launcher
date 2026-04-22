@@ -1,4 +1,4 @@
-import { IpcChannelMap } from "../../shared/constants/ipc-chanels";
+import { IpcChannelMap } from "../shared/constants/ipc-chanels";
 
 export interface IElectronAPI {
   hello: (
