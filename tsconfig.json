@@ -4,6 +4,7 @@
     "module": "ESNext",
     "outDir": "./dist",
     "rootDir": ".",
+    "jsx": "react-jsx",
     "allowJs": true,
     "strict": true,
     "esModuleInterop": true,
