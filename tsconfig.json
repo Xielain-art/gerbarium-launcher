@@ -1,14 +1,23 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "CommonJS",
-    "outDir": "./dist-main",
-    "rootDir": "./src-main",
+    "module": "ESNext",
+    "outDir": "./build",
+    "rootDir": ".",
     "allowJs": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@main/*": ["src/main/*"],
+      "@renderer/*": ["src/renderer/*"],
+      "@shared/*": ["src/shared/*"],
+      "@preload/*": ["src/preload/*"]
+    },
+    "moduleResolution": "bundler"
   },
-  "include": ["src-main/**/*"]
+  "include": ["src/**/*", "vite.config.ts"],
+  "exclude": ["node_modules", "dist", "build", "**/*.config.js"]
 }

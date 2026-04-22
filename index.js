@@ -6,7 +6,7 @@ const { app, BrowserWindow, ipcMain, Menu, shell } = require("electron");
 const autoUpdater = require("electron-updater").autoUpdater;
 // const ejse = require("ejs-electron");
 const fs = require("fs");
-const isDev = require("./app/assets/js/isdev");
+const isDev = require("./_legacy_app/assets/js/isdev");
 const path = require("path");
 const semver = require("semver");
 const { pathToFileURL } = require("url");
@@ -16,8 +16,8 @@ const {
   MSFT_REPLY_TYPE,
   MSFT_ERROR,
   SHELL_OPCODE,
-} = require("./app/assets/js/ipcconstants");
-const LangLoader = require("./app/assets/js/langloader");
+} = require("./_legacy_app/assets/js/ipcconstants");
+const LangLoader = require("./_legacy_app/assets/js/langloader");
 
 const helloHandler = require("./dist-main/handlers/helloHandler").default;
 
