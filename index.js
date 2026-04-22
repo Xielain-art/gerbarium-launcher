@@ -19,7 +19,7 @@ const {
 } = require("./_legacy_app/assets/js/ipcconstants");
 const LangLoader = require("./_legacy_app/assets/js/langloader");
 
-const helloHandler = require("./dist-main/handlers/helloHandler").default;
+const helloHandler = require("./dist/main/handlers/helloHandler").default;
 
 // Setup Lang
 LangLoader.setupLanguage();
@@ -277,7 +277,7 @@ function createWindow() {
     frame: false,
     webPreferences: {
       //   preload: path.join(__dirname, "app", "assets", "js", "preloader.js"),
-      preload: path.join(__dirname, "dist-main", "preload", "preload.js"),
+      preload: path.join(__dirname, "dist", "preload", "preload.js"),
       nodeIntegration: false,
       contextIsolation: true,
     },
@@ -299,7 +299,7 @@ function createWindow() {
     win.webContents.openDevTools();
   } else {
     // Для продакшена (когда будешь собирать .exe файл)
-    win.loadFile(path.join(__dirname, "src-ui", "dist", "index.html"));
+    win.loadFile(path.join(__dirname, "dist", "index.html"));
   }
 
   /*win.once('ready-to-show', () => {
@@ -400,7 +400,13 @@ function getPlatformIcon(filename) {
       break;
   }
 
-  return path.join(__dirname, "app", "assets", "images", `${filename}.${ext}`);
+  return path.join(
+    __dirname,
+    "_legacy_app",
+    "assets",
+    "images",
+    `${filename}.${ext}`,
+  );
 }
 
 app.on("ready", () => {

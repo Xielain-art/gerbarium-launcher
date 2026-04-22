@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "outDir": "./build",
+    "outDir": "./dist",
     "rootDir": ".",
     "allowJs": true,
     "strict": true,

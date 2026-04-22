@@ -13,16 +13,20 @@
   "main": "index.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder build",
+    "build:ui": "vite build",
+    "build:main": "npx esbuild src/main/handlers/helloHandler.ts --bundle --platform=node --outdir=dist/main/handlers --external:electron",
+    "build:preload": "npx esbuild src/preload/preload.ts --bundle --platform=node --outfile=dist/preload/preload.js --external:electron",
+    "build": "npm run build:ui && npm run build:main && npm run build:preload",
+    "dist": "npm run build && electron-builder build",
     "dist:win": "npm run dist -- -w",
     "dist:mac": "npm run dist -- -m",
     "dist:linux": "npm run dist -- -l",
     "lint": "eslint .",
     "dev:ui": "vite",
-    "dev:main": "npx esbuild src/main/authHandlers.ts --bundle --platform=node --outfile=dist/main/authHandlers.js --external:electron --watch",
+    "dev:main": "npx esbuild src/main/handlers/helloHandler.ts --bundle --platform=node --outdir=dist/main/handlers --external:electron --watch",
     "dev:preload": "npx esbuild src/preload/preload.ts --bundle --platform=node --outfile=dist/preload/preload.js --external:electron --watch",
     "dev:electron": "wait-on http://localhost:5173 && electron .",
-    "dev": "concurrently -n \"UI,PRELOAD,APP\" -c \"bgBlue,bgMagenta,bgCyan\" \"npm run dev:ui\" \"npm run dev:preload\" \"npm run dev:electron\""
+    "dev": "concurrently -n \"UI,MAIN,PRELOAD,APP\" -c \"bgBlue,bgGreen,bgMagenta,bgCyan\" \"npm run dev:ui\" \"npm run dev:main\" \"npm run dev:preload\" \"npm run dev:electron\""
   },
   "engines": {
     "node": ">=22.0.0"
