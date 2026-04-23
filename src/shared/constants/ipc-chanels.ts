@@ -9,6 +9,10 @@ export const IPC_CHANNELS = {
     TOGGLE_FULLSCREEN: "window:toggle-fullscreen",
     ON_STATE_CHANGE: "window:on-state-change",
   },
+  UPDATE: {
+    MESSAGE: "update-message",
+    PROGRESS: "update-progress",
+  },
 } as const;
 
 // Карта типов для всех наших IPC событий
@@ -31,6 +35,14 @@ export interface IpcChannelMap {
   };
   [IPC_CHANNELS.WINDOW.TOGGLE_FULLSCREEN]: {
     args: [];
+    return: void;
+  };
+  [IPC_CHANNELS.UPDATE.MESSAGE]: {
+    args: [message: string];
+    return: void;
+  };
+  [IPC_CHANNELS.UPDATE.PROGRESS]: {
+    args: [progress: { percent: number; transferred: number; total: number; bytesPerSecond: number }];
     return: void;
   };
 }

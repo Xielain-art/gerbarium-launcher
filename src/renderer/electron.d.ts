@@ -19,6 +19,17 @@ export interface IElectronAPI {
   closeWindow: () => Promise<void>;
   toggleFullScreen: () => Promise<void>;
   onWindowStateChange: (callback: (state: WindowState) => void) => () => void;
+
+  // Update events
+  onUpdateMessage: (callback: (message: string) => void) => () => void;
+  onUpdateProgress: (
+    callback: (progress: {
+      percent: number;
+      transferred: number;
+      total: number;
+      bytesPerSecond: number;
+    }) => void,
+  ) => () => void;
 }
 
 declare global {
