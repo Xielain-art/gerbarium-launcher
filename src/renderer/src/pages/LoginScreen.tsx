@@ -13,6 +13,7 @@ export function LoginScreen() {
     password: '',
     savePassword: false,
     autoLogin: true,
+    offlineMode: false,
   });
 
   const [showInputs, setShowInputs] = useState(false);
@@ -27,8 +28,25 @@ export function LoginScreen() {
     clearError();
     setLocalError(null);
 
-    if (!credentials.login || !credentials.password) {
+    if (!credentials.login || (!credentials.password && !credentials.offlineMode)) {
       setLocalError('Введите логин и пароль');
+      return;
+    }
+
+    if (credentials.offlineMode) {
+      // Offline mode login
+      const result = await login({
+        login: credentials.login,
+        password: 'offline',
+        savePassword: credentials.savePassword,
+        autoLogin: credentials.autoLogin,
+      });
+
+      if (result.success) {
+        navigate({ to: '/dashboard' });
+      } else {
+        setLocalError(result.error || 'Ошибка входа');
+      }
       return;
     }
 
@@ -112,8 +130,9 @@ export function LoginScreen() {
               size="lg"
               className="min-w-[280px] text-lg"
               onClick={handleLoginClick}
+              disabled={isLoading}
             >
-              Вход
+              {isLoading ? 'Загрузка...' : 'Вход'}
             </Button>
             
             <div className="flex items-center gap-3 mt-4">
@@ -122,13 +141,27 @@ export function LoginScreen() {
                 size="md"
                 onClick={handleMicrosoftLogin}
                 isLoading={isLoading}
+                disabled={isLoading}
               >
                 Войти через Microsoft
               </Button>
             </div>
+
+            {/* Offline Mode Button */}
+            <div className="mt-6">
+              <Button
+                variant="minecraft"
+                size="md"
+                onClick={() => setShowInputs(true)}
+                disabled={isLoading}
+                className="text-sm"
+              >
+                Играть оффлайн
+              </Button>
+            </div>
           </div>
         ) : (
-          /* Login Form */
+          // Login Form
           <div className="w-full max-w-sm">
             {errorMessage && (
               <div className="mb-4 p-3 bg-[#8b2a2a]/80 border border-[#aa3a3a] text-[#ffaaaa] text-sm font-minecraft text-center">
@@ -147,18 +180,22 @@ export function LoginScreen() {
                 placeholder="E-mail или Логин"
                 autoComplete="username"
                 className="min-w-[280px]"
+                disabled={isLoading}
               />
 
-              <Input
-                label=""
-                type="password"
-                value={credentials.password}
-                onChange={(e) =>
-                  setCredentials((prev) => ({ ...prev, password: e.target.value }))
-                }
-                placeholder="Пароль"
-                autoComplete="current-password"
-              />
+              {!credentials.offlineMode && (
+                <Input
+                  label=""
+                  type="password"
+                  value={credentials.password}
+                  onChange={(e) =>
+                    setCredentials((prev) => ({ ...prev, password: e.target.value }))
+                  }
+                  placeholder="Пароль"
+                  autoComplete="current-password"
+                  disabled={isLoading}
+                />
+              )}
 
               {/* Action Button */}
               <Button
@@ -167,8 +204,9 @@ export function LoginScreen() {
                 size="lg"
                 className="w-full mt-6 text-lg"
                 isLoading={isLoading}
+                disabled={isLoading}
               >
-                Вход
+                {isLoading ? 'Авторизация...' : 'Вход'}
               </Button>
 
               {/* Checkboxes */}
@@ -182,6 +220,7 @@ export function LoginScreen() {
                       savePassword: e.target.checked,
                     }))
                   }
+                  disabled={isLoading}
                 />
                 <Checkbox
                   label="Автоход"
@@ -192,21 +231,36 @@ export function LoginScreen() {
                       autoLogin: e.target.checked,
                     }))
                   }
+                  disabled={isLoading}
+                />
+                <Checkbox
+                  label="Оффлайн режим"
+                  checked={credentials.offlineMode}
+                  onChange={(e) =>
+                    setCredentials((prev) => ({
+                      ...prev,
+                      offlineMode: e.target.checked,
+                    }))
+                  }
+                  disabled={isLoading}
                 />
               </div>
             </form>
 
             {/* Microsoft Login Alternative */}
-            <div className="mt-6 flex justify-center">
-              <Button
-                variant="secondary"
-                size="md"
-                onClick={handleMicrosoftLogin}
-                isLoading={isLoading}
-              >
-                Войти через Microsoft
-              </Button>
-            </div>
+            {!credentials.offlineMode && (
+              <div className="mt-6 flex justify-center">
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={handleMicrosoftLogin}
+                  isLoading={isLoading}
+                  disabled={isLoading}
+                >
+                  Войти через Microsoft
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>

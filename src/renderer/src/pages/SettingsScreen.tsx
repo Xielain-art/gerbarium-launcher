@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useSettings } from '../hooks';
-import { Button, Input, Checkbox, WindowControls, Card } from '../components';
+import { Button, Input, Checkbox, WindowControls, Card, Modal, ConfirmModal } from '../components';
 import { useNavigate } from '@tanstack/react-router';
 
-type SettingsTab = 'general' | 'mods' | 'profile';
+type SettingsTab = 'general' | 'mods' | 'profile' | 'java';
 
 export function SettingsScreen() {
   const navigate = useNavigate();
@@ -21,9 +21,11 @@ export function SettingsScreen() {
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
   const [localError, setLocalError] = useState<string | null>(null);
+  const [showConfirmReset, setShowConfirmReset] = useState(false);
 
   const tabs: { id: SettingsTab; label: string }[] = [
     { id: 'general', label: 'ОБЩИЕ' },
+    { id: 'java', label: 'JAVA' },
     { id: 'mods', label: 'МОДЫ' },
     { id: 'profile', label: 'ПРОФИЛЬ' },
   ];
@@ -40,6 +42,10 @@ export function SettingsScreen() {
   };
 
   const handleReset = () => {
+    setShowConfirmReset(true);
+  };
+
+  const handleResetConfirm = () => {
     resetToDefaults();
     setLocalError(null);
     clearError();
@@ -49,12 +55,17 @@ export function SettingsScreen() {
     navigate({ to: '/dashboard' });
   };
 
+  const handleOpenGameFolder = () => {
+    // TODO: Implement IPC call to open game folder
+    console.log('Opening game folder...');
+  };
+
   const errorMessage = localError || error;
 
   return (
     <div className="w-full h-screen bg-[#1a1a1a] overflow-hidden flex flex-col">
       {/* Top Bar */}
-      <header className="h-16 bg-[#2b2d31] border-b-[3px] border-[#1a1a1a] flex items-center justify-between px-4 shrink-0">
+      <header className="h-16 bg-[#2b2d31] border-b-[3px] border-[#1a1a1a] flex items-center justify-between px-4 shrink-0 title-bar-drag">
         <div className="flex items-center gap-4">
           <button
             onClick={handleBack}
@@ -117,6 +128,93 @@ export function SettingsScreen() {
                   Общие настройки
                 </h2>
 
+                {/* Language Dropdown */}
+                <div className="space-y-1.5">
+                  <label className="text-[#e0e0e0] text-sm font-bold uppercase font-minecraft tracking-wide">
+                    Язык
+                  </label>
+                  <select
+                    value={settings.general.language}
+                    onChange={(e) =>
+                      updateGeneral({ language: e.target.value })
+                    }
+                    className="w-full px-4 py-3 bg-[#2b2d31] border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] text-[#e0e0e0] font-minecraft text-base focus:outline-none focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] cursor-pointer
+                      shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]"
+                  >
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                  </select>
+                </div>
+
+                {/* Auto Updates */}
+                <Checkbox
+                  label="Авто-обновления"
+                  checked={settings.general.autoUpdates}
+                  onChange={(e) =>
+                    updateGeneral({ autoUpdates: e.target.checked })
+                  }
+                />
+
+                {/* Close on Launch */}
+                <Checkbox
+                  label="Закрывать лаунчер при запуске игры"
+                  checked={settings.general.closeOnLaunch}
+                  onChange={(e) =>
+                    updateGeneral({ closeOnLaunch: e.target.checked })
+                  }
+                />
+
+                {/* Minimize to Tray */}
+                <Checkbox
+                  label="Сворачивать в трей"
+                  checked={settings.general.minimizeToTray}
+                  onChange={(e) =>
+                    updateGeneral({ minimizeToTray: e.target.checked })
+                  }
+                />
+
+                {/* Discord RPC */}
+                <Checkbox
+                  label="Показывать статус в Discord (RPC)"
+                  checked={settings.general.discordRPC}
+                  onChange={(e) =>
+                    updateGeneral({ discordRPC: e.target.checked })
+                  }
+                />
+
+                {/* Game Directory */}
+                <div className="pt-4">
+                  <label className="text-[#e0e0e0] text-sm font-bold uppercase font-minecraft tracking-wide block mb-2">
+                    Директория игры
+                  </label>
+                  <div className="flex gap-3">
+                    <Input
+                      value="/.minecraft"
+                      readOnly
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="secondary"
+                      size="md"
+                      onClick={handleOpenGameFolder}
+                    >
+                      Открыть папку
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Java Tab */}
+            {activeTab === 'java' && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold text-[#e0e0e0] font-minecraft uppercase mb-4">
+                  Настройки Java
+                </h2>
+
                 <Input
                   label="Путь к Java"
                   value={settings.general.javaPath}
@@ -167,35 +265,25 @@ export function SettingsScreen() {
                   </div>
                 </div>
 
-                {/* Language Dropdown */}
+                {/* JVM Arguments */}
                 <div className="space-y-1.5">
                   <label className="text-[#e0e0e0] text-sm font-bold uppercase font-minecraft tracking-wide">
-                    Язык
+                    Аргументы JVM
                   </label>
-                  <select
-                    value={settings.general.language}
+                  <textarea
+                    value={settings.general.jvmArgs || ''}
                     onChange={(e) =>
-                      updateGeneral({ language: e.target.value })
+                      updateGeneral({ jvmArgs: e.target.value })
                     }
-                    className="w-full px-4 py-3 bg-[#2b2d31] border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] text-[#e0e0e0] font-minecraft text-base focus:outline-none focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] cursor-pointer
-                      shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]"
-                  >
-                    <option value="ru">Русский</option>
-                    <option value="en">English</option>
-                    <option value="es">Español</option>
-                    <option value="fr">Français</option>
-                    <option value="de">Deutsch</option>
-                  </select>
+                    placeholder="-XX:+UseG1GC -XX:MaxGCPauseMillis=50"
+                    rows={4}
+                    className="w-full px-4 py-3 bg-[#2b2d31] border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] text-[#e0e0e0] font-minecraft text-sm focus:outline-none focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] resize-none
+                      shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] placeholder-[#6a6a6a]"
+                  />
+                  <p className="text-xs text-[#6a6a6a] font-minecraft">
+                    Дополнительные параметры для запуска Java. Оставьте пустым для значений по умолчанию.
+                  </p>
                 </div>
-
-                {/* Auto Updates Checkbox */}
-                <Checkbox
-                  label="Авто-обновления"
-                  checked={settings.general.autoUpdates}
-                  onChange={(e) =>
-                    updateGeneral({ autoUpdates: e.target.checked })
-                  }
-                />
               </div>
             )}
 
@@ -304,7 +392,7 @@ export function SettingsScreen() {
               Сохранить
             </Button>
             <Button
-              variant="secondary"
+              variant="danger"
               size="lg"
               onClick={handleReset}
               className="flex-1 text-lg"
@@ -314,6 +402,18 @@ export function SettingsScreen() {
           </div>
         </div>
       </main>
+
+      {/* Confirm Reset Modal */}
+      <ConfirmModal
+        isOpen={showConfirmReset}
+        onClose={() => setShowConfirmReset(false)}
+        onConfirm={handleResetConfirm}
+        title="Сброс настроек"
+        message="Вы уверены, что хотите сбросить все настройки до значений по умолчанию? Это действие нельзя отменить."
+        confirmText="Сбросить"
+        cancelText="Отмена"
+        variant="danger"
+      />
     </div>
   );
 }

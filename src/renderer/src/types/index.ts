@@ -25,6 +25,10 @@ export interface SettingsGeneral {
   ramAllocation: number; // in GB
   language: string;
   autoUpdates: boolean;
+  closeOnLaunch?: boolean;
+  minimizeToTray?: boolean;
+  discordRPC?: boolean;
+  jvmArgs?: string;
 }
 
 export interface SettingsMods {
@@ -77,6 +81,14 @@ export interface WindowState {
   isMinimized: boolean;
   isMaximized: boolean;
   isFullScreen: boolean;
+}
+
+// Download/Progress Types
+export interface DownloadProgress {
+  progress: number;
+  status: string;
+  speed?: string;
+  eta?: string;
 }
 
 // Component Types
