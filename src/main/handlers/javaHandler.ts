@@ -28,31 +28,48 @@ export async function findJavaInSystem(): Promise<string | null> {
     }
 }
 
-export async function downloadAndExtractJRE(url: string, targetDir: string): Promise<void> {
-    console.log(`Downloading JRE from ${url} to ${targetDir}`);
+export async function downloadAndExtractJRE(
+    url: string, 
+    targetDir: string, 
+    onProgress: (percent: number) => void
+): Promise<string> {
     const zipPath = path.join(targetDir, 'jre.zip');
     await fs.ensureDir(targetDir);
 
-    try {
-        const response = got.stream(url);
-        const fileWriter = fs.createWriteStream(zipPath);
+    const response = got.stream(url);
+    const fileWriter = fs.createWriteStream(zipPath);
 
-        await new Promise<void>((resolve, reject) => {
-            response.pipe(fileWriter)
-                .on('finish', () => resolve())
-                .on('error', (err) => {
-                    console.error(`Error downloading JRE: ${err.message}`);
-                    reject(err);
-                });
-        });
+    let totalBytes = 0;
+    let downloadedBytes = 0;
 
-        console.log(`Extracting JRE to ${targetDir}`);
-        const zip = new AdmZip(zipPath);
-        zip.extractAllTo(targetDir, true);
-        await fs.remove(zipPath);
-        console.log(`JRE extracted successfully`);
-    } catch (err) {
-        console.error(`Failed to download or extract JRE: ${(err as Error).message}`);
-        throw err;
-    }
+    response.on('response', (res) => {
+        totalBytes = parseInt(res.headers['content-length'] || '0', 10);
+        console.log(`Download started. Total size: ${totalBytes} bytes`);
+    });
+
+    response.on('downloadProgress', (progress) => {
+        downloadedBytes = progress.transferred;
+        console.log(`Downloaded: ${downloadedBytes} bytes`);
+        if (totalBytes > 0) {
+            const percent = Math.round((downloadedBytes / totalBytes) * 100);
+            onProgress(percent);
+        }
+    });
+
+    await new Promise<void>((resolve, reject) => {
+        response.pipe(fileWriter)
+            .on('finish', () => resolve())
+            .on('error', (err) => reject(err));
+    });
+
+    const zip = new AdmZip(zipPath);
+    zip.extractAllTo(targetDir, true);
+    await fs.remove(zipPath);
+
+    // Поиск папки JRE после распаковки
+    const files = await fs.readdir(targetDir);
+    const jreFolder = files.find(f => fs.statSync(path.join(targetDir, f)).isDirectory());
+    if (!jreFolder) throw new Error("JRE folder not found after extraction");
+    
+    return path.join(targetDir, jreFolder, 'bin', process.platform === 'win32' ? 'java.exe' : 'java');
 }

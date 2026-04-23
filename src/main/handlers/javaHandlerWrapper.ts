@@ -10,11 +10,16 @@ export default function javaHandler() {
         return await findJavaInSystem();
     });
 
-    ipcMain.handle('java:downloadJRE', async (_, { url, targetDir }) => {
+    ipcMain.handle('java:downloadJRE', async (event, { url, targetDir }) => {
+        console.log('Received download request for:', url);
         try {
-            await downloadAndExtractJRE(url, targetDir);
-            return { success: true };
+            const javaPath = await downloadAndExtractJRE(url, targetDir, (percent) => {
+                event.sender.send('java:downloadProgress', percent);
+            });
+            console.log('Download complete, path:', javaPath);
+            return { success: true, javaPath };
         } catch (error) {
+            console.error('Download failed:', error);
             return { success: false, error: (error as Error).message };
         }
     });

@@ -10,6 +10,8 @@ interface SettingsState extends SettingsStateType {
   saveSettings: () => Promise<{ success: boolean; error?: string }>;
   resetToDefaults: () => void;
   clearError: () => void;
+  isDownloadingJava: boolean;
+  setIsDownloadingJava: (val: boolean) => void;
 }
 
 const defaultSettings: SettingsStateType = {
@@ -34,14 +36,16 @@ const defaultSettings: SettingsStateType = {
   },
   isLoading: false,
   error: null,
+  isDownloadingJava: false,
 };
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
       ...defaultSettings,
-      
+
       clearError: () => set({ error: null }),
+      setIsDownloadingJava: (val) => set({ isDownloadingJava: val }),
       
       updateGeneral: (updates) =>
         set((state) => ({

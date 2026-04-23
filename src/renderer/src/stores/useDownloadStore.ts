@@ -5,8 +5,10 @@ interface DownloadState {
   // State
   isDownloading: boolean;
   progress: DownloadProgress | null;
-  
+  javaProgress: number;
+
   // Actions
+  setJavaProgress: (progress: number) => void;
   startDownload: (versionId: string) => Promise<void>;
   updateProgress: (progress: Partial<DownloadProgress>) => void;
   cancelDownload: () => void;
@@ -23,6 +25,8 @@ const defaultProgress: DownloadProgress = {
 export const useDownloadStore = create<DownloadState>((set, get) => ({
   isDownloading: false,
   progress: null,
+  javaProgress: 0,
+  setJavaProgress: (progress) => set({ javaProgress: progress }),
   
   startDownload: async (versionId: string) => {
     set({ 
