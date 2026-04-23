@@ -122,3 +122,5 @@ export interface WindowState {
   isMaximized: boolean;
   isFullScreen: boolean;
 }
+
+export type DownloadStatus = 'DOWNLOADING' | 'EXTRACTING' | 'VERIFYING' | 'DONE';

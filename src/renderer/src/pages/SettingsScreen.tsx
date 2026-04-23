@@ -257,7 +257,7 @@ export function SettingsScreen() {
                   </div>
                   {(javaLoading || javaError || javaVersion || isDownloadingJava) && (
                     <p className={`font-minecraft text-xs ${javaError ? 'text-red-400' : 'text-[#6a6a6a]'}`}>
-                      {isDownloadingJava ? `Загрузка: ${javaProgress}%` : javaLoading ? 'Поиск...' : javaError ? javaError : `Найдена версия: ${javaVersion}`}
+                      {isDownloadingJava ? `${javaStatus === 'EXTRACTING' ? 'Распаковка...' : 'Загрузка: ' + javaProgress + '%'}` : javaLoading ? 'Поиск...' : javaError ? javaError : `Найдена версия: ${javaVersion}`}
                     </p>
                   )}
                   {isDownloadingJava && (

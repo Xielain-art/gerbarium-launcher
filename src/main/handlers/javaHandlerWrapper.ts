@@ -23,10 +23,10 @@ export default function javaHandler() {
         return result.canceled ? null : result.filePaths[0];
     });
 
-    ipcMain.handle(IPC_CHANNELS.JAVA.DOWNLOAD, async (event, { url, targetDir }) => {
+    ipcMain.handle(IPC_CHANNELS.JAVA.DOWNLOAD, async (event, { url }) => {
         try {
-            const javaPath = await downloadAndExtractJRE(url, targetDir, (percent) => {
-                event.sender.send(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, percent);
+            const javaPath = await downloadAndExtractJRE(url, (update) => {
+                event.sender.send(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, update);
             });
             return { success: true, javaPath };
         } catch (error) {

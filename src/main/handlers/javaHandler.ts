@@ -4,14 +4,19 @@ import fs from 'fs-extra';
 import util from 'util';
 import got from 'got';
 import extract from 'extract-zip';
+import tar from 'tar-fs';
+import zlib from 'zlib';
+import { app } from 'electron';
+import { DownloadStatus } from '../../shared/constants/ipc-chanels';
 
 const execPromise = util.promisify(exec);
+
+export interface ProgressUpdate { status: DownloadStatus; progress?: number; }
 
 export async function checkJavaVersion(javaPath: string): Promise<string | null> {
     try {
         const { stdout, stderr } = await execPromise(`"${javaPath}" -version`);
         const output = stdout + stderr;
-        // Захватываем всё содержимое внутри кавычек
         const match = output.match(/version "([^"]+)"/);
         return match ? match[1] : null;
     } catch (error) {
@@ -32,45 +37,66 @@ export async function findJavaInSystem(): Promise<string | null> {
 
 export async function downloadAndExtractJRE(
     url: string,
-    targetDir: string,
-    onProgress: (percent: number) => void
+    onProgress: (update: ProgressUpdate) => void
 ): Promise<string> {
-    const zipPath = path.join(targetDir, 'jre.zip');
+    const targetDir = path.join(app.getPath('userData'), 'java', 'jre17');
+    const archivePath = path.join(targetDir, 'jre.archive');
     await fs.ensureDir(targetDir);
 
-    const response = got.stream(url);
-    const fileWriter = fs.createWriteStream(zipPath);
+    try {
+        const response = got.stream(url, { timeout: { socket: 15000 } });
+        const fileWriter = fs.createWriteStream(archivePath);
 
-    let totalBytes = 0;
-    response.on('response', (res) => {
-        totalBytes = parseInt(res.headers['content-length'] || '0', 10);
-    });
+        let totalBytes = 0;
+        response.on('response', (res) => {
+            totalBytes = parseInt(res.headers['content-length'] || '0', 10);
+        });
 
-    response.on('downloadProgress', (progress) => {
-        if (totalBytes > 0) {
-            const percent = Math.round((progress.transferred / totalBytes) * 100);
-            onProgress(percent);
+        response.on('downloadProgress', (progress) => {
+            if (totalBytes > 0) {
+                onProgress({ status: 'DOWNLOADING', progress: Math.round((progress.transferred / totalBytes) * 100) });
+            }
+        });
+
+        await new Promise<void>((resolve, reject) => {
+            response.pipe(fileWriter)
+                .on('finish', () => resolve())
+                .on('error', (err) => reject(err));
+        });
+
+        onProgress({ status: 'EXTRACTING' });
+        if (url.endsWith('.zip')) {
+            await extract(archivePath, { dir: targetDir });
+        } else {
+            await new Promise((resolve, reject) => {
+                fs.createReadStream(archivePath)
+                    .pipe(zlib.createGunzip())
+                    .pipe(tar.extract(targetDir))
+                    .on('finish', resolve)
+                    .on('error', reject);
+            });
         }
-    });
+        await fs.remove(archivePath);
 
-    await new Promise<void>((resolve, reject) => {
-        response.pipe(fileWriter)
-            .on('finish', () => resolve())
-            .on('error', (err) => reject(err));
-    });
+        onProgress({ status: 'VERIFYING' });
+        const files = await fs.readdir(targetDir);
+        const jreFolder = files.find(f => fs.statSync(path.join(targetDir, f)).isDirectory());
+        if (!jreFolder) throw new Error("JRE folder not found");
 
-    await extract(zipPath, { dir: targetDir });
-    await fs.remove(zipPath);
+        const javaBinaryPath = path.join(targetDir, jreFolder, 'bin', process.platform === 'win32' ? 'java.exe' : 'java');
+        
+        const version = await checkJavaVersion(javaBinaryPath);
+        if (!version) {
+            await fs.remove(path.join(targetDir, jreFolder));
+            throw new Error("Downloaded Java is corrupted or unsupported");
+        }
 
-    const files = await fs.readdir(targetDir);
-    const jreFolder = files.find(f => fs.statSync(path.join(targetDir, f)).isDirectory());
-    if (!jreFolder) throw new Error("JRE folder not found after extraction");
-
-    const javaBinaryPath = path.join(targetDir, jreFolder, 'bin', process.platform === 'win32' ? 'java.exe' : 'java');
-
-    if (process.platform !== 'win32') {
-        await fs.chmod(javaBinaryPath, 0o755);
+        if (process.platform !== 'win32') await fs.chmod(javaBinaryPath, 0o755);
+        
+        onProgress({ status: 'DONE' });
+        return javaBinaryPath;
+    } catch (err) {
+        await fs.remove(archivePath);
+        throw err;
     }
-
-    return javaBinaryPath;
 }

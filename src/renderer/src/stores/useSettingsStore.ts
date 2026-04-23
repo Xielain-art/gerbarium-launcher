@@ -14,6 +14,8 @@ interface SettingsState extends SettingsStateType {
   setIsDownloadingJava: (val: boolean) => void;
   javaError: string | null;
   setJavaError: (err: string | null) => void;
+  isJavaLoading: boolean;
+  setIsJavaLoading: (val: boolean) => void;
 }
 
 const defaultSettings: SettingsStateType = {
@@ -46,10 +48,12 @@ export const useSettingsStore = create<SettingsState>()(
       ...defaultSettings,
       isDownloadingJava: false,
       javaError: null,
+      isJavaLoading: false,
 
       clearError: () => set({ error: null }),
       setIsDownloadingJava: (val) => set({ isDownloadingJava: val }),
       setJavaError: (err) => set({ javaError: err }),
+      setIsJavaLoading: (val) => set({ isJavaLoading: val }),
       
       updateGeneral: (updates) =>
         set((state) => ({

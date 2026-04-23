@@ -1,4 +1,4 @@
-import { IpcChannelMap, WindowState } from "../shared/constants/ipc-chanels";
+import { IpcChannelMap, WindowState, DownloadStatus } from "../shared/constants/ipc-chanels";
 
 type IpcArgs<K extends keyof IpcChannelMap> = IpcChannelMap[K]["args"];
 type IpcReturn<K extends keyof IpcChannelMap> = IpcChannelMap[K]["return"];
@@ -50,8 +50,8 @@ export interface IElectronAPI {
     checkVersion: (javaPath: string) => Promise<string | null>;
     findSystemJava: () => Promise<string | null>;
     selectJavaExecutable: () => Promise<string | null>;
-    downloadJRE: (url: string, targetDir: string) => Promise<{ success: boolean; javaPath?: string; error?: string }>;
-    onDownloadProgress: (callback: (percent: number) => void) => () => void;
+    downloadJRE: (url: string) => Promise<{ success: boolean; javaPath?: string; error?: string }>;
+    onDownloadProgress: (callback: (update: { status: DownloadStatus, progress?: number }) => void) => () => void;
   };
 }
 
