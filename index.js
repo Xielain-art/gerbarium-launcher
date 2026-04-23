@@ -20,7 +20,8 @@ const {
 const LangLoader = require("./_legacy_app/assets/js/langloader");
 
 const helloHandler = require("./dist/main/handlers/helloHandler").default;
-const windowControlsHandler = require("./dist/main/handlers/windowControlsHandler").default;
+const windowControlsHandler =
+  require("./dist/main/handlers/windowControlsHandler").default;
 
 // Setup Lang
 LangLoader.setupLanguage();
@@ -140,7 +141,7 @@ ipcMain.on(MSFT_OPCODE.OPEN_LOGIN, (ipcEvent, ...arguments_) => {
     title: LangLoader.queryJS("index.microsoftLoginTitle"),
     backgroundColor: "#222222",
     width: 520,
-    height: 600,
+    height: 650,
     frame: true,
     icon: getPlatformIcon("SealCircle"),
   });
@@ -278,7 +279,7 @@ function createWindow() {
     frame: false,
     webPreferences: {
       //   preload: path.join(__dirname, "app", "assets", "js", "preloader.js"),
-      preload: path.join(__dirname, "dist", "preload", "preload.js"),
+      preload: path.join(__dirname, "..", "..", "dist", "preload", "preload.js"),
       nodeIntegration: false,
       contextIsolation: true,
     },
@@ -300,7 +301,7 @@ function createWindow() {
     win.webContents.openDevTools();
   } else {
     // Для продакшена (когда будешь собирать .exe файл)
-    win.loadFile(path.join(__dirname, "dist", "index.html"));
+    win.loadFile(path.join(__dirname, "..", "..", "dist", "index.html"));
   }
 
   /*win.once('ready-to-show', () => {

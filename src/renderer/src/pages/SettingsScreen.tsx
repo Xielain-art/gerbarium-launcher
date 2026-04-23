@@ -4,7 +4,7 @@ import { useSettingsStore } from '../stores/useSettingsStore';
 import { useAuthStore } from '../stores/useAuthStore';
 import { WindowControls } from '../components';
 
-type SettingsTab = 'general' | 'java' | 'mods' | 'profile';
+type SettingsTab = 'general' | 'java' | 'profile';
 
 export function SettingsScreen() {
   const navigate = useNavigate();
@@ -28,7 +28,6 @@ export function SettingsScreen() {
   const tabs: { id: SettingsTab; label: string }[] = [
     { id: 'general', label: 'ОБЩИЕ' },
     { id: 'java', label: 'JAVA' },
-    { id: 'mods', label: 'МОДЫ' },
     { id: 'profile', label: 'ПРОФИЛЬ' },
   ];
 
@@ -271,43 +270,6 @@ export function SettingsScreen() {
                   <p className="font-minecraft text-xs text-[#6a6a6a]">
                     Дополнительные параметры для запуска Java
                   </p>
-                </div>
-              </div>
-            )}
-
-            {/* Mods Tab */}
-            {activeTab === 'mods' && (
-              <div className="space-y-6">
-                <h2 className="font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
-                  Настройки модов
-                </h2>
-
-                {/* Mod Pack Selection */}
-                <div className="space-y-2">
-                  <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
-                    Модпак
-                  </label>
-                  <select
-                    value={mods.modPack}
-                    onChange={(e) => updateMods({ modPack: e.target.value })}
-                    className="w-full rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none"
-                  >
-                    <option value="gerbarium">Gerbarium (Рекомендуемый)</option>
-                    <option value="vanilla">Vanilla</option>
-                    <option value="custom">Custom</option>
-                  </select>
-                </div>
-
-                {/* Enabled Mods */}
-                <div className="space-y-2">
-                  <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
-                    Включенные моды
-                  </label>
-                  <div className="rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] p-4 text-center shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]">
-                    <p className="font-minecraft text-sm text-[#8a8a8a] py-4">
-                      Список модов будет доступен после выбора модпака
-                    </p>
-                  </div>
                 </div>
               </div>
             )}
