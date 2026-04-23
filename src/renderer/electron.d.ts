@@ -44,6 +44,15 @@ export interface IElectronAPI {
     get: (key: string) => Promise<{ success: boolean; value?: string | null; error?: string }>;
     delete: (key: string) => Promise<{ success: boolean; error?: string }>;
   };
+
+  // Java management
+  java: {
+    checkVersion: (javaPath: string) => Promise<string | null>;
+    findSystemJava: () => Promise<string | null>;
+    selectJavaExecutable: () => Promise<string | null>;
+    downloadJRE: (url: string, targetDir: string) => Promise<{ success: boolean; javaPath?: string; error?: string }>;
+    onDownloadProgress: (callback: (percent: number) => void) => () => void;
+  };
 }
 
 declare global {

@@ -88,15 +88,15 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // Java management
   java: {
-    checkVersion: (javaPath: string) => ipcRenderer.invoke('java:checkVersion', javaPath),
-    findSystemJava: () => ipcRenderer.invoke('java:findSystemJava'),
-    selectJavaExecutable: () => ipcRenderer.invoke('java:selectJavaExecutable'),
-    downloadJRE: (url: string, targetDir: string) => ipcRenderer.invoke('java:downloadJRE', { url, targetDir }),
+    checkVersion: (javaPath: string) => typedInvoke(IPC_CHANNELS.JAVA.CHECK_VERSION, javaPath),
+    findSystemJava: () => typedInvoke(IPC_CHANNELS.JAVA.FIND_SYSTEM),
+    selectJavaExecutable: () => typedInvoke(IPC_CHANNELS.JAVA.SELECT_EXECUTABLE),
+    downloadJRE: (url: string, targetDir: string) => typedInvoke(IPC_CHANNELS.JAVA.DOWNLOAD, url, targetDir),
     onDownloadProgress: (callback: (percent: number) => void) => {
         const subscription = (_event: any, percent: number) => callback(percent);
-        ipcRenderer.on('java:downloadProgress', subscription);
+        ipcRenderer.on(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, subscription);
         return () => {
-            ipcRenderer.removeListener('java:downloadProgress', subscription);
+            ipcRenderer.removeListener(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, subscription);
         };
     }
   },

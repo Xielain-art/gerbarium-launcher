@@ -1,16 +1,17 @@
 import { ipcMain } from 'electron';
 import { checkJavaVersion, findJavaInSystem, downloadAndExtractJRE } from './javaHandler';
+import { IPC_CHANNELS } from '../../shared/constants/ipc-chanels';
 
 export default function javaHandler() {
-    ipcMain.handle('java:checkVersion', async (_, javaPath: string) => {
+    ipcMain.handle(IPC_CHANNELS.JAVA.CHECK_VERSION, async (_, javaPath: string) => {
         return await checkJavaVersion(javaPath);
     });
 
-    ipcMain.handle('java:findSystemJava', async () => {
+    ipcMain.handle(IPC_CHANNELS.JAVA.FIND_SYSTEM, async () => {
         return await findJavaInSystem();
     });
 
-    ipcMain.handle('java:selectJavaExecutable', async () => {
+    ipcMain.handle(IPC_CHANNELS.JAVA.SELECT_EXECUTABLE, async () => {
         const { dialog } = require('electron');
         const result = await dialog.showOpenDialog({
             properties: ['openFile'],
@@ -19,16 +20,13 @@ export default function javaHandler() {
         return result.canceled ? null : result.filePaths[0];
     });
 
-    ipcMain.handle('java:downloadJRE', async (event, { url, targetDir }) => {
-        console.log('Received download request for:', url);
+    ipcMain.handle(IPC_CHANNELS.JAVA.DOWNLOAD, async (event, { url, targetDir }) => {
         try {
             const javaPath = await downloadAndExtractJRE(url, targetDir, (percent) => {
-                event.sender.send('java:downloadProgress', percent);
+                event.sender.send(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, percent);
             });
-            console.log('Download complete, path:', javaPath);
             return { success: true, javaPath };
         } catch (error) {
-            console.error('Download failed:', error);
             return { success: false, error: (error as Error).message };
         }
     });

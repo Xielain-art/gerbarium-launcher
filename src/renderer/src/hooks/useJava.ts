@@ -9,7 +9,7 @@ export function useJava() {
     const setIsDownloadingJava = useSettingsStore((state) => state.setIsDownloadingJava);
 
     useEffect(() => {
-        const unsubscribe = (window as any).electronAPI.java.onDownloadProgress((percent: number) => {
+        const unsubscribe = window.electronAPI.java.onDownloadProgress((percent: number) => {
             setJavaProgress(percent);
         });
         return () => {
@@ -21,7 +21,7 @@ export function useJava() {
         setLoading(true);
         setError(null);
         try {
-            return await (window as any).electronAPI.java.checkVersion(javaPath);
+            return await window.electronAPI.java.checkVersion(javaPath);
         } catch (err) {
             setError((err as Error).message);
             return null;
@@ -34,7 +34,7 @@ export function useJava() {
         setLoading(true);
         setError(null);
         try {
-            return await (window as any).electronAPI.java.findSystemJava();
+            return await window.electronAPI.java.findSystemJava();
         } catch (err) {
             setError((err as Error).message);
             return null;
@@ -48,7 +48,7 @@ export function useJava() {
         setJavaProgress(0);
         setError(null);
         try {
-            const result = await (window as any).electronAPI.java.downloadJRE(url, targetDir);
+            const result = await window.electronAPI.java.downloadJRE(url, targetDir);
             if (!result.success) throw new Error(result.error);
             return result.javaPath;
         } catch (err) {
