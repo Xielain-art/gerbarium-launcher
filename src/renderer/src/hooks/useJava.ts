@@ -53,10 +53,13 @@ export function useJava() {
         setJavaProgress(0);
         setJavaError(null);
         try {
+            console.log('Calling downloadJRE with URL:', url);
             const result = await window.electronAPI.java.downloadJRE(url);
+            console.log('Result from downloadJRE:', result);
             if (!result.success) throw new Error(result.error);
             return result.javaPath;
         } catch (err) {
+            console.error('Error in downloadJava hook:', err);
             setJavaError((err as Error).message);
             return null;
         } finally {
