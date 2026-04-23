@@ -14,7 +14,7 @@
   "scripts": {
     "start": "electron .",
     "build:ui": "vite build",
-    "build:main": "npx esbuild src/main/handlers/helloHandler.ts --bundle --platform=node --outdir=dist/main/handlers --external:electron",
+    "build:main": "npx esbuild src/main/handlers/*.ts --bundle --platform=node --outdir=dist/main/handlers --external:electron",
     "build:preload": "npx esbuild src/preload/preload.ts --bundle --platform=node --outfile=dist/preload/preload.js --external:electron",
     "build": "npm run build:ui && npm run build:main && npm run build:preload",
     "dist": "npm run build && electron-builder build",
@@ -34,6 +34,7 @@
   "dependencies": {
     "@electron/remote": "^2.1.3",
     "@tailwindcss/vite": "^4.2.4",
+    "@tanstack/react-router": "^1.168.23",
     "adm-zip": "^0.5.16",
     "discord-rpc-patch": "^4.0.1",
     "ejs": "^3.1.10",

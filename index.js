@@ -20,6 +20,7 @@ const {
 const LangLoader = require("./_legacy_app/assets/js/langloader");
 
 const helloHandler = require("./dist/main/handlers/helloHandler").default;
+const windowControlsHandler = require("./dist/main/handlers/windowControlsHandler").default;
 
 // Setup Lang
 LangLoader.setupLanguage();
@@ -412,6 +413,7 @@ function getPlatformIcon(filename) {
 app.on("ready", () => {
   createWindow();
   helloHandler(app);
+  windowControlsHandler(app);
 });
 
 app.on("window-all-closed", () => {
