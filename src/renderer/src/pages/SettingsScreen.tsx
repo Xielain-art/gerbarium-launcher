@@ -10,7 +10,7 @@ export function SettingsScreen() {
   const navigate = useNavigate();
   
   // Zustand stores
-  const { settings, updateGeneral, updateMods, updateProfile, saveSettings, resetToDefaults, isLoading, error, clearError } = useSettingsStore();
+  const { general, mods, profile, updateGeneral, updateMods, updateProfile, saveSettings, resetToDefaults, isLoading, error, clearError } = useSettingsStore();
   const { logout, isAuthenticated } = useAuthStore();
 
   // Local state
@@ -133,7 +133,7 @@ export function SettingsScreen() {
                     Язык
                   </label>
                   <select
-                    value={settings.general.language}
+                    value={general.language}
                     onChange={(e) => updateGeneral({ language: e.target.value })}
                     className="w-full rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none"
                   >
@@ -150,7 +150,7 @@ export function SettingsScreen() {
                   <label className="flex cursor-pointer items-center gap-3">
                     <input
                       type="checkbox"
-                      checked={settings.general.autoUpdates}
+                      checked={general.autoUpdates}
                       onChange={(e) => updateGeneral({ autoUpdates: e.target.checked })}
                       className="peer sr-only"
                     />
@@ -165,7 +165,7 @@ export function SettingsScreen() {
                   <label className="flex cursor-pointer items-center gap-3">
                     <input
                       type="checkbox"
-                      checked={settings.general.closeOnLaunch}
+                      checked={general.closeOnLaunch}
                       onChange={(e) => updateGeneral({ closeOnLaunch: e.target.checked })}
                       className="peer sr-only"
                     />
@@ -180,7 +180,7 @@ export function SettingsScreen() {
                   <label className="flex cursor-pointer items-center gap-3">
                     <input
                       type="checkbox"
-                      checked={settings.general.minimizeToTray}
+                      checked={general.minimizeToTray}
                       onChange={(e) => updateGeneral({ minimizeToTray: e.target.checked })}
                       className="peer sr-only"
                     />
@@ -195,7 +195,7 @@ export function SettingsScreen() {
                   <label className="flex cursor-pointer items-center gap-3">
                     <input
                       type="checkbox"
-                      checked={settings.general.discordRPC}
+                      checked={general.discordRPC}
                       onChange={(e) => updateGeneral({ discordRPC: e.target.checked })}
                       className="peer sr-only"
                     />
@@ -224,7 +224,7 @@ export function SettingsScreen() {
                   </label>
                   <input
                     type="text"
-                    value={settings.general.javaPath}
+                    value={general.javaPath}
                     onChange={(e) => updateGeneral({ javaPath: e.target.value })}
                     placeholder="C:/Program Files/Java/jdk/bin/java.exe"
                     className="w-full rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none placeholder-white/40"
@@ -234,7 +234,7 @@ export function SettingsScreen() {
                 {/* RAM Allocation */}
                 <div className="space-y-2">
                   <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
-                    Выделение ОЗУ: {settings.general.ramAllocation} ГБ
+                    Выделение ОЗУ: {general.ramAllocation} ГБ
                   </label>
                   <div className="flex items-center gap-4">
                     <input
@@ -242,12 +242,12 @@ export function SettingsScreen() {
                       min="1"
                       max="16"
                       step="1"
-                      value={settings.general.ramAllocation}
+                      value={general.ramAllocation}
                       onChange={(e) => updateGeneral({ ramAllocation: parseInt(e.target.value) })}
                       className="h-3 flex-1 appearance-none cursor-pointer rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-none [&::-webkit-slider-thumb]:border-[3px] [&::-webkit-slider-thumb]:border-t-[#4a9a4a] [&::-webkit-slider-thumb]:border-l-[#4a9a4a] [&::-webkit-slider-thumb]:border-b-[#2a5a2a] [&::-webkit-slider-thumb]:border-r-[#2a5a2a] [&::-webkit-slider-thumb]:bg-[#3a753a] [&::-webkit-slider-thumb]:shadow-[inset_2px_2px_0px_#4a9a4a,inset_-2px_-2px_0px_#2a5a2a] [&::-webkit-slider-thumb]:cursor-pointer"
                     />
                     <span className="w-16 text-right font-minecraft text-sm text-[#e0e0e0]">
-                      {settings.general.ramAllocation} ГБ
+                      {general.ramAllocation} ГБ
                     </span>
                   </div>
                   <div className="flex justify-between font-minecraft text-xs text-[#6a6a6a]">
@@ -262,7 +262,7 @@ export function SettingsScreen() {
                     Аргументы JVM
                   </label>
                   <textarea
-                    value={settings.general.jvmArgs || ''}
+                    value={general.jvmArgs || ''}
                     onChange={(e) => updateGeneral({ jvmArgs: e.target.value })}
                     placeholder="-XX:+UseG1GC -XX:MaxGCPauseMillis=50"
                     rows={4}
@@ -288,7 +288,7 @@ export function SettingsScreen() {
                     Модпак
                   </label>
                   <select
-                    value={settings.mods.modPack}
+                    value={mods.modPack}
                     onChange={(e) => updateMods({ modPack: e.target.value })}
                     className="w-full rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none"
                   >
@@ -326,7 +326,7 @@ export function SettingsScreen() {
                     </label>
                     <input
                       type="text"
-                      value={settings.profile.username}
+                      value={profile.username}
                       onChange={(e) => updateProfile({ username: e.target.value })}
                       placeholder="Player"
                       className="w-full rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none placeholder-white/40"
@@ -339,7 +339,7 @@ export function SettingsScreen() {
                     </label>
                     <input
                       type="text"
-                      value={settings.profile.skinUrl || ''}
+                      value={profile.skinUrl || ''}
                       onChange={(e) => updateProfile({ skinUrl: e.target.value })}
                       placeholder="https://example.com/skin.png"
                       className="w-full rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none placeholder-white/40"
@@ -352,7 +352,7 @@ export function SettingsScreen() {
                     </label>
                     <input
                       type="text"
-                      value={settings.profile.capeUrl || ''}
+                      value={profile.capeUrl || ''}
                       onChange={(e) => updateProfile({ capeUrl: e.target.value })}
                       placeholder="https://example.com/cape.png"
                       className="w-full rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none placeholder-white/40"
@@ -368,7 +368,7 @@ export function SettingsScreen() {
                   <div className="flex items-center justify-center rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] p-4 shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]">
                     <div className="flex h-32 w-32 items-center justify-center bg-[#1a1a1a]">
                       <span className="font-minecraft text-sm text-[#6a6a6a]">
-                        {settings.profile.skinUrl ? 'Загрузка...' : 'Скин не выбран'}
+                        {profile.skinUrl ? 'Загрузка...' : 'Скин не выбран'}
                       </span>
                     </div>
                   </div>

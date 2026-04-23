@@ -6,7 +6,8 @@
       "Bash(copy *)",
       "Bash(npx *)",
       "Bash(dir *)",
-      "Bash(npm start)"
+      "Bash(npm start)",
+      "Bash(mkdir *)"
     ]
   },
   "$version": 3

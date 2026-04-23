@@ -30,7 +30,6 @@ const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: LoginScreen,
-  // Redirect to dashboard if already authenticated
   beforeLoad: async () => {
     if (checkAuth()) {
       throw redirect({ to: '/dashboard' });
@@ -43,7 +42,6 @@ const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard',
   component: DashboardScreen,
-  // Protect route - redirect to login if not authenticated
   beforeLoad: async () => {
     if (!checkAuth()) {
       throw redirect({ to: '/' });
@@ -56,8 +54,8 @@ const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
   component: SettingsScreen,
-  // Protect route - redirect to login if not authenticated
   beforeLoad: async () => {
+    console.log('Settings beforeLoad - auth check:', checkAuth());
     if (!checkAuth()) {
       throw redirect({ to: '/' });
     }

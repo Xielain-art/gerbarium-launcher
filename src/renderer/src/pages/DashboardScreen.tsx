@@ -4,8 +4,9 @@ import { useAuthStore } from '../stores/useAuthStore';
 import { useDownloadStore } from '../stores/useDownloadStore';
 import { useNewsStore } from '../stores/useNewsStore';
 import { useServerStatusStore } from '../stores/useServerStatusStore';
-import { WindowControls, Avatar, ProgressBar, Skeleton, NewsCardSkeleton } from '../components';
+import { WindowControls, Avatar } from '../components';
 import miniLogo from '../assets/photo_2026-04-23_10-35-12.jpg';
+import newsPlaceholder from '../assets/photo_2026-04-23_10-34-22.jpg';
 
 // Mock versions data
 const mockVersions = [
@@ -47,13 +48,13 @@ function getCategoryLabel(category: string) {
 
 export function DashboardScreen() {
   const navigate = useNavigate();
-  
+
   // Zustand stores
   const { user, logout, isAuthenticated } = useAuthStore();
-  const { isDownloading, progress, startDownload } = useDownloadStore();
+  const { isDownloading, progress, startDownload, cancelDownload, resetDownload } = useDownloadStore();
   const { items: news, isLoading: isLoadingNews } = useNewsStore();
   const { data: serverStatus } = useServerStatusStore();
-  
+
   // Local state
   const [selectedVersion, setSelectedVersion] = useState<string | null>(
     mockVersions[0]?.id || null
@@ -72,7 +73,12 @@ export function DashboardScreen() {
     await startDownload(selectedVersion);
   };
 
+  const handleCancel = () => {
+    cancelDownload();
+  };
+
   const handleSettings = () => {
+    console.log('Navigating to settings...');
     navigate({ to: '/settings' });
   };
 
@@ -84,167 +90,254 @@ export function DashboardScreen() {
 
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden bg-[#1a1a1a]">
-      {/* Top Bar */}
-      <header className="title-bar-drag flex h-16 shrink-0 items-center justify-between border-b-[3px] border-[#1a1a1a] bg-[#2b2d31] px-4">
-        <div className="flex items-center gap-4">
-          {/* Mini Logo */}
-          <img
-            src={miniLogo}
-            alt="MG"
-            className="h-12 w-auto object-contain"
-            style={{ imageRendering: 'pixelated' }}
-          />
-
-          {/* Navigation */}
-          <nav className="flex items-center gap-2">
-            <button
-              onClick={handleSettings}
-              className="border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] px-4 py-2 font-minecraft text-sm text-[#e0e0e0] transition-colors hover:bg-[#3c3c3c] active:border-t-[#1a1a1a] active:border-l-[#1a1a1a] active:border-b-[#5a5a5a] active:border-r-[#5a5a5a]"
-            >
-              Настройки
-            </button>
-          </nav>
-        </div>
-
-        {/* Right Side */}
-        <div className="flex items-center gap-4">
-          {/* Server Status */}
-          <div className="flex items-center gap-3 rounded border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] bg-[#2b2d31] px-4 py-2">
-            <div className={`h-2 w-2 rounded-full ${serverStatus?.online ? 'bg-[#55ff55] animate-pulse' : 'bg-[#ff5555]'}`} />
-            <span className="font-minecraft text-xs text-[#e0e0e0]">
-              {serverStatus?.online ? 'Онлайн' : 'Оффлайн'}
-            </span>
-            {serverStatus?.online && (
-              <span className="font-minecraft text-xs text-[#55aaff]">
-                 {serverStatus.players.online}/{serverStatus.players.max}
-              </span>
-            )}
+      {/* Main layout: sidebar + content area */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* ZONE 1: Left Sidebar - Navigation & Versions */}
+        <aside className="flex w-72 flex-col border-r-[3px] border-[#1a1a1a] bg-[#252525]">
+          {/* Logo */}
+          <div className="flex items-center justify-center border-b-[3px] border-[#1a1a1a] bg-[#2b2d31] p-6">
+            <img
+              src={miniLogo}
+              alt="Gerbarium"
+              className="h-16 w-auto object-contain"
+              style={{ imageRendering: 'pixelated' }}
+            />
           </div>
 
-          {/* User Avatar */}
-          <div className="flex items-center gap-3">
-            <Avatar username={user?.username} size="md" />
-            <span className="font-minecraft text-sm text-[#e0e0e0]">
-              Привет, {user?.username || 'Игрок'}!
-            </span>
-          </div>
-
-          {/* Logout */}
-          <button
-            onClick={handleLogout}
-            className="font-minecraft text-xs text-[#8a8a8a] transition-colors hover:text-[#e0e0e0]"
-          >
-            Выйти
-          </button>
-
-          {/* Window Controls */}
-          <div>
-            <WindowControls />
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="flex flex-1 overflow-hidden">
-        {/* Left Panel - Version List */}
-        <aside className="flex w-80 flex-col shrink-0 border-r-[3px] border-[#1a1a1a] bg-[#252525]">
-          <div className="border-b-[3px] border-[#1a1a1a] p-4">
-            <h2 className="font-minecraft text-lg font-bold uppercase text-[#e0e0e0]">
+          {/* Versions List */}
+          <div className="flex-1 overflow-y-auto p-4">
+            <h2 className="mb-4 font-minecraft text-sm font-bold uppercase text-gray-400">
               Версии
             </h2>
-          </div>
-
-          <div className="flex-1 space-y-3 overflow-y-auto p-4">
-            {mockVersions.map((version) => (
-              <div
-                key={version.id}
-                onClick={() => setSelectedVersion(version.id)}
-                className={`flex cursor-pointer items-center gap-3 rounded border-[3px] p-4 transition-colors ${
-                  selectedVersion === version.id
-                    ? 'border-t-[#3a753a] border-l-[#3a753a] border-b-[#2a5a2a] border-r-[#2a5a2a] bg-[#3a753a]/20'
-                    : 'border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] bg-[#2b2d31] hover:bg-[#36393f]'
-                }`}
-              >
-                <span className="text-2xl">{getVersionIcon(version.type)}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="font-minecraft text-sm font-bold text-[#e0e0e0] truncate">
-                    {version.name}
-                  </div>
-                  <div className={`font-minecraft text-xs ${version.isInstalled ? 'text-[#5a5]' : 'text-[#8a8a8a]'}`}>
-                    {version.isInstalled ? 'Установлено' : 'Не установлено'}
+            <div className="space-y-2">
+              {mockVersions.map((version) => (
+                <div
+                  key={version.id}
+                  onClick={() => setSelectedVersion(version.id)}
+                  className={`mc-card mc-card-clickable ${
+                    selectedVersion === version.id ? 'mc-panel-active' : ''
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{getVersionIcon(version.type)}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-minecraft text-sm font-bold text-[#e0e0e0] truncate">
+                        {version.name}
+                      </div>
+                      <div className={`font-minecraft text-xs ${version.isInstalled ? 'text-[#5a5]' : 'text-[#8a8a8a]'}`}>
+                        {version.isInstalled ? 'Установлено' : 'Не установлено'}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          {/* Play Button & Progress */}
-          <div className="border-t-[3px] border-[#1a1a1a] bg-[#2b2d31] p-4 space-y-3">
-            {isDownloading && progress && (
-              <ProgressBar
-                progress={progress.progress}
-                status={progress.status}
-                speed={progress.speed}
-                eta={progress.eta}
-              />
-            )}
-
+          {/* Settings Button (bottom) */}
+          <div className="relative z-10 border-t-[3px] border-[#1a1a1a] bg-[#2b2d31] p-4">
             <button
-              onClick={handlePlay}
-              disabled={isDownloading}
-              className="flex w-full items-center justify-center rounded border-[3px] border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a] bg-gradient-to-br from-[#3a753a] to-[#2d5a2d] py-6 font-minecraft text-xl font-bold text-white shadow-[inset_2px_2px_0px_#4a9a4a,inset_-2px_-2px_0px_#2a5a2a] transition-all duration-75 hover:from-[#4a8a4a] hover:to-[#3d6a3d] active:border-t-[#2a5a2a] active:border-l-[#2a5a2a] active:border-b-[#4a9a4a] active:border-r-[#4a9a4a] disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={handleSettings}
+              className="mc-btn mc-btn-secondary w-full"
+              style={{ zIndex: 999 }}
             >
-              {isDownloading ? 'Загрузка...' : 'ИГРАТЬ'}
+              <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="square" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="square" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Настройки
             </button>
           </div>
         </aside>
 
-        {/* Right Panel - News Feed */}
-        <section className="flex-1 overflow-y-auto bg-[#1a1a1a] p-6">
-          <h2 className="mb-6 font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
-            Новости
-          </h2>
+        {/* ZONE 2 & 3: Main Content Area */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+          {/* ZONE 2: Content with Header & News */}
+          <div className="flex-1 overflow-y-auto bg-[#1a1a1a]">
+            {/* Header */}
+            <header className="title-bar-drag sticky top-0 z-20 flex items-center justify-between border-b-[3px] border-[#1a1a1a] bg-[#2b2d31]/95 px-6 py-4 backdrop-blur">
+              <div>
+                <h1 className="font-minecraft text-xl font-bold text-[#e0e0e0]">
+                  Gerbarium Launcher
+                </h1>
+                <p className="font-minecraft text-xs text-gray-400">
+                  Добро пожаловать, {user?.username || 'Игрок'}!
+                </p>
+              </div>
 
-          <div className="space-y-4">
-            {isLoadingNews ? (
-              <>
-                <NewsCardSkeleton />
-                <NewsCardSkeleton />
-                <NewsCardSkeleton />
-              </>
-            ) : (
-              news.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex overflow-hidden rounded border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] bg-[#2b2d31] shadow-[inset_2px_2px_0px_#5a5a5a,inset_-2px_-2px_0px_#1a1a1a]"
-                >
-                  <div className={`w-1 ${getCategoryColor(item.category)}`} />
-                  <div className="flex-1 p-4">
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className={`px-2 py-0.5 font-minecraft text-xs text-[#e0e0e0] ${getCategoryColor(item.category)}`}>
-                        {getCategoryLabel(item.category)}
+              <div className="flex items-center gap-4">
+                {/* Server Status */}
+                {serverStatus && (
+                  <div className="mc-panel px-4 py-2">
+                    <div className="flex items-center gap-2">
+                      <div className={`h-2 w-2 rounded-full ${serverStatus.online ? 'bg-[#55ff55] animate-pulse' : 'bg-[#ff5555]'}`} />
+                      <span className="font-minecraft text-xs text-[#e0e0e0]">
+                        {serverStatus.online ? 'Онлайн' : 'Оффлайн'}
                       </span>
-                      <span className="font-minecraft text-xs text-[#6a6a6a]">
-                        {new Date(item.date).toLocaleDateString('ru-RU', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
-                        })}
-                      </span>
+                      {serverStatus.online && (
+                        <span className="font-minecraft text-xs text-[#55aaff]">
+                          {serverStatus.players.online}/{serverStatus.players.max}
+                        </span>
+                      )}
                     </div>
-                    <h3 className="mb-2 font-minecraft text-base font-bold text-[#e0e0e0]">
-                      {item.title}
-                    </h3>
-                    <p className="font-minecraft text-sm leading-relaxed text-[#a0a0a0]">
-                      {item.content}
-                    </p>
+                  </div>
+                )}
+
+                {/* Settings Button in Header */}
+                <button
+                  onClick={handleSettings}
+                  className="mc-btn mc-btn-sm"
+                  title="Настройки"
+                >
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="square" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="square" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </button>
+
+                {/* User Profile */}
+                <div className="flex items-center gap-3">
+                  <Avatar username={user?.username} size="md" />
+                  <span className="font-minecraft text-sm text-[#e0e0e0]">
+                    {user?.username || 'Игрок'}
+                  </span>
+                </div>
+
+                {/* Logout */}
+                <button
+                  onClick={handleLogout}
+                  className="font-minecraft text-xs text-[#8a8a8a] transition-colors hover:text-[#ff5555]"
+                >
+                  Выйти
+                </button>
+
+                {/* Window Controls */}
+                <div className="ml-4">
+                  <WindowControls />
+                </div>
+              </div>
+            </header>
+
+            {/* News Feed */}
+            <div className="p-6">
+              <h2 className="mb-6 font-minecraft text-lg font-bold uppercase text-[#e0e0e0]">
+                Новости
+              </h2>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                {isLoadingNews ? (
+                  // Skeleton loading
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="mc-card animate-pulse">
+                      <div className="mb-3 h-32 bg-gray-700" />
+                      <div className="mb-2 h-4 w-3/4 bg-gray-700" />
+                      <div className="h-3 w-full bg-gray-700" />
+                    </div>
+                  ))
+                ) : (
+                  news.map((item) => (
+                    <article
+                      key={item.id}
+                      className="mc-card mc-card-clickable overflow-hidden"
+                    >
+                      <div className="mb-3 h-32 w-full overflow-hidden">
+                        <img
+                          src={newsPlaceholder}
+                          alt={item.title}
+                          className="h-full w-full object-cover"
+                          style={{ imageRendering: 'pixelated' }}
+                        />
+                      </div>
+                      <div className="mb-2 flex items-center gap-2">
+                        <span className={`px-2 py-0.5 font-minecraft text-xs text-[#e0e0e0] ${getCategoryColor(item.category)}`}>
+                          {getCategoryLabel(item.category)}
+                        </span>
+                        <span className="font-minecraft text-xs text-gray-500">
+                          {new Date(item.date).toLocaleDateString('ru-RU', {
+                            day: 'numeric',
+                            month: 'long',
+                          })}
+                        </span>
+                      </div>
+                      <h3 className="mb-2 font-minecraft text-base font-bold text-[#e0e0e0]">
+                        {item.title}
+                      </h3>
+                      <p className="font-minecraft text-sm leading-relaxed text-[#a0a0a0]">
+                        {item.content.slice(0, 150)}...
+                      </p>
+                    </article>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ZONE 3: Action Bar (Fixed at bottom) */}
+          <div className="border-t-[3px] border-[#1a1a1a] bg-[#2b2d31] px-6 py-4">
+            {!isDownloading ? (
+              /* Play Button State */
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div>
+                    <div className="font-minecraft text-xs text-gray-400">
+                      Выбранная версия
+                    </div>
+                    <div className="font-minecraft text-sm font-bold text-[#e0e0e0]">
+                      {mockVersions.find((v) => v.id === selectedVersion)?.name || 'Не выбрана'}
+                    </div>
                   </div>
                 </div>
-              ))
+
+                <button
+                  onClick={handlePlay}
+                  className="mc-btn mc-btn-primary mc-btn-xl min-w-[280px]"
+                >
+                  <span className="text-lg">🎮</span>
+                  <span className="ml-2">ИГРАТЬ</span>
+                </button>
+              </div>
+            ) : (
+              /* Downloading State */
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <div className="font-minecraft text-xs text-gray-400">
+                        {progress?.status || 'Загрузка...'}
+                      </div>
+                      <div className="font-minecraft text-sm text-[#55aaff]">
+                        {progress?.speed && `${progress.speed} • `}
+                        {progress?.eta && `Осталось: ${progress.eta}`}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleCancel}
+                    className="mc-btn mc-btn-danger mc-btn-lg"
+                  >
+                    <span className="mr-2">❌</span>
+                    ОТМЕНА
+                  </button>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="mc-progress">
+                  <div
+                    className="mc-progress-fill mc-progress-striped"
+                    style={{ width: `${progress?.progress || 0}%` }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="font-minecraft text-sm font-bold text-white drop-shadow-[2px_2px_0_#000]">
+                      {progress?.progress || 0}%
+                    </span>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
-        </section>
-      </main>
+        </div>
+      </div>
     </div>
   );
 }
