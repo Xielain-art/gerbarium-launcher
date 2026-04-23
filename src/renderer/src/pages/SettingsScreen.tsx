@@ -149,21 +149,6 @@ export function SettingsScreen() {
                   <label className="flex cursor-pointer items-center gap-3">
                     <input
                       type="checkbox"
-                      checked={general.autoUpdates}
-                      onChange={(e) => updateGeneral({ autoUpdates: e.target.checked })}
-                      className="peer sr-only"
-                    />
-                    <div className="h-6 w-6 rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] transition-colors peer-checked:bg-[#3a753a] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]">
-                      <svg className="mx-auto h-4 w-4 text-[#e0e0e0] opacity-0 peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="square" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <span className="font-minecraft text-sm text-[#e0e0e0]">Авто-обновления</span>
-                  </label>
-
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <input
-                      type="checkbox"
                       checked={general.closeOnLaunch}
                       onChange={(e) => updateGeneral({ closeOnLaunch: e.target.checked })}
                       className="peer sr-only"
