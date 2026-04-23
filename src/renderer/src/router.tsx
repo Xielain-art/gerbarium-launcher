@@ -1,5 +1,20 @@
-import { createRouter, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
+import { createRouter, createRoute, createRootRoute, Outlet, redirect } from '@tanstack/react-router';
 import { LoginScreen, DashboardScreen, SettingsScreen } from './pages';
+
+// Helper function to check authentication
+const checkAuth = () => {
+  // Check if user is authenticated from persisted state
+  try {
+    const stored = localStorage.getItem('gerbarium-auth-storage');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return parsed.state?.isAuthenticated || false;
+    }
+  } catch (e) {
+    console.error('Failed to parse auth state:', e);
+  }
+  return false;
+};
 
 // Root route with Outlet for nested routes
 const rootRoute = createRootRoute({
@@ -15,20 +30,38 @@ const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: LoginScreen,
+  // Redirect to dashboard if already authenticated
+  beforeLoad: async () => {
+    if (checkAuth()) {
+      throw redirect({ to: '/dashboard' });
+    }
+  },
 });
 
-// Dashboard route
+// Dashboard route (protected)
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard',
   component: DashboardScreen,
+  // Protect route - redirect to login if not authenticated
+  beforeLoad: async () => {
+    if (!checkAuth()) {
+      throw redirect({ to: '/' });
+    }
+  },
 });
 
-// Settings route
+// Settings route (protected)
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
   component: SettingsScreen,
+  // Protect route - redirect to login if not authenticated
+  beforeLoad: async () => {
+    if (!checkAuth()) {
+      throw redirect({ to: '/' });
+    }
+  },
 });
 
 // Build the route tree

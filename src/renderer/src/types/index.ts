@@ -4,31 +4,34 @@ export interface AuthUser {
   username: string;
   email?: string;
   avatar?: string;
+  xuid?: string;
+  token?: string;
 }
 
 export interface AuthCredentials {
   login: string;
   password: string;
-  savePassword?: boolean;
-  autoLogin?: boolean;
+  rememberMe?: boolean;
 }
 
 export interface AuthState {
-  isAuthenticated: boolean;
   user: AuthUser | null;
   token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
 }
 
 // Settings Types
 export interface SettingsGeneral {
   javaPath: string;
-  ramAllocation: number; // in GB
+  ramAllocation: number;
   language: string;
   autoUpdates: boolean;
-  closeOnLaunch?: boolean;
-  minimizeToTray?: boolean;
-  discordRPC?: boolean;
-  jvmArgs?: string;
+  closeOnLaunch: boolean;
+  minimizeToTray: boolean;
+  discordRPC: boolean;
+  jvmArgs: string;
 }
 
 export interface SettingsMods {
@@ -46,70 +49,102 @@ export interface SettingsState {
   general: SettingsGeneral;
   mods: SettingsMods;
   profile: SettingsProfile;
+  isLoading: boolean;
+  error: string | null;
 }
 
-// Version Types
+// Game Version Types
+export type VersionType = 'gerbarium' | 'fabric' | 'forge' | 'vanilla';
+
 export interface GameVersion {
   id: string;
   name: string;
-  type: 'gerbarium' | 'fabric' | 'forge' | 'vanilla';
+  type: VersionType;
   icon?: string;
   isInstalled: boolean;
+  version?: string;
+}
+
+// Download Progress Types
+export type DownloadStatus = 
+  | 'idle'
+  | 'checking'
+  | 'downloading'
+  | 'installing'
+  | 'verifying'
+  | 'completed'
+  | 'error'
+  | 'cancelled';
+
+export interface DownloadProgress {
+  status: DownloadStatus;
+  progress: number; // 0-100
+  speed?: string; // e.g., "2.5 MB/s"
+  eta?: string; // e.g., "~30 sec"
+  currentFile?: string;
+  totalFiles?: number;
+  downloadedFiles?: number;
+  error?: string;
+}
+
+export interface DownloadState {
+  isDownloading: boolean;
+  progress: DownloadProgress | null;
 }
 
 // News Types
+export type NewsCategory = 'update' | 'event' | 'community' | 'announcement';
+
 export interface NewsItem {
   id: string;
   title: string;
   content: string;
   date: string;
   imageUrl?: string;
-  category: 'update' | 'event' | 'community' | 'announcement';
+  category: NewsCategory;
+  author?: string;
+  tags?: string[];
 }
 
-// Navigation Types
-export type RoutePath = '/' | '/dashboard' | '/settings';
-
-export interface RouterLocation {
-  pathname: RoutePath;
-  search?: string;
-  hash?: string;
+export interface NewsState {
+  items: NewsItem[];
+  isLoading: boolean;
+  error: string | null;
 }
 
-// Window Control Types
-export interface WindowState {
-  isMinimized: boolean;
-  isMaximized: boolean;
-  isFullScreen: boolean;
+// Server Status Types
+export interface ServerStatusData {
+  online: boolean;
+  players: {
+    online: number;
+    max: number;
+  };
+  version?: string;
+  motd?: string;
+  latency?: number;
 }
 
-// Download/Progress Types
-export interface DownloadProgress {
-  progress: number;
-  status: string;
-  speed?: string;
-  eta?: string;
+export interface ServerStatusState {
+  data: ServerStatusData | null;
+  isLoading: boolean;
+  error: string | null;
 }
 
-// Component Types
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'minecraft';
-  size?: 'sm' | 'md' | 'lg';
-  isLoading?: boolean;
+// UI State Types
+export interface UIState {
+  currentView: 'login' | 'dashboard' | 'settings';
+  isFullscreen: boolean;
+  sidebarOpen: boolean;
+  modalOpen: boolean;
+  modalContent: React.ReactNode | null;
 }
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-  error?: string;
-}
-
-export interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-}
-
-export interface CardProps {
-  children: React.ReactNode;
-  className?: string;
-  onClick?: () => void;
-  active?: boolean;
+// Root State for combining all stores (optional)
+export interface RootState {
+  auth: AuthState;
+  settings: SettingsState;
+  download: DownloadState;
+  news: NewsState;
+  serverStatus: ServerStatusState;
+  ui: UIState;
 }
