@@ -32,10 +32,17 @@ const rootRoute = createRootRoute({
   ),
 });
 
-// Login route (default)
-const loginRoute = createRoute({
+// Update route (default - shown first on app launch)
+const updateRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
+  component: UpdateScreen,
+});
+
+// Login route
+const loginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/login",
   component: LoginScreen,
   beforeLoad: async () => {
     if (checkAuth()) {
@@ -51,7 +58,7 @@ const dashboardRoute = createRoute({
   component: DashboardScreen,
   beforeLoad: async () => {
     if (!checkAuth()) {
-      throw redirect({ to: "/" });
+      throw redirect({ to: "/login" });
     }
   },
 });
@@ -64,24 +71,17 @@ const settingsRoute = createRoute({
   beforeLoad: async () => {
     console.log("Settings beforeLoad - auth check:", checkAuth());
     if (!checkAuth()) {
-      throw redirect({ to: "/" });
+      throw redirect({ to: "/login" });
     }
   },
 });
 
-// Update route (shown before login)
-const updateRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/update",
-  component: UpdateScreen,
-});
-
 // Build the route tree
 const routeTree = rootRoute.addChildren([
+  updateRoute,
   loginRoute,
   dashboardRoute,
   settingsRoute,
-  updateRoute,
 ]);
 
 // Create the router instance

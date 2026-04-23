@@ -34,4 +34,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
       ipcRenderer.removeListener("update-progress", handler);
     };
   },
+  // Trigger update check from renderer
+  startUpdateCheck: () => ipcRenderer.send("start-update-check"),
 });

@@ -16,6 +16,7 @@ const {
   MSFT_REPLY_TYPE,
   MSFT_ERROR,
   SHELL_OPCODE,
+  IPC_CHANNELS,
 } = require("./_legacy_app/assets/js/ipcconstants");
 const LangLoader = require("./_legacy_app/assets/js/langloader");
 
@@ -332,9 +333,6 @@ function createWindow() {
   });
   remoteMain.enable(win.webContents);
 
-  // Check for updates on window creation
-  autoUpdater.checkForUpdatesAndNotify();
-
   // const data = {
   //     bkid: Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'assets', 'images', 'backgrounds')).length)),
   //     lang: (str, placeHolders) => LangLoader.queryEJS(str, placeHolders)
@@ -487,4 +485,9 @@ ipcMain.on("close-app", () => {
 // Отвечаем на запрос версии
 ipcMain.handle("get-app-version", () => {
   return app.getVersion();
+});
+
+// Listen for update check request from renderer
+ipcMain.on(IPC_CHANNELS.UPDATE.START_CHECK, () => {
+  autoUpdater.checkForUpdatesAndNotify();
 });

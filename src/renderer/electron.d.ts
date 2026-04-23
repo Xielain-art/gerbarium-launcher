@@ -30,6 +30,7 @@ export interface IElectronAPI {
       bytesPerSecond: number;
     }) => void,
   ) => () => void;
+  startUpdateCheck: () => void;
 }
 
 declare global {

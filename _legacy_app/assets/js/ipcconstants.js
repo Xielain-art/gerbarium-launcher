@@ -26,3 +26,22 @@ exports.MSFT_ERROR = {
 exports.SHELL_OPCODE = {
     TRASH_ITEM: 'TRASH_ITEM'
 }
+
+// IPC Channels for typed communication
+exports.IPC_CHANNELS = {
+    HELLO: {
+        SAY_HELLO: 'hello:say-hello'
+    },
+    WINDOW: {
+        MINIMIZE: 'window:minimize',
+        MAXIMIZE: 'window:maximize',
+        CLOSE: 'window:close',
+        TOGGLE_FULLSCREEN: 'window:toggle-fullscreen',
+        ON_STATE_CHANGE: 'window:on-state-change'
+    },
+    UPDATE: {
+        MESSAGE: 'update-message',
+        PROGRESS: 'update-progress',
+        START_CHECK: 'start-update-check'
+    }
+}

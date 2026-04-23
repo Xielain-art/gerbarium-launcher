@@ -7,23 +7,26 @@ export function UpdateScreen() {
   const [appVersion, setAppVersion] = useState<string>("");
   const [updateMessage, setUpdateMessage] = useState<string>("Поиск обновлений...");
   const [updateProgress, setUpdateProgress] = useState<number>(0);
-  const [hasCheckedUpdates, setHasCheckedUpdates] = useState(false);
 
   useEffect(() => {
     // Get app version
     window.electronAPI.getAppVersion().then(setAppVersion);
 
-    // Subscribe to update messages
+    // Subscribe to update messages BEFORE triggering the check
     const unsubscribeMessage = window.electronAPI.onUpdateMessage((message) => {
       setUpdateMessage(message);
-      
-      // Navigate to login when update check is complete
+
+      // Navigate to login when update check is complete (no update or error)
       if (message === "update-not-available" || message.includes("Ошибка")) {
-        setTimeout(() => navigate({ to: "/" }), 1500);
+        // Show "launching" message for better UX
+        if (message === "update-not-available") {
+          setUpdateMessage("Запуск лаунчера...");
+        }
+        setTimeout(() => navigate({ to: "/login" }), 1500);
       }
       // Don't navigate if update is being downloaded - app will restart
       if (message.includes("Перезагрузка")) {
-        setHasCheckedUpdates(true);
+        // Update is downloading, will restart after install
       }
     });
 
@@ -32,20 +35,20 @@ export function UpdateScreen() {
       setUpdateProgress(progress.percent);
     });
 
-    // Fallback: navigate to login after timeout if no update events
-    const timer = setTimeout(() => {
-      if (!hasCheckedUpdates && !updateMessage.includes("Перезагрузка")) {
-        navigate({ to: "/" });
-      }
-    }, 5000);
+    // TRIGGER update check from renderer
+    if (window.electronAPI.startUpdateCheck) {
+      window.electronAPI.startUpdateCheck();
+    } else {
+      // Fallback for development if startUpdateCheck is not in preload
+      setTimeout(() => navigate({ to: "/login" }), 2000);
+    }
 
     // Cleanup subscriptions
     return () => {
       unsubscribeMessage();
       unsubscribeProgress();
-      clearTimeout(timer);
     };
-  }, [navigate, hasCheckedUpdates, updateMessage]);
+  }, [navigate]);
 
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden bg-gradient-to-br from-[#1a1c20] via-[#2b2d31] to-[#1a1c20]">

@@ -54,4 +54,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
       ipcRenderer.removeListener("update-progress", subscription);
     };
   },
+
+  // Start update check
+  startUpdateCheck: () => ipcRenderer.send(IPC_CHANNELS.UPDATE.START_CHECK),
 });

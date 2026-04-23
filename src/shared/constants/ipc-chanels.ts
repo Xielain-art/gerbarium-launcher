@@ -12,6 +12,7 @@ export const IPC_CHANNELS = {
   UPDATE: {
     MESSAGE: "update-message",
     PROGRESS: "update-progress",
+    START_CHECK: "start-update-check",
   },
 } as const;
 
@@ -43,6 +44,10 @@ export interface IpcChannelMap {
   };
   [IPC_CHANNELS.UPDATE.PROGRESS]: {
     args: [progress: { percent: number; transferred: number; total: number; bytesPerSecond: number }];
+    return: void;
+  };
+  [IPC_CHANNELS.UPDATE.START_CHECK]: {
+    args: [];
     return: void;
   };
 }
