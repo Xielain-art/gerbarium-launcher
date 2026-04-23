@@ -7,7 +7,8 @@
       "Bash(npx *)",
       "Bash(dir *)",
       "Bash(npm start)",
-      "Bash(mkdir *)"
+      "Bash(mkdir *)",
+      "Bash(npm test)"
     ]
   },
   "modelProviders": {
@@ -30,6 +31,23 @@
             "top_p": 0.95,
             "max_tokens": 8192,
             "top_k": 40
+          }
+        }
+      }
+    ],
+    "openai": [
+      {
+        "id": "codestral-latest",
+        "name": "Mistral Codestral",
+        "envKey": "MISTRAL_API_KEY",
+        "baseUrl": "https://codestral.mistral.ai/v1",
+        "generationConfig": {
+          "timeout": 60000,
+          "maxRetries": 2,
+          "contextWindowSize": 256000,
+          "samplingParams": {
+            "temperature": 0.2,
+            "max_tokens": 4096
           }
         }
       }

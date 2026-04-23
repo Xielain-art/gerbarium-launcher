@@ -85,4 +85,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     delete: (key: string) =>
       typedInvoke(IPC_CHANNELS.SECURE_STORAGE.DELETE, key),
   },
+
+  // Java management
+  java: {
+    checkVersion: (javaPath: string) => ipcRenderer.invoke('java:checkVersion', javaPath),
+    findSystemJava: () => ipcRenderer.invoke('java:findSystemJava'),
+    downloadJRE: (url: string, targetDir: string) => ipcRenderer.invoke('java:downloadJRE', { url, targetDir }),
+  },
 });

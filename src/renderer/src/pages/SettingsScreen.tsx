@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { useAuthStore } from '../stores/useAuthStore';
+import { useJava } from '../hooks/useJava';
 import { WindowControls } from '../components';
 
 type SettingsTab = 'general' | 'java' | 'profile';
@@ -12,6 +13,26 @@ export function SettingsScreen() {
   // Zustand stores
   const { general, mods, profile, updateGeneral, updateMods, updateProfile, saveSettings, resetToDefaults, isLoading, error, clearError } = useSettingsStore();
   const { logout, isAuthenticated } = useAuthStore();
+  const { checkJava, findJava, downloadJRE, loading: javaLoading, error: javaError } = useJava();
+  const [javaVersion, setJavaVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (general.javaPath) {
+      checkJava(general.javaPath).then(setJavaVersion);
+    }
+  }, [general.javaPath, checkJava]);
+
+  const handleDownloadJava = async () => {
+    // Временный URL для примера, нужно заменить на актуальный
+    const url = 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jre_x64_windows_hotspot_17.0.10_7.zip';
+    const targetDir = 'C:/Program Files/Gerbarium/java'; // Нужно определить правильную папку
+    const success = await downloadJRE(url, targetDir);
+    if (success) {
+      alert('Java успешно скачана!');
+      const path = `${targetDir}/bin/java.exe`;
+      updateGeneral({ javaPath: path });
+    }
+  };
 
   // Local state
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
@@ -206,13 +227,37 @@ export function SettingsScreen() {
                   <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
                     Путь к Java
                   </label>
-                  <input
-                    type="text"
-                    value={general.javaPath}
-                    onChange={(e) => updateGeneral({ javaPath: e.target.value })}
-                    placeholder="C:/Program Files/Java/jdk/bin/java.exe"
-                    className="w-full rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none placeholder-white/40"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={general.javaPath}
+                      onChange={(e) => updateGeneral({ javaPath: e.target.value })}
+                      placeholder="C:/Program Files/Java/jdk/bin/java.exe"
+                      className="flex-1 rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none placeholder-white/40"
+                    />
+                    <button
+                      onClick={async () => {
+                        const path = await findJava();
+                        if (path) updateGeneral({ javaPath: path });
+                      }}
+                      className="rounded border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] bg-[#2b2d31] px-4 py-3 font-minecraft text-sm text-[#e0e0e0] transition-colors hover:bg-[#3c3c3c]"
+                    >
+                      Найти
+                    </button>
+                  </div>
+                  {(javaLoading || javaError || javaVersion) && (
+                    <p className={`font-minecraft text-xs ${javaError ? 'text-red-400' : 'text-[#6a6a6a]'}`}>
+                      {javaLoading ? 'Поиск...' : javaError ? javaError : `Найдена версия: ${javaVersion}`}
+                    </p>
+                  )}
+                  {!javaVersion && !javaLoading && (
+                    <button
+                      onClick={handleDownloadJava}
+                      className="mt-2 rounded border-[3px] border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a] bg-[#3a753a] px-4 py-2 font-minecraft text-sm text-white transition-colors hover:bg-[#4a8a4a]"
+                    >
+                      Скачать Java 17
+                    </button>
+                  )}
                 </div>
 
                 {/* RAM Allocation */}

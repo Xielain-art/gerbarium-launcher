@@ -11,6 +11,7 @@ const secureStorageHandler =
   require("./dist/main/handlers/secureStorageHandler").default;
 const updateHandler =
   require("./dist/main/handlers/updateHandler").default;
+const javaHandler = require("./dist/main/handlers/javaHandlerWrapper").default;
 
 // Setup Lang
 LangLoader.setupLanguage();
@@ -164,6 +165,7 @@ app.on("ready", () => {
   windowControlsHandler(app);
   secureStorageHandler(app);
   updateHandler(app);
+  javaHandler(app);
 });
 
 app.on("window-all-closed", () => {
