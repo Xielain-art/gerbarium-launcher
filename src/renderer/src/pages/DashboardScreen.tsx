@@ -35,14 +35,8 @@ const mockVersions = [
     isInstalled: false,
   },
   {
-    id: "vanilla-222222222",
-    name: "Vanilla 22222222",
-    type: "vanilla" as const,
-    isInstalled: false,
-  },
-  {
     id: "vanilla-42",
-    name: "Vanilla NEW REALESE TEST",
+    name: "ТЕСТ РЕЛИЗА 1.0.1",
     type: "vanilla" as const,
     isInstalled: false,
   },
@@ -93,6 +87,7 @@ export function DashboardScreen() {
     mockVersions[0]?.id || null,
   );
   const [shouldLogout, setShouldLogout] = useState(false);
+  const [appVersion, setAppVersion] = useState<string>("");
 
   // Handle logout redirect
   useEffect(() => {
@@ -100,6 +95,11 @@ export function DashboardScreen() {
       navigate({ to: "/" });
     }
   }, [isAuthenticated, shouldLogout, navigate]);
+
+  // Get app version on mount
+  useEffect(() => {
+    window.electronAPI.getAppVersion().then(setAppVersion);
+  }, []);
 
   const handlePlay = async () => {
     if (!selectedVersion) {
@@ -284,8 +284,15 @@ export function DashboardScreen() {
 
       {/* ZONE 2: Main Content Area */}
       <main className="relative z-10 flex flex-1 flex-col overflow-hidden">
-        {/* Floating Window Controls (Top Right) */}
-        <div className="absolute right-4 top-4 z-50">
+        {/* Top Bar with Window Controls and Version */}
+        <div className="absolute right-4 top-4 z-50 flex items-center gap-4">
+          {/* Version Display */}
+          {appVersion && (
+            <div className="font-minecraft text-xs text-[#6a6a6a]">
+              Версия: {appVersion}
+            </div>
+          )}
+          {/* Window Controls */}
           <WindowControls />
         </div>
 

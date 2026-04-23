@@ -92,6 +92,51 @@ ipcMain.on("autoUpdateAction", (event, arg, data) => {
       break;
   }
 });
+
+// AutoUpdater event listeners for renderer communication
+autoUpdater.on("checking-for-update", () => {
+  if (win) {
+    win.webContents.send("update-message", "Поиск обновлений...");
+  }
+});
+
+autoUpdater.on("update-available", () => {
+  if (win) {
+    win.webContents.send("update-message", "Найдено новое обновление");
+  }
+});
+
+autoUpdater.on("update-not-available", () => {
+  if (win) {
+    win.webContents.send("update-message", "update-not-available");
+  }
+});
+
+autoUpdater.on("download-progress", (progressObj) => {
+  if (win) {
+    win.webContents.send("update-progress", {
+      percent: progressObj.percent,
+      transferred: progressObj.transferred,
+      total: progressObj.total,
+      bytesPerSecond: progressObj.bytesPerSecond,
+    });
+  }
+});
+
+autoUpdater.on("update-downloaded", () => {
+  if (win) {
+    win.webContents.send("update-message", "Обновление скачано. Перезагрузка...");
+    setTimeout(() => {
+      autoUpdater.quitAndInstall();
+    }, 3000);
+  }
+});
+
+autoUpdater.on("error", (err) => {
+  if (win) {
+    win.webContents.send("update-message", `Ошибка: ${err.message}`);
+  }
+});
 // Redirect distribution index event from preloader to renderer.
 ipcMain.on("distributionIndexDone", (event, res) => {
   event.sender.send("distributionIndexDone", res);
@@ -286,6 +331,9 @@ function createWindow() {
     backgroundColor: "#171614",
   });
   remoteMain.enable(win.webContents);
+
+  // Check for updates on window creation
+  autoUpdater.checkForUpdatesAndNotify();
 
   // const data = {
   //     bkid: Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'assets', 'images', 'backgrounds')).length)),

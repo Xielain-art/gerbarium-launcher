@@ -6,7 +6,7 @@ import {
   redirect,
   createHashHistory,
 } from "@tanstack/react-router";
-import { LoginScreen, DashboardScreen, SettingsScreen } from "./pages";
+import { LoginScreen, DashboardScreen, SettingsScreen, UpdateScreen } from "./pages";
 
 // Helper function to check authentication
 const checkAuth = () => {
@@ -69,11 +69,19 @@ const settingsRoute = createRoute({
   },
 });
 
+// Update route (shown before login)
+const updateRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/update",
+  component: UpdateScreen,
+});
+
 // Build the route tree
 const routeTree = rootRoute.addChildren([
   loginRoute,
   dashboardRoute,
   settingsRoute,
+  updateRoute,
 ]);
 
 // Create the router instance
