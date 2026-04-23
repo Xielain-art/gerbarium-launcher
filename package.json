@@ -51,7 +51,8 @@
     "react-dom": "^19.2.5",
     "semver": "^7.7.3",
     "tailwindcss": "^4.2.4",
-    "toml": "^3.0.0"
+    "toml": "^3.0.0",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",

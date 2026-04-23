@@ -1,27 +1,29 @@
-import { useState } from 'react';
-import { useSettings } from '../hooks';
-import { Button, Input, Checkbox, WindowControls, Card, Modal, ConfirmModal } from '../components';
+import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { useSettingsStore } from '../stores/useSettingsStore';
+import { useAuthStore } from '../stores/useAuthStore';
+import { WindowControls } from '../components';
 
-type SettingsTab = 'general' | 'mods' | 'profile' | 'java';
+type SettingsTab = 'general' | 'java' | 'mods' | 'profile';
 
 export function SettingsScreen() {
   const navigate = useNavigate();
-  const {
-    settings,
-    updateGeneral,
-    updateMods,
-    updateProfile,
-    saveSettings,
-    resetToDefaults,
-    isLoading,
-    error,
-    clearError,
-  } = useSettings();
+  
+  // Zustand stores
+  const { settings, updateGeneral, updateMods, updateProfile, saveSettings, resetToDefaults, isLoading, error, clearError } = useSettingsStore();
+  const { logout, isAuthenticated } = useAuthStore();
 
+  // Local state
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
-  const [localError, setLocalError] = useState<string | null>(null);
   const [showConfirmReset, setShowConfirmReset] = useState(false);
+  const [shouldLogout, setShouldLogout] = useState(false);
+
+  // Handle logout redirect
+  useEffect(() => {
+    if (!isAuthenticated && shouldLogout) {
+      navigate({ to: '/' });
+    }
+  }, [isAuthenticated, shouldLogout, navigate]);
 
   const tabs: { id: SettingsTab; label: string }[] = [
     { id: 'general', label: 'ОБЩИЕ' },
@@ -31,13 +33,9 @@ export function SettingsScreen() {
   ];
 
   const handleSave = async () => {
-    clearError();
-    setLocalError(null);
-
     const result = await saveSettings();
-
     if (!result.success) {
-      setLocalError(result.error || 'Не удалось сохранить настройки');
+      // Error already set in store
     }
   };
 
@@ -47,64 +45,63 @@ export function SettingsScreen() {
 
   const handleResetConfirm = () => {
     resetToDefaults();
-    setLocalError(null);
-    clearError();
+    setShowConfirmReset(false);
   };
 
   const handleBack = () => {
     navigate({ to: '/dashboard' });
   };
 
-  const handleOpenGameFolder = () => {
-    // TODO: Implement IPC call to open game folder
-    console.log('Opening game folder...');
+  const handleLogout = () => {
+    setShouldLogout(true);
+    logout();
+    // Force clear localStorage
+    localStorage.removeItem('gerbarium-auth-storage');
   };
 
-  const errorMessage = localError || error;
-
   return (
-    <div className="w-full h-screen bg-[#1a1a1a] overflow-hidden flex flex-col">
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-[#1a1a1a]">
       {/* Top Bar */}
-      <header className="h-16 bg-[#2b2d31] border-b-[3px] border-[#1a1a1a] flex items-center justify-between px-4 shrink-0 title-bar-drag">
+      <header className="title-bar-drag flex h-16 shrink-0 items-center justify-between border-b-[3px] border-[#1a1a1a] bg-[#2b2d31] px-4">
         <div className="flex items-center gap-4">
           <button
             onClick={handleBack}
-            className="text-[#e0e0e0] hover:text-[#ffffff] font-minecraft text-sm transition-colors
-              border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a]
-              active:border-t-[#1a1a1a] active:border-l-[#1a1a1a] active:border-b-[#5a5a5a] active:border-r-[#5a5a5a]
-              px-4 py-2"
+            className="border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] px-4 py-2 font-minecraft text-sm text-[#e0e0e0] transition-colors hover:bg-[#3c3c3c] active:border-t-[#1a1a1a] active:border-l-[#1a1a1a] active:border-b-[#5a5a5a] active:border-r-[#5a5a5a]"
           >
             ← Назад
           </button>
-          <h1 className="text-lg font-bold text-[#e0e0e0] font-minecraft uppercase">
+          <h1 className="font-minecraft text-lg font-bold uppercase text-[#e0e0e0]">
             Настройки
           </h1>
         </div>
 
-        {/* Window Controls */}
-        <div className="ml-2">
-          <WindowControls />
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleLogout}
+            className="font-minecraft text-xs text-[#8a8a8a] transition-colors hover:text-[#ff5555]"
+          >
+            Выйти
+          </button>
+          <div>
+            <WindowControls />
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex overflow-hidden">
+      <main className="flex flex-1 overflow-hidden">
         {/* Tabs */}
-        <div className="w-48 bg-[#252525] border-r-[3px] border-[#1a1a1a] flex flex-col shrink-0">
-          <div className="p-4 space-y-2">
+        <div className="flex w-48 flex-col shrink-0 border-r-[3px] border-[#1a1a1a] bg-[#252525]">
+          <div className="space-y-2 p-4">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`
-                  w-full px-4 py-3 text-left font-minecraft text-sm font-bold uppercase transition-colors
-                  border-[3px]
-                  ${
-                    activeTab === tab.id
-                      ? 'bg-[#3a753a] text-[#e0e0e0] border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a]'
-                      : 'text-[#8a8a8a] hover:bg-[#3c3c3c] hover:text-[#e0e0e0] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a]'
-                  }
-                `}
+                className={`w-full border-[3px] px-4 py-3 text-left font-minecraft text-sm font-bold uppercase transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a] bg-[#3a753a] text-[#e0e0e0]'
+                    : 'border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] text-[#8a8a8a] hover:bg-[#3c3c3c] hover:text-[#e0e0e0]'
+                }`}
               >
                 {tab.label}
               </button>
@@ -113,33 +110,32 @@ export function SettingsScreen() {
         </div>
 
         {/* Tab Content */}
-        <div className="flex-1 bg-[#1a1a1a] overflow-y-auto p-6">
-          <Card className="max-w-2xl mx-auto p-6">
-            {errorMessage && (
-              <div className="mb-4 p-3 bg-[#8b2a2a]/80 border border-[#aa3a3a] text-[#ffaaaa] text-sm font-minecraft">
-                {errorMessage}
+        <div className="flex-1 overflow-y-auto bg-[#1a1a1a] p-6">
+          <div className="mx-auto max-w-2xl rounded border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] bg-[#2b2d31] p-6 shadow-[inset_2px_2px_0px_#5a5a5a,inset_-2px_-2px_0px_#1a1a1a]">
+            
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/15 p-3 font-minecraft text-sm text-red-300">
+                {error}
               </div>
             )}
 
             {/* General Tab */}
             {activeTab === 'general' && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold text-[#e0e0e0] font-minecraft uppercase mb-4">
+                <h2 className="font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
                   Общие настройки
                 </h2>
 
-                {/* Language Dropdown */}
-                <div className="space-y-1.5">
-                  <label className="text-[#e0e0e0] text-sm font-bold uppercase font-minecraft tracking-wide">
+                {/* Language */}
+                <div className="space-y-2">
+                  <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
                     Язык
                   </label>
                   <select
                     value={settings.general.language}
-                    onChange={(e) =>
-                      updateGeneral({ language: e.target.value })
-                    }
-                    className="w-full px-4 py-3 bg-[#2b2d31] border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] text-[#e0e0e0] font-minecraft text-base focus:outline-none focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] cursor-pointer
-                      shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]"
+                    onChange={(e) => updateGeneral({ language: e.target.value })}
+                    className="w-full rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none"
                   >
                     <option value="ru">Русский</option>
                     <option value="en">English</option>
@@ -149,61 +145,67 @@ export function SettingsScreen() {
                   </select>
                 </div>
 
-                {/* Auto Updates */}
-                <Checkbox
-                  label="Авто-обновления"
-                  checked={settings.general.autoUpdates}
-                  onChange={(e) =>
-                    updateGeneral({ autoUpdates: e.target.checked })
-                  }
-                />
-
-                {/* Close on Launch */}
-                <Checkbox
-                  label="Закрывать лаунчер при запуске игры"
-                  checked={settings.general.closeOnLaunch}
-                  onChange={(e) =>
-                    updateGeneral({ closeOnLaunch: e.target.checked })
-                  }
-                />
-
-                {/* Minimize to Tray */}
-                <Checkbox
-                  label="Сворачивать в трей"
-                  checked={settings.general.minimizeToTray}
-                  onChange={(e) =>
-                    updateGeneral({ minimizeToTray: e.target.checked })
-                  }
-                />
-
-                {/* Discord RPC */}
-                <Checkbox
-                  label="Показывать статус в Discord (RPC)"
-                  checked={settings.general.discordRPC}
-                  onChange={(e) =>
-                    updateGeneral({ discordRPC: e.target.checked })
-                  }
-                />
-
-                {/* Game Directory */}
-                <div className="pt-4">
-                  <label className="text-[#e0e0e0] text-sm font-bold uppercase font-minecraft tracking-wide block mb-2">
-                    Директория игры
-                  </label>
-                  <div className="flex gap-3">
-                    <Input
-                      value="/.minecraft"
-                      readOnly
-                      className="flex-1"
+                {/* Checkboxes */}
+                <div className="space-y-3">
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={settings.general.autoUpdates}
+                      onChange={(e) => updateGeneral({ autoUpdates: e.target.checked })}
+                      className="peer sr-only"
                     />
-                    <Button
-                      variant="secondary"
-                      size="md"
-                      onClick={handleOpenGameFolder}
-                    >
-                      Открыть папку
-                    </Button>
-                  </div>
+                    <div className="h-6 w-6 rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] transition-colors peer-checked:bg-[#3a753a] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]">
+                      <svg className="mx-auto h-4 w-4 text-[#e0e0e0] opacity-0 peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="square" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="font-minecraft text-sm text-[#e0e0e0]">Авто-обновления</span>
+                  </label>
+
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={settings.general.closeOnLaunch}
+                      onChange={(e) => updateGeneral({ closeOnLaunch: e.target.checked })}
+                      className="peer sr-only"
+                    />
+                    <div className="h-6 w-6 rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] transition-colors peer-checked:bg-[#3a753a] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]">
+                      <svg className="mx-auto h-4 w-4 text-[#e0e0e0] opacity-0 peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="square" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="font-minecraft text-sm text-[#e0e0e0]">Закрывать лаунчер при запуске игры</span>
+                  </label>
+
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={settings.general.minimizeToTray}
+                      onChange={(e) => updateGeneral({ minimizeToTray: e.target.checked })}
+                      className="peer sr-only"
+                    />
+                    <div className="h-6 w-6 rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] transition-colors peer-checked:bg-[#3a753a] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]">
+                      <svg className="mx-auto h-4 w-4 text-[#e0e0e0] opacity-0 peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="square" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="font-minecraft text-sm text-[#e0e0e0]">Сворачивать в трей</span>
+                  </label>
+
+                  <label className="flex cursor-pointer items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={settings.general.discordRPC}
+                      onChange={(e) => updateGeneral({ discordRPC: e.target.checked })}
+                      className="peer sr-only"
+                    />
+                    <div className="h-6 w-6 rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] transition-colors peer-checked:bg-[#3a753a] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]">
+                      <svg className="mx-auto h-4 w-4 text-[#e0e0e0] opacity-0 peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <path strokeLinecap="square" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="font-minecraft text-sm text-[#e0e0e0]">Показывать статус в Discord (RPC)</span>
+                  </label>
                 </div>
               </div>
             )}
@@ -211,22 +213,27 @@ export function SettingsScreen() {
             {/* Java Tab */}
             {activeTab === 'java' && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold text-[#e0e0e0] font-minecraft uppercase mb-4">
+                <h2 className="font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
                   Настройки Java
                 </h2>
 
-                <Input
-                  label="Путь к Java"
-                  value={settings.general.javaPath}
-                  onChange={(e) =>
-                    updateGeneral({ javaPath: e.target.value })
-                  }
-                  placeholder="C:/Program Files/Java/jdk/bin/java.exe"
-                />
-
-                {/* RAM Allocation Slider */}
+                {/* Java Path */}
                 <div className="space-y-2">
-                  <label className="text-[#e0e0e0] text-sm font-bold uppercase font-minecraft tracking-wide">
+                  <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
+                    Путь к Java
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.general.javaPath}
+                    onChange={(e) => updateGeneral({ javaPath: e.target.value })}
+                    placeholder="C:/Program Files/Java/jdk/bin/java.exe"
+                    className="w-full rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none placeholder-white/40"
+                  />
+                </div>
+
+                {/* RAM Allocation */}
+                <div className="space-y-2">
+                  <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
                     Выделение ОЗУ: {settings.general.ramAllocation} ГБ
                   </label>
                   <div className="flex items-center gap-4">
@@ -236,52 +243,33 @@ export function SettingsScreen() {
                       max="16"
                       step="1"
                       value={settings.general.ramAllocation}
-                      onChange={(e) =>
-                        updateGeneral({
-                          ramAllocation: parseInt(e.target.value),
-                        })
-                      }
-                      className="flex-1 h-3 bg-[#2b2d31] appearance-none cursor-pointer
-                        [&::-webkit-slider-thumb]:appearance-none
-                        [&::-webkit-slider-thumb]:w-5
-                        [&::-webkit-slider-thumb]:h-7
-                        [&::-webkit-slider-thumb]:bg-[#3a753a]
-                        [&::-webkit-slider-thumb]:border-[3px]
-                        [&::-webkit-slider-thumb]:border-t-[#4a9a4a]
-                        [&::-webkit-slider-thumb]:border-l-[#4a9a4a]
-                        [&::-webkit-slider-thumb]:border-b-[#2a5a2a]
-                        [&::-webkit-slider-thumb]:border-r-[#2a5a2a]
-                        [&::-webkit-slider-thumb]:cursor-pointer
-                        [&::-webkit-slider-thumb]:shadow-[inset_2px_2px_0px_#4a9a4a,inset_-2px_-2px_0px_#2a5a2a]
-                      "
+                      onChange={(e) => updateGeneral({ ramAllocation: parseInt(e.target.value) })}
+                      className="h-3 flex-1 appearance-none cursor-pointer rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-none [&::-webkit-slider-thumb]:border-[3px] [&::-webkit-slider-thumb]:border-t-[#4a9a4a] [&::-webkit-slider-thumb]:border-l-[#4a9a4a] [&::-webkit-slider-thumb]:border-b-[#2a5a2a] [&::-webkit-slider-thumb]:border-r-[#2a5a2a] [&::-webkit-slider-thumb]:bg-[#3a753a] [&::-webkit-slider-thumb]:shadow-[inset_2px_2px_0px_#4a9a4a,inset_-2px_-2px_0px_#2a5a2a] [&::-webkit-slider-thumb]:cursor-pointer"
                     />
-                    <span className="text-[#e0e0e0] font-minecraft text-sm w-16 text-right">
+                    <span className="w-16 text-right font-minecraft text-sm text-[#e0e0e0]">
                       {settings.general.ramAllocation} ГБ
                     </span>
                   </div>
-                  <div className="flex justify-between text-xs text-[#6a6a6a] font-minecraft">
+                  <div className="flex justify-between font-minecraft text-xs text-[#6a6a6a]">
                     <span>1 ГБ</span>
                     <span>16 ГБ</span>
                   </div>
                 </div>
 
                 {/* JVM Arguments */}
-                <div className="space-y-1.5">
-                  <label className="text-[#e0e0e0] text-sm font-bold uppercase font-minecraft tracking-wide">
+                <div className="space-y-2">
+                  <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
                     Аргументы JVM
                   </label>
                   <textarea
                     value={settings.general.jvmArgs || ''}
-                    onChange={(e) =>
-                      updateGeneral({ jvmArgs: e.target.value })
-                    }
+                    onChange={(e) => updateGeneral({ jvmArgs: e.target.value })}
                     placeholder="-XX:+UseG1GC -XX:MaxGCPauseMillis=50"
                     rows={4}
-                    className="w-full px-4 py-3 bg-[#2b2d31] border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] text-[#e0e0e0] font-minecraft text-sm focus:outline-none focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] resize-none
-                      shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] placeholder-[#6a6a6a]"
+                    className="w-full resize-none rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-sm text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none placeholder-white/40"
                   />
-                  <p className="text-xs text-[#6a6a6a] font-minecraft">
-                    Дополнительные параметры для запуска Java. Оставьте пустым для значений по умолчанию.
+                  <p className="font-minecraft text-xs text-[#6a6a6a]">
+                    Дополнительные параметры для запуска Java
                   </p>
                 </div>
               </div>
@@ -290,22 +278,19 @@ export function SettingsScreen() {
             {/* Mods Tab */}
             {activeTab === 'mods' && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold text-[#e0e0e0] font-minecraft uppercase mb-4">
+                <h2 className="font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
                   Настройки модов
                 </h2>
 
                 {/* Mod Pack Selection */}
-                <div className="space-y-1.5">
-                  <label className="text-[#e0e0e0] text-sm font-bold uppercase font-minecraft tracking-wide">
+                <div className="space-y-2">
+                  <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
                     Модпак
                   </label>
                   <select
                     value={settings.mods.modPack}
-                    onChange={(e) =>
-                      updateMods({ modPack: e.target.value })
-                    }
-                    className="w-full px-4 py-3 bg-[#2b2d31] border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] text-[#e0e0e0] font-minecraft text-base focus:outline-none focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] cursor-pointer
-                      shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]"
+                    onChange={(e) => updateMods({ modPack: e.target.value })}
+                    className="w-full rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none"
                   >
                     <option value="gerbarium">Gerbarium (Рекомендуемый)</option>
                     <option value="vanilla">Vanilla</option>
@@ -313,13 +298,13 @@ export function SettingsScreen() {
                   </select>
                 </div>
 
-                {/* Enabled Mods List */}
+                {/* Enabled Mods */}
                 <div className="space-y-2">
-                  <label className="text-[#e0e0e0] text-sm font-bold uppercase font-minecraft tracking-wide block">
+                  <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
                     Включенные моды
                   </label>
-                  <div className="bg-[#2b2d31] border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] p-4 space-y-2 shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]">
-                    <p className="text-[#8a8a8a] text-sm font-minecraft text-center py-4">
+                  <div className="rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] p-4 text-center shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]">
+                    <p className="font-minecraft text-sm text-[#8a8a8a] py-4">
                       Список модов будет доступен после выбора модпака
                     </p>
                   </div>
@@ -330,90 +315,118 @@ export function SettingsScreen() {
             {/* Profile Tab */}
             {activeTab === 'profile' && (
               <div className="space-y-6">
-                <h2 className="text-xl font-bold text-[#e0e0e0] font-minecraft uppercase mb-4">
+                <h2 className="font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
                   Настройки профиля
                 </h2>
 
-                <Input
-                  label="Имя пользователя"
-                  value={settings.profile.username}
-                  onChange={(e) =>
-                    updateProfile({ username: e.target.value })
-                  }
-                  placeholder="Player"
-                />
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
+                      Имя пользователя
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.profile.username}
+                      onChange={(e) => updateProfile({ username: e.target.value })}
+                      placeholder="Player"
+                      className="w-full rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none placeholder-white/40"
+                    />
+                  </div>
 
-                <Input
-                  label="URL скина"
-                  value={settings.profile.skinUrl || ''}
-                  onChange={(e) =>
-                    updateProfile({ skinUrl: e.target.value })
-                  }
-                  placeholder="https://example.com/skin.png"
-                />
+                  <div className="space-y-2">
+                    <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
+                      URL скина
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.profile.skinUrl || ''}
+                      onChange={(e) => updateProfile({ skinUrl: e.target.value })}
+                      placeholder="https://example.com/skin.png"
+                      className="w-full rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none placeholder-white/40"
+                    />
+                  </div>
 
-                <Input
-                  label="URL плаща"
-                  value={settings.profile.capeUrl || ''}
-                  onChange={(e) =>
-                    updateProfile({ capeUrl: e.target.value })
-                  }
-                  placeholder="https://example.com/cape.png"
-                />
+                  <div className="space-y-2">
+                    <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
+                      URL плаща
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.profile.capeUrl || ''}
+                      onChange={(e) => updateProfile({ capeUrl: e.target.value })}
+                      placeholder="https://example.com/cape.png"
+                      className="w-full rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none placeholder-white/40"
+                    />
+                  </div>
+                </div>
 
                 {/* Skin Preview */}
                 <div className="space-y-2">
-                  <label className="text-[#e0e0e0] text-sm font-bold uppercase font-minecraft tracking-wide block">
+                  <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
                     Предпросмотр скина
                   </label>
-                  <div className="bg-[#2b2d31] border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] p-4 flex items-center justify-center shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]">
-                    <div className="w-32 h-32 bg-[#1a1a1a] flex items-center justify-center">
-                      <span className="text-[#6a6a6a] text-sm font-minecraft">
-                        {settings.profile.skinUrl
-                          ? 'Загрузка...'
-                          : 'Скин не выбран'}
+                  <div className="flex items-center justify-center rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] p-4 shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]">
+                    <div className="flex h-32 w-32 items-center justify-center bg-[#1a1a1a]">
+                      <span className="font-minecraft text-sm text-[#6a6a6a]">
+                        {settings.profile.skinUrl ? 'Загрузка...' : 'Скин не выбран'}
                       </span>
                     </div>
                   </div>
                 </div>
               </div>
             )}
-          </Card>
+          </div>
 
           {/* Action Buttons */}
-          <div className="max-w-2xl mx-auto mt-6 flex gap-4">
-            <Button
-              variant="primary"
-              size="lg"
+          <div className="mx-auto mt-6 flex max-w-2xl gap-4">
+            <button
               onClick={handleSave}
-              isLoading={isLoading}
-              className="flex-1 text-lg"
+              disabled={isLoading}
+              className="flex-1 rounded border-[3px] border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a] bg-gradient-to-br from-[#3a753a] to-[#2d5a2d] px-6 py-4 font-minecraft text-lg font-bold text-white shadow-[inset_2px_2px_0px_#4a9a4a,inset_-2px_-2px_0px_#2a5a2a] transition-all duration-75 hover:from-[#4a8a4a] hover:to-[#3d6a3d] active:border-t-[#2a5a2a] active:border-l-[#2a5a2a] active:border-b-[#4a9a4a] active:border-r-[#4a9a4a] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Сохранить
-            </Button>
-            <Button
-              variant="danger"
-              size="lg"
+              {isLoading ? 'Сохранение...' : 'Сохранить'}
+            </button>
+            <button
               onClick={handleReset}
-              className="flex-1 text-lg"
+              className="flex-1 rounded border-[3px] border-t-[#7a5a5a] border-l-[#7a5a5a] border-b-[#3a1a1a] border-r-[#3a1a1a] bg-gradient-to-br from-[#8b2a2a] to-[#5a1a1a] px-6 py-4 font-minecraft text-lg font-bold text-white shadow-[inset_2px_2px_0px_#aa3a3a,inset_-2px_-2px_0px_#5a1a1a] transition-all duration-75 hover:from-[#9a3a3a] hover:to-[#6a2a2a] active:border-t-[#3a1a1a] active:border-l-[#3a1a1a] active:border-b-[#7a5a5a] active:border-r-[#7a5a5a]"
             >
               Сбросить
-            </Button>
+            </button>
           </div>
         </div>
       </main>
 
       {/* Confirm Reset Modal */}
-      <ConfirmModal
-        isOpen={showConfirmReset}
-        onClose={() => setShowConfirmReset(false)}
-        onConfirm={handleResetConfirm}
-        title="Сброс настроек"
-        message="Вы уверены, что хотите сбросить все настройки до значений по умолчанию? Это действие нельзя отменить."
-        confirmText="Сбросить"
-        cancelText="Отмена"
-        variant="danger"
-      />
+      {showConfirmReset && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="relative mx-4 max-w-md rounded border-[4px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] bg-[#2b2d31] shadow-2xl">
+            <div className="border-b-[3px] border-[#1a1a1a] p-4">
+              <h2 className="font-minecraft text-lg font-bold uppercase text-[#e0e0e0]">
+                Сброс настроек
+              </h2>
+            </div>
+            <div className="p-6">
+              <p className="font-minecraft text-sm text-[#e0e0e0]">
+                Вы уверены, что хотите сбросить все настройки до значений по умолчанию? Это действие нельзя отменить.
+              </p>
+            </div>
+            <div className="flex gap-3 border-t-[3px] border-[#1a1a1a] p-4">
+              <button
+                onClick={() => setShowConfirmReset(false)}
+                className="flex-1 rounded border-[3px] border-t-[#7a7a7a] border-l-[#7a7a7a] border-b-[#3a3a3a] border-r-[#3a3a3a] bg-[#5a5a5a] px-4 py-3 font-minecraft text-sm font-bold text-[#e0e0e0] transition-colors hover:bg-[#6a6a6a]"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={handleResetConfirm}
+                className="flex-1 rounded border-[3px] border-t-[#aa3a3a] border-l-[#aa3a3a] border-b-[#5a1a1a] border-r-[#5a1a1a] bg-[#8b2a2a] px-4 py-3 font-minecraft text-sm font-bold text-white transition-colors hover:bg-[#9a3a3a]"
+              >
+                Сбросить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
