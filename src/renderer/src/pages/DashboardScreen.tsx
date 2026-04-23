@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks';
-import { Button, Card, WindowControls } from '../components';
+import { Button, Card, WindowControls, ProgressBar, ServerStatus, Avatar, Skeleton } from '../components';
 import type { GameVersion, NewsItem } from '../types';
 import { useNavigate } from '@tanstack/react-router';
 import miniLogo from '../assets/photo_2026-04-23_10-35-12.jpg';
@@ -97,14 +97,59 @@ export function DashboardScreen() {
     mockVersions[0]?.id || null
   );
   const [isLaunching, setIsLaunching] = useState(false);
+  const [isLoadingNews, setIsLoadingNews] = useState(true);
+  
+  // Download progress state
+  const [downloadProgress, setDownloadProgress] = useState<{
+    progress: number;
+    status: string;
+    speed?: string;
+    eta?: string;
+  } | null>(null);
+
+  // Simulate news loading
+  useState(() => {
+    setTimeout(() => setIsLoadingNews(false), 1500);
+  });
 
   const handlePlay = async () => {
     if (!selectedVersion) return;
 
     setIsLaunching(true);
-    // TODO: Implement game launch logic
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    
+    // Simulate download progress
+    setDownloadProgress({
+      progress: 0,
+      status: 'Инициализация загрузки...',
+      speed: '0 МБ/с',
+      eta: 'Calculating...',
+    });
+
+    // Simulate download stages
+    const stages = [
+      { progress: 10, status: 'Проверка файлов игры...', speed: '0 МБ/с' },
+      { progress: 25, status: 'Скачивание библиотек...', speed: '2.5 МБ/с', eta: '~30 сек' },
+      { progress: 50, status: 'Загрузка ассетов...', speed: '3.2 МБ/с', eta: '~20 сек' },
+      { progress: 75, status: 'Установка модов...', speed: '4.1 МБ/с', eta: '~10 сек' },
+      { progress: 90, status: 'Проверка целостности...', speed: '0 МБ/с' },
+      { progress: 100, status: 'Готово!', speed: '0 МБ/с' },
+    ];
+
+    for (const stage of stages) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setDownloadProgress({
+        progress: stage.progress,
+        status: stage.status,
+        speed: stage.speed,
+        eta: stage.eta,
+      });
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
     setIsLaunching(false);
+    setDownloadProgress(null);
+    
+    // TODO: Implement actual game launch logic
   };
 
   const handleSettings = () => {
@@ -114,7 +159,7 @@ export function DashboardScreen() {
   return (
     <div className="w-full h-screen bg-[#1a1a1a] overflow-hidden flex flex-col">
       {/* Top Bar */}
-      <header className="h-16 bg-[#2b2d31] border-b-[3px] border-[#1a1a1a] flex items-center justify-between px-4 shrink-0">
+      <header className="h-16 bg-[#2b2d31] border-b-[3px] border-[#1a1a1a] flex items-center justify-between px-4 shrink-0 title-bar-drag">
         <div className="flex items-center gap-4">
           {/* Mini Logo */}
           <img
@@ -139,11 +184,11 @@ export function DashboardScreen() {
 
         {/* User Info */}
         <div className="flex items-center gap-4">
+          {/* Server Status */}
+          <ServerStatus />
+
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#3a753a] flex items-center justify-center text-[#e0e0e0] font-minecraft font-bold text-lg
-              border-[3px] border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a]">
-              {user?.username?.charAt(0).toUpperCase() || 'U'}
-            </div>
+            <Avatar username={user?.username} size="md" />
             <span className="text-[#e0e0e0] font-minecraft text-sm">
               Привет, {user?.username || 'Игрок'}!
             </span>
@@ -201,16 +246,27 @@ export function DashboardScreen() {
             ))}
           </div>
 
-          {/* Play Button */}
-          <div className="p-4 border-t-[3px] border-[#1a1a1a] bg-[#2b2d31]">
+          {/* Play Button - BIG and PROMINENT */}
+          <div className="p-4 border-t-[3px] border-[#1a1a1a] bg-[#2b2d31] space-y-3">
+            {/* Download Progress */}
+            {downloadProgress && (
+              <ProgressBar
+                progress={downloadProgress.progress}
+                status={downloadProgress.status}
+                speed={downloadProgress.speed}
+                eta={downloadProgress.eta}
+              />
+            )}
+
             <Button
               variant="primary"
               size="lg"
-              className="w-full text-lg"
+              className="w-full text-xl font-bold py-6"
               onClick={handlePlay}
-              isLoading={isLaunching}
+              isLoading={isLaunching && !downloadProgress}
+              disabled={isLaunching}
             >
-              {isLaunching ? 'Запуск...' : 'Играть'}
+              {isLaunching ? (downloadProgress?.progress === 100 ? 'Запуск...' : 'Загрузка...') : 'ИГРАТЬ'}
             </Button>
           </div>
         </aside>
@@ -222,41 +278,50 @@ export function DashboardScreen() {
           </h2>
 
           <div className="space-y-4">
-            {mockNews.map((news) => (
-              <Card key={news.id} className="p-0 overflow-hidden">
-                <div className="flex">
-                  {/* Category Badge */}
-                  <div
-                    className={`w-1 ${getCategoryColor(news.category)}`}
-                  />
+            {isLoadingNews ? (
+              // Skeleton loading states
+              <>
+                <Skeleton variant="news-card" />
+                <Skeleton variant="news-card" />
+                <Skeleton variant="news-card" />
+              </>
+            ) : (
+              mockNews.map((news) => (
+                <Card key={news.id} className="p-0 overflow-hidden">
+                  <div className="flex">
+                    {/* Category Badge */}
+                    <div
+                      className={`w-1 ${getCategoryColor(news.category)}`}
+                    />
 
-                  <div className="flex-1 p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span
-                        className={`px-2 py-0.5 text-xs font-minecraft text-[#e0e0e0] ${getCategoryColor(news.category)}`}
-                      >
-                        {getCategoryLabel(news.category)}
-                      </span>
-                      <span className="text-[#6a6a6a] text-xs font-minecraft">
-                        {new Date(news.date).toLocaleDateString('ru-RU', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
-                        })}
-                      </span>
+                    <div className="flex-1 p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span
+                          className={`px-2 py-0.5 text-xs font-minecraft text-[#e0e0e0] ${getCategoryColor(news.category)}`}
+                        >
+                          {getCategoryLabel(news.category)}
+                        </span>
+                        <span className="text-[#6a6a6a] text-xs font-minecraft">
+                          {new Date(news.date).toLocaleDateString('ru-RU', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          })}
+                        </span>
+                      </div>
+
+                      <h3 className="text-[#e0e0e0] font-minecraft font-bold text-base mb-2">
+                        {news.title}
+                      </h3>
+
+                      <p className="text-[#a0a0a0] font-minecraft text-sm leading-relaxed">
+                        {news.content}
+                      </p>
                     </div>
-
-                    <h3 className="text-[#e0e0e0] font-minecraft font-bold text-base mb-2">
-                      {news.title}
-                    </h3>
-
-                    <p className="text-[#a0a0a0] font-minecraft text-sm leading-relaxed">
-                      {news.content}
-                    </p>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))
+            )}
           </div>
         </section>
       </main>

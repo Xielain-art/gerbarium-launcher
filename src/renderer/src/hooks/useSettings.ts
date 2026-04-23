@@ -9,6 +9,10 @@ const defaultSettings: SettingsState = {
     ramAllocation: 4,
     language: 'ru',
     autoUpdates: true,
+    closeOnLaunch: false,
+    minimizeToTray: false,
+    discordRPC: true,
+    jvmArgs: '-XX:+UseG1GC -XX:MaxGCPauseMillis=50',
   },
   mods: {
     enabledMods: [],
