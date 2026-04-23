@@ -31,6 +31,19 @@ export interface IElectronAPI {
     }) => void,
   ) => () => void;
   startUpdateCheck: () => void;
+
+  // Update control
+  initUpdate: () => void;
+  onUpdateInfo: (callback: (info: any) => void) => () => void;
+  downloadUpdate: () => Promise<{ success: boolean; error?: string }>;
+  installUpdateAndRestart: () => void;
+
+  // Secure storage for sensitive data
+  secureStorage: {
+    set: (key: string, value: string) => Promise<{ success: boolean; error?: string }>;
+    get: (key: string) => Promise<{ success: boolean; value?: string | null; error?: string }>;
+    delete: (key: string) => Promise<{ success: boolean; error?: string }>;
+  };
 }
 
 declare global {

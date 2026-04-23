@@ -7,27 +7,37 @@ export function UpdateScreen() {
   const [appVersion, setAppVersion] = useState<string>("");
   const [updateMessage, setUpdateMessage] = useState<string>("Поиск обновлений...");
   const [updateProgress, setUpdateProgress] = useState<number>(0);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [updateInfo, setUpdateInfo] = useState<any>(null);
 
   useEffect(() => {
     // Get app version
     window.electronAPI.getAppVersion().then(setAppVersion);
 
-    // Subscribe to update messages BEFORE triggering the check
+    // Initialize update system
+    window.electronAPI.initUpdate();
+
+    // Subscribe to update messages
     const unsubscribeMessage = window.electronAPI.onUpdateMessage((message) => {
       setUpdateMessage(message);
 
-      // Navigate to login when update check is complete (no update or error)
-      if (message === "update-not-available" || message.includes("Ошибка")) {
-        // Show "launching" message for better UX
-        if (message === "update-not-available") {
-          setUpdateMessage("Запуск лаунчера...");
-        }
+      // Navigate to login when update check is complete
+      if (message === "update-not-available") {
+        setUpdateMessage("Запуск лаунчера...");
         setTimeout(() => navigate({ to: "/login" }), 1500);
       }
-      // Don't navigate if update is being downloaded - app will restart
-      if (message.includes("Перезагрузка")) {
-        // Update is downloading, will restart after install
+      
+      // Handle error - still allow user to continue
+      if (message.includes("Ошибка")) {
+        setTimeout(() => navigate({ to: "/login" }), 2000);
       }
+    });
+
+    // Subscribe to update info
+    const unsubscribeInfo = window.electronAPI.onUpdateInfo((info) => {
+      setUpdateInfo(info);
+      setUpdateAvailable(true);
+      setUpdateMessage(`Доступна версия ${info.version}`);
     });
 
     // Subscribe to update progress
@@ -35,17 +45,18 @@ export function UpdateScreen() {
       setUpdateProgress(progress.percent);
     });
 
-    // TRIGGER update check from renderer
-    if (window.electronAPI.startUpdateCheck) {
+    // TRIGGER update check
+    if (process.env.NODE_ENV !== 'development') {
       window.electronAPI.startUpdateCheck();
     } else {
-      // Fallback for development if startUpdateCheck is not in preload
-      setTimeout(() => navigate({ to: "/login" }), 2000);
+      setUpdateMessage("Dev mode: пропуск обновлений...");
+      setTimeout(() => navigate({ to: "/login" }), 500);
     }
 
     // Cleanup subscriptions
     return () => {
       unsubscribeMessage();
+      unsubscribeInfo();
       unsubscribeProgress();
     };
   }, [navigate]);

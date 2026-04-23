@@ -13,8 +13,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   hello: (username: string) =>
     typedInvoke(IPC_CHANNELS.HELLO.SAY_HELLO, username),
 
-  // App controls
-  closeApp: () => ipcRenderer.send("close-app"),
+  // App controls (legacy support)
+  closeApp: () => typedInvoke(IPC_CHANNELS.WINDOW.CLOSE),
   getAppVersion: () => ipcRenderer.invoke("get-app-version"),
 
   // Window controls
@@ -55,6 +55,34 @@ contextBridge.exposeInMainWorld("electronAPI", {
     };
   },
 
+  // Update control methods
+  onUpdateInfo: (callback: (info: any) => void) => {
+    const subscription = (_event: any, info: any) => callback(info);
+    ipcRenderer.on(IPC_CHANNELS.UPDATE.INFO, subscription);
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.UPDATE.INFO, subscription);
+    };
+  },
+
+  // Initialize update system
+  initUpdate: () => ipcRenderer.send(IPC_CHANNELS.UPDATE.INIT),
+
   // Start update check
   startUpdateCheck: () => ipcRenderer.send(IPC_CHANNELS.UPDATE.START_CHECK),
+
+  // Download update
+  downloadUpdate: () => typedInvoke(IPC_CHANNELS.UPDATE.DOWNLOAD),
+
+  // Install update and restart
+  installUpdateAndRestart: () => ipcRenderer.send(IPC_CHANNELS.UPDATE.INSTALL_AND_RESTART),
+
+  // Secure storage for sensitive data (tokens, passwords)
+  secureStorage: {
+    set: (key: string, value: string) =>
+      typedInvoke(IPC_CHANNELS.SECURE_STORAGE.SET, key, value),
+    get: (key: string) =>
+      typedInvoke(IPC_CHANNELS.SECURE_STORAGE.GET, key),
+    delete: (key: string) =>
+      typedInvoke(IPC_CHANNELS.SECURE_STORAGE.DELETE, key),
+  },
 });

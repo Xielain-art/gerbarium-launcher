@@ -69,44 +69,6 @@ export function useAuth() {
     }
   }, []);
 
-  const loginWithMicrosoft = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // @ts-ignore - electron API
-      const data = await window.electronAPI?.openMicrosoftLogin();
-
-      if (!data) {
-        throw new Error('No data received from Microsoft login');
-      }
-
-      const mockUser: AuthUser = {
-        id: data.id || 'user_' + Date.now(),
-        username: data.username || data.email || 'User',
-        email: data.email,
-        avatar: data.avatar,
-      };
-
-      const newState: AuthState = {
-        isAuthenticated: true,
-        user: mockUser,
-        token: data.token || 'microsoft_token_' + Date.now(),
-      };
-
-      setAuthState(newState);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
-
-      return { success: true, user: mockUser };
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Microsoft login failed';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   const logout = useCallback(() => {
     setAuthState(defaultAuthState);
     localStorage.removeItem(STORAGE_KEY);
@@ -122,7 +84,6 @@ export function useAuth() {
     isLoading,
     error,
     login,
-    loginWithMicrosoft,
     logout,
     clearError,
   };

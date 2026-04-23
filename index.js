@@ -1,317 +1,19 @@
-const remoteMain = require("@electron/remote/main");
-remoteMain.initialize();
-
 // Requirements
-const { app, BrowserWindow, ipcMain, Menu, shell } = require("electron");
-const autoUpdater = require("electron-updater").autoUpdater;
-// const ejse = require("ejs-electron");
-const fs = require("fs");
+const { app, BrowserWindow, ipcMain, Menu } = require("electron");
 const isDev = require("./_legacy_app/assets/js/isdev");
 const path = require("path");
-const semver = require("semver");
-const { pathToFileURL } = require("url");
-const {
-  AZURE_CLIENT_ID,
-  MSFT_OPCODE,
-  MSFT_REPLY_TYPE,
-  MSFT_ERROR,
-  SHELL_OPCODE,
-  IPC_CHANNELS,
-} = require("./_legacy_app/assets/js/ipcconstants");
 const LangLoader = require("./_legacy_app/assets/js/langloader");
 
 const helloHandler = require("./dist/main/handlers/helloHandler").default;
 const windowControlsHandler =
   require("./dist/main/handlers/windowControlsHandler").default;
+const secureStorageHandler =
+  require("./dist/main/handlers/secureStorageHandler").default;
+const updateHandler =
+  require("./dist/main/handlers/updateHandler").default;
 
 // Setup Lang
 LangLoader.setupLanguage();
-
-// Setup auto updater.
-function initAutoUpdater(event, data) {
-  if (data) {
-    autoUpdater.allowPrerelease = true;
-  } else {
-    // Defaults to true if application version contains prerelease components (e.g. 0.12.1-alpha.1)
-    // autoUpdater.allowPrerelease = true
-  }
-
-  if (isDev) {
-    autoUpdater.autoInstallOnAppQuit = false;
-    autoUpdater.updateConfigPath = path.join(__dirname, "dev-app-update.yml");
-  }
-  if (process.platform === "darwin") {
-    autoUpdater.autoDownload = false;
-  }
-  autoUpdater.on("update-available", (info) => {
-    event.sender.send("autoUpdateNotification", "update-available", info);
-  });
-  autoUpdater.on("update-downloaded", (info) => {
-    event.sender.send("autoUpdateNotification", "update-downloaded", info);
-  });
-  autoUpdater.on("update-not-available", (info) => {
-    event.sender.send("autoUpdateNotification", "update-not-available", info);
-  });
-  autoUpdater.on("checking-for-update", () => {
-    event.sender.send("autoUpdateNotification", "checking-for-update");
-  });
-  autoUpdater.on("error", (err) => {
-    event.sender.send("autoUpdateNotification", "realerror", err);
-  });
-}
-
-// Open channel to listen for update actions.
-ipcMain.on("autoUpdateAction", (event, arg, data) => {
-  switch (arg) {
-    case "initAutoUpdater":
-      console.log("Initializing auto updater.");
-      initAutoUpdater(event, data);
-      event.sender.send("autoUpdateNotification", "ready");
-      break;
-    case "checkForUpdate":
-      autoUpdater.checkForUpdates().catch((err) => {
-        event.sender.send("autoUpdateNotification", "realerror", err);
-      });
-      break;
-    case "allowPrereleaseChange":
-      if (!data) {
-        const preRelComp = semver.prerelease(app.getVersion());
-        if (preRelComp != null && preRelComp.length > 0) {
-          autoUpdater.allowPrerelease = true;
-        } else {
-          autoUpdater.allowPrerelease = data;
-        }
-      } else {
-        autoUpdater.allowPrerelease = data;
-      }
-      break;
-    case "installUpdateNow":
-      autoUpdater.quitAndInstall();
-      break;
-    default:
-      console.log("Unknown argument", arg);
-      break;
-  }
-});
-
-// AutoUpdater event listeners for renderer communication
-autoUpdater.on("checking-for-update", () => {
-  if (win) {
-    win.webContents.send("update-message", "Поиск обновлений...");
-  }
-});
-
-autoUpdater.on("update-available", () => {
-  if (win) {
-    win.webContents.send("update-message", "Найдено новое обновление");
-  }
-});
-
-autoUpdater.on("update-not-available", () => {
-  if (win) {
-    win.webContents.send("update-message", "update-not-available");
-  }
-});
-
-autoUpdater.on("download-progress", (progressObj) => {
-  if (win) {
-    win.webContents.send("update-progress", {
-      percent: progressObj.percent,
-      transferred: progressObj.transferred,
-      total: progressObj.total,
-      bytesPerSecond: progressObj.bytesPerSecond,
-    });
-  }
-});
-
-autoUpdater.on("update-downloaded", () => {
-  if (win) {
-    win.webContents.send("update-message", "Обновление скачано. Перезагрузка...");
-    setTimeout(() => {
-      autoUpdater.quitAndInstall();
-    }, 3000);
-  }
-});
-
-autoUpdater.on("error", (err) => {
-  if (win) {
-    win.webContents.send("update-message", `Ошибка: ${err.message}`);
-  }
-});
-// Redirect distribution index event from preloader to renderer.
-ipcMain.on("distributionIndexDone", (event, res) => {
-  event.sender.send("distributionIndexDone", res);
-});
-
-// Handle trash item.
-ipcMain.handle(SHELL_OPCODE.TRASH_ITEM, async (event, ...args) => {
-  try {
-    await shell.trashItem(args[0]);
-    return {
-      result: true,
-    };
-  } catch (error) {
-    return {
-      result: false,
-      error: error,
-    };
-  }
-});
-
-// Disable hardware acceleration.
-// https://electronjs.org/docs/tutorial/offscreen-rendering
-app.disableHardwareAcceleration();
-
-const REDIRECT_URI_PREFIX =
-  "https://login.microsoftonline.com/common/oauth2/nativeclient?";
-
-// Microsoft Auth Login
-let msftAuthWindow;
-let msftAuthSuccess;
-let msftAuthViewSuccess;
-let msftAuthViewOnClose;
-ipcMain.on(MSFT_OPCODE.OPEN_LOGIN, (ipcEvent, ...arguments_) => {
-  if (msftAuthWindow) {
-    ipcEvent.reply(
-      MSFT_OPCODE.REPLY_LOGIN,
-      MSFT_REPLY_TYPE.ERROR,
-      MSFT_ERROR.ALREADY_OPEN,
-      msftAuthViewOnClose,
-    );
-    return;
-  }
-  msftAuthSuccess = false;
-  msftAuthViewSuccess = arguments_[0];
-  msftAuthViewOnClose = arguments_[1];
-  msftAuthWindow = new BrowserWindow({
-    title: LangLoader.queryJS("index.microsoftLoginTitle"),
-    backgroundColor: "#222222",
-    width: 520,
-    height: 650,
-    frame: true,
-    icon: getPlatformIcon("SealCircle"),
-  });
-
-  msftAuthWindow.on("closed", () => {
-    msftAuthWindow = undefined;
-  });
-
-  msftAuthWindow.on("close", () => {
-    if (!msftAuthSuccess) {
-      ipcEvent.reply(
-        MSFT_OPCODE.REPLY_LOGIN,
-        MSFT_REPLY_TYPE.ERROR,
-        MSFT_ERROR.NOT_FINISHED,
-        msftAuthViewOnClose,
-      );
-    }
-  });
-
-  msftAuthWindow.webContents.on("did-navigate", (_, uri) => {
-    if (uri.startsWith(REDIRECT_URI_PREFIX)) {
-      let queryMap = {};
-
-      new URL(uri).searchParams.forEach((v, k) => {
-        queryMap[k] = v;
-      });
-
-      ipcEvent.reply(
-        MSFT_OPCODE.REPLY_LOGIN,
-        MSFT_REPLY_TYPE.SUCCESS,
-        queryMap,
-        msftAuthViewSuccess,
-      );
-
-      msftAuthSuccess = true;
-      msftAuthWindow.close();
-      msftAuthWindow = null;
-    }
-  });
-
-  msftAuthWindow.removeMenu();
-  msftAuthWindow.loadURL(
-    `https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?prompt=select_account&client_id=${AZURE_CLIENT_ID}&response_type=code&scope=XboxLive.signin%20offline_access&redirect_uri=https://login.microsoftonline.com/common/oauth2/nativeclient`,
-  );
-});
-
-// Microsoft Auth Logout
-let msftLogoutWindow;
-let msftLogoutSuccess;
-let msftLogoutSuccessSent;
-ipcMain.on(MSFT_OPCODE.OPEN_LOGOUT, (ipcEvent, uuid, isLastAccount) => {
-  if (msftLogoutWindow) {
-    ipcEvent.reply(
-      MSFT_OPCODE.REPLY_LOGOUT,
-      MSFT_REPLY_TYPE.ERROR,
-      MSFT_ERROR.ALREADY_OPEN,
-    );
-    return;
-  }
-
-  msftLogoutSuccess = false;
-  msftLogoutSuccessSent = false;
-  msftLogoutWindow = new BrowserWindow({
-    title: LangLoader.queryJS("index.microsoftLogoutTitle"),
-    backgroundColor: "#222222",
-    width: 520,
-    height: 600,
-    frame: true,
-    icon: getPlatformIcon("SealCircle"),
-  });
-
-  msftLogoutWindow.on("closed", () => {
-    msftLogoutWindow = undefined;
-  });
-
-  msftLogoutWindow.on("close", () => {
-    if (!msftLogoutSuccess) {
-      ipcEvent.reply(
-        MSFT_OPCODE.REPLY_LOGOUT,
-        MSFT_REPLY_TYPE.ERROR,
-        MSFT_ERROR.NOT_FINISHED,
-      );
-    } else if (!msftLogoutSuccessSent) {
-      msftLogoutSuccessSent = true;
-      ipcEvent.reply(
-        MSFT_OPCODE.REPLY_LOGOUT,
-        MSFT_REPLY_TYPE.SUCCESS,
-        uuid,
-        isLastAccount,
-      );
-    }
-  });
-
-  msftLogoutWindow.webContents.on("did-navigate", (_, uri) => {
-    if (
-      uri.startsWith(
-        "https://login.microsoftonline.com/common/oauth2/v2.0/logoutsession",
-      )
-    ) {
-      msftLogoutSuccess = true;
-      setTimeout(() => {
-        if (!msftLogoutSuccessSent) {
-          msftLogoutSuccessSent = true;
-          ipcEvent.reply(
-            MSFT_OPCODE.REPLY_LOGOUT,
-            MSFT_REPLY_TYPE.SUCCESS,
-            uuid,
-            isLastAccount,
-          );
-        }
-
-        if (msftLogoutWindow) {
-          msftLogoutWindow.close();
-          msftLogoutWindow = null;
-        }
-      }, 5000);
-    }
-  });
-
-  msftLogoutWindow.removeMenu();
-  msftLogoutWindow.loadURL(
-    "https://login.microsoftonline.com/common/oauth2/v2.0/logout",
-  );
-});
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -331,7 +33,6 @@ function createWindow() {
     },
     backgroundColor: "#171614",
   });
-  remoteMain.enable(win.webContents);
 
   // const data = {
   //     bkid: Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'assets', 'images', 'backgrounds')).length)),
@@ -461,6 +162,8 @@ app.on("ready", () => {
   createWindow();
   helloHandler(app);
   windowControlsHandler(app);
+  secureStorageHandler(app);
+  updateHandler(app);
 });
 
 app.on("window-all-closed", () => {
@@ -478,16 +181,8 @@ app.on("activate", () => {
     createWindow();
   }
 });
-ipcMain.on("close-app", () => {
-  app.quit();
-});
 
 // Отвечаем на запрос версии
 ipcMain.handle("get-app-version", () => {
   return app.getVersion();
-});
-
-// Listen for update check request from renderer
-ipcMain.on(IPC_CHANNELS.UPDATE.START_CHECK, () => {
-  autoUpdater.checkForUpdatesAndNotify();
 });

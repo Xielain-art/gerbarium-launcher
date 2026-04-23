@@ -27,12 +27,9 @@ export default function windowControlsHandler(app: App) {
     }
   });
 
-  // Close window
+  // Close window - quit the app
   ipcMain.handle(IPC_CHANNELS.WINDOW.CLOSE, () => {
-    const win = getMainWindow();
-    if (win) {
-      win.close();
-    }
+    app.quit();
   });
 
   // Toggle fullscreen

@@ -13,6 +13,15 @@ export const IPC_CHANNELS = {
     MESSAGE: "update-message",
     PROGRESS: "update-progress",
     START_CHECK: "start-update-check",
+    INIT: "update-init",
+    INFO: "update-info",
+    DOWNLOAD: "update-download",
+    INSTALL_AND_RESTART: "update-install-and-restart",
+  },
+  SECURE_STORAGE: {
+    SET: "secure-storage:set",
+    GET: "secure-storage:get",
+    DELETE: "secure-storage:delete",
   },
 } as const;
 
@@ -49,6 +58,34 @@ export interface IpcChannelMap {
   [IPC_CHANNELS.UPDATE.START_CHECK]: {
     args: [];
     return: void;
+  };
+  [IPC_CHANNELS.UPDATE.INIT]: {
+    args: [];
+    return: void;
+  };
+  [IPC_CHANNELS.UPDATE.INFO]: {
+    args: [info: any];
+    return: void;
+  };
+  [IPC_CHANNELS.UPDATE.DOWNLOAD]: {
+    args: [];
+    return: { success: boolean; error?: string };
+  };
+  [IPC_CHANNELS.UPDATE.INSTALL_AND_RESTART]: {
+    args: [];
+    return: void;
+  };
+  [IPC_CHANNELS.SECURE_STORAGE.SET]: {
+    args: [key: string, value: string];
+    return: { success: boolean; error?: string };
+  };
+  [IPC_CHANNELS.SECURE_STORAGE.GET]: {
+    args: [key: string];
+    return: { success: boolean; value?: string | null; error?: string };
+  };
+  [IPC_CHANNELS.SECURE_STORAGE.DELETE]: {
+    args: [key: string];
+    return: { success: boolean; error?: string };
   };
 }
 

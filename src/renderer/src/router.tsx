@@ -7,20 +7,11 @@ import {
   createHashHistory,
 } from "@tanstack/react-router";
 import { LoginScreen, DashboardScreen, SettingsScreen, UpdateScreen } from "./pages";
+import { useAuthStore } from "./stores/useAuthStore";
 
-// Helper function to check authentication
+// Helper function to check authentication using Zustand store state
 const checkAuth = () => {
-  // Check if user is authenticated from persisted state
-  try {
-    const stored = localStorage.getItem("gerbarium-auth-storage");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return parsed.state?.isAuthenticated || false;
-    }
-  } catch (e) {
-    console.error("Failed to parse auth state:", e);
-  }
-  return false;
+  return useAuthStore.getState().isAuthenticated;
 };
 
 // Root route with Outlet for nested routes

@@ -1,8 +1,8 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import type { AuthUser, AuthCredentials } from '../types';
 
-type SocialProvider = 'google' | 'vk' | 'telegram' | 'yandex';
+// Token storage key for secure storage
+const AUTH_TOKEN_KEY = 'auth_token';
 
 interface AuthState {
   // State
@@ -17,15 +17,10 @@ interface AuthState {
 
   // Actions
   login: (credentials: AuthCredentials) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
   clearError: () => void;
   setShowPassword: (show: boolean) => void;
-
-  // Social providers
-  loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
-  loginWithVK: () => Promise<{ success: boolean; error?: string }>;
-  loginWithTelegram: () => Promise<{ success: boolean; error?: string }>;
-  loginWithYandex: () => Promise<{ success: boolean; error?: string }>;
+  loadToken: () => Promise<void>;
 
   // Offline mode
   loginOffline: (username: string) => Promise<{ success: boolean; error?: string }>;
@@ -40,195 +35,125 @@ const defaultState = {
   showPassword: false,
 };
 
-// Mock user creation helper
-const createMockUser = (provider: SocialProvider, id: string): AuthUser => ({
-  id: `${provider}_${id}`,
-  username: `${provider}_user_${id.slice(-6)}`,
-  email: `${provider}_user_${id.slice(-6)}@example.com`,
-});
+export const useAuthStore = create<AuthState>()((set, get) => ({
+  ...defaultState,
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      ...defaultState,
+  setShowPassword: (show) => set({ showPassword: show }),
 
-      setShowPassword: (show) => set({ showPassword: show }),
+  clearError: () => set({ error: null }),
 
-      clearError: () => set({ error: null }),
-
-      logout: () => {
-        set(defaultState);
-        localStorage.removeItem('gerbarium-auth-storage');
-      },
-
-      login: async (credentials: AuthCredentials) => {
-        set({ isLoading: true, error: null });
-
-        try {
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-
-          if (!credentials.login.trim() || !credentials.password.trim()) {
-            set({ isLoading: false, error: 'Введите логин и пароль' });
-            return { success: false, error: 'Введите логин и пароль' };
+  loadToken: async () => {
+    try {
+      const result = await window.electronAPI.secureStorage.get(AUTH_TOKEN_KEY);
+      if (result.success && result.value) {
+        // Also load user data from localStorage (non-sensitive)
+        const stored = localStorage.getItem('gerbarium-auth-user');
+        let user: AuthUser | null = null;
+        if (stored) {
+          try {
+            user = JSON.parse(stored);
+          } catch {
+            // Invalid user data
           }
-
-          const mockUser: AuthUser = {
-            id: 'user_' + Date.now(),
-            username: credentials.login,
-            email: credentials.login.includes('@') ? credentials.login : undefined,
-          };
-
-          const mockToken = 'mock_token_' + Date.now();
-
-          set({
-            user: mockUser,
-            token: mockToken,
-            isAuthenticated: true,
-            isLoading: false,
-          });
-
-          return { success: true };
-        } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : 'Ошибка входа';
-          set({ isLoading: false, error: errorMessage });
-          return { success: false, error: errorMessage };
         }
-      },
-
-      loginWithGoogle: async () => {
-        set({ isLoading: true, error: null });
-
-        try {
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-
-          const mockUser = createMockUser('google', Date.now().toString());
-          const mockToken = 'google_token_' + Date.now();
-
-          set({
-            user: mockUser,
-            token: mockToken,
-            isAuthenticated: true,
-            isLoading: false,
-          });
-
-          return { success: true };
-        } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : 'Ошибка входа через Google';
-          set({ isLoading: false, error: errorMessage });
-          return { success: false, error: errorMessage };
-        }
-      },
-
-      loginWithVK: async () => {
-        set({ isLoading: true, error: null });
-
-        try {
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-
-          const mockUser = createMockUser('vk', Date.now().toString());
-          const mockToken = 'vk_token_' + Date.now();
-
-          set({
-            user: mockUser,
-            token: mockToken,
-            isAuthenticated: true,
-            isLoading: false,
-          });
-
-          return { success: true };
-        } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : 'Ошибка входа через VK';
-          set({ isLoading: false, error: errorMessage });
-          return { success: false, error: errorMessage };
-        }
-      },
-
-      loginWithTelegram: async () => {
-        set({ isLoading: true, error: null });
-
-        try {
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-
-          const mockUser = createMockUser('telegram', Date.now().toString());
-          const mockToken = 'telegram_token_' + Date.now();
-
-          set({
-            user: mockUser,
-            token: mockToken,
-            isAuthenticated: true,
-            isLoading: false,
-          });
-
-          return { success: true };
-        } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : 'Ошибка входа через Telegram';
-          set({ isLoading: false, error: errorMessage });
-          return { success: false, error: errorMessage };
-        }
-      },
-
-      loginWithYandex: async () => {
-        set({ isLoading: true, error: null });
-
-        try {
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-
-          const mockUser = createMockUser('yandex', Date.now().toString());
-          const mockToken = 'yandex_token_' + Date.now();
-
-          set({
-            user: mockUser,
-            token: mockToken,
-            isAuthenticated: true,
-            isLoading: false,
-          });
-
-          return { success: true };
-        } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : 'Ошибка входа через Yandex';
-          set({ isLoading: false, error: errorMessage });
-          return { success: false, error: errorMessage };
-        }
-      },
-
-      loginOffline: async (username: string) => {
-        set({ isLoading: true, error: null });
-
-        try {
-          await new Promise((resolve) => setTimeout(resolve, 500));
-
-          if (!username.trim()) {
-            set({ isLoading: false, error: 'Введите имя пользователя' });
-            return { success: false, error: 'Введите имя пользователя' };
-          }
-
-          const mockUser: AuthUser = {
-            id: 'offline_' + Date.now(),
-            username: username,
-          };
-
-          set({
-            user: mockUser,
-            token: 'offline_token',
-            isAuthenticated: true,
-            isLoading: false,
-          });
-
-          return { success: true };
-        } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : 'Ошибка оффлайн входа';
-          set({ isLoading: false, error: errorMessage });
-          return { success: false, error: errorMessage };
-        }
-      },
-    }),
-    {
-      name: 'gerbarium-auth-storage',
-      partialize: (state) => ({
-        user: state.user,
-        token: state.token,
-        isAuthenticated: state.isAuthenticated,
-      }),
+        set({ 
+          token: result.value, 
+          isAuthenticated: true,
+          user 
+        });
+      }
+    } catch (err) {
+      console.error('Failed to load auth token:', err);
     }
-  )
-);
+  },
+
+  logout: async () => {
+    // Clear secure storage
+    await window.electronAPI.secureStorage.delete(AUTH_TOKEN_KEY);
+    // Clear localStorage
+    localStorage.removeItem('gerbarium-auth-user');
+    set(defaultState);
+  },
+
+  login: async (credentials: AuthCredentials) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      if (!credentials.login.trim() || !credentials.password.trim()) {
+        set({ isLoading: false, error: 'Введите логин и пароль' });
+        return { success: false, error: 'Введите логин и пароль' };
+      }
+
+      const mockUser: AuthUser = {
+        id: 'user_' + Date.now(),
+        username: credentials.login,
+        email: credentials.login.includes('@') ? credentials.login : undefined,
+      };
+
+      const mockToken = 'mock_token_' + Date.now();
+
+      // Store token in secure storage
+      const secureResult = await window.electronAPI.secureStorage.set(AUTH_TOKEN_KEY, mockToken);
+      if (!secureResult.success) {
+        set({ isLoading: false, error: 'Failed to store token securely' });
+        return { success: false, error: 'Failed to store token securely' };
+      }
+
+      // Store non-sensitive user data in localStorage
+      localStorage.setItem('gerbarium-auth-user', JSON.stringify(mockUser));
+
+      set({
+        user: mockUser,
+        token: mockToken,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Ошибка входа';
+      set({ isLoading: false, error: errorMessage });
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  loginOffline: async (username: string) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      if (!username.trim()) {
+        set({ isLoading: false, error: 'Введите имя пользователя' });
+        return { success: false, error: 'Введите имя пользователя' };
+      }
+
+      const mockUser: AuthUser = {
+        id: 'offline_' + Date.now(),
+        username: username,
+      };
+
+      const mockToken = 'offline_token';
+
+      // Store token in secure storage
+      await window.electronAPI.secureStorage.set(AUTH_TOKEN_KEY, mockToken);
+      // Store non-sensitive user data in localStorage
+      localStorage.setItem('gerbarium-auth-user', JSON.stringify(mockUser));
+
+      set({
+        user: mockUser,
+        token: mockToken,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Ошибка оффлайн входа';
+      set({ isLoading: false, error: errorMessage });
+      return { success: false, error: errorMessage };
+    }
+  },
+}));
