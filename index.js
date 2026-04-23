@@ -279,7 +279,7 @@ function createWindow() {
     frame: false,
     webPreferences: {
       //   preload: path.join(__dirname, "app", "assets", "js", "preloader.js"),
-      preload: path.join(__dirname, "..", "..", "dist", "preload", "preload.js"),
+      preload: path.join(__dirname, "dist", "preload", "preload.js"),
       nodeIntegration: false,
       contextIsolation: true,
     },
@@ -301,7 +301,7 @@ function createWindow() {
     win.webContents.openDevTools();
   } else {
     // Для продакшена (когда будешь собирать .exe файл)
-    win.loadFile(path.join(__dirname, "..", "..", "dist", "index.html"));
+    win.loadFile(path.join(__dirname, "dist", "index.html"));
   }
 
   /*win.once('ready-to-show', () => {
