@@ -39,11 +39,16 @@ export async function downloadAndExtractJRE(
     url: string,
     onProgress: (update: ProgressUpdate) => void
 ): Promise<string> {
+    if (!url || typeof url !== 'string') {
+        throw new Error(`Invalid URL provided: ${url}`);
+    }
+
     const targetDir = path.join(app.getPath('userData'), 'java', 'jre17');
     const archivePath = path.join(targetDir, 'jre.archive');
     await fs.ensureDir(targetDir);
 
     try {
+        console.log('Starting download from:', url);
         const response = got.stream(url, { timeout: { socket: 15000 } });
         const fileWriter = fs.createWriteStream(archivePath);
 

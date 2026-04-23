@@ -23,13 +23,16 @@ export default function javaHandler() {
         return result.canceled ? null : result.filePaths[0];
     });
 
-    ipcMain.handle(IPC_CHANNELS.JAVA.DOWNLOAD, async (event, { url }) => {
+    ipcMain.handle(IPC_CHANNELS.JAVA.DOWNLOAD, async (event, { url }: { url: string }) => {
+        console.log('Received download request for:', url);
         try {
             const javaPath = await downloadAndExtractJRE(url, (update) => {
                 event.sender.send(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, update);
             });
+            console.log('Download complete, path:', javaPath);
             return { success: true, javaPath };
         } catch (error) {
+            console.error('Download failed:', error);
             return { success: false, error: (error as Error).message };
         }
     });

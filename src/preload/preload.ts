@@ -91,7 +91,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     checkVersion: (javaPath: string) => typedInvoke(IPC_CHANNELS.JAVA.CHECK_VERSION, javaPath),
     findSystemJava: () => typedInvoke(IPC_CHANNELS.JAVA.FIND_SYSTEM),
     selectJavaExecutable: () => typedInvoke(IPC_CHANNELS.JAVA.SELECT_EXECUTABLE),
-    downloadJRE: (url: string, targetDir: string) => typedInvoke(IPC_CHANNELS.JAVA.DOWNLOAD, url, targetDir),
+    downloadJRE: (url: string) => typedInvoke(IPC_CHANNELS.JAVA.DOWNLOAD, { url }),
     onDownloadProgress: (callback: (percent: number) => void) => {
         const subscription = (_event: any, percent: number) => callback(percent);
         ipcRenderer.on(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, subscription);
