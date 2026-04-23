@@ -55,3 +55,8 @@ linux:
 directories:
   buildResources: 'build'
   output: 'release'
+
+publish:
+  provider: github
+  owner: Xielain-art 
+  repo: gerbarium-releases

@@ -1,6 +1,6 @@
 {
   "name": "helioslauncher",
-  "version": "2.2.1",
+  "version": "2.2.3",
   "productName": "Helios Launcher",
   "description": "Modded Minecraft Launcher",
   "author": "Daniel Scalzi (https://github.com/dscalzi/)",
@@ -26,7 +26,8 @@
     "dev:main": "npx esbuild src/main/handlers/helloHandler.ts --bundle --platform=node --outdir=dist/main/handlers --external:electron --watch",
     "dev:preload": "npx esbuild src/preload/preload.ts --bundle --platform=node --outfile=dist/preload/preload.js --external:electron --watch",
     "dev:electron": "wait-on http://localhost:5173 && electron .",
-    "dev": "concurrently -n \"UI,MAIN,PRELOAD,APP\" -c \"bgBlue,bgGreen,bgMagenta,bgCyan\" \"npm run dev:ui\" \"npm run dev:main\" \"npm run dev:preload\" \"npm run dev:electron\""
+    "dev": "concurrently -n \"UI,MAIN,PRELOAD,APP\" -c \"bgBlue,bgGreen,bgMagenta,bgCyan\" \"npm run dev:ui\" \"npm run dev:main\" \"npm run dev:preload\" \"npm run dev:electron\"",
+    "publish-app": "npm run build && electron-builder build -p always"
   },
   "engines": {
     "node": ">=22.0.0"
