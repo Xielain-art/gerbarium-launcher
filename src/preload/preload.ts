@@ -90,6 +90,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   java: {
     checkVersion: (javaPath: string) => ipcRenderer.invoke('java:checkVersion', javaPath),
     findSystemJava: () => ipcRenderer.invoke('java:findSystemJava'),
+    selectJavaExecutable: () => ipcRenderer.invoke('java:selectJavaExecutable'),
     downloadJRE: (url: string, targetDir: string) => ipcRenderer.invoke('java:downloadJRE', { url, targetDir }),
     onDownloadProgress: (callback: (percent: number) => void) => {
         const subscription = (_event: any, percent: number) => callback(percent);

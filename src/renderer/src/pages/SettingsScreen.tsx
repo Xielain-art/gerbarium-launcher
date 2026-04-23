@@ -37,6 +37,11 @@ export function SettingsScreen() {
     }
   };
 
+  const handleSelectJava = async () => {
+    const path = await (window as any).electronAPI.java.selectJavaExecutable();
+    if (path) updateGeneral({ javaPath: path });
+  };
+
   const handleFindJava = async () => {
     const path = await findJava();
     if (path) updateGeneral({ javaPath: path });
@@ -244,10 +249,10 @@ export function SettingsScreen() {
                       className="flex-1 rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none placeholder-white/40"
                     />
                     <button
-                      onClick={handleFindJava}
+                      onClick={handleSelectJava}
                       className="rounded border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] bg-[#2b2d31] px-4 py-3 font-minecraft text-sm text-[#e0e0e0] transition-colors hover:bg-[#3c3c3c]"
                     >
-                      Найти
+                      Выбрать файл
                     </button>
                   </div>
                   {(javaLoading || javaError || javaVersion || isDownloadingJava) && (

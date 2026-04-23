@@ -10,6 +10,15 @@ export default function javaHandler() {
         return await findJavaInSystem();
     });
 
+    ipcMain.handle('java:selectJavaExecutable', async () => {
+        const { dialog } = require('electron');
+        const result = await dialog.showOpenDialog({
+            properties: ['openFile'],
+            filters: [{ name: 'Java Executable', extensions: ['exe'] }]
+        });
+        return result.canceled ? null : result.filePaths[0];
+    });
+
     ipcMain.handle('java:downloadJRE', async (event, { url, targetDir }) => {
         console.log('Received download request for:', url);
         try {
