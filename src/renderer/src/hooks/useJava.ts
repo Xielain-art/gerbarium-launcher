@@ -7,6 +7,7 @@ export function useJava() {
     const [error, setError] = useState<string | null>(null);
     const setJavaProgress = useDownloadStore((state) => state.setJavaProgress);
     const setIsDownloadingJava = useSettingsStore((state) => state.setIsDownloadingJava);
+    const setJavaError = useSettingsStore((state) => state.setJavaError);
 
     useEffect(() => {
         const unsubscribe = window.electronAPI.java.onDownloadProgress((percent: number) => {
@@ -19,46 +20,46 @@ export function useJava() {
 
     const checkJava = useCallback(async (javaPath: string) => {
         setLoading(true);
-        setError(null);
+        setJavaError(null);
         try {
             return await window.electronAPI.java.checkVersion(javaPath);
         } catch (err) {
-            setError((err as Error).message);
+            setJavaError((err as Error).message);
             return null;
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [setJavaError]);
 
     const findJava = useCallback(async () => {
         setLoading(true);
-        setError(null);
+        setJavaError(null);
         try {
             return await window.electronAPI.java.findSystemJava();
         } catch (err) {
-            setError((err as Error).message);
+            setJavaError((err as Error).message);
             return null;
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [setJavaError]);
 
     const downloadJava = useCallback(async (url: string, targetDir: string) => {
         setIsDownloadingJava(true);
         setJavaProgress(0);
-        setError(null);
+        setJavaError(null);
         try {
             const result = await window.electronAPI.java.downloadJRE(url, targetDir);
             if (!result.success) throw new Error(result.error);
             return result.javaPath;
         } catch (err) {
-            setError((err as Error).message);
+            setJavaError((err as Error).message);
             return null;
         } finally {
             setIsDownloadingJava(false);
             setJavaProgress(0);
         }
-    }, [setIsDownloadingJava, setJavaProgress]);
+    }, [setIsDownloadingJava, setJavaProgress, setJavaError]);
 
-    return { checkJava, findJava, downloadJava, loading, error };
+    return { checkJava, findJava, downloadJava, loading, error: useSettingsStore((state) => state.javaError) };
 }

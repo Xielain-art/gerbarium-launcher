@@ -13,9 +13,12 @@ export default function javaHandler() {
 
     ipcMain.handle(IPC_CHANNELS.JAVA.SELECT_EXECUTABLE, async () => {
         const { dialog } = require('electron');
+        const filters = process.platform === 'win32' 
+            ? [{ name: 'Java Executable', extensions: ['exe'] }] 
+            : [];
         const result = await dialog.showOpenDialog({
             properties: ['openFile'],
-            filters: [{ name: 'Java Executable', extensions: ['exe'] }]
+            filters
         });
         return result.canceled ? null : result.filePaths[0];
     });

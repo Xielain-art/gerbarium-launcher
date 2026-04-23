@@ -12,6 +12,8 @@ interface SettingsState extends SettingsStateType {
   clearError: () => void;
   isDownloadingJava: boolean;
   setIsDownloadingJava: (val: boolean) => void;
+  javaError: string | null;
+  setJavaError: (err: string | null) => void;
 }
 
 const defaultSettings: SettingsStateType = {
@@ -36,16 +38,18 @@ const defaultSettings: SettingsStateType = {
   },
   isLoading: false,
   error: null,
-  isDownloadingJava: false,
 };
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
       ...defaultSettings,
+      isDownloadingJava: false,
+      javaError: null,
 
       clearError: () => set({ error: null }),
       setIsDownloadingJava: (val) => set({ isDownloadingJava: val }),
+      setJavaError: (err) => set({ javaError: err }),
       
       updateGeneral: (updates) =>
         set((state) => ({
