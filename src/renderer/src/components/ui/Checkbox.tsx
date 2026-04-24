@@ -30,7 +30,7 @@ export function Checkbox({ label, className = '', id, ...props }: CheckboxProps)
             border-l-[#1a1a1a] 
             border-b-[#5a5a5a] 
             border-r-[#5a5a5a]
-            peer-checked:bg-[#3a3a3a]
+            peer-checked:bg-[#3a753a]
             peer-focus:outline-none
             transition-colors duration-75
             flex items-center justify-center

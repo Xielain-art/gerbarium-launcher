@@ -1,8 +1,9 @@
 import { useWindowControls } from '../../hooks';
-import { UI_STRINGS } from '../../../../shared/constants/ui-strings';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export function WindowControls() {
   const { minimize, maximize, close, isMaximized } = useWindowControls();
+  const { t } = useTranslation();
 
   return (
     <div className="flex items-center gap-0 -webkit-app-region-no-drag">
@@ -13,7 +14,7 @@ export function WindowControls() {
           border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a]
           active:border-t-[#1a1a1a] active:border-l-[#1a1a1a] active:border-b-[#5a5a5a] active:border-r-[#5a5a5a]
           -webkit-app-region-no-drag"
-        title={UI_STRINGS.WINDOW_CONTROLS.MINIMIZE}
+        title={t.WINDOW_CONTROLS.MINIMIZE}
       >
         <svg
           className="w-4 h-4 text-[#e0e0e0]"
@@ -33,7 +34,7 @@ export function WindowControls() {
           border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a]
           active:border-t-[#1a1a1a] active:border-l-[#1a1a1a] active:border-b-[#5a5a5a] active:border-r-[#5a5a5a]
           -webkit-app-region-no-drag"
-        title={isMaximized ? UI_STRINGS.WINDOW_CONTROLS.RESTORE : UI_STRINGS.WINDOW_CONTROLS.MAXIMIZE}
+        title={isMaximized ? t.WINDOW_CONTROLS.RESTORE : t.WINDOW_CONTROLS.MAXIMIZE}
       >
         {isMaximized ? (
           <svg
@@ -75,7 +76,7 @@ export function WindowControls() {
           active:border-t-[#1a1a1a] active:border-l-[#1a1a1a] active:border-b-[#5a5a5a] active:border-r-[#5a5a5a]
           hover:border-t-[#aa3a3a] hover:border-l-[#aa3a3a] hover:border-b-[#5a1a1a] hover:border-r-[#5a1a1a]
           -webkit-app-region-no-drag"
-        title={UI_STRINGS.WINDOW_CONTROLS.CLOSE}
+        title={t.WINDOW_CONTROLS.CLOSE}
       >
         <svg
           className="w-4 h-4 text-[#e0e0e0]"

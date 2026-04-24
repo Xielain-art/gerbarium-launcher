@@ -39,6 +39,9 @@ export const IPC_CHANNELS = {
     LOG_ACTION: "system:log-action",
     OPEN_EXTERNAL: "system:open-external",
     OPEN_GITHUB_ISSUE: "system:open-github-issue",
+    SELECT_DIRECTORY: "system:select-directory",
+    OPEN_PATH: "system:open-path",
+    OPEN_DATA_FOLDER: "system:open-data-folder",
   },
   LOG: {
     EXPORT_AND_REPORT: "logs:export-and-report",
@@ -49,6 +52,7 @@ export const IPC_CHANNELS = {
   GAME: {
     LAUNCH: "game:launch",
     PROGRESS: "game:progress",
+    GET_INSTALLED_VERSIONS: "game:get-installed-versions",
   },
 } as const;
 
@@ -173,6 +177,18 @@ export interface IpcChannelMap {
     args: [];
     return: void;
   };
+  [IPC_CHANNELS.SYSTEM.SELECT_DIRECTORY]: {
+    args: [];
+    return: string | null;
+  };
+  [IPC_CHANNELS.SYSTEM.OPEN_PATH]: {
+    args: [path: string];
+    return: void;
+  };
+  [IPC_CHANNELS.SYSTEM.OPEN_DATA_FOLDER]: {
+    args: [];
+    return: void;
+  };
   [IPC_CHANNELS.LOG.EXPORT_AND_REPORT]: {
     args: [];
     return: { success: boolean; path?: string; error?: string };
@@ -182,12 +198,16 @@ export interface IpcChannelMap {
     return: string;
   };
   [IPC_CHANNELS.GAME.LAUNCH]: {
-    args: [{ username: string; version: string; memory: { min: string; max: string }; javaPath: string }];
+    args: [{ username: string; version: string; memory: { min: string; max: string }; javaPath: string; gamePath?: string; fullscreen: boolean; jvmArgs: string[] }];
     return: { success: boolean; error?: string };
   };
   [IPC_CHANNELS.GAME.PROGRESS]: {
     args: [{ type: 'data' | 'progress' | 'close'; content: any }];
     return: void;
+  };
+  [IPC_CHANNELS.GAME.GET_INSTALLED_VERSIONS]: {
+    args: [];
+    return: string[];
   };
 }
 

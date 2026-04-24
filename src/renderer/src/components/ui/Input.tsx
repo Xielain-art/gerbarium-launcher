@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import type { InputProps } from '../types';
-import { UI_STRINGS } from '../../../../shared/constants/ui-strings';
+import { useTranslation } from '../../hooks/useTranslation';
+
+interface ExtendedInputProps extends InputProps {
+  showPasswordExternal?: boolean;
+  onTogglePassword?: () => void;
+}
 
 export function Input({
   label,
@@ -8,9 +13,16 @@ export function Input({
   className = '',
   id,
   type = 'text',
+  showPasswordExternal,
+  onTogglePassword,
   ...props
-}: InputProps) {
-  const [showPassword, setShowPassword] = useState(false);
+}: ExtendedInputProps) {
+  const t = useTranslation();
+  const [internalShowPassword, setInternalShowPassword] = useState(false);
+  
+  const showPassword = showPasswordExternal !== undefined ? showPasswordExternal : internalShowPassword;
+  const togglePassword = onTogglePassword || (() => setInternalShowPassword(!internalShowPassword));
+
   const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
   
   const isPassword = type === 'password';
@@ -55,11 +67,11 @@ export function Input({
         {isPassword && (
           <button
             type="button"
-            onClick={() => setShowPassword(!showPassword)}
+            onClick={togglePassword}
             className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center
               text-[#8a8a8a] hover:text-[#e0e0e0] transition-colors
               focus:outline-none"
-            title={showPassword ? UI_STRINGS.LOGIN.PASSWORD_HIDE : UI_STRINGS.LOGIN.PASSWORD_SHOW}
+            title={showPassword ? t.LOGIN.PASSWORD_HIDE : t.LOGIN.PASSWORD_SHOW}
           >
             {showPassword ? (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">

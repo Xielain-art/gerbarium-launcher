@@ -48,4 +48,33 @@ export default function systemHandler() {
       `${EXTERNAL_URLS.GITHUB_ISSUES}?body=${issueBody}`
     );
   });
+
+  // Select directory dialog
+  ipcMain.handle(IPC_CHANNELS.SYSTEM.SELECT_DIRECTORY, async () => {
+    const { dialog } = require('electron') as typeof import('electron');
+    const result = await dialog.showOpenDialog({
+      properties: ['openDirectory', 'createDirectory'],
+    });
+    return result.canceled ? null : result.filePaths[0];
+  });
+
+  // Open local path (folder or file)
+  ipcMain.handle(IPC_CHANNELS.SYSTEM.OPEN_PATH, async (_event, targetPath: string) => {
+    const path = require('path');
+    const os = require('os');
+    
+    let finalPath = targetPath;
+    if (!finalPath) {
+       finalPath = path.join(os.homedir(), ".gerbarium");
+    }
+    
+    if (finalPath) {
+      await shell.openPath(finalPath);
+    }
+  });
+
+  ipcMain.handle(IPC_CHANNELS.SYSTEM.OPEN_DATA_FOLDER, async () => {
+    const { app } = require('electron') as typeof import('electron');
+    await shell.openPath(app.getPath('userData'));
+  });
 }

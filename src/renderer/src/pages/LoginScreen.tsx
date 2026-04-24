@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "../stores/useAuthStore";
-import { WindowControls } from "../components";
-import { UI_STRINGS } from "../../../shared/constants/ui-strings";
-import { ROUTES } from "../../../shared/constants/system";
+import { WindowControls, Input, Button } from "../components";
+import { useTranslation } from "../hooks/useTranslation";
+import { ROUTES, STORAGE_KEYS } from "../../../shared/constants/system";
 import logoImage from "../assets/photo_2026-04-23_10-34-22.jpg";
 
 export function LoginScreen() {
+  const t = useTranslation();
   const navigate = useNavigate();
 
   // Zustand store
@@ -30,6 +31,17 @@ export function LoginScreen() {
   // Load token from secure storage on mount
   useEffect(() => {
     loadToken();
+    
+    // Pre-fill username if available
+    const stored = localStorage.getItem(STORAGE_KEYS.USER);
+    if (stored) {
+      try {
+        const user = JSON.parse(stored);
+        if (user.username) setLocalUsername(user.username);
+      } catch (e) {
+        // Ignore parse error
+      }
+    }
   }, []);
 
   // Redirect if already authenticated
@@ -68,7 +80,7 @@ export function LoginScreen() {
         <div className="mb-4 text-center">
           <img
             src={logoImage}
-            alt={UI_STRINGS.LOGIN.LOGO_ALT}
+            alt={t.LOGIN.LOGO_ALT}
             className="h-32 w-auto object-contain drop-shadow-2xl"
             style={{ imageRendering: "pixelated" }}
           />
@@ -97,101 +109,39 @@ export function LoginScreen() {
 
           <form onSubmit={handleLogin} className="flex flex-col gap-3">
             {/* Username Input */}
-            <input
+            <Input
               type="text"
               value={localUsername}
               onChange={(e) => setLocalUsername(e.target.value)}
-              placeholder={UI_STRINGS.LOGIN.USERNAME_PLACEHOLDER}
-              className="mc-input py-2"
+              placeholder={t.LOGIN.USERNAME_PLACEHOLDER}
               disabled={isLoading}
               autoComplete="username"
             />
 
             {/* Password Input */}
             {!offlineMode && (
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={localPassword}
-                  onChange={(e) => setLocalPassword(e.target.value)}
-                  placeholder={UI_STRINGS.LOGIN.PASSWORD_PLACEHOLDER}
-                  className="mc-input py-2 pr-12"
-                  disabled={isLoading}
-                  autoComplete="current-password"
-                />
-                {/* Password Visibility Toggle */}
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-gray-400 transition-colors hover:text-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
-                  disabled={isLoading}
-                >
-                  {showPassword ? (
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="square"
-                        strokeWidth={2}
-                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.591a9.98 9.98 0 012.053-1.14m3.097-2.187a9.954 9.954 0 013.543 2.187M6.375 6.375C4.5 8.25 3 10.5 3 12c0 1.5 1.5 3.75 3.375 5.625m3.75 3.75a10.05 10.05 0 001.875-.175M18 12a6 6 0 11-12 0 6 6 0 0112 0z"
-                      />
-                      <path strokeLinecap="square" d="M3 3l18 18" />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="square"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="square"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
-                  )}
-                </button>
-              </div>
+              <Input
+                type="password"
+                value={localPassword}
+                onChange={(e) => setLocalPassword(e.target.value)}
+                placeholder={t.LOGIN.PASSWORD_PLACEHOLDER}
+                disabled={isLoading}
+                autoComplete="current-password"
+                showPasswordExternal={showPassword}
+                onTogglePassword={() => setShowPassword(!showPassword)}
+              />
             )}
 
             {/* Login Button */}
-            <button
+            <Button
               type="submit"
-              className="mc-btn mc-btn-primary mc-btn-md mt-2 w-full py-2"
-              disabled={isLoading}
+              variant="primary"
+              size="md"
+              className="mt-2 w-full"
+              isLoading={isLoading}
             >
-              {isLoading ? (
-                <>
-                  <svg className="mc-spinner" viewBox="0 0 24 24">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  {UI_STRINGS.LOGIN.AUTHORIZING}
-                </>
-              ) : (
-                UI_STRINGS.LOGIN.SUBMIT_BUTTON
-              )}
-            </button>
+              {t.LOGIN.SUBMIT_BUTTON}
+            </Button>
 
             {/* Offline Mode Toggle */}
             <div className="flex items-center justify-center pt-1">
@@ -215,7 +165,7 @@ export function LoginScreen() {
                   </svg>
                 </div>
                 <span className="font-minecraft text-[10px] text-gray-400">
-                  {UI_STRINGS.LOGIN.OFFLINE_MODE}
+                  {t.LOGIN.OFFLINE_MODE}
                 </span>
               </label>
             </div>
@@ -227,14 +177,14 @@ export function LoginScreen() {
                 className="font-minecraft text-[11px] text-gray-400 transition-colors hover:text-cyan-400 hover:underline"
                 onClick={(e) => e.preventDefault()}
               >
-                {UI_STRINGS.LOGIN.FORGOT_PASSWORD}
+                {t.LOGIN.FORGOT_PASSWORD}
               </a>
               <a
                 href="#"
                 className="font-minecraft text-[11px] text-cyan-400 transition-colors hover:text-cyan-300 hover:underline"
                 onClick={(e) => e.preventDefault()}
               >
-                {UI_STRINGS.LOGIN.CREATE_ACCOUNT}
+                {t.LOGIN.CREATE_ACCOUNT}
               </a>
             </div>
           </form>
@@ -242,7 +192,7 @@ export function LoginScreen() {
 
         {/* Footer */}
         <div className="mt-4 text-center font-minecraft text-[10px] text-gray-600">
-          {UI_STRINGS.LOGIN.FOOTER_TEXT}
+          {t.LOGIN.FOOTER_TEXT}
         </div>
       </div>
     </div>
