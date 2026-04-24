@@ -19,7 +19,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // App controls (legacy support)
   closeApp: () => typedInvoke(IPC_CHANNELS.WINDOW.CLOSE),
-  getAppVersion: () => ipcRenderer.invoke("get-app-version"),
+  // App version
+  getAppVersion: () => typedInvoke(IPC_CHANNELS.APP.GET_VERSION),
 
   // Window controls
   minimizeWindow: () => typedInvoke(IPC_CHANNELS.WINDOW.MINIMIZE),
@@ -44,11 +45,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Auto-updater listeners
   onUpdateMessage: (callback: (message: string) => void) => {
     const subscription = (_event: any, message: string) => callback(message);
-    ipcRenderer.on("update-message", subscription);
+    ipcRenderer.on(IPC_CHANNELS.UPDATE.MESSAGE, subscription);
 
     // Return unsubscribe function
     return () => {
-      ipcRenderer.removeListener("update-message", subscription);
+      ipcRenderer.removeListener(IPC_CHANNELS.UPDATE.MESSAGE, subscription);
     };
   },
 
@@ -69,11 +70,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
         bytesPerSecond: number;
       },
     ) => callback(progress);
-    ipcRenderer.on("update-progress", subscription);
+    ipcRenderer.on(IPC_CHANNELS.UPDATE.PROGRESS, subscription);
 
     // Return unsubscribe function
     return () => {
-      ipcRenderer.removeListener("update-progress", subscription);
+      ipcRenderer.removeListener(IPC_CHANNELS.UPDATE.PROGRESS, subscription);
     };
   },
 

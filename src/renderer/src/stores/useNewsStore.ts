@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { NewsItem } from '../types';
+import { UI_STRINGS } from '../../../shared/constants/ui-strings';
 
 interface NewsState {
   // State
@@ -16,9 +17,8 @@ interface NewsState {
 const mockNews: NewsItem[] = [
   {
     id: '1',
-    title: 'Кристальные мобы: Обновление Гербариум!',
-    content:
-      'Новое крупное обновление добавляет кристальных мобов, новые биомы и улучшенную систему крафта. Исследуйте новые измерения и сражайтесь с эпическими боссами!',
+    title: UI_STRINGS.NEWS.MOCK[0].title,
+    content: UI_STRINGS.NEWS.MOCK[0].content,
     date: '2026-04-20',
     category: 'update',
     author: 'Gerbarium Team',
@@ -26,9 +26,8 @@ const mockNews: NewsItem[] = [
   },
   {
     id: '2',
-    title: 'Новая система скинов',
-    content:
-      'Теперь вы можете загружать собственные скины прямо в лаунчере! Поддержка HD текстур и плащей.',
+    title: UI_STRINGS.NEWS.MOCK[1].title,
+    content: UI_STRINGS.NEWS.MOCK[1].content,
     date: '2026-04-15',
     category: 'announcement',
     author: 'Gerbarium Team',
@@ -36,9 +35,8 @@ const mockNews: NewsItem[] = [
   },
   {
     id: '3',
-    title: 'Турнир сообщества',
-    content:
-      'Присоединяйтесь к еженедельному турниру! Призовой фонд: 10,000 кристаллов. Регистрация открыта до конца недели.',
+    title: UI_STRINGS.NEWS.MOCK[2].title,
+    content: UI_STRINGS.NEWS.MOCK[2].content,
     date: '2026-04-10',
     category: 'event',
     author: 'Community Team',
@@ -63,7 +61,7 @@ export const useNewsStore = create<NewsState>((set, get) => ({
         isLoading: false 
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Не удалось загрузить новости';
+      const errorMessage = err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.NEWS_LOAD;
       set({ 
         error: errorMessage, 
         isLoading: false 

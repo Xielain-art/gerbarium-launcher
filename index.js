@@ -1,89 +1,94 @@
 // Requirements
-const { app, BrowserWindow, ipcMain, Menu } = require("electron");
+const { app, BrowserWindow, Menu } = require("electron");
 const isDev = require("./_legacy_app/assets/js/isdev");
 const path = require("path");
-const fs = require("fs");
 const LangLoader = require("./_legacy_app/assets/js/langloader");
 const log = require("electron-log");
-const setupLogHandler = require("./dist/main/handlers/logHandler").default;
 
-const helloHandler = require("./dist/main/handlers/helloHandler").default;
+// Handlers
+const setupLogHandler = require("./dist/main/handlers/logHandler").default;
 const windowControlsHandler = require("./dist/main/handlers/windowControlsHandler").default;
 const secureStorageHandler = require("./dist/main/handlers/secureStorageHandler").default;
 const updateHandler = require("./dist/main/handlers/updateHandler").default;
 const javaHandler = require("./dist/main/handlers/javaHandlerWrapper").default;
 const systemHandler = require("./dist/main/handlers/systemHandler").default;
 
-// Setup log
-const currentDate = new Date().toISOString().split('T')[0]; // Получаем строгую дату (YYYY-MM-DD)
+// Try to load bundled constants
+let CONSTANTS;
+try {
+  CONSTANTS = require("./dist/main/main-constants").MAIN_CONSTANTS;
+} catch (e) {
+  // Fallback if not yet bundled
+  CONSTANTS = {
+    APP_CONFIG: { DEV_URL: 'http://localhost:5173', PROD_INDEX: 'dist/index.html', BG_COLOR: '#171614' },
+    WINDOW_CONFIG: { WIDTH: 980, HEIGHT: 552 },
+    DIRECTORIES: { LOGS: 'logs', USER_DATA: 'userData' },
+    LOG_FILE_NAMES: { MAIN: 'main.log' },
+    LOG_MESSAGES: { APP_STARTING: 'Gerbarium starting...', APP_UNCAUGHT_EXCEPTION: 'Uncaught Exception:', APP_UNHANDLED_REJECTION: 'Unhandled Rejection:' },
+    PLATFORMS: { WINDOWS: 'win32', MACOS: 'darwin' }
+  };
+}
 
-log.transports.file.level = "info";
-log.transports.console.level = "debug";
-// Жестко задаем имя файла с датой
-log.transports.file.fileName = `main-${currentDate}.log`;
-log.transports.file.resolvePathFn = () => path.join(app.getPath('userData'), 'logs', log.transports.file.fileName);
+// Setup log — files go into userData/logs/<D.MM.YYYY>/main.log
+function getDateFolder() {
+  const now = new Date();
+  const day = now.getDate();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = now.getFullYear();
+  return `${day}.${month}.${year}`;
+}
+
+const dateFolder = getDateFolder();
+
+log.transports.file.level = 'info';
+log.transports.console.level = 'debug';
+log.transports.file.fileName = CONSTANTS.LOG_FILE_NAMES.MAIN;
+log.transports.file.resolvePathFn = () =>
+  path.join(app.getPath(CONSTANTS.DIRECTORIES.USER_DATA), CONSTANTS.DIRECTORIES.LOGS, dateFolder, CONSTANTS.LOG_FILE_NAMES.MAIN);
 
 // Global error handlers
 process.on("uncaughtException", (error) => {
-  log.error("Uncaught Exception:", error);
+  log.error(CONSTANTS.LOG_MESSAGES.APP_UNCAUGHT_EXCEPTION, error);
   app.exit(1);
 });
 
 process.on("unhandledRejection", (reason) => {
-  log.error("Unhandled Rejection:", reason);
+  log.error(CONSTANTS.LOG_MESSAGES.APP_UNHANDLED_REJECTION, reason);
 });
 
 // Setup Lang
 LangLoader.setupLanguage();
 
-log.info("Gerbarium starting...", {
+log.info(CONSTANTS.LOG_MESSAGES.APP_STARTING, {
   version: app.getVersion(),
   platform: process.platform,
   arch: process.arch,
 });
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
 let win;
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 980,
-    height: 552,
+    width: CONSTANTS.WINDOW_CONFIG.WIDTH,
+    height: CONSTANTS.WINDOW_CONFIG.HEIGHT,
     icon: getPlatformIcon("SealCircle"),
     frame: false,
     webPreferences: {
-      //   preload: path.join(__dirname, "app", "assets", "js", "preloader.js"),
       preload: path.join(__dirname, "dist", "preload", "preload.js"),
       nodeIntegration: false,
       contextIsolation: true,
     },
-    backgroundColor: "#171614",
+    backgroundColor: CONSTANTS.APP_CONFIG.BG_COLOR,
   });
 
-  // const data = {
-  //     bkid: Math.floor((Math.random() * fs.readdirSync(path.join(__dirname, 'app', 'assets', 'images', 'backgrounds')).length)),
-  //     lang: (str, placeHolders) => LangLoader.queryEJS(str, placeHolders)
-  // }
-  // Object.entries(data).forEach(([key, val]) => ejse.data(key, val))
-
-  // win.loadURL(pathToFileURL(path.join(__dirname, 'app', 'app.ejs')).toString())
   if (isDev) {
-    // Загружаем локальный сервер Vite для разработки
-    win.loadURL("http://localhost:5173");
-    // Сразу открываем панель разработчика (DevTools), чтобы видеть ошибки React
+    win.loadURL(CONSTANTS.APP_CONFIG.DEV_URL);
     win.webContents.openDevTools();
   } else {
-    // Для продакшена (когда будешь собирать .exe файл)
-    win.loadFile(path.join(__dirname, "dist", "index.html"));
+    win.loadFile(path.join(__dirname, CONSTANTS.APP_CONFIG.PROD_INDEX));
   }
 
-  /*win.once('ready-to-show', () => {
-        win.show()
-    })*/
-
   win.removeMenu();
-
   win.resizable = true;
 
   win.on("closed", () => {
@@ -92,8 +97,7 @@ function createWindow() {
 }
 
 function createMenu() {
-  if (process.platform === "darwin") {
-    // Extend default included application menu to continue support for quit keyboard shortcut
+  if (process.platform === CONSTANTS.PLATFORMS.MACOS) {
     let applicationSubMenu = {
       label: "Application",
       submenu: [
@@ -114,7 +118,6 @@ function createMenu() {
       ],
     };
 
-    // New edit menu adds support for text-editing keyboard shortcuts
     let editSubMenu = {
       label: "Edit",
       submenu: [
@@ -154,11 +157,8 @@ function createMenu() {
       ],
     };
 
-    // Bundle submenus into a single template and build a menu object with it
     let menuTemplate = [applicationSubMenu, editSubMenu];
     let menuObject = Menu.buildFromTemplate(menuTemplate);
-
-    // Assign it to the application
     Menu.setApplicationMenu(menuObject);
   }
 }
@@ -166,11 +166,9 @@ function createMenu() {
 function getPlatformIcon(filename) {
   let ext;
   switch (process.platform) {
-    case "win32":
+    case CONSTANTS.PLATFORMS.WINDOWS:
       ext = "ico";
       break;
-    case "darwin":
-    case "linux":
     default:
       ext = "png";
       break;
@@ -187,7 +185,7 @@ function getPlatformIcon(filename) {
 
 app.on("ready", () => {
    createWindow();
-   helloHandler(app);
+   createMenu();
    windowControlsHandler(app);
    secureStorageHandler(app);
    updateHandler(app);
@@ -197,22 +195,13 @@ app.on("ready", () => {
 });
 
 app.on("window-all-closed", () => {
-  // On macOS it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== "darwin") {
+  if (process.platform !== CONSTANTS.PLATFORMS.MACOS) {
     app.quit();
   }
 });
 
 app.on("activate", () => {
-  // On macOS it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (win === null) {
     createWindow();
   }
-});
-
-// Отвечаем на запрос версии
-ipcMain.handle("get-app-version", () => {
-  return app.getVersion();
 });

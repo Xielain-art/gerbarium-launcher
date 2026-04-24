@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { ServerStatusData } from '../types';
+import { UI_STRINGS } from '../../../shared/constants/ui-strings';
 
 interface ServerStatusState {
   // State
@@ -21,7 +22,7 @@ const mockServerStatus: ServerStatusData = {
     max: 500,
   },
   version: '1.20.1',
-  motd: '§b§lGerbarium §8| §aКристальное обновление!',
+  motd: UI_STRINGS.DASHBOARD.SERVER_MOTD,
   latency: 45,
 };
 
@@ -42,7 +43,7 @@ export const useServerStatusStore = create<ServerStatusState>((set, get) => ({
         isLoading: false 
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Не удалось получить статус сервера';
+      const errorMessage = err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.SERVER_STATUS;
       set({ 
         error: errorMessage, 
         isLoading: false 

@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { LoginScreen, DashboardScreen, SettingsScreen, UpdateScreen } from "./pages";
 import { useAuthStore } from "./stores/useAuthStore";
+import { ROUTES } from "../../shared/constants/system";
 
 // Helper function to check authentication using Zustand store state
 const checkAuth = () => {
@@ -26,18 +27,18 @@ const rootRoute = createRootRoute({
 // Update route (default - shown first on app launch)
 const updateRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/",
+  path: ROUTES.HOME,
   component: UpdateScreen,
 });
 
 // Login route
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/login",
+  path: ROUTES.LOGIN,
   component: LoginScreen,
   beforeLoad: async () => {
     if (checkAuth()) {
-      throw redirect({ to: "/dashboard" });
+      throw redirect({ to: ROUTES.DASHBOARD });
     }
   },
 });
@@ -45,11 +46,11 @@ const loginRoute = createRoute({
 // Dashboard route (protected)
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/dashboard",
+  path: ROUTES.DASHBOARD,
   component: DashboardScreen,
   beforeLoad: async () => {
     if (!checkAuth()) {
-      throw redirect({ to: "/login" });
+      throw redirect({ to: ROUTES.LOGIN });
     }
   },
 });
@@ -57,12 +58,11 @@ const dashboardRoute = createRoute({
 // Settings route (protected)
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/settings",
+  path: ROUTES.SETTINGS,
   component: SettingsScreen,
   beforeLoad: async () => {
-    console.log("Settings beforeLoad - auth check:", checkAuth());
     if (!checkAuth()) {
-      throw redirect({ to: "/login" });
+      throw redirect({ to: ROUTES.LOGIN });
     }
   },
 });

@@ -1,8 +1,7 @@
 import { create } from 'zustand';
 import type { AuthUser, AuthCredentials } from '../types';
-
-// Token storage key for secure storage
-const AUTH_TOKEN_KEY = 'auth_token';
+import { STORAGE_KEYS, LOG_ACTIONS } from '../../../shared/constants/system';
+import { UI_STRINGS } from '../../../shared/constants/ui-strings';
 
 // Auto-log helper
 const logAction = (action: string, details?: string) => {
@@ -49,10 +48,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
    loadToken: async () => {
      try {
-       const result = await window.electronAPI.secureStorage.get(AUTH_TOKEN_KEY);
+       const result = await window.electronAPI.secureStorage.get(STORAGE_KEYS.TOKEN);
        if (result.success && result.value) {
          // Also load user data from localStorage (non-sensitive)
-         const stored = localStorage.getItem('gerbarium-auth-user');
+         const stored = localStorage.getItem(STORAGE_KEYS.USER);
          let user: AuthUser | null = null;
          if (stored) {
            try {
@@ -66,21 +65,21 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
            isAuthenticated: true,
            user 
          });
-         logAction('TOKEN_LOADED', user ? `User: ${user.username}` : 'Token only');
+         logAction(LOG_ACTIONS.TOKEN_LOADED, user ? `User: ${user.username}` : 'Token only');
        }
      } catch (err) {
        const errorMsg = err instanceof Error ? err.message : 'Unknown error';
-       logAction('TOKEN_LOAD_ERROR', errorMsg);
+       logAction(LOG_ACTIONS.TOKEN_LOAD_ERROR, errorMsg);
        console.error('Failed to load auth token:', err);
      }
    },
 
   logout: async () => {
-    logAction('LOGOUT', 'User logged out');
+    logAction(LOG_ACTIONS.LOGOUT, 'User logged out');
     // Clear secure storage
-    await window.electronAPI.secureStorage.delete(AUTH_TOKEN_KEY);
+    await window.electronAPI.secureStorage.delete(STORAGE_KEYS.TOKEN);
     // Clear localStorage
-    localStorage.removeItem('gerbarium-auth-user');
+    localStorage.removeItem(STORAGE_KEYS.USER);
     set(defaultState);
   },
 
@@ -91,9 +90,10 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
        if (!credentials.login.trim() || !credentials.password.trim()) {
-         logAction('LOGIN_VALIDATION_ERROR', 'Empty login or password');
-         set({ isLoading: false, error: 'Введите логин и пароль' });
-         return { success: false, error: 'Введите логин и пароль' };
+         logAction(LOG_ACTIONS.LOGIN_VALIDATION_ERROR, 'Empty login or password');
+         const errorMsg = UI_STRINGS.STORE_ERRORS.AUTH_EMPTY_FIELDS;
+         set({ isLoading: false, error: errorMsg });
+         return { success: false, error: errorMsg };
        }
 
       const mockUser: AuthUser = {
@@ -105,14 +105,15 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const mockToken = 'mock_token_' + Date.now();
 
       // Store token in secure storage
-      const secureResult = await window.electronAPI.secureStorage.set(AUTH_TOKEN_KEY, mockToken);
+      const secureResult = await window.electronAPI.secureStorage.set(STORAGE_KEYS.TOKEN, mockToken);
       if (!secureResult.success) {
-        set({ isLoading: false, error: 'Failed to store token securely' });
-        return { success: false, error: 'Failed to store token securely' };
+        const errorMsg = 'Failed to store token securely';
+        set({ isLoading: false, error: errorMsg });
+        return { success: false, error: errorMsg };
       }
 
       // Store non-sensitive user data in localStorage
-      localStorage.setItem('gerbarium-auth-user', JSON.stringify(mockUser));
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(mockUser));
 
       set({
         user: mockUser,
@@ -121,12 +122,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         isLoading: false,
       });
 
-      logAction('LOGIN', `User logged in: ${mockUser.username}`);
+      logAction(LOG_ACTIONS.LOGIN_SUCCESS, `User logged in: ${mockUser.username}`);
       return { success: true };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка входа';
+      const errorMessage = err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.AUTH_LOGIN;
       set({ isLoading: false, error: errorMessage });
-      logAction('LOGIN_ERROR', errorMessage);
+      logAction(LOG_ACTIONS.LOGIN_ERROR, errorMessage);
       return { success: false, error: errorMessage };
     }
   },
@@ -138,8 +139,9 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       if (!username.trim()) {
-        set({ isLoading: false, error: 'Введите имя пользователя' });
-        return { success: false, error: 'Введите имя пользователя' };
+        const errorMsg = UI_STRINGS.STORE_ERRORS.AUTH_EMPTY_USERNAME;
+        set({ isLoading: false, error: errorMsg });
+        return { success: false, error: errorMsg };
       }
 
       const mockUser: AuthUser = {
@@ -150,9 +152,9 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const mockToken = 'offline_token';
 
       // Store token in secure storage
-      await window.electronAPI.secureStorage.set(AUTH_TOKEN_KEY, mockToken);
+      await window.electronAPI.secureStorage.set(STORAGE_KEYS.TOKEN, mockToken);
       // Store non-sensitive user data in localStorage
-      localStorage.setItem('gerbarium-auth-user', JSON.stringify(mockUser));
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(mockUser));
 
       set({
         user: mockUser,
@@ -161,12 +163,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         isLoading: false,
       });
 
-      logAction('LOGIN_OFFLINE', `Offline login: ${username}`);
+      logAction(LOG_ACTIONS.LOGIN_OFFLINE, `Offline login: ${username}`);
       return { success: true };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка оффлайн входа';
+      const errorMessage = err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.AUTH_OFFLINE;
       set({ isLoading: false, error: errorMessage });
-      logAction('LOGIN_OFFLINE_ERROR', errorMessage);
+      logAction(LOG_ACTIONS.LOGIN_OFFLINE_ERROR, errorMessage);
       return { success: false, error: errorMessage };
     }
   },

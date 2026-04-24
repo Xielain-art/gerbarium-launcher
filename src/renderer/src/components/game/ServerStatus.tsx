@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { UI_STRINGS } from '../../../../shared/constants/ui-strings';
+import { SERVER_INFO } from '../../../../shared/constants/system';
 
 export interface ServerStatusData {
   online: boolean;
@@ -23,12 +25,12 @@ const mockServerStatus: ServerStatusData = {
     max: 500,
   },
   version: '1.20.1',
-  motd: '§b§lGerbarium §8| §aКристальное обновление!',
+  motd: UI_STRINGS.DASHBOARD.SERVER_MOTD,
 };
 
 export function ServerStatus({ 
-  serverIp = 'play.gerbarium.ru',
-  serverPort = 25565 
+  serverIp = SERVER_INFO.IP,
+  serverPort = SERVER_INFO.PORT 
 }: ServerStatusProps) {
   const [status, setStatus] = useState<ServerStatusData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +47,7 @@ export function ServerStatus({
         await new Promise((resolve) => setTimeout(resolve, 1000));
         setStatus(mockServerStatus);
       } catch (err) {
-        setError('Не удалось получить статус сервера');
+        setError(UI_STRINGS.STORE_ERRORS.SERVER_STATUS);
       } finally {
         setIsLoading(false);
       }
@@ -62,7 +64,7 @@ export function ServerStatus({
     return (
       <div className="flex items-center gap-2 text-[#8a8a8a] text-xs font-minecraft">
         <div className="w-2 h-2 bg-[#8a8a8a] animate-pulse rounded-full" />
-        Загрузка...
+        {UI_STRINGS.COMMON.LOADING}
       </div>
     );
   }
@@ -71,7 +73,7 @@ export function ServerStatus({
     return (
       <div className="flex items-center gap-2 text-[#ff5555] text-xs font-minecraft">
         <div className="w-2 h-2 bg-[#ff5555] rounded-full" />
-        Ошибка
+        {UI_STRINGS.COMMON.ERROR}
       </div>
     );
   }
@@ -86,7 +88,7 @@ export function ServerStatus({
           }`}
         />
         <span className="text-[#e0e0e0] text-xs font-minecraft">
-          {status.online ? 'Онлайн' : 'Оффлайн'}
+          {status.online ? UI_STRINGS.DASHBOARD.SERVER_STATUS_ONLINE : UI_STRINGS.DASHBOARD.SERVER_STATUS_OFFLINE}
         </span>
       </div>
 

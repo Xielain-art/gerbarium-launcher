@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { InputProps } from '../types';
+import { UI_STRINGS } from '../../../../shared/constants/ui-strings';
 
 export function Input({
   label,
@@ -58,7 +59,7 @@ export function Input({
             className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center
               text-[#8a8a8a] hover:text-[#e0e0e0] transition-colors
               focus:outline-none"
-            title={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+            title={showPassword ? UI_STRINGS.LOGIN.PASSWORD_HIDE : UI_STRINGS.LOGIN.PASSWORD_SHOW}
           >
             {showPassword ? (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">

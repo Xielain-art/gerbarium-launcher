@@ -41,6 +41,9 @@ export const IPC_CHANNELS = {
    LOG: {
      EXPORT_AND_REPORT: "logs:export-and-report",
    },
+   APP: {
+     GET_VERSION: "app:get-version",
+   },
  } as const;
 
 // Карта типов для всех наших IPC событий
@@ -159,6 +162,10 @@ export interface IpcChannelMap {
    [IPC_CHANNELS.LOG.EXPORT_AND_REPORT]: {
      args: [];
      return: { success: boolean; path?: string; error?: string };
+   };
+   [IPC_CHANNELS.APP.GET_VERSION]: {
+     args: [];
+     return: string;
    };
  }
 

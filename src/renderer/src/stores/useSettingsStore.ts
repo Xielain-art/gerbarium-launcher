@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { SettingsState as SettingsStateType, SettingsGeneral, SettingsMods, SettingsProfile } from '../types';
+import { STORAGE_KEYS, LOG_ACTIONS, DEFAULT_SETTINGS } from '../../../shared/constants/system';
+import { UI_STRINGS } from '../../../shared/constants/ui-strings';
 
 const logAction = (action: string, details?: string) => {
   window.logAction?.(action, details);
@@ -25,20 +27,20 @@ interface SettingsState extends SettingsStateType {
 const defaultSettings: SettingsStateType = {
   general: {
     javaPath: '',
-    ramAllocation: 4,
-    language: 'ru',
+    ramAllocation: DEFAULT_SETTINGS.RAM_GB,
+    language: DEFAULT_SETTINGS.LANGUAGE,
     autoUpdates: true,
     closeOnLaunch: false,
     minimizeToTray: false,
     discordRPC: true,
-    jvmArgs: '-XX:+UseG1GC -XX:MaxGCPauseMillis=50',
+    jvmArgs: DEFAULT_SETTINGS.JVM_ARGS,
   },
   mods: {
     enabledMods: [],
-    modPack: 'gerbarium',
+    modPack: DEFAULT_SETTINGS.MODPACK,
   },
   profile: {
-    username: 'Player',
+    username: DEFAULT_SETTINGS.USERNAME,
     skinUrl: undefined,
     capeUrl: undefined,
   },
@@ -83,24 +85,24 @@ export const useSettingsStore = create<SettingsState>()(
           
           // Settings are already persisted by zustand
           set({ isLoading: false });
-          logAction('SAVE_SETTINGS', 'Settings saved successfully');
+          logAction(LOG_ACTIONS.SAVE_SETTINGS, 'Settings saved successfully');
           return { success: true };
         } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : 'Не удалось сохранить настройки';
+          const errorMessage = err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.SETTINGS_SAVE;
           set({ isLoading: false, error: errorMessage });
-          logAction('SAVE_SETTINGS_ERROR', errorMessage);
+          logAction(LOG_ACTIONS.SAVE_SETTINGS_ERROR, errorMessage);
           return { success: false, error: errorMessage };
         }
       },
       
       resetToDefaults: () => {
-        logAction('RESET_SETTINGS', 'Settings reset to defaults');
+        logAction(LOG_ACTIONS.RESET_SETTINGS, 'Settings reset to defaults');
         set(defaultSettings);
-        localStorage.removeItem('gerbarium-settings-storage');
+        localStorage.removeItem(STORAGE_KEYS.SETTINGS);
       },
     }),
     {
-      name: 'gerbarium-settings-storage',
+      name: STORAGE_KEYS.SETTINGS,
       partialize: (state) => ({
         general: state.general,
         mods: state.mods,

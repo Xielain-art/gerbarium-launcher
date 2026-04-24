@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { WindowControls } from "../components";
+import { UI_STRINGS } from "../../../shared/constants/ui-strings";
+import { ROUTES } from "../../../shared/constants/system";
 
 export function UpdateScreen() {
   const navigate = useNavigate();
   const [appVersion, setAppVersion] = useState<string>("");
-  const [updateMessage, setUpdateMessage] = useState<string>("Поиск обновлений...");
+  const [updateMessage, setUpdateMessage] = useState<string>(UI_STRINGS.UPDATE_SCREEN.SEARCHING);
   const [updateProgress, setUpdateProgress] = useState<number>(0);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [updateInfo, setUpdateInfo] = useState<any>(null);
@@ -21,12 +23,12 @@ useEffect(() => {
 
     const unsubMessage = window.electronAPI.onUpdateMessage((message) => {
       setUpdateMessage(message);
-      if (message === "update-not-available") {
-        setUpdateMessage("Запуск лаунчера...");
-        setTimeout(() => navigate({ to: "/login" }), 1500);
+      if (message === UI_STRINGS.UPDATE_SCREEN.NONE) {
+        setUpdateMessage(UI_STRINGS.UPDATE_SCREEN.STARTING_LAUNCHER);
+        setTimeout(() => navigate({ to: ROUTES.LOGIN }), 1500);
       }
-      if (message.includes("Ошибка")) {
-        setTimeout(() => navigate({ to: "/login" }), 2000);
+      if (message.includes(UI_STRINGS.UPDATE_SCREEN.ERROR_PREFIX)) {
+        setTimeout(() => navigate({ to: ROUTES.LOGIN }), 2000);
       }
     });
 
@@ -42,8 +44,8 @@ useEffect(() => {
     window.electronAPI.startUpdateCheck();
     window.electronAPI.getAppVersion().then((version) => {
       if (version) {
-        setUpdateMessage("Обновление не требуется");
-        setTimeout(() => navigate({ to: "/login" }), 500);
+        setUpdateMessage(UI_STRINGS.UPDATE_SCREEN.NOT_REQUIRED);
+        setTimeout(() => navigate({ to: ROUTES.LOGIN }), 500);
       }
     });
 
@@ -87,7 +89,7 @@ useEffect(() => {
           {/* Version */}
           {appVersion && (
             <p className="mb-8 text-center font-minecraft text-sm text-[#8a8a8a]">
-              Версия: {appVersion}
+              {UI_STRINGS.COMMON.VERSION}: {appVersion}
             </p>
           )}
 
@@ -119,7 +121,7 @@ useEffect(() => {
 
           {/* Footer Info */}
           <p className="mt-6 text-center font-minecraft text-xs text-[#5a5a5a]">
-            © 2026 Gerbarium. Radmir Klimau.
+            {UI_STRINGS.UPDATE_SCREEN.COPYRIGHT}
           </p>
         </div>
       </div>

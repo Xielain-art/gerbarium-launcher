@@ -5,38 +5,40 @@ import { useDownloadStore } from "../stores/useDownloadStore";
 import { useNewsStore } from "../stores/useNewsStore";
 import { useServerStatusStore } from "../stores/useServerStatusStore";
 import { WindowControls, Avatar } from "../components";
+import { UI_STRINGS } from "../../../shared/constants/ui-strings";
+import { ROUTES, STORAGE_KEYS } from "../../../shared/constants/system";
 import miniLogo from "../assets/photo_2026-04-23_10-35-12.jpg";
 import newsPlaceholder from "../assets/photo_2026-04-23_10-34-22.jpg";
 
 // Mock versions data
 const mockVersions = [
   {
-    id: "gerbarium-1.2",
-    name: "Gerbarium v1.2",
+    id: UI_STRINGS.DASHBOARD.MOCK_VERSIONS[0].id,
+    name: UI_STRINGS.DASHBOARD.MOCK_VERSIONS[0].name,
     type: "gerbarium" as const,
     isInstalled: true,
   },
   {
-    id: "fabric-1.21",
-    name: "Fabric 1.21",
+    id: UI_STRINGS.DASHBOARD.MOCK_VERSIONS[1].id,
+    name: UI_STRINGS.DASHBOARD.MOCK_VERSIONS[1].name,
     type: "fabric" as const,
     isInstalled: true,
   },
   {
-    id: "forge-1.20.1",
-    name: "Forge 1.20.1",
+    id: UI_STRINGS.DASHBOARD.MOCK_VERSIONS[2].id,
+    name: UI_STRINGS.DASHBOARD.MOCK_VERSIONS[2].name,
     type: "forge" as const,
     isInstalled: true,
   },
   {
-    id: "vanilla-1.21.4",
-    name: "Vanilla 1.21.4",
+    id: UI_STRINGS.DASHBOARD.MOCK_VERSIONS[3].id,
+    name: UI_STRINGS.DASHBOARD.MOCK_VERSIONS[3].name,
     type: "vanilla" as const,
     isInstalled: false,
   },
   {
-    id: "vanilla-42",
-    name: "ТЕСТ РЕЛИЗА 1.0.1",
+    id: UI_STRINGS.DASHBOARD.MOCK_VERSIONS[4].id,
+    name: UI_STRINGS.DASHBOARD.MOCK_VERSIONS[4].name,
     type: "vanilla" as const,
     isInstalled: false,
   },
@@ -63,13 +65,7 @@ function getCategoryColor(category: string) {
 }
 
 function getCategoryLabel(category: string) {
-  const labels: Record<string, string> = {
-    update: "Обновление",
-    event: "Событие",
-    community: "Сообщество",
-    announcement: "Анонс",
-  };
-  return labels[category] || category;
+  return UI_STRINGS.NEWS.CATEGORIES[category as keyof typeof UI_STRINGS.NEWS.CATEGORIES] || category;
 }
 
 export function DashboardScreen() {
@@ -92,7 +88,7 @@ export function DashboardScreen() {
   // Handle logout redirect
   useEffect(() => {
     if (!isAuthenticated && shouldLogout) {
-      navigate({ to: "/" });
+      navigate({ to: ROUTES.HOME });
     }
   }, [isAuthenticated, shouldLogout, navigate]);
 
@@ -105,7 +101,7 @@ export function DashboardScreen() {
 
   const handlePlay = async () => {
     if (!selectedVersion) {
-      alert("Выберите версию для запуска!");
+      alert(UI_STRINGS.DASHBOARD.SELECT_VERSION_ALERT);
       return;
     }
     await startDownload(selectedVersion);
@@ -120,13 +116,13 @@ export function DashboardScreen() {
   };
 
   const handleSettings = () => {
-    navigate({ to: "/settings" });
+    navigate({ to: ROUTES.SETTINGS });
   };
 
   const handleLogout = () => {
     setShouldLogout(true);
     logout();
-    localStorage.removeItem("gerbarium-auth-storage");
+    localStorage.removeItem(STORAGE_KEYS.AUTH);
   };
 
   return (
@@ -152,14 +148,14 @@ export function DashboardScreen() {
                     className="font-minecraft text-sm font-bold text-[#e0e0e0] truncate"
                     title={user?.username || ""}
                   >
-                    {user?.username || "Игрок"}
+                    {user?.username || UI_STRINGS.DASHBOARD.PLAYER_DEFAULT}
                   </span>
                   <span className="rounded bg-[#3a753a] px-1.5 py-0.5 font-minecraft text-[10px] font-bold text-white">
-                    VIP
+                    {UI_STRINGS.DASHBOARD.PLAYER_RANK_VIP}
                   </span>
                 </div>
                 <div className="font-minecraft text-xs text-[#8a8a8a]">
-                  ID: {user?.id?.slice(0, 8) || "???"}
+                  {UI_STRINGS.DASHBOARD.PLAYER_ID_LABEL} {user?.id?.slice(0, 8) || UI_STRINGS.DASHBOARD.PLAYER_ID_UNKNOWN}
                 </div>
               </div>
             </div>
@@ -168,7 +164,7 @@ export function DashboardScreen() {
             <button
               onClick={handleLogout}
               className="mc-btn mc-btn-sm shrink-0"
-              title="Выйти"
+              title={UI_STRINGS.DASHBOARD.LOGOUT_TOOLTIP}
             >
               <svg
                 className="h-4 w-4"
@@ -195,7 +191,7 @@ export function DashboardScreen() {
                   className={`h-2.5 w-2.5 rounded-full ${serverStatus.online ? "bg-[#55ff55] animate-pulse" : "bg-[#ff5555]"}`}
                 />
                 <span className="font-minecraft text-xs font-bold text-[#e0e0e0]">
-                  {serverStatus.online ? "ОНЛАЙН" : "ОФФЛАЙН"}
+                  {serverStatus.online ? UI_STRINGS.DASHBOARD.SERVER_ONLINE : UI_STRINGS.DASHBOARD.SERVER_OFFLINE}
                 </span>
               </div>
               {serverStatus.online && (
@@ -217,7 +213,7 @@ export function DashboardScreen() {
         <div className="flex flex-1 flex-col overflow-hidden">
           <div className="border-b-[2px] border-[#1a1a1a] bg-[#2b2d31]/30 px-4 py-3">
             <h2 className="font-minecraft text-xs font-bold uppercase tracking-wider text-[#8a8a8a]">
-              Версии
+              {UI_STRINGS.DASHBOARD.VERSIONS_TITLE}
             </h2>
           </div>
 
@@ -243,13 +239,13 @@ export function DashboardScreen() {
                         className={`font-minecraft text-xs ${version.isInstalled ? "text-[#5a5]" : "text-[#8a8a8a]"}`}
                       >
                         {version.isInstalled
-                          ? "✓ Установлено"
-                          : "○ Не установлено"}
+                          ? UI_STRINGS.DASHBOARD.VERSION_INSTALLED
+                          : UI_STRINGS.DASHBOARD.VERSION_NOT_INSTALLED}
                       </div>
                     </div>
                     {selectedVersion === version.id && (
                       <span className="text-green-400 text-lg font-bold">
-                        ▶
+                        {UI_STRINGS.DASHBOARD.PLAY_ARROW_ICON}
                       </span>
                     )}
                   </div>
@@ -279,7 +275,7 @@ export function DashboardScreen() {
                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
               />
             </svg>
-            Настройки
+            {UI_STRINGS.DASHBOARD.SETTINGS_BUTTON}
           </button>
         </div>
       </aside>
@@ -291,7 +287,7 @@ export function DashboardScreen() {
           {/* Version Display */}
           {appVersion && (
             <div className="font-minecraft text-xs text-[#6a6a6a]">
-              Версия: {appVersion}
+              {UI_STRINGS.DASHBOARD.VERSION_DISPLAY_LABEL} {appVersion}
             </div>
           )}
           {/* Window Controls */}
@@ -303,7 +299,7 @@ export function DashboardScreen() {
           {/* News Section */}
           <div className="px-6">
             <h2 className="mb-6 font-minecraft text-lg font-bold uppercase tracking-wider text-[#e0e0e0]">
-              Новости проекта
+              {UI_STRINGS.DASHBOARD.NEWS_TITLE}
             </h2>
 
             <div className="grid gap-5">
@@ -366,19 +362,19 @@ export function DashboardScreen() {
               <div className="flex items-center gap-4 min-w-0">
                 <div className="min-w-0">
                   <div className="font-minecraft text-xs text-gray-400">
-                    Выбранная версия
+                    {UI_STRINGS.DASHBOARD.SELECTED_VERSION_LABEL}
                   </div>
                   <div className="font-minecraft text-base font-bold text-[#e0e0e0] truncate">
                     {mockVersions.find((v) => v.id === selectedVersion)?.name ||
-                      "Не выбрана"}
+                      UI_STRINGS.DASHBOARD.VERSION_NOT_SELECTED}
                   </div>
                   <div className="font-minecraft text-xs">
                     {mockVersions.find((v) => v.id === selectedVersion)
                       ?.isInstalled ? (
-                      <span className="text-[#5a5]">✓ Готово к запуску</span>
+                      <span className="text-[#5a5]">{UI_STRINGS.DASHBOARD.READY_TO_PLAY}</span>
                     ) : (
                       <span className="text-[#8a8a8a]">
-                        ○ Требуется установка
+                        {UI_STRINGS.DASHBOARD.NEEDS_INSTALLATION}
                       </span>
                     )}
                   </div>
@@ -389,8 +385,8 @@ export function DashboardScreen() {
                 onClick={handlePlay}
                 className="mc-btn mc-btn-primary mc-btn-xl min-w-[320px] shrink-0"
               >
-                <span className="text-xl">🎮</span>
-                <span className="ml-3 text-lg">ИГРАТЬ</span>
+                <span className="text-xl">{UI_STRINGS.DASHBOARD.PLAY_ICON}</span>
+                <span className="ml-3 text-lg">{UI_STRINGS.DASHBOARD.PLAY_BUTTON}</span>
               </button>
             </div>
           ) : (
@@ -400,14 +396,14 @@ export function DashboardScreen() {
                 <div className="flex items-center gap-4">
                   <div>
                     <div className="font-minecraft text-sm text-gray-400">
-                      {progress?.status || "Загрузка..."}
+                      {progress?.status || UI_STRINGS.COMMON.LOADING}
                     </div>
                     <div className="font-minecraft text-sm text-[#55aaff]">
                       {progress?.speed && <span>{progress.speed}</span>}
                       {progress?.speed && progress?.eta && (
                         <span className="mx-2">•</span>
                       )}
-                      {progress?.eta && <span>Осталось: {progress.eta}</span>}
+                      {progress?.eta && <span>{UI_STRINGS.DASHBOARD.TIME_REMAINING_LABEL} {progress.eta}</span>}
                     </div>
                   </div>
                 </div>
@@ -416,8 +412,8 @@ export function DashboardScreen() {
                   onClick={handleCancel}
                   className="mc-btn mc-btn-danger mc-btn-lg"
                 >
-                  <span className="mr-2">❌</span>
-                  ОТМЕНА
+                  <span className="mr-2">{UI_STRINGS.DASHBOARD.CANCEL_ICON}</span>
+                  {UI_STRINGS.COMMON.CANCEL}
                 </button>
               </div>
 

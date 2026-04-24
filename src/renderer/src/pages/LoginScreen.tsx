@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "../stores/useAuthStore";
 import { WindowControls } from "../components";
+import { UI_STRINGS } from "../../../shared/constants/ui-strings";
+import { ROUTES } from "../../../shared/constants/system";
 import logoImage from "../assets/photo_2026-04-23_10-34-22.jpg";
 
 export function LoginScreen() {
@@ -33,7 +35,7 @@ export function LoginScreen() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate({ to: "/dashboard" });
+      navigate({ to: ROUTES.DASHBOARD });
     }
   }, [isAuthenticated, navigate]);
 
@@ -66,7 +68,7 @@ export function LoginScreen() {
         <div className="mb-4 text-center">
           <img
             src={logoImage}
-            alt="Minecraft Gerbarium"
+            alt={UI_STRINGS.LOGIN.LOGO_ALT}
             className="h-32 w-auto object-contain drop-shadow-2xl"
             style={{ imageRendering: "pixelated" }}
           />
@@ -99,7 +101,7 @@ export function LoginScreen() {
               type="text"
               value={localUsername}
               onChange={(e) => setLocalUsername(e.target.value)}
-              placeholder="Логин"
+              placeholder={UI_STRINGS.LOGIN.USERNAME_PLACEHOLDER}
               className="mc-input py-2"
               disabled={isLoading}
               autoComplete="username"
@@ -112,7 +114,7 @@ export function LoginScreen() {
                   type={showPassword ? "text" : "password"}
                   value={localPassword}
                   onChange={(e) => setLocalPassword(e.target.value)}
-                  placeholder="Пароль"
+                  placeholder={UI_STRINGS.LOGIN.PASSWORD_PLACEHOLDER}
                   className="mc-input py-2 pr-12"
                   disabled={isLoading}
                   autoComplete="current-password"
@@ -184,10 +186,10 @@ export function LoginScreen() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
-                  Авторизация...
+                  {UI_STRINGS.LOGIN.AUTHORIZING}
                 </>
               ) : (
-                "Вход"
+                UI_STRINGS.LOGIN.SUBMIT_BUTTON
               )}
             </button>
 
@@ -213,7 +215,7 @@ export function LoginScreen() {
                   </svg>
                 </div>
                 <span className="font-minecraft text-[10px] text-gray-400">
-                  Оффлайн режим
+                  {UI_STRINGS.LOGIN.OFFLINE_MODE}
                 </span>
               </label>
             </div>
@@ -225,14 +227,14 @@ export function LoginScreen() {
                 className="font-minecraft text-[11px] text-gray-400 transition-colors hover:text-cyan-400 hover:underline"
                 onClick={(e) => e.preventDefault()}
               >
-                Забыли пароль?
+                {UI_STRINGS.LOGIN.FORGOT_PASSWORD}
               </a>
               <a
                 href="#"
                 className="font-minecraft text-[11px] text-cyan-400 transition-colors hover:text-cyan-300 hover:underline"
                 onClick={(e) => e.preventDefault()}
               >
-                Создать аккаунт
+                {UI_STRINGS.LOGIN.CREATE_ACCOUNT}
               </a>
             </div>
           </form>
@@ -240,7 +242,7 @@ export function LoginScreen() {
 
         {/* Footer */}
         <div className="mt-4 text-center font-minecraft text-[10px] text-gray-600">
-          Gerbarium Launcher v2.0
+          {UI_STRINGS.LOGIN.FOOTER_TEXT}
         </div>
       </div>
     </div>

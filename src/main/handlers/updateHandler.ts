@@ -1,6 +1,10 @@
-import { ipcMain, BrowserWindow, App } from "electron";
-import { autoUpdater } from "electron-updater";
-import { IPC_CHANNELS } from "@shared/constants/ipc-chanels";
+import { ipcMain, BrowserWindow, App } from 'electron';
+import { autoUpdater } from 'electron-updater';
+import log from 'electron-log';
+import { IPC_CHANNELS } from '@shared/constants/ipc-chanels';
+import { LOG_MESSAGES, UI_MESSAGES } from '@shared/constants/log-messages';
+import { ENVIRONMENTS, PLATFORMS, FILENAMES, TIMEOUTS } from '@shared/constants/system';
+import path from 'path';
 
 export default function updateHandler(app: App) {
   let mainWindow: BrowserWindow | null = null;
@@ -9,58 +13,46 @@ export default function updateHandler(app: App) {
     return mainWindow || BrowserWindow.getAllWindows()[0] || null;
   };
 
-  // Initialize auto updater
   ipcMain.on(IPC_CHANNELS.UPDATE.INIT, () => {
     mainWindow = getMainWindow();
 
-    // Don't check for updates in dev mode
-    if (process.env.NODE_ENV === "development") {
+    if (process.env.NODE_ENV === ENVIRONMENTS.DEVELOPMENT) {
       autoUpdater.autoInstallOnAppQuit = false;
-      autoUpdater.updateConfigPath = require("path").join(
-        __dirname,
-        "..",
-        "..",
-        "dev-app-update.yml"
+      autoUpdater.updateConfigPath = path.join(
+        __dirname, '..', '..', FILENAMES.DEV_APP_UPDATE
       );
     }
 
-    // Disable auto download on macOS
-    if (process.platform === "darwin") {
+    if (process.platform === PLATFORMS.MACOS) {
       autoUpdater.autoDownload = false;
     }
 
-    // Setup event listeners
-    autoUpdater.on("checking-for-update", () => {
-      if (mainWindow) {
-        mainWindow.webContents.send(
-          IPC_CHANNELS.UPDATE.MESSAGE,
-          "Поиск обновлений..."
-        );
+    autoUpdater.on('checking-for-update', () => {
+      log.info(LOG_MESSAGES.UPDATE_CHECKING);
+      const win = getMainWindow();
+      if (win) win.webContents.send(IPC_CHANNELS.UPDATE.MESSAGE, UI_MESSAGES.UPDATE_SEARCHING);
+    });
+
+    autoUpdater.on('update-available', (info) => {
+      log.info(LOG_MESSAGES.UPDATE_AVAILABLE, info.version);
+      const win = getMainWindow();
+      if (win) {
+        win.webContents.send(IPC_CHANNELS.UPDATE.MESSAGE, UI_MESSAGES.UPDATE_FOUND);
+        win.webContents.send(IPC_CHANNELS.UPDATE.INFO, info);
       }
     });
 
-    autoUpdater.on("update-available", (info) => {
-      if (mainWindow) {
-        mainWindow.webContents.send(
-          IPC_CHANNELS.UPDATE.MESSAGE,
-          "Найдено новое обновление"
-        );
-        mainWindow.webContents.send(IPC_CHANNELS.UPDATE.INFO, info);
-      }
+    autoUpdater.on('update-not-available', () => {
+      log.info(LOG_MESSAGES.UPDATE_NOT_AVAILABLE);
+      const win = getMainWindow();
+      if (win) win.webContents.send(IPC_CHANNELS.UPDATE.MESSAGE, UI_MESSAGES.UPDATE_NONE);
     });
 
-    autoUpdater.on("update-not-available", () => {
-      if (mainWindow) {
-        mainWindow.webContents.send(
-          IPC_CHANNELS.UPDATE.MESSAGE,
-          "update-not-available"
-        );
-      }
-    });
-
-    autoUpdater.on("download-progress", (progressObj) => {
-      if (mainWindow) {
-        mainWindow.webContents.send(IPC_CHANNELS.UPDATE.PROGRESS, {
+    autoUpdater.on('download-progress', (progressObj) => {
+      log.info(LOG_MESSAGES.UPDATE_DOWNLOAD_PROGRESS, Math.round(progressObj.percent) + '%');
+      const win = getMainWindow();
+      if (win) {
+        win.webContents.send(IPC_CHANNELS.UPDATE.PROGRESS, {
           percent: progressObj.percent,
           transferred: progressObj.transferred,
           total: progressObj.total,
@@ -69,56 +61,56 @@ export default function updateHandler(app: App) {
       }
     });
 
-    autoUpdater.on("update-downloaded", () => {
-      if (mainWindow) {
-        mainWindow.webContents.send(
-          IPC_CHANNELS.UPDATE.MESSAGE,
-          "Обновление скачано. Перезагрузка..."
-        );
-        // Auto install after 3 seconds
-        setTimeout(() => {
-          autoUpdater.quitAndInstall();
-        }, 3000);
+    autoUpdater.on('update-downloaded', () => {
+      log.info(LOG_MESSAGES.UPDATE_DOWNLOADED);
+      const win = getMainWindow();
+      if (win) {
+        win.webContents.send(IPC_CHANNELS.UPDATE.MESSAGE, UI_MESSAGES.UPDATE_DOWNLOADED);
+        setTimeout(() => autoUpdater.quitAndInstall(), TIMEOUTS.UPDATE_RESTART);
       }
     });
 
-    autoUpdater.on("error", (err) => {
-      if (mainWindow) {
-        mainWindow.webContents.send(
+    autoUpdater.on('error', (err) => {
+      log.error(LOG_MESSAGES.UPDATE_ERROR, err.message);
+      const win = getMainWindow();
+      if (win) {
+        win.webContents.send(
           IPC_CHANNELS.UPDATE.MESSAGE,
-          `Ошибка: ${err.message}`
+          `${UI_MESSAGES.UPDATE_ERROR_PREFIX} ${err.message}`
         );
       }
     });
   });
 
-  // Start update check
   ipcMain.on(IPC_CHANNELS.UPDATE.START_CHECK, () => {
+    log.info(LOG_MESSAGES.UPDATE_MANUAL_CHECK_STARTED);
     autoUpdater.checkForUpdates().catch((err) => {
-      if (mainWindow) {
-        mainWindow.webContents.send(
+      log.error(LOG_MESSAGES.UPDATE_MANUAL_CHECK_FAILED, err.message);
+      const win = getMainWindow();
+      if (win) {
+        win.webContents.send(
           IPC_CHANNELS.UPDATE.MESSAGE,
-          `Ошибка: ${err.message}`
+          `${UI_MESSAGES.UPDATE_ERROR_PREFIX} ${err.message}`
         );
       }
     });
   });
 
-  // Download update
   ipcMain.handle(IPC_CHANNELS.UPDATE.DOWNLOAD, async () => {
+    log.info(LOG_MESSAGES.UPDATE_DOWNLOADING);
     try {
       await autoUpdater.downloadUpdate();
+      log.info(LOG_MESSAGES.UPDATE_DOWNLOAD_COMPLETE);
       return { success: true };
     } catch (err) {
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : "Failed to download update",
-      };
+      const errorMsg = err instanceof Error ? err.message : LOG_MESSAGES.UPDATE_DOWNLOAD_FAILED;
+      log.error(LOG_MESSAGES.UPDATE_DOWNLOAD_FAILED, errorMsg);
+      return { success: false, error: errorMsg };
     }
   });
 
-  // Install update and restart
   ipcMain.on(IPC_CHANNELS.UPDATE.INSTALL_AND_RESTART, () => {
+    log.info(LOG_MESSAGES.UPDATE_INSTALLING);
     autoUpdater.quitAndInstall();
   });
 }
