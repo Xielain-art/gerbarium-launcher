@@ -70,13 +70,18 @@ export interface IElectronAPI {
     ) => () => void;
   };
 
-  // System info
-  system: {
-    getMemory: () => Promise<{ total: number; free: number }>;
-    getCpus: () => Promise<number>;
-    logAction: (action: string, details?: string) => Promise<void>;
-  };
-}
+   // System info
+   system: {
+     getMemory: () => Promise<{ total: number; free: number }>;
+     getCpus: () => Promise<number>;
+     logAction: (action: string, details?: string) => Promise<void>;
+   };
+
+   // Logs export and report
+   logs: {
+     exportAndReport: () => Promise<{ success: boolean; path?: string; error?: string }>;
+   };
+ }
 
 declare global {
   interface Window {

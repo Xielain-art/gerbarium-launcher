@@ -4,7 +4,7 @@ import { useSettingsStore } from "../stores/useSettingsStore";
 import { DownloadStatus } from "../../../shared/constants/ipc-chanels";
 
 const logAction = (action: string, details?: string) => {
-  window.logAction?.(action, details);
+  window.electronAPI?.system.logAction(action, details);
 };
 
 export function useJava() {
@@ -30,34 +30,45 @@ export function useJava() {
     };
   }, [setJavaProgress]);
 
-  const checkJava = useCallback(
-    async (javaPath: string) => {
-      setIsJavaLoading(true);
-      setJavaError(null);
-      try {
-        return await window.electronAPI.java.checkVersion(javaPath);
-      } catch (err) {
-        setJavaError((err as Error).message);
-        return null;
-      } finally {
-        setIsJavaLoading(false);
-      }
-    },
-    [setJavaError, setIsJavaLoading],
-  );
+   const checkJava = useCallback(
+     async (javaPath: string) => {
+       setIsJavaLoading(true);
+       setJavaError(null);
+       logAction('CHECK_JAVA', javaPath);
+       try {
+         const version = await window.electronAPI.java.checkVersion(javaPath);
+         if (version) logAction('CHECK_JAVA_SUCCESS', `Version: ${version}`);
+         return version;
+       } catch (err) {
+         const errMsg = (err as Error).message;
+         setJavaError(errMsg);
+         logAction('CHECK_JAVA_ERROR', errMsg);
+         return null;
+       } finally {
+         setIsJavaLoading(false);
+       }
+     },
+     [setJavaError, setIsJavaLoading],
+   );
 
-  const findJava = useCallback(async () => {
-    setIsJavaLoading(true);
-    setJavaError(null);
-    try {
-      return await window.electronAPI.java.findSystemJava();
-    } catch (err) {
-      setJavaError((err as Error).message);
-      return null;
-    } finally {
-      setIsJavaLoading(false);
-    }
-  }, [setJavaError, setIsJavaLoading]);
+   const findJava = useCallback(async () => {
+     setIsJavaLoading(true);
+     setJavaError(null);
+     logAction('FIND_JAVA_START', 'Searching for system Java');
+     try {
+       const javaPath = await window.electronAPI.java.findSystemJava();
+       if (javaPath) logAction('FIND_JAVA_SUCCESS', javaPath);
+       else logAction('FIND_JAVA_NOT_FOUND', 'No system Java found');
+       return javaPath;
+     } catch (err) {
+       const errMsg = (err as Error).message;
+       setJavaError(errMsg);
+       logAction('FIND_JAVA_ERROR', errMsg);
+       return null;
+     } finally {
+       setIsJavaLoading(false);
+     }
+   }, [setJavaError, setIsJavaLoading]);
 
   const downloadJava = useCallback(
     async (javaVersion: number) => {
@@ -85,23 +96,33 @@ export function useJava() {
     [setIsDownloadingJava, setJavaProgress, setJavaError],
   );
 
-  const getInstalledJava = useCallback(async () => {
-    try {
-      return await window.electronAPI.java.getInstalledJava();
-    } catch (err) {
-      console.error("Error getting installed Java:", err);
-      return [];
-    }
-  }, []);
+   const getInstalledJava = useCallback(async () => {
+     logAction('GET_INSTALLED_JAVA_START', 'Fetching installed Java list');
+     try {
+       const list = await window.electronAPI.java.getInstalledJava();
+       logAction('GET_INSTALLED_JAVA_SUCCESS', `Found ${list.length} installations`);
+       return list;
+     } catch (err) {
+       const errMsg = (err as Error).message;
+       logAction('GET_INSTALLED_JAVA_ERROR', errMsg);
+       console.error("Error getting installed Java:", err);
+       return [];
+     }
+   }, []);
 
-  const getJavaVersions = useCallback(async () => {
-    try {
-      return await window.electronAPI.java.getJavaVersions();
-    } catch (err) {
-      console.error("Error getting Java versions:", err);
-      return [];
-    }
-  }, []);
+   const getJavaVersions = useCallback(async () => {
+     logAction('GET_JAVA_VERSIONS_START', 'Fetching available Java versions');
+     try {
+       const versions = await window.electronAPI.java.getJavaVersions();
+       logAction('GET_JAVA_VERSIONS_SUCCESS', `Available: ${versions.join(', ')}`);
+       return versions;
+     } catch (err) {
+       const errMsg = (err as Error).message;
+       logAction('GET_JAVA_VERSIONS_ERROR', errMsg);
+       console.error("Error getting Java versions:", err);
+       return [];
+     }
+   }, []);
 
   const removeJava = useCallback(async (javaVersion: number) => {
     logAction('REMOVE_JAVA_START', `Java ${javaVersion}`);

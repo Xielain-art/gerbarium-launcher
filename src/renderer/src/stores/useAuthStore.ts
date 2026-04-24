@@ -6,7 +6,7 @@ const AUTH_TOKEN_KEY = 'auth_token';
 
 // Auto-log helper
 const logAction = (action: string, details?: string) => {
-  window.logAction?.(action, details);
+  window.electronAPI?.system.logAction(action, details);
 };
 
 interface AuthState {
@@ -47,30 +47,33 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
   clearError: () => set({ error: null }),
 
-  loadToken: async () => {
-    try {
-      const result = await window.electronAPI.secureStorage.get(AUTH_TOKEN_KEY);
-      if (result.success && result.value) {
-        // Also load user data from localStorage (non-sensitive)
-        const stored = localStorage.getItem('gerbarium-auth-user');
-        let user: AuthUser | null = null;
-        if (stored) {
-          try {
-            user = JSON.parse(stored);
-          } catch {
-            // Invalid user data
-          }
-        }
-        set({ 
-          token: result.value, 
-          isAuthenticated: true,
-          user 
-        });
-      }
-    } catch (err) {
-      console.error('Failed to load auth token:', err);
-    }
-  },
+   loadToken: async () => {
+     try {
+       const result = await window.electronAPI.secureStorage.get(AUTH_TOKEN_KEY);
+       if (result.success && result.value) {
+         // Also load user data from localStorage (non-sensitive)
+         const stored = localStorage.getItem('gerbarium-auth-user');
+         let user: AuthUser | null = null;
+         if (stored) {
+           try {
+             user = JSON.parse(stored);
+           } catch {
+             // Invalid user data
+           }
+         }
+         set({ 
+           token: result.value, 
+           isAuthenticated: true,
+           user 
+         });
+         logAction('TOKEN_LOADED', user ? `User: ${user.username}` : 'Token only');
+       }
+     } catch (err) {
+       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+       logAction('TOKEN_LOAD_ERROR', errorMsg);
+       console.error('Failed to load auth token:', err);
+     }
+   },
 
   logout: async () => {
     logAction('LOGOUT', 'User logged out');
@@ -87,10 +90,11 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      if (!credentials.login.trim() || !credentials.password.trim()) {
-        set({ isLoading: false, error: 'Введите логин и пароль' });
-        return { success: false, error: 'Введите логин и пароль' };
-      }
+       if (!credentials.login.trim() || !credentials.password.trim()) {
+         logAction('LOGIN_VALIDATION_ERROR', 'Empty login or password');
+         set({ isLoading: false, error: 'Введите логин и пароль' });
+         return { success: false, error: 'Введите логин и пароль' };
+       }
 
       const mockUser: AuthUser = {
         id: 'user_' + Date.now(),

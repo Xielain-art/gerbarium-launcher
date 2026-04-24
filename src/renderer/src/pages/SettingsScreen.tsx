@@ -92,9 +92,10 @@ const {
   };
 
   // Local state
-  const [activeTab, setActiveTab] = useState<SettingsTab>("general");
-  const [showConfirmReset, setShowConfirmReset] = useState(false);
-  const [shouldLogout, setShouldLogout] = useState(false);
+   const [activeTab, setActiveTab] = useState<SettingsTab>("general");
+   const [showConfirmReset, setShowConfirmReset] = useState(false);
+   const [shouldLogout, setShouldLogout] = useState(false);
+   const [isExporting, setIsExporting] = useState(false);
 
   // Handle logout redirect
   useEffect(() => {
@@ -129,12 +130,34 @@ const {
     navigate({ to: "/dashboard" });
   };
 
-  const handleLogout = () => {
-    setShouldLogout(true);
-    logout();
-    // Force clear localStorage
-    localStorage.removeItem("gerbarium-auth-storage");
-  };
+   const handleLogout = () => {
+     setShouldLogout(true);
+     logout();
+     // Force clear localStorage
+     localStorage.removeItem("gerbarium-auth-storage");
+   };
+
+   const handleExportLogs = async () => {
+     setIsExporting(true);
+     window.electronAPI.system.logAction('LOGS_EXPORT_STARTED', 'User requested log export');
+     
+     try {
+       const result = await window.electronAPI.logs.exportAndReport();
+       
+       if (result.success) {
+          window.electronAPI.system.logAction('LOGS_EXPORT_SUCCESS', `Saved to: ${result.path}`);
+          alert(`Логи успешно сохранены в:\n${result.path}\n\nОткроется браузер для создания Issue.`);
+       } else {
+          window.electronAPI.system.logAction('LOGS_EXPORT_FAILED', result.error || 'Unknown error');
+          alert(`Ошибка при сохранении логов:\n${result.error}`);
+       }
+     } catch (e) {
+       console.error(e);
+       alert('Произошла непредвиденная ошибка при экспорте логов.');
+     } finally {
+       setIsExporting(false);
+     }
+   };
 
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden bg-[#1a1a1a]">
@@ -536,22 +559,39 @@ const {
             )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="mx-auto mt-6 flex max-w-2xl gap-4">
-            <button
-              onClick={handleSave}
-              disabled={isLoading}
-              className="flex-1 rounded border-[3px] border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a] bg-gradient-to-br from-[#3a753a] to-[#2d5a2d] px-6 py-4 font-minecraft text-lg font-bold text-white shadow-[inset_2px_2px_0px_#4a9a4a,inset_-2px_-2px_0px_#2a5a2a] transition-all duration-75 hover:from-[#4a8a4a] hover:to-[#3d6a3d] active:border-t-[#2a5a2a] active:border-l-[#2a5a2a] active:border-b-[#4a9a4a] active:border-r-[#4a9a4a] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isLoading ? "Сохранение..." : "Сохранить"}
-            </button>
-            <button
-              onClick={handleReset}
-              className="flex-1 rounded border-[3px] border-t-[#7a5a5a] border-l-[#7a5a5a] border-b-[#3a1a1a] border-r-[#3a1a1a] bg-gradient-to-br from-[#8b2a2a] to-[#5a1a1a] px-6 py-4 font-minecraft text-lg font-bold text-white shadow-[inset_2px_2px_0px_#aa3a3a,inset_-2px_-2px_0px_#5a1a1a] transition-all duration-75 hover:from-[#9a3a3a] hover:to-[#6a2a2a] active:border-t-[#3a1a1a] active:border-l-[#3a1a1a] active:border-b-[#7a5a5a] active:border-r-[#7a5a5a]"
-            >
-              Сбросить
-            </button>
-          </div>
+           {/* Action Buttons */}
+           <div className="mx-auto mt-6 flex max-w-2xl gap-4">
+             <button
+               onClick={handleSave}
+               disabled={isLoading}
+               className="flex-1 rounded border-[3px] border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a] bg-gradient-to-br from-[#3a753a] to-[#2d5a2d] px-6 py-4 font-minecraft text-lg font-bold text-white shadow-[inset_2px_2px_0px_#4a9a4a,inset_-2px_-2px_0px_#2a5a2a] transition-all duration-75 hover:from-[#4a8a4a] hover:to-[#3d6a3d] active:border-t-[#2a5a2a] active:border-l-[#2a5a2a] active:border-b-[#4a9a4a] active:border-r-[#4a9a4a] disabled:cursor-not-allowed disabled:opacity-50"
+             >
+               {isLoading ? "Сохранение..." : "Сохранить"}
+             </button>
+             <button
+               onClick={handleReset}
+               className="flex-1 rounded border-[3px] border-t-[#7a5a5a] border-l-[#7a5a5a] border-b-[#3a1a1a] border-r-[#3a1a1a] bg-gradient-to-br from-[#8b2a2a] to-[#5a1a1a] px-6 py-4 font-minecraft text-lg font-bold text-white shadow-[inset_2px_2px_0px_#aa3a3a,inset_-2px_-2px_0px_#5a1a1a] transition-all duration-75 hover:from-[#9a3a3a] hover:to-[#6a2a2a] active:border-t-[#3a1a1a] active:border-l-[#3a1a1a] active:border-b-[#7a5a5a] active:border-r-[#7a5a5a]"
+             >
+               Сбросить
+             </button>
+           </div>
+
+           {/* Debug & Support Section */}
+           <div className="mx-auto mt-8 max-w-2xl rounded border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] bg-[#252525] p-4 shadow-[inset_2px_2px_0px_#5a5a5a,inset_-2px_-2px_0px_#1a1a1a]">
+             <h2 className="mb-2 font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
+               Отладка и Поддержка
+             </h2>
+             <p className="mb-4 font-minecraft text-sm text-[#6a6a6a]">
+               Если вы столкнулись с проблемой, выгрузите логи и прикрепите их к баг-репорту на GitHub.
+             </p>
+             <button
+               onClick={handleExportLogs}
+               disabled={isExporting}
+               className="w-full rounded border-[3px] border-t-[#8b2a2a] border-l-[#8b2a2a] border-b-[#5a1a1a] border-r-[#5a1a1a] bg-[#6b2222] px-4 py-3 font-minecraft text-sm font-bold text-white shadow-[inset_2px_2px_0px_#8b2a2a,inset_-2px_-2px_0px_#5a1a1a] transition-all duration-75 hover:bg-[#8b2a2a] active:border-t-[#5a1a1a] active:border-l-[#5a1a1a] active:border-b-[#8b2a2a] active:border-r-[#8b2a2a] disabled:cursor-not-allowed disabled:opacity-50"
+             >
+               {isExporting ? 'Архивация...' : 'Сообщить об ошибке (Экспорт логов)'}
+             </button>
+           </div>
         </div>
       </main>
 

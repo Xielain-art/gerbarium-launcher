@@ -17,6 +17,8 @@ const systemHandler = require("./dist/main/handlers/systemHandler").default;
 // Setup log
 log.transports.file.level = "info";
 log.transports.console.level = "debug";
+log.transports.file.fileName = 'log-%DATE%.log';
+log.transports.file.resolvePathFn = () => path.join(app.getPath('userData'), 'logs', log.transports.file.fileName);
 
 // Global error handlers
 process.on("uncaughtException", (error) => {
@@ -188,7 +190,7 @@ app.on("ready", () => {
    updateHandler(app);
    javaHandler(app);
    systemHandler(app);
-   setupLogHandler();
+   setupLogHandler(app);
 });
 
 app.on("window-all-closed", () => {
