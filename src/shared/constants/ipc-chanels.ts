@@ -158,7 +158,7 @@ export interface IpcChannelMap {
    };
    [IPC_CHANNELS.LOG.EXPORT_AND_REPORT]: {
      args: [];
-     return: { success: boolean; path?: string };
+     return: { success: boolean; path?: string; error?: string };
    };
  }
 

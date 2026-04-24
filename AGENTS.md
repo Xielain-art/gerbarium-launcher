@@ -24,7 +24,7 @@ Strict adherence to architectural boundaries, type safety, and project-specific 
 ## 🏗 Core Development Standards
 
 ### 1. Inter-Process Communication (Strict IPC) - CRITICAL
-- **NO "Magic Strings":** Never use hardcoded strings for IPC events (e.g., `ipcMain.handle('my-event')`).
+- **NO "Magic Strings":** Never use hardcoded strings for IPC events and LOGS AND ERRORS (e.g., `ipcMain.handle('my-event')`).
 - **Channel Registry:** ALL events must be added to the `IPC_CHANNELS` constant and strongly typed within the `IpcChannelMap` interface inside `src/shared/constants/ipc-chanels.ts`. Update both simultaneously.
 - **Preload Isolation:** In `src/preload/preload.ts`, only invoke methods defined in `IpcChannelMap` using the `typedInvoke` wrapper.
 - **Renderer API:** All renderer APIs must be exposed via `window.electronAPI`. Do not attach random methods to the global `window` object.

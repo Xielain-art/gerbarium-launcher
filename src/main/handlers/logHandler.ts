@@ -1,10 +1,11 @@
-import { ipcMain, app, shell, dialog } from 'electron';
+import { ipcMain, shell, dialog } from 'electron';
 import archiver from 'archiver';
 import path from 'path';
 import fs from 'fs-extra';
+import log from 'electron-log';
 import { IPC_CHANNELS } from '../../shared/constants/ipc-chanels';
 
-export default function setupLogHandler() {
+export default function setupLogHandler(app: Electron.App) {
     ipcMain.handle(IPC_CHANNELS.LOG.EXPORT_AND_REPORT, async () => {
         try {
             const logsPath = path.join(app.getPath('userData'), 'logs');
@@ -51,8 +52,17 @@ export default function setupLogHandler() {
             return { success: true, path: filePath };
         } catch (e) {
             const error = e as Error;
-            console.error("Failed to export logs", error);
+            log.error("Failed to export logs", error);
             return { success: false, error: error.message };
         }
+    });
+
+    // Обработчик пользовательских действий (LOG_ACTION)
+    ipcMain.handle(IPC_CHANNELS.SYSTEM.LOG_ACTION, (_, action: string, details?: string) => {
+        log.info("[USER ACTION]", action, details);
+        const logPath = path.join(app.getPath("userData"), "user-actions.log");
+        const timestamp = new Date().toISOString();
+        const entry = `[${timestamp}] [${action}] ${details || ""}\n`;
+        fs.appendFileSync(logPath, entry);
     });
 }
