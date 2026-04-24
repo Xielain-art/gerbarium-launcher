@@ -10,6 +10,8 @@ import { pipeline } from "stream/promises";
 import { app } from "electron";
 import { DownloadStatus } from "../../shared/constants/ipc-chanels";
 import { getJavaDownloadUrl, type JavaVersion } from "../config/javaConfig";
+import { ERROR_CODES } from "../../shared/constants/errors";
+import log from "electron-log";
 
 const execPromise = util.promisify(exec);
 
@@ -110,20 +112,20 @@ export async function getInstalledJavaList(): Promise<InstalledJava[]> {
 }
 
 export async function removeInstalledJava(
-  javaVersion: JavaVersion,
+   javaVersion: JavaVersion,
 ): Promise<boolean> {
-  const targetDir = path.join(app.getPath("userData"), "java", `jre${javaVersion}`);
-  try {
-    if (await fs.pathExists(targetDir)) {
-      await fs.remove(targetDir);
-      return true;
-    }
-    return false;
-  } catch (error) {
-    console.error("Failed to remove Java:", error);
-    return false;
-  }
-}
+   const targetDir = path.join(app.getPath("userData"), "java", `jre${javaVersion}`);
+   try {
+     if (await fs.pathExists(targetDir)) {
+       await fs.remove(targetDir);
+       return true;
+     }
+     return false;
+   } catch (error) {
+     log.error("Failed to remove Java:", error);
+     return false;
+   }
+ }
 
 export async function downloadAndExtractJRE(
   javaVersion: JavaVersion,
@@ -140,7 +142,7 @@ export async function downloadAndExtractJRE(
   await fs.ensureDir(targetDir);
 
   try {
-    console.log(`Starting download Java ${javaVersion} from:`, url);
+     log.info(`Starting download Java ${javaVersion} from:`, url);
     const response = got.stream(url, { timeout: { socket: 15000 } });
     const fileWriter = fs.createWriteStream(archivePath);
 
@@ -179,11 +181,11 @@ export async function downloadAndExtractJRE(
     await fs.remove(archivePath);
 
     onProgress({ status: "VERIFYING" });
-    const files = await fs.readdir(targetDir);
-    const jreFolder = files.find((f) =>
-      fs.statSync(path.join(targetDir, f)).isDirectory(),
-    );
-    if (!jreFolder) throw new Error("JRE folder not found");
+     const files = await fs.readdir(targetDir);
+     const jreFolder = files.find((f) =>
+       fs.statSync(path.join(targetDir, f)).isDirectory(),
+     );
+     if (!jreFolder) throw new Error(ERROR_CODES.JAVA_FOLDER_NOT_FOUND);
 
     const javaBinaryPath = path.join(
       targetDir,
@@ -192,11 +194,11 @@ export async function downloadAndExtractJRE(
       process.platform === "win32" ? "java.exe" : "java",
     );
 
-    const version = await checkJavaVersion(javaBinaryPath);
-    if (!version) {
-      await fs.remove(path.join(targetDir, jreFolder));
-      throw new Error("Downloaded Java is corrupted or unsupported");
-    }
+     const version = await checkJavaVersion(javaBinaryPath);
+     if (!version) {
+       await fs.remove(path.join(targetDir, jreFolder));
+       throw new Error(ERROR_CODES.JAVA_CORRUPTED);
+     }
 
     if (process.platform !== "win32") await fs.chmod(javaBinaryPath, 0o755);
 

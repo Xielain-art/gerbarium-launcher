@@ -5,6 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const LangLoader = require("./_legacy_app/assets/js/langloader");
 const log = require("electron-log");
+const setupLogHandler = require("./dist/main/handlers/logHandler").default;
 
 const helloHandler = require("./dist/main/handlers/helloHandler").default;
 const windowControlsHandler = require("./dist/main/handlers/windowControlsHandler").default;
@@ -180,13 +181,14 @@ function getPlatformIcon(filename) {
 }
 
 app.on("ready", () => {
-  createWindow();
-  helloHandler(app);
-  windowControlsHandler(app);
-  secureStorageHandler(app);
-  updateHandler(app);
-  javaHandler(app);
-  systemHandler(app);
+   createWindow();
+   helloHandler(app);
+   windowControlsHandler(app);
+   secureStorageHandler(app);
+   updateHandler(app);
+   javaHandler(app);
+   systemHandler(app);
+   setupLogHandler();
 });
 
 app.on("window-all-closed", () => {

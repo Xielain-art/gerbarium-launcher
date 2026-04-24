@@ -8,6 +8,7 @@ import {
 } from "./javaHandler";
 import { IPC_CHANNELS } from "../../shared/constants/ipc-chanels";
 import { JAVA_VERSIONS } from "../config/javaConfig";
+import log from "electron-log";
 
 const downloadLocks: Map<number, boolean> = new Map();
 
@@ -70,10 +71,10 @@ export default function javaHandler() {
             event.sender.send(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, update);
           },
         );
-        console.log("Download complete, path:", javaPath);
+         log.info("Download complete, path:", javaPath);
         return { success: true, javaPath };
       } catch (error) {
-        console.error("Download failed:", error);
+         log.error("Download failed:", error);
         return { success: false, error: (error as Error).message };
       } finally {
         downloadLocks.delete(version);
