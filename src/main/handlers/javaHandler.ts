@@ -31,6 +31,17 @@ export async function checkJavaVersion(
 }
 
 export async function findJavaInSystem(): Promise<string | null> {
+  if (process.env.JAVA_HOME) {
+    const javaPath = path.join(
+      process.env.JAVA_HOME,
+      "bin",
+      process.platform === "win32" ? "java.exe" : "java",
+    );
+    if (await fs.pathExists(javaPath)) {
+      return javaPath;
+    }
+  }
+
   try {
     const cmd = process.platform === "win32" ? "where java" : "which java";
     const { stdout } = await execPromise(cmd);
@@ -39,6 +50,62 @@ export async function findJavaInSystem(): Promise<string | null> {
   } catch (error) {
     return null;
   }
+}
+
+export interface InstalledJava {
+  version: JavaVersion;
+  path: string;
+  detectedVersion: string;
+}
+
+export async function getInstalledJavaList(): Promise<InstalledJava[]> {
+  const javaDir = path.join(app.getPath("userData"), "java");
+  if (!await fs.pathExists(javaDir)) return [];
+
+  const installed: InstalledJava[] = [];
+  const entries = await fs.readdir(javaDir);
+
+  for (const entry of entries) {
+    const entryPath = path.join(javaDir, entry);
+    const stat = await fs.stat(entryPath);
+    if (!stat.isDirectory()) continue;
+
+    const versionMatch = entry.match(/^jre(\d+)$/);
+    if (!versionMatch) continue;
+
+    const javaVersion = parseInt(versionMatch[1], 10) as JavaVersion;
+    if (![8, 17, 21].includes(javaVersion)) continue;
+
+    let finalPath: string | null = null;
+    const jdkFolders = await fs.readdir(entryPath).catch(() => []);
+
+    for (const jdkFolder of jdkFolders) {
+      const jdkPath = path.join(entryPath, jdkFolder);
+      const jdkStat = await fs.stat(jdkPath);
+      if (!jdkStat.isDirectory()) continue;
+
+      const binPath = path.join(jdkPath, "bin");
+      const potentialJava = path.join(binPath, process.platform === "win32" ? "java.exe" : "java");
+      
+      if (await fs.pathExists(potentialJava)) {
+        finalPath = potentialJava;
+        break;
+      }
+    }
+
+    if (finalPath && await fs.pathExists(finalPath)) {
+      const detectedVersion = await checkJavaVersion(finalPath);
+      if (detectedVersion) {
+        installed.push({
+          version: javaVersion,
+          path: finalPath,
+          detectedVersion,
+        });
+      }
+    }
+  }
+
+  return installed.sort((a, b) => a.version - b.version);
 }
 
 export async function downloadAndExtractJRE(
@@ -85,12 +152,42 @@ export async function downloadAndExtractJRE(
     if (url.endsWith(".zip")) {
       await extract(archivePath, { dir: targetDir });
     } else {
-      await new Promise((resolve, reject) => {
-        fs.createReadStream(archivePath)
-          .pipe(zlib.createGunzip())
-          .pipe(tar.extract(targetDir))
-          .on("finish", resolve)
-          .on("error", reject);
+      await new Promise<void>((resolve, reject) => {
+        const readStream = fs.createReadStream(archivePath);
+        const gunzip = zlib.createGunzip();
+        const extractStream = tar.extract(targetDir);
+        
+        let finished = false;
+        let error: Error | null = null;
+        
+        const cleanup = () => {
+          readStream.destroy();
+          gunzip.destroy();
+          extractStream.destroy();
+        };
+        
+        const done = (err?: Error) => {
+          if (finished) return;
+          if (err) {
+            error = err;
+          }
+          finished = true;
+          cleanup();
+          if (error) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        };
+        
+        readStream.on("error", done);
+        gunzip.on("error", done);
+        extractStream.on("error", done);
+        extractStream.on("finish", () => done());
+        
+        readStream
+          .pipe(gunzip)
+          .pipe(extractStream);
       });
     }
     await fs.remove(archivePath);

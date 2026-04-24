@@ -29,6 +29,8 @@ export const IPC_CHANNELS = {
     SELECT_EXECUTABLE: "java:select-executable",
     DOWNLOAD: "java:download",
     DOWNLOAD_PROGRESS: "java:download-progress",
+    GET_INSTALLED: "java:get-installed",
+    GET_VERSIONS: "java:get-versions",
   },
 } as const;
 
@@ -120,6 +122,14 @@ export interface IpcChannelMap {
   [IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS]: {
     args: [percent: number];
     return: void;
+  };
+  [IPC_CHANNELS.JAVA.GET_INSTALLED]: {
+    args: [];
+    return: Array<{ version: number; path: string; detectedVersion: string }>;
+  };
+  [IPC_CHANNELS.JAVA.GET_VERSIONS]: {
+    args: [];
+    return: number[];
   };
 }
 

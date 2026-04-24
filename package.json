@@ -23,7 +23,7 @@
     "dist:linux": "npm run dist -- -l",
     "lint": "eslint .",
     "dev:ui": "vite",
-    "dev:main": "npx esbuild src/main/handlers/helloHandler.ts --bundle --platform=node --outdir=dist/main/handlers --external:electron --watch",
+    "dev:main": "npx esbuild src/main/handlers/*.ts --bundle --platform=node --outdir=dist/main/handlers --external:electron --watch",
     "dev:preload": "npx esbuild src/preload/preload.ts --bundle --platform=node --outfile=dist/preload/preload.js --external:electron --watch",
     "dev:electron": "wait-on http://localhost:5173 && electron .",
     "dev": "concurrently -n \"UI,MAIN,PRELOAD,APP\" -c \"bgBlue,bgGreen,bgMagenta,bgCyan\" \"npm run dev:ui\" \"npm run dev:main\" \"npm run dev:preload\" \"npm run dev:electron\"",

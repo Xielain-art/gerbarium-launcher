@@ -77,10 +77,30 @@ export function useJava() {
     [setIsDownloadingJava, setJavaProgress, setJavaError],
   );
 
+  const getInstalledJava = useCallback(async () => {
+    try {
+      return await window.electronAPI.java.getInstalledJava();
+    } catch (err) {
+      console.error("Error getting installed Java:", err);
+      return [];
+    }
+  }, []);
+
+  const getJavaVersions = useCallback(async () => {
+    try {
+      return await window.electronAPI.java.getJavaVersions();
+    } catch (err) {
+      console.error("Error getting Java versions:", err);
+      return [8, 17, 21];
+    }
+  }, []);
+
   return {
     checkJava,
     findJava,
     downloadJava,
+    getInstalledJava,
+    getJavaVersions,
     loading: isJavaLoading,
     error: javaError,
     status,

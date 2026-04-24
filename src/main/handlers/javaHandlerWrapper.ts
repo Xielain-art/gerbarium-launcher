@@ -3,8 +3,10 @@ import {
   checkJavaVersion,
   findJavaInSystem,
   downloadAndExtractJRE,
+  getInstalledJavaList,
 } from "./javaHandler";
 import { IPC_CHANNELS } from "../../shared/constants/ipc-chanels";
+import { JAVA_VERSIONS } from "../config/javaConfig";
 
 export default function javaHandler() {
   ipcMain.handle(
@@ -16,6 +18,14 @@ export default function javaHandler() {
 
   ipcMain.handle(IPC_CHANNELS.JAVA.FIND_SYSTEM, async () => {
     return await findJavaInSystem();
+  });
+
+  ipcMain.handle(IPC_CHANNELS.JAVA.GET_INSTALLED, async () => {
+    return await getInstalledJavaList();
+  });
+
+  ipcMain.handle(IPC_CHANNELS.JAVA.GET_VERSIONS, async () => {
+    return JAVA_VERSIONS;
   });
 
   ipcMain.handle(IPC_CHANNELS.JAVA.SELECT_EXECUTABLE, async () => {

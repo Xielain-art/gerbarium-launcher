@@ -1,5 +1,7 @@
 export type JavaVersion = 8 | 17 | 21;
 
+export const JAVA_VERSIONS: JavaVersion[] = [8, 17, 21];
+
 export interface JavaReleaseConfig {
   baseUrl: string;
   version: string;

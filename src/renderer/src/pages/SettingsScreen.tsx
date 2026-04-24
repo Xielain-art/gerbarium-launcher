@@ -27,10 +27,12 @@ export function SettingsScreen() {
     isDownloadingJava,
   } = useSettingsStore();
   const { logout, isAuthenticated } = useAuthStore();
-  const {
+const {
     checkJava,
     findJava,
     downloadJava,
+    getInstalledJava,
+    getJavaVersions,
     loading: javaLoading,
     error: javaError,
     status: javaStatus,
@@ -40,12 +42,18 @@ export function SettingsScreen() {
   const [downloadJavaVersion, setDownloadJavaVersion] = useState<8 | 17 | 21>(
     17,
   );
+  const [installedJava, setInstalledJava] = useState<Array<{version: number; path: string; detectedVersion: string}>>([]);
+  const [javaVersions, setJavaVersions] = useState<number[]>([8, 17, 21]);
+
+  const isJavaInstalled = (version: number) => installedJava.some(j => j.version === version);
 
   useEffect(() => {
     if (general.javaPath) {
       checkJava(general.javaPath).then(setJavaVersion);
     }
-  }, [general.javaPath, checkJava]);
+    getInstalledJava().then(setInstalledJava);
+    getJavaVersions().then(setJavaVersions);
+  }, [general.javaPath, checkJava, getInstalledJava, getJavaVersions]);
 
   const handleDownloadJava = async () => {
     const path = await downloadJava(downloadJavaVersion);
@@ -285,6 +293,33 @@ export function SettingsScreen() {
                   Настройки Java
                 </h2>
 
+                {/* Installed Java Versions */}
+                {installedJava.length > 0 && (
+                  <div className="space-y-2">
+                    <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
+                      Установленные версии
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {installedJava.map((java) => (
+                        <button
+                          key={java.version}
+                          onClick={() => {
+                            updateGeneral({ javaPath: java.path });
+                            checkJava(java.path).then(setJavaVersion);
+                          }}
+                          className={`rounded border-[3px] px-4 py-2 font-minecraft text-sm transition-colors ${
+                            general.javaPath === java.path
+                              ? "border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a] bg-[#3a753a] text-white"
+                              : "border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] bg-[#2b2d31] text-[#e0e0e0] hover:bg-[#3c3c3c]"
+                          }`}
+                        >
+                          Java {java.version}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Java Path */}
                 <div className="space-y-2">
                   <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
@@ -331,8 +366,8 @@ export function SettingsScreen() {
                       ></div>
                     </div>
                   )}
-                  {!javaVersion && !javaLoading && !isDownloadingJava && (
-                    <div className="mt-2 flex items-center gap-2">
+                  {!javaLoading && !isDownloadingJava && (
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
                       <select
                         value={downloadJavaVersion}
                         onChange={(e) =>
@@ -342,15 +377,16 @@ export function SettingsScreen() {
                         }
                         className="rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-3 py-2 font-minecraft text-sm text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a] focus:outline-none"
                       >
-                        <option value={8}>Java 8</option>
-                        <option value={17}>Java 17</option>
-                        <option value={21}>Java 21</option>
+                        {javaVersions.map((v) => (
+                          <option key={v} value={v}>Java {v}</option>
+                        ))}
                       </select>
                       <button
                         onClick={handleDownloadJava}
-                        className="rounded border-[3px] border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a] bg-[#3a753a] px-4 py-2 font-minecraft text-sm text-white transition-colors hover:bg-[#4a8a4a]"
+                        disabled={isJavaInstalled(downloadJavaVersion)}
+                        className="rounded border-[3px] border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a] bg-[#3a753a] px-4 py-2 font-minecraft text-sm text-white transition-colors hover:bg-[#4a8a4a] disabled:opacity-50 disabled:cursor-not-allowed disabled:border-t-[#5a5a5a] disabled:border-l-[#5a5a5a] disabled:border-b-[#1a1a1a] disabled:border-r-[#1a1a1a] disabled:bg-[#2b2d31]"
                       >
-                        Скачать Java {downloadJavaVersion}
+                        {isJavaInstalled(downloadJavaVersion) ? `Java ${downloadJavaVersion} уже установлена` : `Скачать Java ${downloadJavaVersion}`}
                       </button>
                     </div>
                   )}
