@@ -6,14 +6,17 @@ import log from 'electron-log';
 import { IPC_CHANNELS } from '../../shared/constants/ipc-chanels';
 
 export default function setupLogHandler(app: Electron.App) {
+    // Надежная генерация даты, чтобы не ломался кастомный resolvePathFn
+    const currentDate = new Date().toISOString().split('T')[0];
+    
     // Create SECOND logger instance for user actions
     const userActionsLog = log.create('user-actions');
     userActionsLog.transports.file.level = 'info';
-    userActionsLog.transports.file.fileName = 'user-actions-%DATE%.log';
+    userActionsLog.transports.file.fileName = `user-actions-${currentDate}.log`;
     userActionsLog.transports.file.resolvePathFn = () => 
         path.join(app.getPath('userData'), 'logs', userActionsLog.transports.file.fileName);
 
-    // LOG_ACTION handler - uses EXCLUSIVELY the user-actions logger
+    // LOG_ACTION handler 
     ipcMain.handle(IPC_CHANNELS.SYSTEM.LOG_ACTION, (_, action: string, details?: string) => {
         userActionsLog.info(`[Action: ${action}] ${details || ''}`);
     });

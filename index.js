@@ -15,9 +15,12 @@ const javaHandler = require("./dist/main/handlers/javaHandlerWrapper").default;
 const systemHandler = require("./dist/main/handlers/systemHandler").default;
 
 // Setup log
+const currentDate = new Date().toISOString().split('T')[0]; // Получаем строгую дату (YYYY-MM-DD)
+
 log.transports.file.level = "info";
 log.transports.console.level = "debug";
-log.transports.file.fileName = 'log-%DATE%.log';
+// Жестко задаем имя файла с датой
+log.transports.file.fileName = `main-${currentDate}.log`;
 log.transports.file.resolvePathFn = () => path.join(app.getPath('userData'), 'logs', log.transports.file.fileName);
 
 // Global error handlers
