@@ -8,7 +8,7 @@ import tar from "tar-fs";
 import zlib from "zlib";
 import { app } from "electron";
 import { DownloadStatus } from "../../shared/constants/ipc-chanels";
-import { JAVA_RELEASE_CONFIG } from "../config/javaConfig";
+import { getJavaDownloadUrl, type JavaVersion } from "../config/javaConfig";
 
 const execPromise = util.promisify(exec);
 
@@ -41,31 +41,22 @@ export async function findJavaInSystem(): Promise<string | null> {
   }
 }
 
-export function getJavaDownloadUrl(): string {
-  const arch = process.arch;
-  const platform = process.platform;
-
-  const key = `${platform}_${arch}`;
-  const build = JAVA_RELEASE_CONFIG.builds[key];
-
-  if (!build) {
-    throw new Error(`Unsupported platform/architecture: ${platform} ${arch}`);
-  }
-
-  return `${JAVA_RELEASE_CONFIG.baseUrl}/${JAVA_RELEASE_CONFIG.version}/${build}`;
-}
-
 export async function downloadAndExtractJRE(
+  javaVersion: JavaVersion,
   onProgress: (update: ProgressUpdate) => void,
 ): Promise<string> {
-  const url = getJavaDownloadUrl();
+  const url = getJavaDownloadUrl(javaVersion);
 
-  const targetDir = path.join(app.getPath("userData"), "java", "jre17");
+  const targetDir = path.join(
+    app.getPath("userData"),
+    "java",
+    `jre${javaVersion}`,
+  );
   const archivePath = path.join(targetDir, "jre.archive");
   await fs.ensureDir(targetDir);
 
   try {
-    console.log("Starting download from:", url);
+    console.log(`Starting download Java ${javaVersion} from:`, url);
     const response = got.stream(url, { timeout: { socket: 15000 } });
     const fileWriter = fs.createWriteStream(archivePath);
 

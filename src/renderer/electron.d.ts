@@ -60,7 +60,7 @@ export interface IElectronAPI {
     findSystemJava: () => Promise<string | null>;
     selectJavaExecutable: () => Promise<string | null>;
     downloadJRE: (
-      url: string,
+      javaVersion: number,
     ) => Promise<{ success: boolean; javaPath?: string; error?: string }>;
     onDownloadProgress: (
       callback: (update: { status: DownloadStatus; progress?: number }) => void,

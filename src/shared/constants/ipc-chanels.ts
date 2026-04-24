@@ -59,7 +59,14 @@ export interface IpcChannelMap {
     return: void;
   };
   [IPC_CHANNELS.UPDATE.PROGRESS]: {
-    args: [progress: { percent: number; transferred: number; total: number; bytesPerSecond: number }];
+    args: [
+      progress: {
+        percent: number;
+        transferred: number;
+        total: number;
+        bytesPerSecond: number;
+      },
+    ];
     return: void;
   };
   [IPC_CHANNELS.UPDATE.START_CHECK]: {
@@ -107,7 +114,7 @@ export interface IpcChannelMap {
     return: string | null;
   };
   [IPC_CHANNELS.JAVA.DOWNLOAD]: {
-    args: [url: string, targetDir: string];
+    args: [javaVersion: number];
     return: { success: boolean; javaPath?: string; error?: string };
   };
   [IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS]: {
@@ -123,4 +130,8 @@ export interface WindowState {
   isFullScreen: boolean;
 }
 
-export type DownloadStatus = 'DOWNLOADING' | 'EXTRACTING' | 'VERIFYING' | 'DONE';
+export type DownloadStatus =
+  | "DOWNLOADING"
+  | "EXTRACTING"
+  | "VERIFYING"
+  | "DONE";

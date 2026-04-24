@@ -1,5 +1,9 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { IPC_CHANNELS, IpcChannelMap, WindowState } from "../shared/constants/ipc-chanels";
+import {
+  IPC_CHANNELS,
+  IpcChannelMap,
+  WindowState,
+} from "../shared/constants/ipc-chanels";
 
 async function typedInvoke<K extends keyof IpcChannelMap>(
   channel: K,
@@ -30,7 +34,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
     // Return unsubscribe function
     return () => {
-      ipcRenderer.removeListener(IPC_CHANNELS.WINDOW.ON_STATE_CHANGE, subscription);
+      ipcRenderer.removeListener(
+        IPC_CHANNELS.WINDOW.ON_STATE_CHANGE,
+        subscription,
+      );
     };
   },
 
@@ -45,8 +52,23 @@ contextBridge.exposeInMainWorld("electronAPI", {
     };
   },
 
-  onUpdateProgress: (callback: (progress: { percent: number; transferred: number; total: number; bytesPerSecond: number }) => void) => {
-    const subscription = (_event: any, progress: { percent: number; transferred: number; total: number; bytesPerSecond: number }) => callback(progress);
+  onUpdateProgress: (
+    callback: (progress: {
+      percent: number;
+      transferred: number;
+      total: number;
+      bytesPerSecond: number;
+    }) => void,
+  ) => {
+    const subscription = (
+      _event: any,
+      progress: {
+        percent: number;
+        transferred: number;
+        total: number;
+        bytesPerSecond: number;
+      },
+    ) => callback(progress);
     ipcRenderer.on("update-progress", subscription);
 
     // Return unsubscribe function
@@ -74,30 +96,36 @@ contextBridge.exposeInMainWorld("electronAPI", {
   downloadUpdate: () => typedInvoke(IPC_CHANNELS.UPDATE.DOWNLOAD),
 
   // Install update and restart
-  installUpdateAndRestart: () => ipcRenderer.send(IPC_CHANNELS.UPDATE.INSTALL_AND_RESTART),
+  installUpdateAndRestart: () =>
+    ipcRenderer.send(IPC_CHANNELS.UPDATE.INSTALL_AND_RESTART),
 
   // Secure storage for sensitive data (tokens, passwords)
   secureStorage: {
     set: (key: string, value: string) =>
       typedInvoke(IPC_CHANNELS.SECURE_STORAGE.SET, key, value),
-    get: (key: string) =>
-      typedInvoke(IPC_CHANNELS.SECURE_STORAGE.GET, key),
+    get: (key: string) => typedInvoke(IPC_CHANNELS.SECURE_STORAGE.GET, key),
     delete: (key: string) =>
       typedInvoke(IPC_CHANNELS.SECURE_STORAGE.DELETE, key),
   },
 
   // Java management
   java: {
-    checkVersion: (javaPath: string) => typedInvoke(IPC_CHANNELS.JAVA.CHECK_VERSION, javaPath),
+    checkVersion: (javaPath: string) =>
+      typedInvoke(IPC_CHANNELS.JAVA.CHECK_VERSION, javaPath),
     findSystemJava: () => typedInvoke(IPC_CHANNELS.JAVA.FIND_SYSTEM),
-    selectJavaExecutable: () => typedInvoke(IPC_CHANNELS.JAVA.SELECT_EXECUTABLE),
-    downloadJRE: (url: string) => typedInvoke(IPC_CHANNELS.JAVA.DOWNLOAD, url),
+    selectJavaExecutable: () =>
+      typedInvoke(IPC_CHANNELS.JAVA.SELECT_EXECUTABLE),
+    downloadJRE: (javaVersion: number) =>
+      typedInvoke(IPC_CHANNELS.JAVA.DOWNLOAD, javaVersion),
     onDownloadProgress: (callback: (percent: number) => void) => {
-        const subscription = (_event: any, percent: number) => callback(percent);
-        ipcRenderer.on(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, subscription);
-        return () => {
-            ipcRenderer.removeListener(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, subscription);
-        };
-    }
+      const subscription = (_event: any, percent: number) => callback(percent);
+      ipcRenderer.on(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, subscription);
+      return () => {
+        ipcRenderer.removeListener(
+          IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS,
+          subscription,
+        );
+      };
+    },
   },
 });
