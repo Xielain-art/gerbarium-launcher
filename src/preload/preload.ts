@@ -149,4 +149,17 @@ contextBridge.exposeInMainWorld("electronAPI", {
   logs: {
     exportAndReport: () => typedInvoke(IPC_CHANNELS.LOG.EXPORT_AND_REPORT),
   },
+
+  // Game controls
+  game: {
+    launch: (options: { username: string; version: string; memory: { min: string; max: string }; javaPath: string }) =>
+      typedInvoke(IPC_CHANNELS.GAME.LAUNCH, options),
+    onProgress: (callback: (data: { type: 'data' | 'progress' | 'close'; content: any }) => void) => {
+      const subscription = (_event: any, data: { type: 'data' | 'progress' | 'close'; content: any }) => callback(data);
+      ipcRenderer.on(IPC_CHANNELS.GAME.PROGRESS, subscription);
+      return () => {
+        ipcRenderer.removeListener(IPC_CHANNELS.GAME.PROGRESS, subscription);
+      };
+    },
+  },
 });

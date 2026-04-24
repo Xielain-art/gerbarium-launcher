@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useDownloadStore } from "../stores/useDownloadStore";
@@ -84,6 +84,30 @@ export function DashboardScreen() {
   );
   const [shouldLogout, setShouldLogout] = useState(false);
   const [appVersion, setAppVersion] = useState<string>("");
+  const [logs, setLogs] = useState<string[]>([]);
+  const [isLaunching, setIsLaunching] = useState(false);
+  const logsEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logs]);
+
+  useEffect(() => {
+    if (!window.electronAPI?.game) return;
+
+    const unsubscribe = window.electronAPI.game.onProgress((data) => {
+      if (data.type === 'data') {
+        setLogs(prev => [...prev, String(data.content)]);
+      } else if (data.type === 'progress') {
+        setLogs(prev => [...prev, `[PROGRESS] ${JSON.stringify(data.content)}`]);
+      } else if (data.type === 'close') {
+        setIsLaunching(false);
+        setLogs(prev => [...prev, `[GAME] Closed with code: ${data.content}`]);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Handle logout redirect
   useEffect(() => {
@@ -104,7 +128,50 @@ export function DashboardScreen() {
       alert(UI_STRINGS.DASHBOARD.SELECT_VERSION_ALERT);
       return;
     }
-    await startDownload(selectedVersion);
+    
+    if (!user?.username) {
+       alert("User not logged in");
+       return;
+    }
+
+    setIsLaunching(true);
+    setLogs([]);
+
+    try {
+      // 1. Try to find Java in internal launcher storage
+      const installedJava = await window.electronAPI.java.getInstalledJava();
+      // Minecraft 1.20.4 needs Java 17 or higher
+      const bestJava = installedJava.find(j => j.version >= 17) || installedJava[0];
+      
+      let javaPath = bestJava?.path;
+
+      // 2. Fallback to system Java if no internal Java found
+      if (!javaPath) {
+        javaPath = await window.electronAPI.java.findSystemJava();
+      }
+      
+      if (!javaPath) {
+        setIsLaunching(false);
+        alert("Java not found! Please install Java in settings.");
+        return;
+      }
+
+      const launchOptions = {
+        username: user.username,
+        version: "1.20.4",
+        memory: { min: "1G", max: "4G" },
+        javaPath: javaPath,
+      };
+
+      const result = await window.electronAPI.game.launch(launchOptions);
+      if (!result.success) {
+         setIsLaunching(false);
+         alert(`Failed to launch: ${result.error}`);
+      }
+    } catch (error: any) {
+      setIsLaunching(false);
+      alert(`Launch error: ${error.message}`);
+    }
   };
 
   const handleVersionSelect = (versionId: string) => {
@@ -295,8 +362,21 @@ export function DashboardScreen() {
         </div>
 
         {/* Content with padding for window controls */}
-        <div className="flex-1 overflow-y-auto pt-20 pb-4">
-          {/* News Section */}
+        <div className="flex-1 overflow-y-auto pt-20 pb-4 flex flex-col">
+          {isLaunching ? (
+            <div className="px-6 h-full flex flex-col">
+              <h2 className="mb-4 font-minecraft text-lg font-bold uppercase tracking-wider text-[#e0e0e0]">
+                Console
+              </h2>
+              <div className="flex-1 bg-[#101010] border-[2px] border-[#1a1a1a] rounded p-4 font-mono text-xs text-[#55ff55] overflow-y-auto shadow-inner">
+                {logs.length === 0 && <div className="text-gray-500">Waiting for logs...</div>}
+                {logs.map((log, i) => (
+                  <div key={i} className="break-words mb-1 opacity-90 hover:opacity-100">{log}</div>
+                ))}
+                <div ref={logsEndRef} />
+              </div>
+            </div>
+          ) : (
           <div className="px-6">
             <h2 className="mb-6 font-minecraft text-lg font-bold uppercase tracking-wider text-[#e0e0e0]">
               {UI_STRINGS.DASHBOARD.NEWS_TITLE}
@@ -352,11 +432,12 @@ export function DashboardScreen() {
                   ))}
             </div>
           </div>
+          )}
         </div>
 
         {/* ZONE 3: Action Bar (Fixed at Bottom) */}
         <div className="shrink-0 border-t-[4px] border-[#1a1a1a] bg-[#2b2d31]/95 backdrop-blur-md p-6 shadow-2xl">
-          {!isDownloading ? (
+          {!isDownloading && !isLaunching ? (
             /* Play Button State */
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4 min-w-0">
@@ -387,6 +468,29 @@ export function DashboardScreen() {
               >
                 <span className="text-xl">{UI_STRINGS.DASHBOARD.PLAY_ICON}</span>
                 <span className="ml-3 text-lg">{UI_STRINGS.DASHBOARD.PLAY_BUTTON}</span>
+              </button>
+            </div>
+          ) : isLaunching ? (
+            /* Launching State */
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="h-8 w-8 rounded-full border-4 border-[#55aaff] border-t-transparent animate-spin" />
+                <div>
+                  <div className="font-minecraft text-sm text-[#55aaff]">
+                    Launching Game...
+                  </div>
+                  <div className="font-minecraft text-base font-bold text-[#e0e0e0]">
+                    Minecraft 1.20.4
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsLaunching(false)}
+                className="mc-btn mc-btn-danger mc-btn-lg"
+              >
+                <span className="mr-2">{UI_STRINGS.DASHBOARD.CANCEL_ICON}</span>
+                Hide Console
               </button>
             </div>
           ) : (

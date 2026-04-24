@@ -12,6 +12,7 @@ const secureStorageHandler = require("./dist/main/handlers/secureStorageHandler"
 const updateHandler = require("./dist/main/handlers/updateHandler").default;
 const javaHandler = require("./dist/main/handlers/javaHandlerWrapper").default;
 const systemHandler = require("./dist/main/handlers/systemHandler").default;
+const gameHandler = require("./dist/main/handlers/gameHandler").default;
 
 // Try to load bundled constants
 let CONSTANTS;
@@ -191,6 +192,7 @@ app.on("ready", () => {
    updateHandler(app);
    javaHandler(app);
    systemHandler(app);
+   gameHandler(win);
    setupLogHandler(app);
 });
 

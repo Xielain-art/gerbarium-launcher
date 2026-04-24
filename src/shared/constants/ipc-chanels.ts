@@ -46,6 +46,10 @@ export const IPC_CHANNELS = {
   APP: {
     GET_VERSION: "app:get-version",
   },
+  GAME: {
+    LAUNCH: "game:launch",
+    PROGRESS: "game:progress",
+  },
 } as const;
 
 // Карта типов для всех наших IPC событий
@@ -176,6 +180,14 @@ export interface IpcChannelMap {
   [IPC_CHANNELS.APP.GET_VERSION]: {
     args: [];
     return: string;
+  };
+  [IPC_CHANNELS.GAME.LAUNCH]: {
+    args: [{ username: string; version: string; memory: { min: string; max: string }; javaPath: string }];
+    return: { success: boolean; error?: string };
+  };
+  [IPC_CHANNELS.GAME.PROGRESS]: {
+    args: [{ type: 'data' | 'progress' | 'close'; content: any }];
+    return: void;
   };
 }
 
