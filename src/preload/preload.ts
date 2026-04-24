@@ -134,15 +134,19 @@ contextBridge.exposeInMainWorld("electronAPI", {
     },
   },
 
-   system: {
-     getMemory: () => typedInvoke(IPC_CHANNELS.SYSTEM.GET_MEMORY),
-     getCpus: () => typedInvoke(IPC_CHANNELS.SYSTEM.GET_CPUS),
-     logAction: (action: string, details?: string) =>
-       typedInvoke(IPC_CHANNELS.SYSTEM.LOG_ACTION, action, details),
-   },
+  system: {
+    getMemory: () => typedInvoke(IPC_CHANNELS.SYSTEM.GET_MEMORY),
+    getCpus: () => typedInvoke(IPC_CHANNELS.SYSTEM.GET_CPUS),
+    logAction: (action: string, details?: string) =>
+      typedInvoke(IPC_CHANNELS.SYSTEM.LOG_ACTION, action, details),
+    openExternal: (url: string) =>
+      typedInvoke(IPC_CHANNELS.SYSTEM.OPEN_EXTERNAL, url),
+    openGitHubIssue: () =>
+      typedInvoke(IPC_CHANNELS.SYSTEM.OPEN_GITHUB_ISSUE),
+  },
 
-   // Logs export and report
-   logs: {
-     exportAndReport: () => typedInvoke(IPC_CHANNELS.LOG.EXPORT_AND_REPORT),
-   },
- });
+  // Logs export and report
+  logs: {
+    exportAndReport: () => typedInvoke(IPC_CHANNELS.LOG.EXPORT_AND_REPORT),
+  },
+});

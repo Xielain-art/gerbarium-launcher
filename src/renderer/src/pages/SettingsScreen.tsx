@@ -8,7 +8,7 @@ import { WindowControls } from "../components";
 import { UI_STRINGS } from "../../../shared/constants/ui-strings";
 import { DOWNLOAD_STATUS, ROUTES, STORAGE_KEYS } from "../../../shared/constants/system";
 
-type SettingsTab = "general" | "java" | "profile";
+type SettingsTab = "general" | "java" | "profile" | "support";
 
 export function SettingsScreen() {
   const navigate = useNavigate();
@@ -109,6 +109,7 @@ const {
     { id: "general", label: UI_STRINGS.SETTINGS.TABS.general },
     { id: "java", label: UI_STRINGS.SETTINGS.TABS.java },
     { id: "profile", label: UI_STRINGS.SETTINGS.TABS.profile },
+    { id: "support", label: UI_STRINGS.SETTINGS.TABS.support },
   ];
 
   const handleSave = async () => {
@@ -551,6 +552,37 @@ const {
                 </div>
               </div>
             )}
+            {/* Support Tab */}
+            {activeTab === "support" && (
+              <div className="space-y-6">
+                <h2 className="font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
+                  {UI_STRINGS.SETTINGS.DEBUG.TITLE}
+                </h2>
+                
+                <div className="space-y-4">
+                  <p className="font-minecraft text-sm text-[#e0e0e0]">
+                    {UI_STRINGS.SETTINGS.DEBUG.HELP_TEXT}
+                  </p>
+                  
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={handleExportLogs}
+                      disabled={isExporting}
+                      className="w-full rounded border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] bg-[#2b2d31] px-4 py-3 font-minecraft text-sm font-bold text-[#e0e0e0] shadow-[inset_2px_2px_0px_#5a5a5a,inset_-2px_-2px_0px_#1a1a1a] transition-all duration-75 hover:bg-[#3c3c3c] active:border-t-[#1a1a1a] active:border-l-[#1a1a1a] active:border-b-[#5a5a5a] active:border-r-[#5a5a5a] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isExporting ? UI_STRINGS.SETTINGS.DEBUG.EXPORTING : UI_STRINGS.SETTINGS.DEBUG.EXPORT_BUTTON}
+                    </button>
+                    
+                    <button
+                      onClick={() => window.electronAPI?.system.openGitHubIssue()}
+                      className="w-full rounded border-[3px] border-t-[#8b2a2a] border-l-[#8b2a2a] border-b-[#5a1a1a] border-r-[#5a1a1a] bg-[#6b2222] px-4 py-3 font-minecraft text-sm font-bold text-white shadow-[inset_2px_2px_0px_#8b2a2a,inset_-2px_-2px_0px_#5a1a1a] transition-all duration-75 hover:bg-[#8b2a2a] active:border-t-[#5a1a1a] active:border-l-[#5a1a1a] active:border-b-[#8b2a2a] active:border-r-[#8b2a2a]"
+                    >
+                      {UI_STRINGS.SETTINGS.DEBUG.GITHUB_ISSUES_BUTTON}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
            {/* Action Buttons */}
@@ -562,29 +594,14 @@ const {
              >
                {isLoading ? UI_STRINGS.SETTINGS.ACTIONS.SAVING : UI_STRINGS.SETTINGS.ACTIONS.SAVE_BUTTON}
              </button>
-             <button
-               onClick={handleReset}
-               className="flex-1 rounded border-[3px] border-t-[#7a5a5a] border-l-[#7a5a5a] border-b-[#3a1a1a] border-r-[#3a1a1a] bg-gradient-to-br from-[#8b2a2a] to-[#5a1a1a] px-6 py-4 font-minecraft text-lg font-bold text-white shadow-[inset_2px_2px_0px_#aa3a3a,inset_-2px_-2px_0px_#5a1a1a] transition-all duration-75 hover:from-[#9a3a3a] hover:to-[#6a2a2a] active:border-t-[#3a1a1a] active:border-l-[#3a1a1a] active:border-b-[#7a5a5a] active:border-r-[#7a5a5a]"
-             >
-               {UI_STRINGS.SETTINGS.ACTIONS.RESET_BUTTON}
-             </button>
-           </div>
-
-           {/* Debug & Support Section */}
-           <div className="mx-auto mt-8 max-w-2xl rounded border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] bg-[#252525] p-4 shadow-[inset_2px_2px_0px_#5a5a5a,inset_-2px_-2px_0px_#1a1a1a]">
-             <h2 className="mb-2 font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
-               {UI_STRINGS.SETTINGS.DEBUG.TITLE}
-             </h2>
-             <p className="mb-4 font-minecraft text-sm text-[#6a6a6a]">
-               {UI_STRINGS.SETTINGS.DEBUG.HELP_TEXT}
-             </p>
-             <button
-               onClick={handleExportLogs}
-               disabled={isExporting}
-               className="w-full rounded border-[3px] border-t-[#8b2a2a] border-l-[#8b2a2a] border-b-[#5a1a1a] border-r-[#5a1a1a] bg-[#6b2222] px-4 py-3 font-minecraft text-sm font-bold text-white shadow-[inset_2px_2px_0px_#8b2a2a,inset_-2px_-2px_0px_#5a1a1a] transition-all duration-75 hover:bg-[#8b2a2a] active:border-t-[#5a1a1a] active:border-l-[#5a1a1a] active:border-b-[#8b2a2a] active:border-r-[#8b2a2a] disabled:cursor-not-allowed disabled:opacity-50"
-             >
-               {isExporting ? UI_STRINGS.SETTINGS.DEBUG.EXPORTING : UI_STRINGS.SETTINGS.DEBUG.EXPORT_BUTTON}
-             </button>
+             {activeTab === "general" && (
+               <button
+                 onClick={handleReset}
+                 className="flex-1 rounded border-[3px] border-t-[#7a5a5a] border-l-[#7a5a5a] border-b-[#3a1a1a] border-r-[#3a1a1a] bg-gradient-to-br from-[#8b2a2a] to-[#5a1a1a] px-6 py-4 font-minecraft text-lg font-bold text-white shadow-[inset_2px_2px_0px_#aa3a3a,inset_-2px_-2px_0px_#5a1a1a] transition-all duration-75 hover:from-[#9a3a3a] hover:to-[#6a2a2a] active:border-t-[#3a1a1a] active:border-l-[#3a1a1a] active:border-b-[#7a5a5a] active:border-r-[#7a5a5a]"
+               >
+                 {UI_STRINGS.SETTINGS.ACTIONS.RESET_BUTTON}
+               </button>
+             )}
            </div>
         </div>
       </main>

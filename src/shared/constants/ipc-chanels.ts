@@ -33,18 +33,20 @@ export const IPC_CHANNELS = {
     GET_VERSIONS: "java:get-versions",
     REMOVE: "java:remove",
   },
-   SYSTEM: {
-     GET_MEMORY: "system:get-memory",
-     GET_CPUS: "system:get-cpus",
-     LOG_ACTION: "system:log-action",
-   },
-   LOG: {
-     EXPORT_AND_REPORT: "logs:export-and-report",
-   },
-   APP: {
-     GET_VERSION: "app:get-version",
-   },
- } as const;
+  SYSTEM: {
+    GET_MEMORY: "system:get-memory",
+    GET_CPUS: "system:get-cpus",
+    LOG_ACTION: "system:log-action",
+    OPEN_EXTERNAL: "system:open-external",
+    OPEN_GITHUB_ISSUE: "system:open-github-issue",
+  },
+  LOG: {
+    EXPORT_AND_REPORT: "logs:export-and-report",
+  },
+  APP: {
+    GET_VERSION: "app:get-version",
+  },
+} as const;
 
 // Карта типов для всех наших IPC событий
 export interface IpcChannelMap {
@@ -155,19 +157,27 @@ export interface IpcChannelMap {
     args: [];
     return: number;
   };
-   [IPC_CHANNELS.SYSTEM.LOG_ACTION]: {
-     args: [action: string, details?: string];
-     return: void;
-   };
-   [IPC_CHANNELS.LOG.EXPORT_AND_REPORT]: {
-     args: [];
-     return: { success: boolean; path?: string; error?: string };
-   };
-   [IPC_CHANNELS.APP.GET_VERSION]: {
-     args: [];
-     return: string;
-   };
- }
+  [IPC_CHANNELS.SYSTEM.LOG_ACTION]: {
+    args: [action: string, details?: string];
+    return: void;
+  };
+  [IPC_CHANNELS.SYSTEM.OPEN_EXTERNAL]: {
+    args: [url: string];
+    return: void;
+  };
+  [IPC_CHANNELS.SYSTEM.OPEN_GITHUB_ISSUE]: {
+    args: [];
+    return: void;
+  };
+  [IPC_CHANNELS.LOG.EXPORT_AND_REPORT]: {
+    args: [];
+    return: { success: boolean; path?: string; error?: string };
+  };
+  [IPC_CHANNELS.APP.GET_VERSION]: {
+    args: [];
+    return: string;
+  };
+}
 
 // Window state interface
 export interface WindowState {

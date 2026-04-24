@@ -59,7 +59,13 @@ export const GITHUB_TEMPLATES = {
     '**Системные данные:**\n' +
     `- ОС: ${platform} ${arch}\n` +
     `- Версия: ${version}\n\n` +
-    '*(Пожалуйста, прикрепите архив логов сюда)*'
+    '*(Пожалуйста, прикрепите архив логов сюда)*',
+  CONTACT_BODY: (platform: string, arch: string, version: string) => 
+    '**Опишите вашу проблему или вопрос:**\n' +
+    '*(Писать тут)*\n\n' +
+    '**Системные данные:**\n' +
+    `- ОС: ${platform} ${arch}\n` +
+    `- Версия лаунчера: ${version}\n`
 } as const;
 
 export const TIMEOUTS = {

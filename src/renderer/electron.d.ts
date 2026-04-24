@@ -75,6 +75,8 @@ export interface IElectronAPI {
      getMemory: () => Promise<{ total: number; free: number }>;
      getCpus: () => Promise<number>;
      logAction: (action: string, details?: string) => Promise<void>;
+     openExternal: (url: string) => Promise<void>;
+     openGitHubIssue: () => Promise<void>;
    };
 
    // Logs export and report

@@ -70,6 +70,7 @@ export const UI_STRINGS = {
       general: "ОБЩИЕ",
       java: "JAVA",
       profile: "ПРОФИЛЬ",
+      support: "ПОДДЕРЖКА",
     },
     GENERAL: {
       TITLE: "Общие настройки",
@@ -123,6 +124,7 @@ export const UI_STRINGS = {
       EXPORT_SUCCESS: (path: string) => `Логи успешно сохранены в:\n${path}\n\nОткроется браузер для создания Issue.`,
       EXPORT_ERROR: (err: string) => `Ошибка при сохранении логов:\n${err}`,
       EXPORT_UNEXPECTED_ERROR: "Произошла непредвиденная ошибка при экспорте логов.",
+      GITHUB_ISSUES_BUTTON: "Связаться через GitHub Issues",
     },
     RESET_MODAL: {
       TITLE: "Сброс настроек",
