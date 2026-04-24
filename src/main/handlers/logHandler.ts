@@ -35,7 +35,7 @@ export function getDateFolder(): string {
  */
 export function createUserActionsLogger(app: Electron.App) {
   const dateFolder = getDateFolder();
-  const userActionsLog = log.create(LOG_FILE_NAMES.USER_ACTIONS_SCOPE);
+  const userActionsLog = log.create({ logId: LOG_FILE_NAMES.USER_ACTIONS_SCOPE });
   userActionsLog.transports.file.level = 'info';
   userActionsLog.transports.file.fileName = LOG_FILE_NAMES.USER_ACTIONS;
   userActionsLog.transports.file.resolvePathFn = () =>
