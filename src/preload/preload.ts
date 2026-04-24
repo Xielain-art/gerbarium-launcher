@@ -119,6 +119,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
       typedInvoke(IPC_CHANNELS.JAVA.DOWNLOAD, javaVersion),
     getInstalledJava: () => typedInvoke(IPC_CHANNELS.JAVA.GET_INSTALLED),
     getJavaVersions: () => typedInvoke(IPC_CHANNELS.JAVA.GET_VERSIONS),
+    removeJava: (javaVersion: number) =>
+      typedInvoke(IPC_CHANNELS.JAVA.REMOVE, javaVersion),
     onDownloadProgress: (callback: (percent: number) => void) => {
       const subscription = (_event: any, percent: number) => callback(percent);
       ipcRenderer.on(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, subscription);
@@ -130,4 +132,18 @@ contextBridge.exposeInMainWorld("electronAPI", {
       };
     },
   },
+
+  system: {
+    getMemory: () => typedInvoke(IPC_CHANNELS.SYSTEM.GET_MEMORY),
+    getCpus: () => typedInvoke(IPC_CHANNELS.SYSTEM.GET_CPUS),
+    logAction: (action: string, details?: string) =>
+      typedInvoke(IPC_CHANNELS.SYSTEM.LOG_ACTION, action, details),
+  },
 });
+
+// Auto-log all renderer actions
+function logAction(action: string, details?: string) {
+  ipcRenderer.invoke(IPC_CHANNELS.SYSTEM.LOG_ACTION, action, details);
+}
+
+contextBridge.exposeInMainWorld("logAction", logAction);

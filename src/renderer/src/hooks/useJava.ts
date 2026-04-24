@@ -3,6 +3,10 @@ import { useDownloadStore } from "../stores/useDownloadStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
 import { DownloadStatus } from "../../../shared/constants/ipc-chanels";
 
+const logAction = (action: string, details?: string) => {
+  window.logAction?.(action, details);
+};
+
 export function useJava() {
   const setJavaProgress = useDownloadStore((state) => state.setJavaProgress);
   const setIsDownloadingJava = useSettingsStore(
@@ -60,13 +64,17 @@ export function useJava() {
       setIsDownloadingJava(true);
       setJavaProgress(0);
       setJavaError(null);
+      logAction('DOWNLOAD_JAVA_START', `Java ${javaVersion}`);
       try {
         const result = await window.electronAPI.java.downloadJRE(javaVersion);
         if (!result.success) throw new Error(result.error);
+        logAction('DOWNLOAD_JAVA_COMPLETE', `Java ${javaVersion} - ${result.javaPath}`);
         return result.javaPath;
       } catch (err) {
         console.error("Error in downloadJava hook:", err);
-        setJavaError((err as Error).message);
+        const errMsg = (err as Error).message;
+        setJavaError(errMsg);
+        logAction('DOWNLOAD_JAVA_ERROR', errMsg);
         return null;
       } finally {
         setIsDownloadingJava(false);
@@ -91,7 +99,22 @@ export function useJava() {
       return await window.electronAPI.java.getJavaVersions();
     } catch (err) {
       console.error("Error getting Java versions:", err);
-      return [8, 17, 21];
+      return [];
+    }
+  }, []);
+
+  const removeJava = useCallback(async (javaVersion: number) => {
+    logAction('REMOVE_JAVA_START', `Java ${javaVersion}`);
+    try {
+      const result = await window.electronAPI.java.removeJava(javaVersion);
+      if (!result.success) throw new Error(result.error);
+      logAction('REMOVE_JAVA_COMPLETE', `Java ${javaVersion}`);
+      return true;
+    } catch (err) {
+      console.error("Error removing Java:", err);
+      const errMsg = (err as Error).message;
+      logAction('REMOVE_JAVA_ERROR', errMsg);
+      return false;
     }
   }, []);
 
@@ -101,6 +124,7 @@ export function useJava() {
     downloadJava,
     getInstalledJava,
     getJavaVersions,
+    removeJava,
     loading: isJavaLoading,
     error: javaError,
     status,

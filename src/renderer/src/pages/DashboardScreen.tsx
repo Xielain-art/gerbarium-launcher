@@ -98,6 +98,8 @@ export function DashboardScreen() {
 
   // Get app version on mount
   useEffect(() => {
+    if (!window.electronAPI) return;
+
     window.electronAPI.getAppVersion().then(setAppVersion);
   }, []);
 

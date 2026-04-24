@@ -4,6 +4,11 @@ import type { AuthUser, AuthCredentials } from '../types';
 // Token storage key for secure storage
 const AUTH_TOKEN_KEY = 'auth_token';
 
+// Auto-log helper
+const logAction = (action: string, details?: string) => {
+  window.logAction?.(action, details);
+};
+
 interface AuthState {
   // State
   user: AuthUser | null;
@@ -68,6 +73,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
 
   logout: async () => {
+    logAction('LOGOUT', 'User logged out');
     // Clear secure storage
     await window.electronAPI.secureStorage.delete(AUTH_TOKEN_KEY);
     // Clear localStorage
@@ -111,10 +117,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         isLoading: false,
       });
 
+      logAction('LOGIN', `User logged in: ${mockUser.username}`);
       return { success: true };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Ошибка входа';
       set({ isLoading: false, error: errorMessage });
+      logAction('LOGIN_ERROR', errorMessage);
       return { success: false, error: errorMessage };
     }
   },
@@ -149,10 +157,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         isLoading: false,
       });
 
+      logAction('LOGIN_OFFLINE', `Offline login: ${username}`);
       return { success: true };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Ошибка оффлайн входа';
       set({ isLoading: false, error: errorMessage });
+      logAction('LOGIN_OFFLINE_ERROR', errorMessage);
       return { success: false, error: errorMessage };
     }
   },

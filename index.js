@@ -2,19 +2,39 @@
 const { app, BrowserWindow, ipcMain, Menu } = require("electron");
 const isDev = require("./_legacy_app/assets/js/isdev");
 const path = require("path");
+const fs = require("fs");
 const LangLoader = require("./_legacy_app/assets/js/langloader");
+const log = require("electron-log");
 
 const helloHandler = require("./dist/main/handlers/helloHandler").default;
-const windowControlsHandler =
-  require("./dist/main/handlers/windowControlsHandler").default;
-const secureStorageHandler =
-  require("./dist/main/handlers/secureStorageHandler").default;
-const updateHandler =
-  require("./dist/main/handlers/updateHandler").default;
+const windowControlsHandler = require("./dist/main/handlers/windowControlsHandler").default;
+const secureStorageHandler = require("./dist/main/handlers/secureStorageHandler").default;
+const updateHandler = require("./dist/main/handlers/updateHandler").default;
 const javaHandler = require("./dist/main/handlers/javaHandlerWrapper").default;
+const systemHandler = require("./dist/main/handlers/systemHandler").default;
+
+// Setup log
+log.transports.file.level = "info";
+log.transports.console.level = "debug";
+
+// Global error handlers
+process.on("uncaughtException", (error) => {
+  log.error("Uncaught Exception:", error);
+  app.exit(1);
+});
+
+process.on("unhandledRejection", (reason) => {
+  log.error("Unhandled Rejection:", reason);
+});
 
 // Setup Lang
 LangLoader.setupLanguage();
+
+log.info("Gerbarium starting...", {
+  version: app.getVersion(),
+  platform: process.platform,
+  arch: process.arch,
+});
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -166,6 +186,7 @@ app.on("ready", () => {
   secureStorageHandler(app);
   updateHandler(app);
   javaHandler(app);
+  systemHandler(app);
 });
 
 app.on("window-all-closed", () => {

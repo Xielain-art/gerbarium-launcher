@@ -10,54 +10,47 @@ export function UpdateScreen() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [updateInfo, setUpdateInfo] = useState<any>(null);
 
-  useEffect(() => {
-    // Get app version
-    window.electronAPI.getAppVersion().then(setAppVersion);
+useEffect(() => {
+    if (!window.electronAPI?.getAppVersion) {
+      navigate({ to: "/login" });
+      return;
+    }
 
-    // Initialize update system
+    window.electronAPI.getAppVersion().then(setAppVersion);
     window.electronAPI.initUpdate();
 
-    // Subscribe to update messages
-    const unsubscribeMessage = window.electronAPI.onUpdateMessage((message) => {
+    const unsubMessage = window.electronAPI.onUpdateMessage((message) => {
       setUpdateMessage(message);
-
-      // Navigate to login when update check is complete
       if (message === "update-not-available") {
         setUpdateMessage("Запуск лаунчера...");
         setTimeout(() => navigate({ to: "/login" }), 1500);
       }
-      
-      // Handle error - still allow user to continue
       if (message.includes("Ошибка")) {
         setTimeout(() => navigate({ to: "/login" }), 2000);
       }
     });
 
-    // Subscribe to update info
-    const unsubscribeInfo = window.electronAPI.onUpdateInfo((info) => {
+    const unsubInfo = window.electronAPI.onUpdateInfo((info) => {
       setUpdateInfo(info);
-      setUpdateAvailable(true);
-      setUpdateMessage(`Доступна версия ${info.version}`);
+      setUpdateAvailable(info?.updateAvailable || false);
     });
 
-    // Subscribe to update progress
-    const unsubscribeProgress = window.electronAPI.onUpdateProgress((progress) => {
+    const unsubProgress = window.electronAPI.onUpdateProgress((progress) => {
       setUpdateProgress(progress.percent);
     });
 
-    // TRIGGER update check
-    if (process.env.NODE_ENV !== 'development') {
-      window.electronAPI.startUpdateCheck();
-    } else {
-      setUpdateMessage("Dev mode: пропуск обновлений...");
-      setTimeout(() => navigate({ to: "/login" }), 500);
-    }
+    window.electronAPI.startUpdateCheck();
+    window.electronAPI.getAppVersion().then((version) => {
+      if (version) {
+        setUpdateMessage("Обновление не требуется");
+        setTimeout(() => navigate({ to: "/login" }), 500);
+      }
+    });
 
-    // Cleanup subscriptions
     return () => {
-      unsubscribeMessage();
-      unsubscribeInfo();
-      unsubscribeProgress();
+      unsubMessage?.();
+      unsubInfo?.();
+      unsubProgress?.();
     };
   }, [navigate]);
 

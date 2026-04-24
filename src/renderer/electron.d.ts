@@ -62,14 +62,25 @@ export interface IElectronAPI {
     downloadJRE: (
       javaVersion: number,
     ) => Promise<{ success: boolean; javaPath?: string; error?: string }>;
+    getInstalledJava: () => Promise<Array<{ version: number; path: string; detectedVersion: string }>>;
+    getJavaVersions: () => Promise<number[]>;
+    removeJava: (javaVersion: number) => Promise<{ success: boolean; error?: string }>;
     onDownloadProgress: (
       callback: (update: { status: DownloadStatus; progress?: number }) => void,
     ) => () => void;
+  };
+
+  // System info
+  system: {
+    getMemory: () => Promise<{ total: number; free: number }>;
+    getCpus: () => Promise<number>;
+    logAction: (action: string, details?: string) => Promise<void>;
   };
 }
 
 declare global {
   interface Window {
     electronAPI: IElectronAPI;
+    logAction: (action: string, details?: string) => void;
   }
 }

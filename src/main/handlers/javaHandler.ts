@@ -6,6 +6,7 @@ import got from "got";
 import extract from "extract-zip";
 import tar from "tar-fs";
 import zlib from "zlib";
+import { pipeline } from "stream/promises";
 import { app } from "electron";
 import { DownloadStatus } from "../../shared/constants/ipc-chanels";
 import { getJavaDownloadUrl, type JavaVersion } from "../config/javaConfig";
@@ -108,6 +109,22 @@ export async function getInstalledJavaList(): Promise<InstalledJava[]> {
   return installed.sort((a, b) => a.version - b.version);
 }
 
+export async function removeInstalledJava(
+  javaVersion: JavaVersion,
+): Promise<boolean> {
+  const targetDir = path.join(app.getPath("userData"), "java", `jre${javaVersion}`);
+  try {
+    if (await fs.pathExists(targetDir)) {
+      await fs.remove(targetDir);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error("Failed to remove Java:", error);
+    return false;
+  }
+}
+
 export async function downloadAndExtractJRE(
   javaVersion: JavaVersion,
   onProgress: (update: ProgressUpdate) => void,
@@ -152,44 +169,13 @@ export async function downloadAndExtractJRE(
     if (url.endsWith(".zip")) {
       await extract(archivePath, { dir: targetDir });
     } else {
-      await new Promise<void>((resolve, reject) => {
-        const readStream = fs.createReadStream(archivePath);
-        const gunzip = zlib.createGunzip();
-        const extractStream = tar.extract(targetDir);
-        
-        let finished = false;
-        let error: Error | null = null;
-        
-        const cleanup = () => {
-          readStream.destroy();
-          gunzip.destroy();
-          extractStream.destroy();
-        };
-        
-        const done = (err?: Error) => {
-          if (finished) return;
-          if (err) {
-            error = err;
-          }
-          finished = true;
-          cleanup();
-          if (error) {
-            reject(error);
-          } else {
-            resolve();
-          }
-        };
-        
-        readStream.on("error", done);
-        gunzip.on("error", done);
-        extractStream.on("error", done);
-        extractStream.on("finish", () => done());
-        
-        readStream
-          .pipe(gunzip)
-          .pipe(extractStream);
-      });
+      await pipeline(
+        fs.createReadStream(archivePath),
+        zlib.createGunzip(),
+        tar.extract(targetDir),
+      );
     }
+    await fs.remove(archivePath);
     await fs.remove(archivePath);
 
     onProgress({ status: "VERIFYING" });

@@ -31,6 +31,12 @@ export const IPC_CHANNELS = {
     DOWNLOAD_PROGRESS: "java:download-progress",
     GET_INSTALLED: "java:get-installed",
     GET_VERSIONS: "java:get-versions",
+    REMOVE: "java:remove",
+  },
+  SYSTEM: {
+    GET_MEMORY: "system:get-memory",
+    GET_CPUS: "system:get-cpus",
+    LOG_ACTION: "system:log-action",
   },
 } as const;
 
@@ -130,6 +136,22 @@ export interface IpcChannelMap {
   [IPC_CHANNELS.JAVA.GET_VERSIONS]: {
     args: [];
     return: number[];
+  };
+  [IPC_CHANNELS.JAVA.REMOVE]: {
+    args: [javaVersion: number];
+    return: { success: boolean; error?: string };
+  };
+  [IPC_CHANNELS.SYSTEM.GET_MEMORY]: {
+    args: [];
+    return: { total: number; free: number };
+  };
+  [IPC_CHANNELS.SYSTEM.GET_CPUS]: {
+    args: [];
+    return: number;
+  };
+  [IPC_CHANNELS.SYSTEM.LOG_ACTION]: {
+    args: [action: string, details?: string];
+    return: void;
   };
 }
 

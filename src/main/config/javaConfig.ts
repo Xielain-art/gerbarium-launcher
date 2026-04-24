@@ -72,8 +72,24 @@ export function getJavaDownloadUrl(javaVersion: JavaVersion): string {
 
   const arch = process.arch;
   const platform = process.platform;
-  const key = `${platform}_${arch}`;
-  const build = config.builds[key];
+  let key = `${platform}_${arch}`;
+  let build = config.builds[key];
+
+  if (!build) {
+    if (platform === "darwin" && arch === "arm64") {
+      key = "darwin_x64";
+      build = config.builds[key];
+      if (build) {
+        console.log(`[Java] Native ARM64 build not found for Java ${javaVersion}, falling back to x64 via Rosetta 2`);
+      }
+    } else if (platform === "linux" && arch === "arm64") {
+      key = "linux_x64";
+      build = config.builds[key];
+      if (build) {
+        console.log(`[Java] Native ARM64 build not found for Java ${javaVersion}, falling back to x64`);
+      }
+    }
+  }
 
   if (!build) {
     throw new Error(

@@ -2,6 +2,10 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { SettingsState as SettingsStateType, SettingsGeneral, SettingsMods, SettingsProfile } from '../types';
 
+const logAction = (action: string, details?: string) => {
+  window.logAction?.(action, details);
+};
+
 interface SettingsState extends SettingsStateType {
   // Actions
   updateGeneral: (updates: Partial<SettingsGeneral>) => void;
@@ -79,15 +83,18 @@ export const useSettingsStore = create<SettingsState>()(
           
           // Settings are already persisted by zustand
           set({ isLoading: false });
+          logAction('SAVE_SETTINGS', 'Settings saved successfully');
           return { success: true };
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : 'Не удалось сохранить настройки';
           set({ isLoading: false, error: errorMessage });
+          logAction('SAVE_SETTINGS_ERROR', errorMessage);
           return { success: false, error: errorMessage };
         }
       },
       
       resetToDefaults: () => {
+        logAction('RESET_SETTINGS', 'Settings reset to defaults');
         set(defaultSettings);
         localStorage.removeItem('gerbarium-settings-storage');
       },

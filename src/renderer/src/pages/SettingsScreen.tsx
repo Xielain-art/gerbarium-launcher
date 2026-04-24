@@ -33,6 +33,7 @@ const {
     downloadJava,
     getInstalledJava,
     getJavaVersions,
+    removeJava,
     loading: javaLoading,
     error: javaError,
     status: javaStatus,
@@ -43,9 +44,22 @@ const {
     17,
   );
   const [installedJava, setInstalledJava] = useState<Array<{version: number; path: string; detectedVersion: string}>>([]);
-  const [javaVersions, setJavaVersions] = useState<number[]>([8, 17, 21]);
+  const [javaVersions, setJavaVersions] = useState<number[]>([]);
 
   const isJavaInstalled = (version: number) => installedJava.some(j => j.version === version);
+
+  const handleRemoveJava = async (version: number) => {
+    if (confirm(`Удалить Java ${version}?`)) {
+      const removedVersionPath = installedJava.find(j => j.version === version)?.path;
+      await removeJava(version);
+      const list = await getInstalledJava();
+      setInstalledJava(list);
+      if (removedVersionPath === general.javaPath) {
+        updateGeneral({ javaPath: '' });
+        setJavaVersion(null);
+      }
+    }
+  };
 
   useEffect(() => {
     if (general.javaPath) {
@@ -65,8 +79,11 @@ const {
   };
 
   const handleSelectJava = async () => {
-    const path = await (window as any).electronAPI.java.selectJavaExecutable();
-    if (path) updateGeneral({ javaPath: path });
+    const path = await window.electronAPI.java.selectJavaExecutable();
+    if (path) {
+      updateGeneral({ javaPath: path });
+      window.logAction?.('SELECT_JAVA', path);
+    }
   };
 
   const handleFindJava = async () => {
@@ -301,20 +318,28 @@ const {
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {installedJava.map((java) => (
-                        <button
-                          key={java.version}
-                          onClick={() => {
-                            updateGeneral({ javaPath: java.path });
-                            checkJava(java.path).then(setJavaVersion);
-                          }}
-                          className={`rounded border-[3px] px-4 py-2 font-minecraft text-sm transition-colors ${
-                            general.javaPath === java.path
-                              ? "border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a] bg-[#3a753a] text-white"
-                              : "border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] bg-[#2b2d31] text-[#e0e0e0] hover:bg-[#3c3c3c]"
-                          }`}
-                        >
-                          Java {java.version}
-                        </button>
+                        <div key={java.version} className="flex items-center gap-1">
+                          <button
+                            onClick={() => {
+                              updateGeneral({ javaPath: java.path });
+                              checkJava(java.path).then(setJavaVersion);
+                            }}
+                            className={`rounded border-[3px] px-4 py-2 font-minecraft text-sm transition-colors ${
+                              general.javaPath === java.path
+                                ? "border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a] bg-[#3a753a] text-white"
+                                : "border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] bg-[#2b2d31] text-[#e0e0e0] hover:bg-[#3c3c3c]"
+                            }`}
+                          >
+                            Java {java.version}
+                          </button>
+                          <button
+                            onClick={() => handleRemoveJava(java.version)}
+                            className="rounded border-[3px] border-t-[#8b2a2a] border-l-[#8b2a2a] border-b-[#5a1a1a] border-r-[#5a1a1a] bg-[#6b2222] px-2 py-2 font-minecraft text-sm text-white hover:bg-[#8b2a2a]"
+                            title="Удалить"
+                          >
+                            ✕
+                          </button>
+                        </div>
                       ))}
                     </div>
                   </div>

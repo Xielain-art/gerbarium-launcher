@@ -4,9 +4,12 @@ import {
   findJavaInSystem,
   downloadAndExtractJRE,
   getInstalledJavaList,
+  removeInstalledJava,
 } from "./javaHandler";
 import { IPC_CHANNELS } from "../../shared/constants/ipc-chanels";
 import { JAVA_VERSIONS } from "../config/javaConfig";
+
+const downloadLocks: Map<number, boolean> = new Map();
 
 export default function javaHandler() {
   ipcMain.handle(
@@ -28,6 +31,15 @@ export default function javaHandler() {
     return JAVA_VERSIONS;
   });
 
+  ipcMain.handle(IPC_CHANNELS.JAVA.REMOVE, async (_, javaVersion: number) => {
+    try {
+      const success = await removeInstalledJava(javaVersion as 8 | 17 | 21);
+      return { success };
+    } catch (error) {
+      return { success: false, error: (error as Error).message };
+    }
+  });
+
   ipcMain.handle(IPC_CHANNELS.JAVA.SELECT_EXECUTABLE, async () => {
     const { dialog } = require("electron");
     const filters =
@@ -44,9 +56,16 @@ export default function javaHandler() {
   ipcMain.handle(
     IPC_CHANNELS.JAVA.DOWNLOAD,
     async (event, javaVersion: number) => {
+      const version = javaVersion as 8 | 17 | 21;
+      
+      if (downloadLocks.get(version)) {
+        return { success: false, error: "Download already in progress" };
+      }
+      
       try {
+        downloadLocks.set(version, true);
         const javaPath = await downloadAndExtractJRE(
-          javaVersion as 8 | 17 | 21,
+          version,
           (update) => {
             event.sender.send(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, update);
           },
@@ -56,6 +75,8 @@ export default function javaHandler() {
       } catch (error) {
         console.error("Download failed:", error);
         return { success: false, error: (error as Error).message };
+      } finally {
+        downloadLocks.delete(version);
       }
     },
   );
