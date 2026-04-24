@@ -14,7 +14,7 @@ export function SettingsScreen() {
   // Zustand stores
   const { general, mods, profile, updateGeneral, updateMods, updateProfile, saveSettings, resetToDefaults, isLoading, error, clearError, isDownloadingJava } = useSettingsStore();
   const { logout, isAuthenticated } = useAuthStore();
-  const { checkJava, findJava, downloadJava, loading: javaLoading, error: javaError } = useJava();
+  const { checkJava, findJava, downloadJava, loading: javaLoading, error: javaError, status: javaStatus } = useJava();
   const javaProgress = useDownloadStore((state) => state.javaProgress);
   const [javaVersion, setJavaVersion] = useState<string | null>(null);
 
@@ -25,12 +25,7 @@ export function SettingsScreen() {
   }, [general.javaPath, checkJava]);
 
   const handleDownloadJava = async () => {
-    console.log('Кнопка скачивания нажата');
-    const url = 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jre_x64_windows_hotspot_17.0.10_7.zip';
-    const targetDir = 'C:/gerbarium-data/java/jre17';
-    console.log('Вызов downloadJava...');
-    const path = await downloadJava(url, targetDir);
-    console.log('Результат downloadJava:', path);
+    const path = await downloadJava();
     if (path) {
       updateGeneral({ javaPath: path });
       setJavaVersion('17');

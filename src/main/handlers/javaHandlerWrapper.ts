@@ -23,10 +23,9 @@ export default function javaHandler() {
         return result.canceled ? null : result.filePaths[0];
     });
 
-    ipcMain.handle(IPC_CHANNELS.JAVA.DOWNLOAD, async (event, url: string) => {
-        console.log('Received download request for:', url);
+    ipcMain.handle(IPC_CHANNELS.JAVA.DOWNLOAD, async (event) => {
         try {
-            const javaPath = await downloadAndExtractJRE(url, (update) => {
+            const javaPath = await downloadAndExtractJRE((update) => {
                 event.sender.send(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, update);
             });
             console.log('Download complete, path:', javaPath);

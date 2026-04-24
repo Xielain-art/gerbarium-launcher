@@ -48,14 +48,12 @@ export function useJava() {
         }
     }, [setJavaError, setIsJavaLoading]);
 
-    const downloadJava = useCallback(async (url: string) => {
+    const downloadJava = useCallback(async () => {
         setIsDownloadingJava(true);
         setJavaProgress(0);
         setJavaError(null);
         try {
-            console.log('Calling downloadJRE with URL:', url);
-            const result = await window.electronAPI.java.downloadJRE(url);
-            console.log('Result from downloadJRE:', result);
+            const result = await window.electronAPI.java.downloadJRE();
             if (!result.success) throw new Error(result.error);
             return result.javaPath;
         } catch (err) {
