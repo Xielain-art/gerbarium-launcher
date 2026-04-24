@@ -133,17 +133,15 @@ contextBridge.exposeInMainWorld("electronAPI", {
     },
   },
 
-  system: {
-    getMemory: () => typedInvoke(IPC_CHANNELS.SYSTEM.GET_MEMORY),
-    getCpus: () => typedInvoke(IPC_CHANNELS.SYSTEM.GET_CPUS),
-    logAction: (action: string, details?: string) =>
-      typedInvoke(IPC_CHANNELS.SYSTEM.LOG_ACTION, action, details),
-  },
-});
+   system: {
+     getMemory: () => typedInvoke(IPC_CHANNELS.SYSTEM.GET_MEMORY),
+     getCpus: () => typedInvoke(IPC_CHANNELS.SYSTEM.GET_CPUS),
+     logAction: (action: string, details?: string) =>
+       typedInvoke(IPC_CHANNELS.SYSTEM.LOG_ACTION, action, details),
+   },
 
-// Auto-log all renderer actions
-function logAction(action: string, details?: string) {
-  ipcRenderer.invoke(IPC_CHANNELS.SYSTEM.LOG_ACTION, action, details);
-}
-
-contextBridge.exposeInMainWorld("logAction", logAction);
+   // Logs export and report
+   logs: {
+     exportAndReport: () => typedInvoke(IPC_CHANNELS.LOG.EXPORT_AND_REPORT),
+   },
+ });

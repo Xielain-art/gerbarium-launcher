@@ -33,12 +33,15 @@ export const IPC_CHANNELS = {
     GET_VERSIONS: "java:get-versions",
     REMOVE: "java:remove",
   },
-  SYSTEM: {
-    GET_MEMORY: "system:get-memory",
-    GET_CPUS: "system:get-cpus",
-    LOG_ACTION: "system:log-action",
-  },
-} as const;
+   SYSTEM: {
+     GET_MEMORY: "system:get-memory",
+     GET_CPUS: "system:get-cpus",
+     LOG_ACTION: "system:log-action",
+   },
+   LOG: {
+     EXPORT_AND_REPORT: "logs:export-and-report",
+   },
+ } as const;
 
 // Карта типов для всех наших IPC событий
 export interface IpcChannelMap {
@@ -149,11 +152,15 @@ export interface IpcChannelMap {
     args: [];
     return: number;
   };
-  [IPC_CHANNELS.SYSTEM.LOG_ACTION]: {
-    args: [action: string, details?: string];
-    return: void;
-  };
-}
+   [IPC_CHANNELS.SYSTEM.LOG_ACTION]: {
+     args: [action: string, details?: string];
+     return: void;
+   };
+   [IPC_CHANNELS.LOG.EXPORT_AND_REPORT]: {
+     args: [];
+     return: { success: boolean; path?: string };
+   };
+ }
 
 // Window state interface
 export interface WindowState {

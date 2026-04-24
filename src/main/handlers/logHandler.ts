@@ -1,32 +1,58 @@
-import { ipcMain, app, shell } from 'electron';
-import AdmZip from 'adm-zip';
+import { ipcMain, app, shell, dialog } from 'electron';
+import archiver from 'archiver';
 import path from 'path';
+import fs from 'fs-extra';
+import { IPC_CHANNELS } from '../../shared/constants/ipc-chanels';
 
 export default function setupLogHandler() {
-    ipcMain.handle('logs:export-and-report', async () => {
+    ipcMain.handle(IPC_CHANNELS.LOG.EXPORT_AND_REPORT, async () => {
         try {
-            // 1. Создаем архив с логами на Рабочем столе
-            const logsPath = path.join(app.getPath('userData'), 'logs'); // Путь от electron-log
-            const desktopPath = app.getPath('desktop');
-            const zipPath = path.join(desktopPath, `GerbariumLogs_${Date.now()}.zip`);
-            
-            const zip = new AdmZip();
-            zip.addLocalFolder(logsPath);
-            zip.writeZip(zipPath);
+            const logsPath = path.join(app.getPath('userData'), 'logs');
 
-            // 2. Открываем GitHub Issue с предзаполненным шаблоном
+            if (!await fs.pathExists(logsPath)) {
+                return { success: false, error: 'Папка с логами не найдена' };
+            }
+
+            const files = await fs.readdir(logsPath);
+            if (files.length === 0) {
+                return { success: false, error: 'Папка с логами пуста' };
+            }
+
+            const { filePath, canceled } = await dialog.showSaveDialog({
+                title: 'Сохранить архив с логами',
+                defaultPath: path.join(app.getPath('desktop'), `GerbariumLogs_${Date.now()}.zip`),
+                filters: [{ name: 'Zip Archive', extensions: ['zip'] }],
+            });
+
+            if (canceled || !filePath) {
+                return { success: false, error: 'Отменено пользователем' };
+            }
+
+            await new Promise<void>((resolve, reject) => {
+                const output = fs.createWriteStream(filePath);
+                const archive = archiver('zip', { zlib: { level: 9 } });
+
+                output.on('close', resolve);
+                archive.on('error', reject);
+
+                archive.pipe(output);
+                archive.directory(logsPath, false);
+                archive.finalize();
+            });
+
             const issueBody = encodeURIComponent(
                 "**Системные данные:**\n" +
                 `- ОС: ${process.platform} ${process.arch}\n` +
                 `- Версия: ${app.getVersion()}\n\n` +
-                "*(Пожалуйста, прикрепите архив GerbariumLogs с рабочего стола сюда)*"
+                "*(Пожалуйста, прикрепите архив GerbariumLogs сюда)*"
             );
             await shell.openExternal(`https://github.com/Xielain-art/gerbarium-releases/issues/new?body=${issueBody}`);
 
-            return { success: true, path: zipPath };
+            return { success: true, path: filePath };
         } catch (e) {
-            console.error("Failed to export logs", e);
-            return { success: false };
+            const error = e as Error;
+            console.error("Failed to export logs", error);
+            return { success: false, error: error.message };
         }
     });
 }
