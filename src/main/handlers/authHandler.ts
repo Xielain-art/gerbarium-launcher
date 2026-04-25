@@ -6,6 +6,7 @@ import log from "electron-log";
 import { IPC_CHANNELS, type AuthSessionUser } from "../../shared/constants/ipc-chanels";
 import { ERROR_CODES } from "../../shared/constants/errors";
 import { LOG_MESSAGES } from "../../shared/constants/log-messages";
+import { secureStorageLock } from "../utils/secureStorageLock";
 
 const SECURE_STORAGE_FILE_NAME = "secure-storage.json";
 const AUTH_SESSION_KEY = "auth:session";
@@ -95,9 +96,11 @@ export default function authHandler(app: App) {
           user,
         });
 
-        const secureData = await readSecureData(secureDataPath);
-        secureData[AUTH_SESSION_KEY] = encryptedSession;
-        await writeSecureData(secureDataPath, secureData);
+        await secureStorageLock.runExclusive(async () => {
+          const secureData = await readSecureData(secureDataPath);
+          secureData[AUTH_SESSION_KEY] = encryptedSession;
+          await writeSecureData(secureDataPath, secureData);
+        });
 
         log.info(LOG_MESSAGES.AUTH_LOGIN_SUCCESS, user.username);
         return { success: true, user };
@@ -133,9 +136,11 @@ export default function authHandler(app: App) {
           user,
         });
 
-        const secureData = await readSecureData(secureDataPath);
-        secureData[AUTH_SESSION_KEY] = encryptedSession;
-        await writeSecureData(secureDataPath, secureData);
+        await secureStorageLock.runExclusive(async () => {
+          const secureData = await readSecureData(secureDataPath);
+          secureData[AUTH_SESSION_KEY] = encryptedSession;
+          await writeSecureData(secureDataPath, secureData);
+        });
 
         log.info(LOG_MESSAGES.AUTH_LOGIN_OFFLINE_SUCCESS, user.username);
         return { success: true, user };
@@ -152,18 +157,20 @@ export default function authHandler(app: App) {
   ipcMain.handle(IPC_CHANNELS.AUTH.GET_SESSION, async () => {
     log.debug(LOG_MESSAGES.AUTH_SESSION_READ);
     try {
-      const secureData = await readSecureData(secureDataPath);
-      const encryptedSession = secureData[AUTH_SESSION_KEY];
-      if (!encryptedSession) {
-        return { success: true, isAuthenticated: false, user: null };
-      }
+      return await secureStorageLock.runExclusive(async () => {
+        const secureData = await readSecureData(secureDataPath);
+        const encryptedSession = secureData[AUTH_SESSION_KEY];
+        if (!encryptedSession) {
+          return { success: true, isAuthenticated: false, user: null };
+        }
 
-      const session = decryptSession(encryptedSession);
-      return {
-        success: true,
-        isAuthenticated: true,
-        user: session.user,
-      };
+        const session = decryptSession(encryptedSession);
+        return {
+          success: true,
+          isAuthenticated: true,
+          user: session.user,
+        };
+      });
     } catch (error) {
       log.error(LOG_MESSAGES.AUTH_SESSION_READ_FAILED, error);
       return {
@@ -176,11 +183,13 @@ export default function authHandler(app: App) {
   ipcMain.handle(IPC_CHANNELS.AUTH.LOGOUT, async () => {
     log.info(LOG_MESSAGES.AUTH_LOGOUT);
     try {
-      const secureData = await readSecureData(secureDataPath);
-      if (secureData[AUTH_SESSION_KEY]) {
-        delete secureData[AUTH_SESSION_KEY];
-        await writeSecureData(secureDataPath, secureData);
-      }
+      await secureStorageLock.runExclusive(async () => {
+        const secureData = await readSecureData(secureDataPath);
+        if (secureData[AUTH_SESSION_KEY]) {
+          delete secureData[AUTH_SESSION_KEY];
+          await writeSecureData(secureDataPath, secureData);
+        }
+      });
       return { success: true };
     } catch (error) {
       log.error(LOG_MESSAGES.AUTH_LOGOUT_FAILED, error);

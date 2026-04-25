@@ -9,64 +9,21 @@ export function Button({
   disabled,
   ...props
 }: ButtonProps) {
-  const baseStyles =
-    'relative inline-flex items-center justify-center font-bold uppercase transition-all duration-75 select-none font-minecraft';
+  const baseStyles = 'mc-btn';
 
   const variantStyles = {
-    // Classic Minecraft-style button
-    minecraft:
-      'bg-[#3c3c3c] text-[#e0e0e0] ' +
-      'border-[3px] ' +
-      'border-t-[#5a5a5a] border-l-[#5a5a5a] ' +
-      'border-b-[#1a1a1a] border-r-[#1a1a1a] ' +
-      'hover:bg-[#4a4a4a] ' +
-      'active:border-t-[#1a1a1a] active:border-l-[#1a1a1a] ' +
-      'active:border-b-[#5a5a5a] active:border-r-[#5a5a5a] ' +
-      'active:bg-[#323232] ' +
-      'shadow-[inset_2px_2px_0px_#5a5a5a,inset_-2px_-2px_0px_#1a1a1a]',
-    
-    primary:
-      'bg-[#3a753a] text-[#ffffff] ' +
-      'border-[3px] ' +
-      'border-t-[#4a9a4a] border-l-[#4a9a4a] ' +
-      'border-b-[#2a5a2a] border-r-[#2a5a2a] ' +
-      'hover:bg-[#4a8a4a] ' +
-      'active:border-t-[#2a5a2a] active:border-l-[#2a5a2a] ' +
-      'active:border-b-[#4a9a4a] active:border-r-[#4a9a4a] ' +
-      'shadow-[inset_2px_2px_0px_#4a9a4a,inset_-2px_-2px_0px_#2a5a2a]',
-    
-    secondary:
-      'bg-[#5a5a5a] text-[#e0e0e0] ' +
-      'border-[3px] ' +
-      'border-t-[#7a7a7a] border-l-[#7a7a7a] ' +
-      'border-b-[#3a3a3a] border-r-[#3a3a3a] ' +
-      'hover:bg-[#6a6a6a] ' +
-      'active:border-t-[#3a3a3a] active:border-l-[#3a3a3a] ' +
-      'active:border-b-[#7a7a7a] active:border-r-[#7a7a7a] ' +
-      'shadow-[inset_2px_2px_0px_#7a7a7a,inset_-2px_-2px_0px_#3a3a3a]',
-    
-    danger:
-      'bg-[#8b2a2a] text-[#ffffff] ' +
-      'border-[3px] ' +
-      'border-t-[#aa3a3a] border-l-[#aa3a3a] ' +
-      'border-b-[#5a1a1a] border-r-[#5a1a1a] ' +
-      'hover:bg-[#9a3a3a] ' +
-      'active:border-t-[#5a1a1a] active:border-l-[#5a1a1a] ' +
-      'active:border-b-[#aa3a3a] active:border-r-[#aa3a3a] ' +
-      'shadow-[inset_2px_2px_0px_#aa3a3a,inset_-2px_-2px_0px_#5a1a1a]',
+    minecraft: '',
+    primary: 'mc-btn-primary',
+    secondary: 'mc-btn-secondary',
+    danger: 'mc-btn-danger',
   };
 
   const sizeStyles = {
-    sm: 'px-4 py-2 text-xs min-h-[32px]',
-    md: 'px-6 py-3 text-sm min-h-[40px]',
-    lg: 'px-8 py-4 text-base min-h-[52px]',
-    xl: 'px-10 py-5 text-lg min-h-[60px]',
+    sm: 'mc-btn-sm',
+    md: 'mc-btn-md',
+    lg: 'mc-btn-lg',
+    xl: 'mc-btn-xl',
   };
-
-  const disabledStyles =
-    'opacity-50 cursor-not-allowed ' +
-    'active:border-t-[#5a5a5a] active:border-l-[#5a5a5a] ' +
-    'active:border-b-[#1a1a1a] active:border-r-[#1a1a1a]';
 
   return (
     <button
@@ -74,7 +31,6 @@ export function Button({
         ${baseStyles}
         ${variantStyles[variant]}
         ${sizeStyles[size]}
-        ${disabled || isLoading ? disabledStyles : ''}
         ${className}
       `}
       disabled={disabled || isLoading}

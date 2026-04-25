@@ -5,6 +5,7 @@ import log from "electron-log";
 import { IPC_CHANNELS } from "@shared/constants/ipc-chanels";
 import { ERROR_CODES } from "@shared/constants/errors";
 import { LOG_MESSAGES } from "@shared/constants/log-messages";
+import { secureStorageLock } from "../utils/secureStorageLock";
 
 type SecureData = Record<string, string>;
 
@@ -35,11 +36,13 @@ export default function secureStorageHandler(app: App) {
     async (_event, key: string, value: string) => {
       log.info(LOG_MESSAGES.SECURE_STORAGE_SET, key);
       try {
-        const encrypted = safeStorage.encryptString(value);
-        const encryptedBase64 = encrypted.toString("base64");
-        const secureData = await readSecureData(secureDataPath);
-        secureData[key] = encryptedBase64;
-        await writeSecureData(secureDataPath, secureData);
+        await secureStorageLock.runExclusive(async () => {
+          const encrypted = safeStorage.encryptString(value);
+          const encryptedBase64 = encrypted.toString("base64");
+          const secureData = await readSecureData(secureDataPath);
+          secureData[key] = encryptedBase64;
+          await writeSecureData(secureDataPath, secureData);
+        });
         log.info(LOG_MESSAGES.SECURE_STORAGE_SET_OK, key);
         return { success: true };
       } catch (error) {
@@ -57,15 +60,17 @@ export default function secureStorageHandler(app: App) {
     async (_event, key: string) => {
       log.debug(LOG_MESSAGES.SECURE_STORAGE_GET, key);
       try {
-        const secureData = await readSecureData(secureDataPath);
-        const encryptedBase64 = secureData[key];
-        if (!encryptedBase64) {
-          return { success: true, value: null };
-        }
+        return await secureStorageLock.runExclusive(async () => {
+          const secureData = await readSecureData(secureDataPath);
+          const encryptedBase64 = secureData[key];
+          if (!encryptedBase64) {
+            return { success: true, value: null };
+          }
 
-        const encrypted = Buffer.from(encryptedBase64, "base64");
-        const decrypted = safeStorage.decryptString(encrypted);
-        return { success: true, value: decrypted };
+          const encrypted = Buffer.from(encryptedBase64, "base64");
+          const decrypted = safeStorage.decryptString(encrypted);
+          return { success: true, value: decrypted };
+        });
       } catch (error) {
         log.error(LOG_MESSAGES.SECURE_STORAGE_GET_FAILED, key, error);
         return {
@@ -81,9 +86,11 @@ export default function secureStorageHandler(app: App) {
     async (_event, key: string) => {
       log.info(LOG_MESSAGES.SECURE_STORAGE_DELETE, key);
       try {
-        const secureData = await readSecureData(secureDataPath);
-        delete secureData[key];
-        await writeSecureData(secureDataPath, secureData);
+        await secureStorageLock.runExclusive(async () => {
+          const secureData = await readSecureData(secureDataPath);
+          delete secureData[key];
+          await writeSecureData(secureDataPath, secureData);
+        });
         return { success: true };
       } catch (error) {
         log.error(LOG_MESSAGES.SECURE_STORAGE_DELETE_FAILED, key, error);

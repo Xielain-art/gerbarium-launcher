@@ -82,7 +82,7 @@ export function LoginScreen() {
           onSubmit={handleLogin}
         />
 
-        <div className="mt-4 text-center font-minecraft text-[10px] text-gray-600">
+        <div className="mt-4 text-center font-minecraft text-xs text-gray-600">
           {t.LOGIN.FOOTER_TEXT}
         </div>
       </div>

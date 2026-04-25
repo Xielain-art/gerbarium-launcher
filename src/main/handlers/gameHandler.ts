@@ -88,17 +88,9 @@ function validateAbsolutePath(inputPath: string, field: string): string {
 async function validateJavaPath(inputPath: string): Promise<string> {
   const resolvedPath = validateAbsolutePath(inputPath, "javaPath");
   const javaExecutableNames = new Set(["java", "java.exe", "javaw.exe"]);
-  const parentDirName = path.basename(path.dirname(resolvedPath)).toLowerCase();
-  const javaHomeDirName = path.basename(path.dirname(path.dirname(resolvedPath))).toLowerCase();
 
   if (!javaExecutableNames.has(path.basename(resolvedPath).toLowerCase())) {
     throw new Error("javaPath must point to a Java executable");
-  }
-  if (parentDirName !== "bin") {
-    throw new Error("javaPath must point to a Java executable inside a bin directory");
-  }
-  if (!/(java|jdk|jre)/.test(javaHomeDirName)) {
-    throw new Error("javaPath must point to a Java runtime or JDK directory");
   }
 
   try {

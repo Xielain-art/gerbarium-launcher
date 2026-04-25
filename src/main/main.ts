@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, Tray, dialog, ipcMain, type MenuItemConstructorOptions } from "electron";
+import { app, BrowserWindow, Menu, Tray, ipcMain, type MenuItemConstructorOptions } from "electron";
 import path from "node:path";
 import fs from "node:fs";
 import crypto from "node:crypto";
@@ -62,19 +62,6 @@ function handleFatalError(title: string, details: unknown): void {
   isHandlingFatalError = true;
 
   log.error(title, details);
-
-  let logPath = "unknown";
-  try {
-    logPath = getMainLogPath();
-  } catch {
-    // Ignore path resolution errors and still exit.
-  }
-
-  dialog.showErrorBox(
-    "Критическая ошибка",
-    `Лаунчер завершил работу из-за критической ошибки.\nЛоги сохранены в:\n${logPath}`
-  );
-
   app.exit(1);
 }
 
@@ -390,3 +377,4 @@ app.on("activate", () => {
     mainWindow = createWindow();
   }
 });
+
