@@ -10,7 +10,6 @@ compression: 'maximum'
 # Указываем, какие файлы брать, а какие игнорировать
 files:
   - 'dist/**/*'
-  - 'index.js'
   - 'package.json'
   - '_legacy_app/**/*'
   - 'libraries/**/*'

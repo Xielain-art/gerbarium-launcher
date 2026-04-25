@@ -1,28 +1,18 @@
 import * as esbuild from "esbuild";
 
 const isWatch = process.argv.includes("--watch");
-const commonOptions = {
+const mainConfig = {
   bundle: true,
   platform: "node",
+  format: "cjs",
   external: ["electron", "electron-log"],
-};
-
-const handlersConfig = {
-  ...commonOptions,
-  entryPoints: ["src/main/handlers/*.ts"],
-  outdir: "dist/main/handlers",
-};
-
-const constantsConfig = {
-  ...commonOptions,
-  entryPoints: ["src/main/main-constants.ts"],
-  outfile: "dist/main/main-constants.js",
+  entryPoints: ["src/main/main.ts"],
+  outfile: "dist/main/main.js",
 };
 
 if (isWatch) {
-  const handlersContext = await esbuild.context(handlersConfig);
-  const constantsContext = await esbuild.context(constantsConfig);
-  await Promise.all([handlersContext.watch(), constantsContext.watch()]);
+  const mainContext = await esbuild.context(mainConfig);
+  await mainContext.watch();
 } else {
-  await Promise.all([esbuild.build(handlersConfig), esbuild.build(constantsConfig)]);
+  await esbuild.build(mainConfig);
 }

@@ -10,7 +10,7 @@
     "url": "https://github.com/Xielain-art/gerbarium-releases/issues"
   },
   "private": true,
-  "main": "index.js",
+  "main": "dist/main/main.js",
   "scripts": {
     "start": "electron .",
     "build:ui": "vite build",

@@ -32,7 +32,7 @@ async function bootstrapElectron(): Promise<void> {
 
   while (Date.now() - startedAt < MAX_WAIT_MS) {
     if (await isServerReady(DEV_SERVER_URL)) {
-      require(path.resolve(process.cwd(), "index.js"));
+      require(path.resolve(process.cwd(), "dist", "main", "main.js"));
       return;
     }
     await wait(RETRY_DELAY_MS);
