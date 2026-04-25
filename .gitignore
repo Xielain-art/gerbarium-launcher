@@ -4,6 +4,7 @@
 /target/
 /logs/
 /dist/
+/dist-electron/
 /dist-main/
 /release/
 /public/
