@@ -22,7 +22,7 @@ const checkUpdateGate = () => {
 // Root route with Outlet for nested routes
 const rootRoute = createRootRoute({
   component: () => (
-    <div className="w-full h-screen bg-[#1a1a1a]">
+    <div className="w-full h-screen bg-[var(--theme-bg)]">
       <Outlet />
     </div>
   ),

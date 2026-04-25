@@ -11,6 +11,7 @@ export function Checkbox({ label, className = '', id, ...props }: CheckboxProps)
         cursor-pointer 
         group
         select-none
+        [-webkit-app-region:no-drag]
         ${className}
       `}
     >

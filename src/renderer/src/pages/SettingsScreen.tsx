@@ -69,12 +69,18 @@ export function SettingsScreen() {
   }, [isAuthenticated, shouldLogout, navigate]);
 
   useEffect(() => {
-    if (general.javaPath) {
-      void checkJava(general.javaPath).then(setJavaVersion);
+    if (activeTab !== "java") {
+      return;
     }
-    void getInstalledJava().then(setInstalledJava);
-    void getJavaVersions().then(setJavaVersions);
-  }, [general.javaPath, checkJava, getInstalledJava, getJavaVersions]);
+
+    void Promise.all([
+      getInstalledJava().then(setInstalledJava),
+      getJavaVersions().then(setJavaVersions),
+      general.javaPath
+        ? checkJava(general.javaPath).then(setJavaVersion)
+        : Promise.resolve().then(() => setJavaVersion(null)),
+    ]);
+  }, [activeTab, general.javaPath, checkJava, getInstalledJava, getJavaVersions]);
 
   const handleSave = async () => {
     await saveSettings();
@@ -255,13 +261,13 @@ export function SettingsScreen() {
   };
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-[#1a1a1a]">
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-[var(--theme-bg)]">
       <SettingsHeader t={t} onBack={handleBack} onLogout={handleLogout} />
 
       <main className="flex flex-1 overflow-hidden">
         <SettingsTabNav t={t} activeTab={activeTab} onChangeTab={setActiveTab} />
 
-        <div className="flex-1 overflow-y-auto bg-[#1a1a1a] p-6">
+        <div className="flex-1 overflow-y-auto bg-[var(--theme-bg)] p-6">
           <Card className="mx-auto max-w-2xl p-6">
             {error && <div className="mc-error mb-6">{error}</div>}
             {renderActiveTab()}
