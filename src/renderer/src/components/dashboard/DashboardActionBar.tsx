@@ -11,10 +11,11 @@ interface DashboardActionBarProps {
   isLaunching: boolean;
   launchProgress: number | null;
   launchStatus: string;
+  isConsoleVisible: boolean;
   errorMessage: string | null;
   onPlay: () => void;
   onCancelDownload: () => void;
-  onHideConsole: () => void;
+  onToggleConsole: () => void;
 }
 
 export function DashboardActionBar({
@@ -25,10 +26,11 @@ export function DashboardActionBar({
   isLaunching,
   launchProgress,
   launchStatus,
+  isConsoleVisible,
   errorMessage,
   onPlay,
   onCancelDownload,
-  onHideConsole,
+  onToggleConsole,
 }: DashboardActionBarProps) {
   return (
     <div className="shrink-0 border-t-[4px] border-[#1a1a1a] bg-[#2b2d31]/95 backdrop-blur-md p-6 shadow-2xl">
@@ -98,12 +100,12 @@ export function DashboardActionBar({
           </div>
 
           <Button
-            onClick={onHideConsole}
+            onClick={onToggleConsole}
             variant="danger"
             size="lg"
           >
             <span className="mr-2">{t.DASHBOARD.CANCEL_ICON}</span>
-            Hide Console
+            {isConsoleVisible ? "Hide Console" : "Show Console"}
           </Button>
         </div>
       ) : (

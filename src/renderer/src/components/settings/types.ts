@@ -2,7 +2,7 @@ import type { SettingsGeneral, SettingsProfile } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
 import type { DownloadStatus } from "../../../../shared/constants/ipc-chanels";
 
-export type SettingsTab = "general" | "java" | "profile" | "support";
+export type SettingsTab = "general" | "java" | "profile" | "advanced" | "support";
 
 export interface SettingsNotice {
   type: "success" | "error";
@@ -52,9 +52,16 @@ export interface ProfileSettingsTabProps extends SettingsBaseProps {
   onUpdateProfile: (updates: Partial<SettingsProfile>) => void;
 }
 
+export interface AdvancedSettingsTabProps extends SettingsBaseProps {
+  general: SettingsGeneral;
+  onUpdateGeneral: (updates: Partial<SettingsGeneral>) => void;
+}
+
 export interface SupportSettingsTabProps extends SettingsBaseProps {
   isExporting: boolean;
   notice: SettingsNotice | null;
   onExportLogs: () => Promise<void>;
   onOpenGithub: () => void;
+  showDevToolsButton: boolean;
+  onOpenDevTools: () => Promise<void>;
 }

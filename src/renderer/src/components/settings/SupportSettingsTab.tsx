@@ -7,7 +7,13 @@ export function SupportSettingsTab({
   notice,
   onExportLogs,
   onOpenGithub,
+  showDevToolsButton,
+  onOpenDevTools,
 }: SupportSettingsTabProps) {
+  const debugTranslations = t.SETTINGS.DEBUG as unknown as {
+    OPEN_DEVTOOLS_BUTTON?: string;
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
@@ -48,6 +54,16 @@ export function SupportSettingsTab({
           >
             {t.SETTINGS.DEBUG.GITHUB_ISSUES_BUTTON}
           </Button>
+
+          {showDevToolsButton && (
+            <Button
+              variant="secondary"
+              onClick={() => void onOpenDevTools()}
+              className="w-full"
+            >
+              {debugTranslations.OPEN_DEVTOOLS_BUTTON || "Open DevTools"}
+            </Button>
+          )}
         </div>
       </div>
     </div>

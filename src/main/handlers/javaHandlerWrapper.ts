@@ -10,6 +10,7 @@ import { IPC_CHANNELS } from '../../shared/constants/ipc-chanels';
 import { JAVA_VERSIONS } from '../config/javaConfig';
 import { ERROR_CODES } from '../../shared/constants/errors';
 import { LOG_MESSAGES } from '../../shared/constants/log-messages';
+import { DIALOG_FILTERS, FILE_EXTENSIONS, PLATFORMS } from '../../shared/constants/system';
 import log from 'electron-log';
 
 const downloadLocks: Map<number, boolean> = new Map();

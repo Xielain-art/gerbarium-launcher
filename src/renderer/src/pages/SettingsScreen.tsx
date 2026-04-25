@@ -8,6 +8,7 @@ import { Card, ConfirmModal } from "../components";
 import { useTranslation } from "../hooks/useTranslation";
 import { ROUTES, STORAGE_KEYS } from "../../../shared/constants/system";
 import {
+  AdvancedSettingsTab,
   GeneralSettingsTab,
   JavaSettingsTab,
   ProfileSettingsTab,
@@ -23,6 +24,7 @@ import {
 export function SettingsScreen() {
   const t = useTranslation();
   const navigate = useNavigate();
+  const isDevMode = import.meta.env.DEV;
 
   const {
     general,
@@ -225,6 +227,16 @@ export function SettingsScreen() {
       );
     }
 
+    if (activeTab === "advanced") {
+      return (
+        <AdvancedSettingsTab
+          t={t}
+          general={general}
+          onUpdateGeneral={updateGeneral}
+        />
+      );
+    }
+
     return (
       <SupportSettingsTab
         t={t}
@@ -233,6 +245,10 @@ export function SettingsScreen() {
         onExportLogs={handleExportLogs}
         onOpenGithub={() => {
           void window.electronAPI.system.openGitHubIssue();
+        }}
+        showDevToolsButton={isDevMode}
+        onOpenDevTools={async () => {
+          await window.electronAPI.openDevTools();
         }}
       />
     );

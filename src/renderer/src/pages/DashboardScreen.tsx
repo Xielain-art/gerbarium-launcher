@@ -79,6 +79,7 @@ export function DashboardScreen() {
   const [launchProgress, setLaunchProgress] = useState<number | null>(null);
   const [launchStatus, setLaunchStatus] = useState<string>("");
   const [launchError, setLaunchError] = useState<string | null>(null);
+  const [isConsoleVisible, setIsConsoleVisible] = useState(true);
   const closeOnLaunchRequestedRef = useRef(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
 
@@ -200,6 +201,7 @@ export function DashboardScreen() {
 
       const settings = useSettingsStore.getState().general;
       closeOnLaunchRequestedRef.current = settings.closeOnLaunch;
+      setIsConsoleVisible(settings.showLaunchConsole);
 
       const launchOptions = {
         username: user.username,
@@ -269,7 +271,7 @@ export function DashboardScreen() {
         </div>
 
         <div className="flex-1 overflow-y-auto pt-20 pb-4 flex flex-col">
-          {isLaunching ? (
+          {isLaunching && isConsoleVisible ? (
             <LaunchConsole logs={logs} logsEndRef={logsEndRef} />
           ) : (
             <NewsFeed
@@ -289,10 +291,11 @@ export function DashboardScreen() {
           isLaunching={isLaunching}
           launchProgress={launchProgress}
           launchStatus={launchStatus}
+          isConsoleVisible={isConsoleVisible}
           errorMessage={launchError}
           onPlay={handlePlay}
           onCancelDownload={cancelDownload}
-          onHideConsole={() => setIsLaunching(false)}
+          onToggleConsole={() => setIsConsoleVisible((prev) => !prev)}
         />
       </main>
     </div>

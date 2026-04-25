@@ -36,6 +36,7 @@ const defaultSettings: SettingsStateType = {
     jvmArgs: DEFAULT_SETTINGS.JVM_ARGS,
     gamePath: '',
     fullscreen: false,
+    showLaunchConsole: true,
     theme: 'gerbarium',
   },
   mods: {

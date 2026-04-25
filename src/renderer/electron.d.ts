@@ -24,6 +24,7 @@ export interface IElectronAPI {
   maximizeWindow: () => Promise<void>;
   closeWindow: () => Promise<void>;
   toggleFullScreen: () => Promise<void>;
+  openDevTools: () => Promise<void>;
   onWindowStateChange: (callback: (state: WindowState) => void) => () => void;
 
   // Update events
