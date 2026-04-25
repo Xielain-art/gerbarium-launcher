@@ -5,7 +5,7 @@ import { STORAGE_KEYS, LOG_ACTIONS, DEFAULT_SETTINGS } from '../../../shared/con
 import { UI_STRINGS } from '../../../shared/constants/ui-strings';
 
 const logAction = (action: string, details?: string) => {
-  window.logAction?.(action, details);
+  void window.electronAPI?.system.logAction(action, details);
 };
 
 interface SettingsState extends SettingsStateType {
@@ -68,6 +68,12 @@ export const useSettingsStore = create<SettingsState>()(
       updateGeneral: (updates) => {
         set((state) => {
           const newState = { ...state.general, ...updates };
+          if (typeof updates.showLaunchConsole === "boolean") {
+            logAction(
+              LOG_ACTIONS.SAVE_SETTINGS,
+              `showLaunchConsole=${updates.showLaunchConsole ? "enabled" : "disabled"}`,
+            );
+          }
           // Sync with main process
           if (window.electronAPI?.system?.sendSettingsUpdate) {
             window.electronAPI.system.sendSettingsUpdate(newState);

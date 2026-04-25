@@ -6,16 +6,18 @@ import {
   redirect,
   createHashHistory,
 } from "@tanstack/react-router";
-import { LoginScreen, DashboardScreen, SettingsScreen, UpdateScreen } from "./pages";
+import { LoginScreen, DashboardScreen, SettingsScreen, UpdateScreen, IntegrityCheckScreen } from "./pages";
 import { useAuthStore } from "./stores/useAuthStore";
+import { useStartupGateStore } from "./stores/useStartupGateStore";
 import { ROUTES } from "../../shared/constants/system";
 
 // Helper function to check authentication using Zustand store state
 const checkAuth = () => {
   return useAuthStore.getState().isAuthenticated;
 };
-
-const isDevMode = import.meta.env.DEV;
+const checkUpdateGate = () => {
+  return useStartupGateStore.getState().updateGatePassed;
+};
 
 // Root route with Outlet for nested routes
 const rootRoute = createRootRoute({
@@ -26,11 +28,17 @@ const rootRoute = createRootRoute({
   ),
 });
 
-// Update route (default - shown first on app launch)
-const updateRoute = createRoute({
+// Integrity route (always first)
+const integrityRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: ROUTES.HOME,
-  component: isDevMode ? LoginScreen : UpdateScreen,
+  component: IntegrityCheckScreen,
+});
+
+const updateRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: ROUTES.UPDATE,
+  component: UpdateScreen,
 });
 
 // Login route
@@ -39,6 +47,9 @@ const loginRoute = createRoute({
   path: ROUTES.LOGIN,
   component: LoginScreen,
   beforeLoad: async () => {
+    if (!import.meta.env.DEV && !checkUpdateGate()) {
+      throw redirect({ to: ROUTES.UPDATE });
+    }
     if (checkAuth()) {
       throw redirect({ to: ROUTES.DASHBOARD });
     }
@@ -51,6 +62,9 @@ const dashboardRoute = createRoute({
   path: ROUTES.DASHBOARD,
   component: DashboardScreen,
   beforeLoad: async () => {
+    if (!import.meta.env.DEV && !checkUpdateGate()) {
+      throw redirect({ to: ROUTES.UPDATE });
+    }
     if (!checkAuth()) {
       throw redirect({ to: ROUTES.LOGIN });
     }
@@ -63,6 +77,9 @@ const settingsRoute = createRoute({
   path: ROUTES.SETTINGS,
   component: SettingsScreen,
   beforeLoad: async () => {
+    if (!import.meta.env.DEV && !checkUpdateGate()) {
+      throw redirect({ to: ROUTES.UPDATE });
+    }
     if (!checkAuth()) {
       throw redirect({ to: ROUTES.LOGIN });
     }
@@ -71,6 +88,7 @@ const settingsRoute = createRoute({
 
 // Build the route tree
 const routeTree = rootRoute.addChildren([
+  integrityRoute,
   updateRoute,
   loginRoute,
   dashboardRoute,

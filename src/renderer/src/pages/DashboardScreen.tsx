@@ -7,7 +7,7 @@ import { useServerStatusStore } from "../stores/useServerStatusStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
 import { WindowControls } from "../components";
 import { useTranslation } from "../hooks/useTranslation";
-import { ROUTES, STORAGE_KEYS } from "../../../shared/constants/system";
+import { ROUTES, STORAGE_KEYS, LOG_ACTIONS } from "../../../shared/constants/system";
 import type { GameVersion } from "../types";
 import newsPlaceholder from "../assets/photo_2026-04-23_10-34-22.jpg";
 import { DashboardSidebar } from "../components/dashboard/DashboardSidebar";
@@ -55,6 +55,10 @@ function parseJvmArgs(jvmArgsText: string): string[] {
 
 function toErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error";
+}
+
+function logAction(action: string, details?: string): void {
+  void window.electronAPI?.system.logAction(action, details);
 }
 
 export function DashboardScreen() {
@@ -131,6 +135,7 @@ export function DashboardScreen() {
       if (data.type === "state" && data.content.phase === "spawned") {
         setLaunchProgress(100);
         setLaunchStatus("Running...");
+        logAction("GAME_PROCESS_SPAWNED", "Spawn event received");
 
         if (closeOnLaunchRequestedRef.current) {
           if (useSettingsStore.getState().general.minimizeToTray) {
@@ -147,6 +152,7 @@ export function DashboardScreen() {
         setLaunchProgress(null);
         setLaunchStatus("");
         closeOnLaunchRequestedRef.current = false;
+        logAction("GAME_PROCESS_CLOSED", "Game process exited");
       }
     });
 
@@ -185,6 +191,7 @@ export function DashboardScreen() {
     setLaunchProgress(0);
     setLaunchStatus("Preparing...");
     setLogs([]);
+    logAction("GAME_LAUNCH_START", selectedVersion.name);
 
     try {
       const installedJava = await window.electronAPI.java.getInstalledJava();
@@ -223,12 +230,14 @@ export function DashboardScreen() {
 
       setLaunchStatus("Starting game process...");
       setLaunchProgress(95);
+      logAction("GAME_LAUNCH_REQUESTED", selectedVersion.name);
     } catch (error: unknown) {
       setIsLaunching(false);
       setLaunchProgress(null);
       setLaunchStatus("");
       setLaunchError(`Launch error: ${toErrorMessage(error)}`);
       closeOnLaunchRequestedRef.current = false;
+      logAction("GAME_LAUNCH_ERROR", toErrorMessage(error));
     }
   };
 
@@ -238,6 +247,14 @@ export function DashboardScreen() {
     setShouldLogout(true);
     logout();
     localStorage.removeItem(STORAGE_KEYS.AUTH);
+  };
+
+  const handleToggleConsole = () => {
+    setIsConsoleVisible((prev) => {
+      const next = !prev;
+      logAction(LOG_ACTIONS.SAVE_SETTINGS, `Launch console visibility toggled: ${next ? "on" : "off"}`);
+      return next;
+    });
   };
 
   return (
@@ -295,7 +312,7 @@ export function DashboardScreen() {
           errorMessage={launchError}
           onPlay={handlePlay}
           onCancelDownload={cancelDownload}
-          onToggleConsole={() => setIsConsoleVisible((prev) => !prev)}
+          onToggleConsole={handleToggleConsole}
         />
       </main>
     </div>

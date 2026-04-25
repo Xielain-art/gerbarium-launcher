@@ -155,6 +155,7 @@ export const DOWNLOAD_STATUS = {
 
 export const ROUTES = {
   HOME: '/',
+  UPDATE: '/update',
   LOGIN: '/login',
   DASHBOARD: '/dashboard',
   SETTINGS: '/settings',

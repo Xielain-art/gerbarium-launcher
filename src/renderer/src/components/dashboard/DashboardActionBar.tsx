@@ -32,6 +32,20 @@ export function DashboardActionBar({
   onCancelDownload,
   onToggleConsole,
 }: DashboardActionBarProps) {
+  const launchPercent = launchProgress !== null ? Math.max(0, Math.min(100, launchProgress)) : null;
+  const launchPhase =
+    launchPercent === null
+      ? "Preparing runtime"
+      : launchPercent < 25
+        ? "Preparing assets"
+        : launchPercent < 55
+          ? "Downloading components"
+          : launchPercent < 85
+            ? "Validating game files"
+            : launchPercent < 100
+              ? "Starting Minecraft process"
+              : "Minecraft is running";
+
   return (
     <div className="shrink-0 border-t-[4px] border-[#1a1a1a] bg-[#2b2d31]/95 backdrop-blur-md p-6 shadow-2xl">
       {errorMessage && (
@@ -73,27 +87,29 @@ export function DashboardActionBar({
           </Button>
         </div>
       ) : isLaunching ? (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between gap-6">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
             <div className="h-8 w-8 rounded-full border-4 border-[#55aaff] border-t-transparent animate-spin" />
-            <div className="flex-1 min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between mb-1">
                 <div className="font-minecraft text-sm text-[#55aaff] flex items-center gap-2">
-                  <span className="capitalize">{launchStatus}</span>
-                  {launchProgress === null && <span className="animate-pulse">...</span>}
+                  <span className="capitalize">{launchStatus || launchPhase}</span>
+                  {launchPercent === null && <span className="animate-pulse">...</span>}
                 </div>
-                {launchProgress !== null && (
+                {launchPercent !== null && (
                   <div className="font-minecraft text-xs text-[#55aaff]">
-                    {launchProgress}%
+                    {launchPercent}%
                   </div>
                 )}
               </div>
               <div className="font-minecraft text-base font-bold text-[#e0e0e0] truncate">
                 {selectedVersion?.name || "Minecraft"}
               </div>
+              <div className="mt-1 font-minecraft text-xs text-[#7f95af]">{launchPhase}</div>
 
               <ProgressBar
-                progress={launchProgress !== null ? launchProgress : 0}
+                progress={launchPercent !== null ? launchPercent : 0}
+                status={launchStatus || launchPhase}
                 className="mt-3"
               />
             </div>
@@ -101,8 +117,9 @@ export function DashboardActionBar({
 
           <Button
             onClick={onToggleConsole}
-            variant="danger"
+            variant="secondary"
             size="lg"
+            className="shrink-0 min-w-[170px]"
           >
             <span className="mr-2">{t.DASHBOARD.CANCEL_ICON}</span>
             {isConsoleVisible ? "Hide Console" : "Show Console"}

@@ -6,6 +6,7 @@ import log from "electron-log";
 import { autoUpdater } from "electron-updater";
 import got from "got";
 import { MAIN_CONSTANTS } from "./main-constants";
+import { IPC_CHANNELS, type IntegrityCheckResult } from "../shared/constants/ipc-chanels";
 import setupLogHandler from "./handlers/logHandler";
 import windowControlsHandler from "./handlers/windowControlsHandler";
 import secureStorageHandler from "./handlers/secureStorageHandler";
@@ -146,43 +147,70 @@ async function fetchExpectedAsarSha256(): Promise<string | null> {
 
     return expectedHash;
   } catch (error) {
-    log.error("Failed to fetch latest.yml for ASAR integrity check", error);
+    log.warn("Failed to fetch latest.yml for ASAR integrity check", error);
     return null;
   }
 }
 
-async function verifyAsarIntegrity(): Promise<void> {
+async function verifyAsarIntegrity(): Promise<IntegrityCheckResult> {
   if (isDev) {
-    return;
+    return {
+      ok: true,
+      status: "skipped",
+      message: "Integrity check is skipped in development mode.",
+    };
   }
 
   const expectedHashRaw = await fetchExpectedAsarSha256();
   if (!expectedHashRaw || !isHexHash(expectedHashRaw)) {
     log.warn("ASAR integrity check skipped: expected hash is missing or invalid");
-    return;
+    return {
+      ok: true,
+      status: "offline",
+      message: "Unable to fetch hash from latest.yml (offline or missing key).",
+    };
   }
 
   const asarPath = path.join(process.resourcesPath, "app.asar");
   if (!fs.existsSync(asarPath)) {
     log.warn("ASAR integrity check skipped: app.asar not found", asarPath);
-    return;
+    return {
+      ok: true,
+      status: "skipped",
+      message: "app.asar is not present in current runtime.",
+    };
   }
 
   try {
     const expectedHash = normalizeHexHash(expectedHashRaw);
     const actualHash = normalizeHexHash(await calculateFileSha256(asarPath));
     if (actualHash === expectedHash) {
-      return;
+      log.info("ASAR integrity check passed");
+      return {
+        ok: true,
+        status: "ok",
+        message: "ASAR integrity check passed.",
+        expectedHash,
+        actualHash,
+      };
     }
 
     log.warn("ASAR integrity mismatch detected", { expectedHash, actualHash });
-    dialog.showErrorBox(
-      "Нарушена целостность лаунчера",
-      "Файлы лаунчера были изменены. Запускается восстановление через обновление."
-    );
     await triggerRecoveryUpdate();
+    return {
+      ok: false,
+      status: "mismatch",
+      message: "ASAR integrity mismatch detected. Recovery update was triggered.",
+      expectedHash,
+      actualHash,
+    };
   } catch (error) {
     log.error("ASAR integrity check failed", error);
+    return {
+      ok: false,
+      status: "error",
+      message: error instanceof Error ? error.message : "Unknown integrity check error",
+    };
   }
 }
 
@@ -308,12 +336,15 @@ ipcMain.on("settings-updated", (_event, newSettings: Partial<LauncherSettings>) 
   scheduleTrayStateSync();
 });
 
+ipcMain.handle(IPC_CHANNELS.APP.VERIFY_INTEGRITY, async () => {
+  return await verifyAsarIntegrity();
+});
+
 app.on("before-quit", () => {
   isQuiting = true;
 });
 
 app.whenReady().then(() => {
-  void verifyAsarIntegrity();
   LangLoader.setupLanguage();
   mainWindow = createWindow();
   createMenu();
