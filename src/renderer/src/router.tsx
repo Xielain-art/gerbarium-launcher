@@ -10,6 +10,7 @@ import { LoginScreen, DashboardScreen, SettingsScreen, UpdateScreen, IntegrityCh
 import { useAuthStore } from "./stores/useAuthStore";
 import { useStartupGateStore } from "./stores/useStartupGateStore";
 import { ROUTES } from "../../shared/constants/system";
+import { CrashNoticeBanner } from "./components/layout/CrashNoticeBanner";
 
 // Helper function to check authentication using Zustand store state
 const checkAuth = () => {
@@ -22,7 +23,8 @@ const checkUpdateGate = () => {
 // Root route with Outlet for nested routes
 const rootRoute = createRootRoute({
   component: () => (
-    <div className="w-full h-screen bg-[var(--theme-bg)]">
+    <div className="relative w-full h-screen bg-[var(--theme-bg)]">
+      <CrashNoticeBanner />
       <Outlet />
     </div>
   ),

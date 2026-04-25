@@ -27,6 +27,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // App version
   getAppVersion: () => typedInvoke(IPC_CHANNELS.APP.GET_VERSION),
   verifyIntegrity: () => typedInvoke(IPC_CHANNELS.APP.VERIFY_INTEGRITY),
+  getLastCrashReport: () => typedInvoke(IPC_CHANNELS.APP.GET_LAST_CRASH_REPORT),
+  clearLastCrashReport: () => typedInvoke(IPC_CHANNELS.APP.CLEAR_LAST_CRASH_REPORT),
 
   // Window controls
   minimizeWindow: () => typedInvoke(IPC_CHANNELS.WINDOW.MINIMIZE),

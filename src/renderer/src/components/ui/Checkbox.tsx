@@ -6,52 +6,24 @@ export function Checkbox({ label, className = '', id, ...props }: CheckboxProps)
   return (
     <label
       htmlFor={checkboxId}
-      className={`
-        flex items-center gap-3 
-        cursor-pointer 
-        group
-        select-none
-        [-webkit-app-region:no-drag]
-        ${className}
-      `}
+      className={`mc-checkbox-label group [-webkit-app-region:no-drag] ${className}`}
     >
-      <div className="relative">
-        <input
-          id={checkboxId}
-          type="checkbox"
-          className="peer sr-only"
-          {...props}
-        />
-        <div
-          className={`
-            w-6 h-6 
-            bg-[#2b2d31] 
-            border-[3px] 
-            border-t-[#1a1a1a] 
-            border-l-[#1a1a1a] 
-            border-b-[#5a5a5a] 
-            border-r-[#5a5a5a]
-            peer-checked:bg-[#3a753a]
-            peer-focus:outline-none
-            transition-colors duration-75
-            flex items-center justify-center
-            shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]
-          `}
+      <input
+        id={checkboxId}
+        type="checkbox"
+        className="mc-checkbox"
+        {...props}
+      />
+      <div className="mc-checkbox-box">
+        <svg
+          className="h-4 w-4 text-white opacity-0"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={3}
         >
-          <svg
-            className="w-4 h-4 text-[#e0e0e0] opacity-0 peer-checked:opacity-100"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            strokeWidth="3"
-          >
-            <path
-              strokeLinecap="square"
-              strokeLinejoin="miter"
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
-        </div>
+          <path strokeLinecap="square" strokeLinejoin="miter" d="M5 13l4 4L19 7" />
+        </svg>
       </div>
       <span className="text-[#e0e0e0] text-sm font-minecraft group-hover:text-[#ffffff] transition-colors">
         {label}

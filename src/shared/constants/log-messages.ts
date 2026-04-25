@@ -48,6 +48,9 @@ export const LOG_MESSAGES = {
   AUTH_SESSION_READ_FAILED: '[AUTH] Failed to read auth session:',
   AUTH_LOGOUT: '[AUTH] Logout requested',
   AUTH_LOGOUT_FAILED: '[AUTH] Logout failed:',
+  APP_CRASH_REPORT_WRITE_FAILED: '[APP] Failed to write crash report:',
+  APP_CRASH_REPORT_READ_FAILED: '[APP] Failed to read crash report:',
+  APP_CRASH_REPORT_CLEAR_FAILED: '[APP] Failed to clear crash report:',
 
   // Log Export
   LOG_EXPORT_STARTED: '[LOG] Export started',

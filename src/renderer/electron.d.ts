@@ -7,6 +7,7 @@ import {
   UpdateInfoPayload,
   IntegrityCheckResult,
   AuthSessionUser,
+  CrashReportPayload,
 } from "../shared/constants/ipc-chanels";
 
 type IpcArgs<K extends keyof IpcChannelMap> = IpcChannelMap[K]["args"];
@@ -22,6 +23,8 @@ export interface IElectronAPI {
   closeApp: () => void;
   getAppVersion: () => Promise<string>;
   verifyIntegrity: () => Promise<IntegrityCheckResult>;
+  getLastCrashReport: () => Promise<{ success: boolean; report?: CrashReportPayload | null; error?: string }>;
+  clearLastCrashReport: () => Promise<{ success: boolean; error?: string }>;
 
   // Window controls
   minimizeWindow: () => Promise<void>;

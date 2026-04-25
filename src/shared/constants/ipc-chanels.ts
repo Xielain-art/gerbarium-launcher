@@ -56,6 +56,8 @@ export const IPC_CHANNELS = {
   APP: {
     GET_VERSION: "app:get-version",
     VERIFY_INTEGRITY: "app:verify-integrity",
+    GET_LAST_CRASH_REPORT: "app:get-last-crash-report",
+    CLEAR_LAST_CRASH_REPORT: "app:clear-last-crash-report",
   },
   GAME: {
     LAUNCH: "game:launch",
@@ -106,6 +108,12 @@ export interface IntegrityCheckResult {
   message: string;
   expectedHash?: string;
   actualHash?: string;
+}
+
+export interface CrashReportPayload {
+  title: string;
+  message: string;
+  timestamp: string;
 }
 
 // Карта типов для всех наших IPC событий
@@ -285,6 +293,14 @@ export interface IpcChannelMap {
   [IPC_CHANNELS.APP.VERIFY_INTEGRITY]: {
     args: [];
     return: IntegrityCheckResult;
+  };
+  [IPC_CHANNELS.APP.GET_LAST_CRASH_REPORT]: {
+    args: [];
+    return: { success: boolean; report?: CrashReportPayload | null; error?: string };
+  };
+  [IPC_CHANNELS.APP.CLEAR_LAST_CRASH_REPORT]: {
+    args: [];
+    return: { success: boolean; error?: string };
   };
   [IPC_CHANNELS.GAME.LAUNCH]: {
     args: [GameLaunchOptions];

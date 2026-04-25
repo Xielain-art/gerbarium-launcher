@@ -116,6 +116,10 @@ body {
   transition: background-color 180ms ease, color 180ms ease;
 }
 
+html {
+  background-color: var(--theme-bg);
+}
+
 /* Theme mapping for existing utility-heavy markup */
 body[class*="theme-"] .bg-\[\#1a1a1a\],
 body[class*="theme-"] .bg-\[\#1a1c20\],

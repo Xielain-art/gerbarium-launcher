@@ -6,7 +6,13 @@ import log from "electron-log";
 import { autoUpdater } from "electron-updater";
 import got from "got";
 import { MAIN_CONSTANTS } from "./main-constants";
-import { IPC_CHANNELS, type IntegrityCheckResult } from "../shared/constants/ipc-chanels";
+import {
+  IPC_CHANNELS,
+  type CrashReportPayload,
+  type IntegrityCheckResult,
+} from "../shared/constants/ipc-chanels";
+import { ERROR_CODES } from "../shared/constants/errors";
+import { LOG_MESSAGES } from "../shared/constants/log-messages";
 import setupLogHandler from "./handlers/logHandler";
 import windowControlsHandler from "./handlers/windowControlsHandler";
 import secureStorageHandler from "./handlers/secureStorageHandler";
@@ -24,6 +30,26 @@ type LauncherSettings = {
   minimizeToTray: boolean;
   gamePath?: string;
 };
+
+function sanitizeSettingsPatch(newSettings: unknown): Partial<LauncherSettings> {
+  if (!newSettings || typeof newSettings !== "object") {
+    return {};
+  }
+
+  const patch = newSettings as Record<string, unknown>;
+  const safePatch: Partial<LauncherSettings> = {};
+
+  if (typeof patch.minimizeToTray === "boolean") {
+    safePatch.minimizeToTray = patch.minimizeToTray;
+  }
+
+  if (typeof patch.gamePath === "string") {
+    const trimmed = patch.gamePath.trim();
+    safePatch.gamePath = trimmed;
+  }
+
+  return safePatch;
+}
 
 const appRoot = path.resolve(__dirname, "..", "..");
 
@@ -61,8 +87,20 @@ function handleFatalError(title: string, details: unknown): void {
   }
   isHandlingFatalError = true;
 
+  const message = details instanceof Error
+    ? details.stack || details.message
+    : String(details);
+
   log.error(title, details);
-  app.exit(1);
+  void writeCrashReport({
+    title,
+    message,
+    timestamp: new Date().toISOString(),
+  }).catch((error) => {
+    log.error(LOG_MESSAGES.APP_CRASH_REPORT_WRITE_FAILED, error);
+  }).finally(() => {
+    app.exit(1);
+  });
 }
 
 process.on("uncaughtException", (error) => {
@@ -86,6 +124,49 @@ let isQuiting = false;
 let traySyncTimer: NodeJS.Timeout | null = null;
 const LATEST_YML_URL = "https://github.com/Xielain-art/gerbarium-releases/releases/latest/download/latest.yml";
 const ASAR_SHA256_KEY_RE = /^(?:appAsarSha256|asarSha256|asar_sha256):\s*["']?([a-fA-F0-9]{64})["']?\s*$/m;
+const LAST_CRASH_REPORT_FILE = "last-crash-report.json";
+
+function getCrashReportPath(): string {
+  return path.join(
+    app.getPath(MAIN_CONSTANTS.DIRECTORIES.USER_DATA),
+    LAST_CRASH_REPORT_FILE,
+  );
+}
+
+async function writeCrashReport(report: CrashReportPayload): Promise<void> {
+  const crashPath = getCrashReportPath();
+  await fs.promises.mkdir(path.dirname(crashPath), { recursive: true });
+  await fs.promises.writeFile(crashPath, JSON.stringify(report, null, 2), "utf-8");
+}
+
+async function readCrashReport(): Promise<CrashReportPayload | null> {
+  try {
+    const raw = await fs.promises.readFile(getCrashReportPath(), "utf-8");
+    const parsed = JSON.parse(raw) as CrashReportPayload;
+    if (!parsed?.title || !parsed?.message || !parsed?.timestamp) {
+      return null;
+    }
+    return parsed;
+  } catch (error) {
+    const err = error as NodeJS.ErrnoException;
+    if (err.code === "ENOENT") {
+      return null;
+    }
+    throw error;
+  }
+}
+
+async function clearCrashReport(): Promise<void> {
+  try {
+    await fs.promises.unlink(getCrashReportPath());
+  } catch (error) {
+    const err = error as NodeJS.ErrnoException;
+    if (err.code === "ENOENT") {
+      return;
+    }
+    throw error;
+  }
+}
 
 function normalizeHexHash(value: string): string {
   return value.trim().toLowerCase();
@@ -319,13 +400,34 @@ function scheduleTrayStateSync(): void {
   }, 120);
 }
 
-ipcMain.on("settings-updated", (_event, newSettings: Partial<LauncherSettings>) => {
-  settings = { ...settings, ...newSettings };
+ipcMain.on("settings-updated", (_event, newSettings: unknown) => {
+  const safePatch = sanitizeSettingsPatch(newSettings);
+  settings = { ...settings, ...safePatch };
   scheduleTrayStateSync();
 });
 
 ipcMain.handle(IPC_CHANNELS.APP.VERIFY_INTEGRITY, async () => {
   return await verifyAsarIntegrity();
+});
+
+ipcMain.handle(IPC_CHANNELS.APP.GET_LAST_CRASH_REPORT, async () => {
+  try {
+    const report = await readCrashReport();
+    return { success: true, report };
+  } catch (error) {
+    log.error(LOG_MESSAGES.APP_CRASH_REPORT_READ_FAILED, error);
+    return { success: false, error: ERROR_CODES.APP_CRASH_REPORT_READ_FAILED };
+  }
+});
+
+ipcMain.handle(IPC_CHANNELS.APP.CLEAR_LAST_CRASH_REPORT, async () => {
+  try {
+    await clearCrashReport();
+    return { success: true };
+  } catch (error) {
+    log.error(LOG_MESSAGES.APP_CRASH_REPORT_CLEAR_FAILED, error);
+    return { success: false, error: ERROR_CODES.APP_CRASH_REPORT_CLEAR_FAILED };
+  }
 });
 
 app.on("before-quit", () => {
