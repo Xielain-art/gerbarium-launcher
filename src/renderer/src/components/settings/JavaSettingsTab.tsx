@@ -1,5 +1,6 @@
 import { DOWNLOAD_STATUS } from "../../../../shared/constants/system";
 import type { JavaSettingsTabProps } from "./types";
+import { useEffect, useState } from "react";
 
 function isJavaInstalled(installedVersions: number[], version: number): boolean {
   return installedVersions.includes(version);
@@ -26,6 +27,17 @@ export function JavaSettingsTab({
   onSelectInstalledJava,
 }: JavaSettingsTabProps) {
   const installedVersionNumbers = installedJava.map((java) => java.version);
+  const [localRamAllocation, setLocalRamAllocation] = useState(general.ramAllocation);
+
+  useEffect(() => {
+    setLocalRamAllocation(general.ramAllocation);
+  }, [general.ramAllocation]);
+
+  const commitRamAllocation = () => {
+    if (localRamAllocation !== general.ramAllocation) {
+      onUpdateGeneral({ ramAllocation: localRamAllocation });
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -137,7 +149,7 @@ export function JavaSettingsTab({
 
       <div className="space-y-2">
         <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
-          {t.SETTINGS.JAVA.RAM_LABEL} {general.ramAllocation} {t.COMMON.GB}
+          {t.SETTINGS.JAVA.RAM_LABEL} {localRamAllocation} {t.COMMON.GB}
         </label>
         <div className="flex items-center gap-4">
           <input
@@ -145,12 +157,15 @@ export function JavaSettingsTab({
             min="1"
             max="16"
             step="1"
-            value={general.ramAllocation}
-            onChange={(e) => onUpdateGeneral({ ramAllocation: Number.parseInt(e.target.value, 10) })}
+            value={localRamAllocation}
+            onChange={(e) => setLocalRamAllocation(Number.parseInt(e.target.value, 10))}
+            onMouseUp={commitRamAllocation}
+            onTouchEnd={commitRamAllocation}
+            onKeyUp={commitRamAllocation}
             className="h-3 flex-1 appearance-none cursor-pointer rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-none [&::-webkit-slider-thumb]:border-[3px] [&::-webkit-slider-thumb]:border-t-[#4a9a4a] [&::-webkit-slider-thumb]:border-l-[#4a9a4a] [&::-webkit-slider-thumb]:border-b-[#2a5a2a] [&::-webkit-slider-thumb]:border-r-[#2a5a2a] [&::-webkit-slider-thumb]:bg-[#3a753a] [&::-webkit-slider-thumb]:shadow-[inset_2px_2px_0px_#4a9a4a,inset_-2px_-2px_0px_#2a5a2a] [&::-webkit-slider-thumb]:cursor-pointer"
           />
           <span className="w-16 text-right font-minecraft text-sm text-[#e0e0e0]">
-            {general.ramAllocation} {t.COMMON.GB}
+            {localRamAllocation} {t.COMMON.GB}
           </span>
         </div>
         <div className="flex justify-between font-minecraft text-xs text-[#6a6a6a]">

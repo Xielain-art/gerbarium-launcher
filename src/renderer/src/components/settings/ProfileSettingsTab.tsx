@@ -1,11 +1,29 @@
 import { Input } from "../ui";
 import type { ProfileSettingsTabProps } from "./types";
 
+function isValidHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export function ProfileSettingsTab({
   t,
   profile,
   onUpdateProfile,
 }: ProfileSettingsTabProps) {
+  const skinUrl = profile.skinUrl || "";
+  const capeUrl = profile.capeUrl || "";
+  const skinUrlError = skinUrl.length > 0 && !isValidHttpUrl(skinUrl)
+    ? t.SETTINGS.PROFILE.URL_VALIDATION_ERROR
+    : undefined;
+  const capeUrlError = capeUrl.length > 0 && !isValidHttpUrl(capeUrl)
+    ? t.SETTINGS.PROFILE.URL_VALIDATION_ERROR
+    : undefined;
+
   return (
     <div className="space-y-6">
       <h2 className="font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
@@ -22,14 +40,18 @@ export function ProfileSettingsTab({
 
         <Input
           label={t.SETTINGS.PROFILE.SKIN_URL_LABEL}
-          value={profile.skinUrl || ""}
+          type="url"
+          value={skinUrl}
+          error={skinUrlError}
           onChange={(e) => onUpdateProfile({ skinUrl: e.target.value })}
           placeholder={t.SETTINGS.PROFILE.SKIN_URL_PLACEHOLDER}
         />
 
         <Input
           label={t.SETTINGS.PROFILE.CAPE_URL_LABEL}
-          value={profile.capeUrl || ""}
+          type="url"
+          value={capeUrl}
+          error={capeUrlError}
           onChange={(e) => onUpdateProfile({ capeUrl: e.target.value })}
           placeholder={t.SETTINGS.PROFILE.CAPE_URL_PLACEHOLDER}
         />
