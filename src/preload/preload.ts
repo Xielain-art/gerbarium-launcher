@@ -3,6 +3,8 @@ import {
   IPC_CHANNELS,
   IpcChannelMap,
   WindowState,
+  GameLaunchOptions,
+  GameProgressPayload,
 } from "../shared/constants/ipc-chanels";
 
 async function typedInvoke<K extends keyof IpcChannelMap>(
@@ -30,7 +32,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // Window state listener
   onWindowStateChange: (callback: (state: WindowState) => void) => {
-    const subscription = (_event: any, state: WindowState) => callback(state);
+    const subscription = (_event: unknown, state: WindowState) => callback(state);
     ipcRenderer.on(IPC_CHANNELS.WINDOW.ON_STATE_CHANGE, subscription);
 
     // Return unsubscribe function
@@ -44,7 +46,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // Auto-updater listeners
   onUpdateMessage: (callback: (message: string) => void) => {
-    const subscription = (_event: any, message: string) => callback(message);
+    const subscription = (_event: unknown, message: string) => callback(message);
     ipcRenderer.on(IPC_CHANNELS.UPDATE.MESSAGE, subscription);
 
     // Return unsubscribe function
@@ -62,7 +64,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     }) => void,
   ) => {
     const subscription = (
-      _event: any,
+      _event: unknown,
       progress: {
         percent: number;
         transferred: number;
@@ -80,7 +82,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // Update control methods
   onUpdateInfo: (callback: (info: any) => void) => {
-    const subscription = (_event: any, info: any) => callback(info);
+    const subscription = (_event: unknown, info: unknown) => callback(info);
     ipcRenderer.on(IPC_CHANNELS.UPDATE.INFO, subscription);
     return () => {
       ipcRenderer.removeListener(IPC_CHANNELS.UPDATE.INFO, subscription);
@@ -123,7 +125,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     removeJava: (javaVersion: number) =>
       typedInvoke(IPC_CHANNELS.JAVA.REMOVE, javaVersion),
     onDownloadProgress: (callback: (percent: number) => void) => {
-      const subscription = (_event: any, percent: number) => callback(percent);
+      const subscription = (_event: unknown, percent: number) => callback(percent);
       ipcRenderer.on(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, subscription);
       return () => {
         ipcRenderer.removeListener(
@@ -160,18 +162,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // Game controls
   game: {
-    launch: (options: { 
-      username: string; 
-      version: string; 
-      memory: { min: string; max: string }; 
-      javaPath: string;
-      gamePath?: string;
-      fullscreen: boolean;
-      jvmArgs: string[];
-    }) =>
+    launch: (options: GameLaunchOptions) =>
       typedInvoke(IPC_CHANNELS.GAME.LAUNCH, options),
-    onProgress: (callback: (data: { type: 'data' | 'progress' | 'close'; content: any }) => void) => {
-      const subscription = (_event: any, data: { type: 'data' | 'progress' | 'close'; content: any }) => callback(data);
+    onProgress: (callback: (data: GameProgressPayload) => void) => {
+      const subscription = (_event: unknown, data: GameProgressPayload) => callback(data);
       ipcRenderer.on(IPC_CHANNELS.GAME.PROGRESS, subscription);
       return () => {
         ipcRenderer.removeListener(IPC_CHANNELS.GAME.PROGRESS, subscription);
