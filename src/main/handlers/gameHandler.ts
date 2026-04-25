@@ -32,13 +32,7 @@ gameLog.transports.file.resolvePathFn = () => {
 const DEFAULT_GAME_ROOT = path.join(os.homedir(), ".gerbarium");
 const MAX_JVM_ARGS = 12;
 const MAX_JVM_ARG_LENGTH = 256;
-const ALLOWED_JVM_ARG_EXACT = new Set(["-XX:+UseG1GC"]);
-const ALLOWED_JVM_ARG_PATTERNS: RegExp[] = [
-  /^-XX:MaxGCPauseMillis=\d{1,4}$/,
-  /^-XX:G1HeapRegionSize=\d{1,3}[mM]$/,
-  /^-XX:InitiatingHeapOccupancyPercent=\d{1,3}$/,
-  /^-Dfile\.encoding=UTF-8$/,
-];
+const LAUNCH_START_TIMEOUT_MS = 15_000;
 const PROGRESS_EMIT_INTERVAL_MS = 50;
 
 function toErrorMessage(error: unknown): string {
@@ -134,12 +128,19 @@ function sanitizeJvmArgs(jvmArgs: string[]): string[] {
         throw new Error("JVM argument is too long");
       }
 
-      if (ALLOWED_JVM_ARG_EXACT.has(arg)) {
-        return arg;
+      if (!(arg.startsWith("-X") || arg.startsWith("-D"))) {
+        throw new Error(`Blocked JVM argument: ${arg}`);
       }
 
-      const isAllowedPattern = ALLOWED_JVM_ARG_PATTERNS.some((pattern) => pattern.test(arg));
-      if (!isAllowedPattern) {
+      if (
+        arg.includes(";")
+        || arg.includes("|")
+        || arg.includes("&&")
+        || arg.includes("||")
+        || arg.includes("\n")
+        || arg.includes("\r")
+        || arg.includes("`")
+      ) {
         throw new Error(`Blocked JVM argument: ${arg}`);
       }
 
@@ -208,6 +209,51 @@ function createProgressSender(mainWindow: BrowserWindow): (payload: GameProgress
     lastEmitTs = now;
     sendProgress(mainWindow, payload);
   };
+}
+
+function waitForLaunchStart(
+  launcher: Client,
+  launchPromise: Promise<void>,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    let isSettled = false;
+    let timeoutId: NodeJS.Timeout | null = null;
+
+    const settle = (fn: () => void) => {
+      if (isSettled) {
+        return;
+      }
+      isSettled = true;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+      launcher.removeListener("arguments", onSpawned);
+      launcher.removeListener("close", onCloseBeforeSpawn);
+      fn();
+    };
+
+    const onSpawned = () => {
+      settle(resolve);
+    };
+
+    const onCloseBeforeSpawn = (code: number | string) => {
+      const exitCode = Number(code);
+      const normalizedCode = Number.isFinite(exitCode) ? exitCode : 0;
+      settle(() => reject(new Error(`Game process exited before startup (code ${normalizedCode})`)));
+    };
+
+    launcher.once("arguments", onSpawned);
+    launcher.once("close", onCloseBeforeSpawn);
+
+    launchPromise.catch((error) => {
+      settle(() => reject(new Error(`Failed to launch game: ${toErrorMessage(error)}`)));
+    });
+
+    timeoutId = setTimeout(() => {
+      settle(() => reject(new Error("Game process did not start in time")));
+    }, LAUNCH_START_TIMEOUT_MS);
+  });
 }
 
 export default function setupGameHandlers(mainWindow: BrowserWindow) {
@@ -295,9 +341,14 @@ export default function setupGameHandlers(mainWindow: BrowserWindow) {
           emitProgress({ type: "close", content: Number(e) || 0 });
         });
 
-        launcher.launch(opts).catch((error) => {
+        const launchPromise = launcher.launch(opts);
+        launchPromise.catch((error) => {
+          const errorMessage = toErrorMessage(error);
           log.error("Failed to launch game asynchronously", error);
+          emitProgress({ type: "error", content: errorMessage });
         });
+
+        await waitForLaunchStart(launcher, launchPromise);
 
         return { success: true };
       } catch (error: unknown) {

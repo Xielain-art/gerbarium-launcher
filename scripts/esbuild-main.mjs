@@ -4,6 +4,7 @@ const isWatch = process.argv.includes("--watch");
 const mainConfig = {
   bundle: true,
   platform: "node",
+  target: "node20",
   format: "cjs",
   external: ["electron", "electron-log"],
   entryPoints: ["src/main/main.ts"],

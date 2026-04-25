@@ -62,8 +62,8 @@ export function ProfileSettingsTab({
           {t.SETTINGS.PROFILE.SKIN_PREVIEW_TITLE}
         </label>
         <div className="flex items-center justify-center rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] p-4 shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]">
-          <div className="flex h-32 w-32 items-center justify-center bg-[#1a1a1a]">
-            <span className="font-minecraft text-sm text-[#6a6a6a]">
+          <div className="bg-theme-bg flex h-32 w-32 items-center justify-center">
+            <span className="text-theme-muted font-minecraft text-sm">
               {profile.skinUrl ? t.SETTINGS.PROFILE.SKIN_LOADING : t.SETTINGS.PROFILE.SKIN_NOT_SELECTED}
             </span>
           </div>

@@ -8,6 +8,7 @@ import {
   IntegrityCheckResult,
   AuthSessionUser,
   CrashReportPayload,
+  LauncherSettings,
 } from "../shared/constants/ipc-chanels";
 
 type IpcArgs<K extends keyof IpcChannelMap> = IpcChannelMap[K]["args"];
@@ -96,7 +97,7 @@ export interface IElectronAPI {
       selectDirectory: () => Promise<string | null>;
       openPath: (path: string) => Promise<void>;
       openDataFolder: () => Promise<void>;
-      sendSettingsUpdate: (settings: any) => void;
+      sendSettingsUpdate: (settings: Partial<LauncherSettings>) => void;
     };
 
     // Game management

@@ -8,6 +8,7 @@ import {
   UpdateInfoPayload,
   IntegrityCheckResult,
   AuthSessionUser,
+  LauncherSettings,
 } from "../shared/constants/ipc-chanels";
 
 async function typedInvoke<K extends keyof IpcChannelMap>(
@@ -15,6 +16,13 @@ async function typedInvoke<K extends keyof IpcChannelMap>(
   ...args: IpcChannelMap[K]["args"]
 ): Promise<IpcChannelMap[K]["return"]> {
   return ipcRenderer.invoke(channel, ...args);
+}
+
+function typedSend<K extends keyof IpcChannelMap>(
+  channel: K,
+  ...args: IpcChannelMap[K]["args"]
+): void {
+  ipcRenderer.send(channel, ...args);
 }
 
 contextBridge.exposeInMainWorld("electronAPI", {
@@ -97,17 +105,17 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
 
   // Initialize update system
-  initUpdate: () => ipcRenderer.send(IPC_CHANNELS.UPDATE.INIT),
+  initUpdate: () => typedSend(IPC_CHANNELS.UPDATE.INIT),
 
   // Start update check
-  startUpdateCheck: () => ipcRenderer.send(IPC_CHANNELS.UPDATE.START_CHECK),
+  startUpdateCheck: () => typedSend(IPC_CHANNELS.UPDATE.START_CHECK),
 
   // Download update
   downloadUpdate: () => typedInvoke(IPC_CHANNELS.UPDATE.DOWNLOAD),
 
   // Install update and restart
   installUpdateAndRestart: () =>
-    ipcRenderer.send(IPC_CHANNELS.UPDATE.INSTALL_AND_RESTART),
+    typedSend(IPC_CHANNELS.UPDATE.INSTALL_AND_RESTART),
 
   // Auth API (tokens never leave Main process)
   auth: {
@@ -163,8 +171,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
       typedInvoke(IPC_CHANNELS.SYSTEM.OPEN_PATH, path),
     openDataFolder: () =>
       typedInvoke(IPC_CHANNELS.SYSTEM.OPEN_DATA_FOLDER),
-    sendSettingsUpdate: (settings: any) =>
-      ipcRenderer.send('settings-updated', settings),
+    sendSettingsUpdate: (settings: Partial<LauncherSettings>) =>
+      typedSend(IPC_CHANNELS.SYSTEM.SETTINGS_UPDATED, settings),
   },
 
   // Logs export and report

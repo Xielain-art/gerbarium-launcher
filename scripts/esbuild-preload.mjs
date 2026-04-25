@@ -4,6 +4,7 @@ const isWatch = process.argv.includes("--watch");
 const buildOptions = {
   bundle: true,
   platform: "node",
+  target: "node20",
   entryPoints: ["src/preload/preload.ts"],
   outfile: "dist/preload/preload.js",
   external: ["electron"],

@@ -120,58 +120,35 @@ html {
   background-color: var(--theme-bg);
 }
 
-/* Theme mapping for existing utility-heavy markup */
-body[class*="theme-"] .bg-\[\#1a1a1a\],
-body[class*="theme-"] .bg-\[\#1a1c20\],
-body[class*="theme-"] .bg-\[\#171614\] {
-  background-color: var(--theme-bg) !important;
-}
+@layer utilities {
+  .bg-theme-bg {
+    background-color: var(--theme-bg);
+  }
 
-body[class*="theme-"] .from-\[\#1a1c20\] {
-  --tw-gradient-from: var(--theme-bg-gradient-a) !important;
-}
+  .bg-theme-surface {
+    background-color: var(--theme-surface);
+  }
 
-body[class*="theme-"] .via-\[\#2b2d31\] {
-  --tw-gradient-via: var(--theme-bg-gradient-b) !important;
-}
+  .text-theme {
+    color: var(--theme-text);
+  }
 
-body[class*="theme-"] .to-\[\#1a1c20\] {
-  --tw-gradient-to: var(--theme-bg-gradient-a) !important;
-}
+  .text-theme-muted {
+    color: var(--theme-text-muted);
+  }
 
-body[class*="theme-"] .bg-\[\#2b2d31\],
-body[class*="theme-"] .bg-\[\#2b2d31\]\/95,
-body[class*="theme-"] .bg-\[\#2b2d31\]\/50,
-body[class*="theme-"] .bg-\[\#252525\],
-body[class*="theme-"] .bg-\[\#25272c\]\/50 {
-  background-color: var(--theme-surface) !important;
-}
+  .border-theme {
+    border-color: var(--theme-border);
+  }
 
-body[class*="theme-"] .bg-\[\#1e2025\]\/95 {
-  background-color: var(--theme-sidebar) !important;
-}
-
-body[class*="theme-"] .text-\[\#e0e0e0\] {
-  color: var(--theme-text) !important;
-}
-
-body[class*="theme-"] .text-\[\#8a8a8a\],
-body[class*="theme-"] .text-\[\#6a6a6a\] {
-  color: var(--theme-text-muted) !important;
-}
-
-body[class*="theme-"] .border-\[\#1a1a1a\] {
-  border-color: var(--theme-border) !important;
-}
-
-body[class*="theme-"] .border-t-\[\#5a5a5a\],
-body[class*="theme-"] .border-l-\[\#5a5a5a\] {
-  border-color: var(--theme-border-hi) !important;
-}
-
-body[class*="theme-"] .border-b-\[\#1a1a1a\],
-body[class*="theme-"] .border-r-\[\#1a1a1a\] {
-  border-color: var(--theme-border) !important;
+  .bg-theme-main-gradient {
+    background-image: linear-gradient(
+      135deg,
+      var(--theme-bg-gradient-a) 0%,
+      var(--theme-bg-gradient-b) 50%,
+      var(--theme-bg-gradient-a) 100%
+    );
+  }
 }
 
 html,

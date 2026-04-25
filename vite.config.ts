@@ -54,6 +54,9 @@ export default defineConfig(({ command }) => ({
       : null,
   ].filter(Boolean),
   base: "./",
+  build: {
+    target: "es2020",
+  },
   server: {
     host: "127.0.0.1",
     port: 5173,

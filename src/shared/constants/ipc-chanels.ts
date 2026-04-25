@@ -49,6 +49,7 @@ export const IPC_CHANNELS = {
     SELECT_DIRECTORY: "system:select-directory",
     OPEN_PATH: "system:open-path",
     OPEN_DATA_FOLDER: "system:open-data-folder",
+    SETTINGS_UPDATED: "system:settings-updated",
   },
   LOG: {
     EXPORT_AND_REPORT: "logs:export-and-report",
@@ -93,7 +94,13 @@ export type GameProgressPayload =
       };
     }
   | { type: "state"; content: { phase: "spawned" } }
-  | { type: "close"; content: number };
+  | { type: "close"; content: number }
+  | { type: "error"; content: string };
+
+export interface LauncherSettings {
+  minimizeToTray: boolean;
+  gamePath?: string;
+}
 
 export interface UpdateInfoPayload {
   version: string;
@@ -280,6 +287,10 @@ export interface IpcChannelMap {
   };
   [IPC_CHANNELS.SYSTEM.OPEN_DATA_FOLDER]: {
     args: [];
+    return: void;
+  };
+  [IPC_CHANNELS.SYSTEM.SETTINGS_UPDATED]: {
+    args: [settings: Partial<LauncherSettings>];
     return: void;
   };
   [IPC_CHANNELS.LOG.EXPORT_AND_REPORT]: {

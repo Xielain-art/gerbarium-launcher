@@ -50,7 +50,7 @@ export function LoginScreen() {
   };
 
   return (
-    <div className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-br from-[#1a1c20] via-[#2b2d31] to-[#1a1c20]">
+    <div className="bg-theme-main-gradient relative flex h-screen w-full items-center justify-center overflow-hidden">
       <div className="absolute inset-0 bg-pattern opacity-30" />
 
       <div className="absolute right-4 top-4 z-50">

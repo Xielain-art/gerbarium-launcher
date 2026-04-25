@@ -72,7 +72,7 @@ export function UpdateScreen() {
   }, [updateInfo, downloadStarted]);
 
   return (
-    <div className="relative flex h-screen w-full flex-col overflow-hidden bg-gradient-to-br from-[#1a1c20] via-[#2b2d31] to-[#1a1c20]">
+    <div className="bg-theme-main-gradient relative flex h-screen w-full flex-col overflow-hidden">
       <div
         className="absolute inset-0 opacity-30 pointer-events-none"
         style={{

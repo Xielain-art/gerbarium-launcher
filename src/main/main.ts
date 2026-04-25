@@ -10,6 +10,7 @@ import {
   IPC_CHANNELS,
   type CrashReportPayload,
   type IntegrityCheckResult,
+  type LauncherSettings,
 } from "../shared/constants/ipc-chanels";
 import { ERROR_CODES } from "../shared/constants/errors";
 import { LOG_MESSAGES } from "../shared/constants/log-messages";
@@ -24,11 +25,6 @@ import gameHandler from "./handlers/gameHandler";
 
 type LegacyLangLoader = {
   setupLanguage: () => void;
-};
-
-type LauncherSettings = {
-  minimizeToTray: boolean;
-  gamePath?: string;
 };
 
 function sanitizeSettingsPatch(newSettings: unknown): Partial<LauncherSettings> {
@@ -53,7 +49,7 @@ function sanitizeSettingsPatch(newSettings: unknown): Partial<LauncherSettings> 
 
 const appRoot = path.resolve(__dirname, "..", "..");
 
-const isDev = require(path.join(appRoot, "_legacy_app", "assets", "js", "isdev")) as boolean;
+const isDev = !app.isPackaged;
 const LangLoader = require(path.join(appRoot, "_legacy_app", "assets", "js", "langloader")) as LegacyLangLoader;
 
 function getDateFolder(): string {
@@ -121,9 +117,7 @@ let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let settings: LauncherSettings = { minimizeToTray: false };
 let isQuiting = false;
-let traySyncTimer: NodeJS.Timeout | null = null;
 const LATEST_YML_URL = "https://github.com/Xielain-art/gerbarium-releases/releases/latest/download/latest.yml";
-const ASAR_SHA256_KEY_RE = /^(?:appAsarSha256|asarSha256|asar_sha256):\s*["']?([a-fA-F0-9]{64})["']?\s*$/m;
 const LAST_CRASH_REPORT_FILE = "last-crash-report.json";
 
 function getCrashReportPath(): string {
@@ -176,6 +170,38 @@ function isHexHash(value: string): boolean {
   return /^[a-f0-9]{64}$/i.test(value);
 }
 
+function isSimpleYamlComment(value: string): boolean {
+  return value.startsWith("#");
+}
+
+function parseSimpleYamlKeyValue(line: string): { key: string; value: string } | null {
+  const separatorIndex = line.indexOf(":");
+  if (separatorIndex <= 0) {
+    return null;
+  }
+
+  const key = line.slice(0, separatorIndex).trim();
+  if (!key) {
+    return null;
+  }
+
+  let value = line.slice(separatorIndex + 1).trim();
+  if (!value || isSimpleYamlComment(value)) {
+    return null;
+  }
+
+  const hashCommentIndex = value.indexOf(" #");
+  if (hashCommentIndex >= 0) {
+    value = value.slice(0, hashCommentIndex).trim();
+  }
+
+  if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
+    value = value.slice(1, -1).trim();
+  }
+
+  return { key, value };
+}
+
 async function calculateFileSha256(filePath: string): Promise<string> {
   return await new Promise((resolve, reject) => {
     const hash = crypto.createHash("sha256");
@@ -197,8 +223,25 @@ async function triggerRecoveryUpdate(): Promise<void> {
 }
 
 function extractAsarSha256FromLatestYml(content: string): string | null {
-  const match = content.match(ASAR_SHA256_KEY_RE);
-  return match?.[1] ?? null;
+  const allowedKeys = new Set(["appAsarSha256", "asarSha256", "asar_sha256"]);
+
+  for (const rawLine of content.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || isSimpleYamlComment(line)) {
+      continue;
+    }
+
+    const keyValue = parseSimpleYamlKeyValue(line);
+    if (!keyValue || !allowedKeys.has(keyValue.key)) {
+      continue;
+    }
+
+    if (isHexHash(keyValue.value)) {
+      return keyValue.value;
+    }
+  }
+
+  return null;
 }
 
 async function fetchExpectedAsarSha256(): Promise<string | null> {
@@ -390,20 +433,10 @@ function syncTrayState(): void {
   destroyTray();
 }
 
-function scheduleTrayStateSync(): void {
-  if (traySyncTimer) {
-    clearTimeout(traySyncTimer);
-  }
-  traySyncTimer = setTimeout(() => {
-    traySyncTimer = null;
-    syncTrayState();
-  }, 120);
-}
-
-ipcMain.on("settings-updated", (_event, newSettings: unknown) => {
+ipcMain.on(IPC_CHANNELS.SYSTEM.SETTINGS_UPDATED, (_event, newSettings: unknown) => {
   const safePatch = sanitizeSettingsPatch(newSettings);
   settings = { ...settings, ...safePatch };
-  scheduleTrayStateSync();
+  syncTrayState();
 });
 
 ipcMain.handle(IPC_CHANNELS.APP.VERIFY_INTEGRITY, async () => {

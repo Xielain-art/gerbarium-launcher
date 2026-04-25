@@ -9,7 +9,7 @@ export function Button({
   disabled,
   ...props
 }: ButtonProps) {
-  const baseStyles = 'mc-btn';
+  const baseStyles = 'mc-btn gap-2';
 
   const variantStyles = {
     minecraft: '',
@@ -38,7 +38,7 @@ export function Button({
     >
       {isLoading && (
         <svg
-          className="absolute left-4 animate-spin h-4 w-4"
+          className="h-4 w-4 animate-spin"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -58,7 +58,7 @@ export function Button({
           />
         </svg>
       )}
-      <span className={isLoading ? 'ml-8' : ''}>{children}</span>
+      <span className={isLoading ? 'opacity-90' : ''}>{children}</span>
     </button>
   );
 }

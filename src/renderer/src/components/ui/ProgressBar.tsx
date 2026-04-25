@@ -19,7 +19,7 @@ export function ProgressBar({
   return (
     <div className={`space-y-2 ${className}`}>
       <div className="relative">
-        <div className="h-3 w-full overflow-hidden rounded-full bg-[#1a1a1a] border border-[#3c3c3c] shadow-inner">
+        <div className="bg-theme-bg h-3 w-full overflow-hidden rounded-full border border-[#3c3c3c] shadow-inner">
           <div 
             className="h-full bg-gradient-to-r from-[#55aaff] via-[#4a9a4a] to-[#3a753a] transition-all duration-500 ease-out relative"
             style={{ width: `${clampedProgress}%` }}

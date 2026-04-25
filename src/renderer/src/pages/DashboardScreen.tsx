@@ -8,6 +8,7 @@ import { useSettingsStore } from "../stores/useSettingsStore";
 import { WindowControls } from "../components";
 import { useTranslation } from "../hooks/useTranslation";
 import { ROUTES, LOG_ACTIONS } from "../../../shared/constants/system";
+import type { LauncherSettings } from "../../../shared/constants/ipc-chanels";
 import type { GameVersion } from "../types";
 import newsPlaceholder from "../assets/photo_2026-04-23_10-34-22.jpg";
 import { DashboardSidebar } from "../components/dashboard/DashboardSidebar";
@@ -59,6 +60,15 @@ function toErrorMessage(error: unknown): string {
 
 function logAction(action: string, details?: string): void {
   void window.electronAPI?.system.logAction(action, details);
+}
+
+function toLauncherSettingsPatch(
+  settings: { minimizeToTray: boolean; gamePath?: string },
+): Partial<LauncherSettings> {
+  return {
+    minimizeToTray: settings.minimizeToTray,
+    gamePath: settings.gamePath,
+  };
 }
 
 export function DashboardScreen() {
@@ -153,6 +163,16 @@ export function DashboardScreen() {
         setLaunchStatus("");
         closeOnLaunchRequestedRef.current = false;
         logAction("GAME_PROCESS_CLOSED", "Game process exited");
+        return;
+      }
+
+      if (data.type === "error") {
+        setIsLaunching(false);
+        setLaunchProgress(null);
+        setLaunchStatus("");
+        setLaunchError(`Launch error: ${data.content}`);
+        closeOnLaunchRequestedRef.current = false;
+        logAction("GAME_LAUNCH_ERROR", data.content);
       }
     });
 
@@ -171,7 +191,9 @@ export function DashboardScreen() {
     window.electronAPI.getAppVersion().then(setAppVersion);
     const currentSettings = useSettingsStore.getState().general;
     if (window.electronAPI.system?.sendSettingsUpdate) {
-      window.electronAPI.system.sendSettingsUpdate(currentSettings);
+      window.electronAPI.system.sendSettingsUpdate(
+        toLauncherSettingsPatch(currentSettings),
+      );
     }
   }, []);
 
@@ -257,7 +279,7 @@ export function DashboardScreen() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-gradient-to-br from-[#1a1c20] via-[#2b2d31] to-[#1a1c20]">
+    <div className="bg-theme-main-gradient flex h-screen w-full overflow-hidden">
       <div
         className="absolute inset-0 opacity-30 pointer-events-none"
         style={{
@@ -279,7 +301,7 @@ export function DashboardScreen() {
       <main className="relative z-10 flex flex-1 flex-col overflow-hidden">
         <div className="absolute right-4 top-4 z-50 flex items-center gap-4">
           {appVersion && (
-            <div className="font-minecraft text-xs text-[#6a6a6a]">
+            <div className="text-theme-muted font-minecraft text-xs">
               {t.DASHBOARD.VERSION_DISPLAY_LABEL} {appVersion}
             </div>
           )}

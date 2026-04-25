@@ -3,10 +3,18 @@ import { persist } from 'zustand/middleware';
 import type { SettingsState as SettingsStateType, SettingsGeneral, SettingsMods, SettingsProfile } from '../types';
 import { STORAGE_KEYS, LOG_ACTIONS, DEFAULT_SETTINGS } from '../../../shared/constants/system';
 import { UI_STRINGS } from '../../../shared/constants/ui-strings';
+import type { LauncherSettings } from '../../../shared/constants/ipc-chanels';
 
 const logAction = (action: string, details?: string) => {
   void window.electronAPI?.system.logAction(action, details);
 };
+
+function toLauncherSettingsPatch(settings: SettingsGeneral): Partial<LauncherSettings> {
+  return {
+    minimizeToTray: settings.minimizeToTray,
+    gamePath: settings.gamePath,
+  };
+}
 
 interface SettingsState extends SettingsStateType {
   // Actions
@@ -76,7 +84,7 @@ export const useSettingsStore = create<SettingsState>()(
           }
           // Sync with main process
           if (window.electronAPI?.system?.sendSettingsUpdate) {
-            window.electronAPI.system.sendSettingsUpdate(newState);
+            window.electronAPI.system.sendSettingsUpdate(toLauncherSettingsPatch(newState));
           }
           return { general: newState };
         });
