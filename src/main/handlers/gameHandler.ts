@@ -9,6 +9,8 @@ import os from "node:os";
 import path from "node:path";
 import log from "electron-log";
 import fs from "node:fs";
+import { checkJavaVersion } from "./javaHandler";
+import { getRequiredJavaVersion } from "../config/javaConfig";
 
 // Create a separate logger for Minecraft
 const gameLog = log.create("minecraft");
@@ -39,6 +41,7 @@ const BLOCKED_JVM_ARG_PREFIXES = [
   "-agentlib",
   "-agentpath",
 ];
+const PROGRESS_EMIT_INTERVAL_MS = 50;
 
 function toErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error";
@@ -146,6 +149,52 @@ function sendProgress(mainWindow: BrowserWindow, payload: GameProgressPayload): 
   mainWindow.webContents.send(IPC_CHANNELS.GAME.PROGRESS, payload);
 }
 
+function parseJavaMajor(version: string): number {
+  const trimmed = version.trim();
+  if (trimmed.startsWith("1.")) {
+    const legacyMajor = Number.parseInt(trimmed.split(".")[1] ?? "", 10);
+    return Number.isNaN(legacyMajor) ? 0 : legacyMajor;
+  }
+
+  const major = Number.parseInt(trimmed.split(".")[0] ?? "", 10);
+  return Number.isNaN(major) ? 0 : major;
+}
+
+async function validateJavaCompatibility(javaPath: string, minecraftVersion: string): Promise<void> {
+  const detectedVersion = await checkJavaVersion(javaPath);
+  if (!detectedVersion) {
+    throw new Error("Unable to determine Java version from javaPath");
+  }
+
+  const detectedMajor = parseJavaMajor(detectedVersion);
+  const requiredMajor = getRequiredJavaVersion(minecraftVersion);
+
+  if (detectedMajor < requiredMajor) {
+    throw new Error(
+      `Minecraft ${minecraftVersion} requires Java ${requiredMajor}+ (detected Java ${detectedVersion})`,
+    );
+  }
+}
+
+function createProgressSender(mainWindow: BrowserWindow): (payload: GameProgressPayload) => void {
+  let lastEmitTs = 0;
+
+  return (payload: GameProgressPayload) => {
+    if (payload.type !== "progress") {
+      sendProgress(mainWindow, payload);
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastEmitTs < PROGRESS_EMIT_INTERVAL_MS) {
+      return;
+    }
+
+    lastEmitTs = now;
+    sendProgress(mainWindow, payload);
+  };
+}
+
 export default function setupGameHandlers(mainWindow: BrowserWindow) {
   ipcMain.handle(
     IPC_CHANNELS.GAME.LAUNCH,
@@ -165,8 +214,10 @@ export default function setupGameHandlers(mainWindow: BrowserWindow) {
 
         const rootPath = await resolveRootPath(options.gamePath);
         const javaPath = await validateJavaPath(options.javaPath);
+        await validateJavaCompatibility(javaPath, version);
         const jvmArgs = sanitizeJvmArgs(options.jvmArgs);
         const auth = await Authenticator.getAuth(username);
+        const emitProgress = createProgressSender(mainWindow);
 
         const opts = {
           clientPackage: null,
@@ -191,16 +242,16 @@ export default function setupGameHandlers(mainWindow: BrowserWindow) {
 
         launcher.on("debug", (e) => {
           gameLog.debug(e);
-          sendProgress(mainWindow, { type: "data", content: String(e) });
+          emitProgress({ type: "data", content: String(e) });
         });
 
         launcher.on("data", (e) => {
           gameLog.info(e);
-          sendProgress(mainWindow, { type: "data", content: String(e) });
+          emitProgress({ type: "data", content: String(e) });
         });
 
         launcher.on("progress", (e) => {
-          sendProgress(mainWindow, {
+          emitProgress({
             type: "progress",
             content:
               typeof e === "object" && e !== null
@@ -211,7 +262,7 @@ export default function setupGameHandlers(mainWindow: BrowserWindow) {
 
         launcher.on("download", (e) => {
           // Keep sending individual download progress too
-          sendProgress(mainWindow, {
+          emitProgress({
             type: "progress",
             content:
               typeof e === "object" && e !== null
@@ -221,12 +272,12 @@ export default function setupGameHandlers(mainWindow: BrowserWindow) {
         });
 
         launcher.on("arguments", () => {
-          sendProgress(mainWindow, { type: "state", content: { phase: "spawned" } });
+          emitProgress({ type: "state", content: { phase: "spawned" } });
         });
 
         launcher.on("close", (e) => {
           gameLog.info(`Closed with code ${e}`);
-          sendProgress(mainWindow, { type: "close", content: Number(e) || 0 });
+          emitProgress({ type: "close", content: Number(e) || 0 });
         });
 
         launcher.launch(opts).catch((error) => {

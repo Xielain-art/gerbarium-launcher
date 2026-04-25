@@ -30,13 +30,12 @@
     "publish-app": "npm run build && electron-builder build -p always"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=20.18.0"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.4",
     "@tanstack/react-router": "^1.168.23",
     "@types/archiver": "^7.0.0",
-    "adm-zip": "^0.5.16",
     "archiver": "^7.0.1",
     "discord-rpc-patch": "^4.0.1",
     "ejs": "^3.1.10",
@@ -56,7 +55,6 @@
     "semver": "^7.7.3",
     "tailwindcss": "^4.2.4",
     "tar-fs": "^3.1.2",
-    "tar-stream": "^3.1.8",
     "toml": "^3.0.0",
     "zustand": "^5.0.12"
   },
@@ -65,7 +63,6 @@
     "@eslint/js": "^9.39.4",
     "@rolldown/plugin-babel": "^0.2.3",
     "@stylistic/eslint-plugin": "^5.6.1",
-    "@types/adm-zip": "^0.5.8",
     "@types/babel__core": "^7.20.5",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
