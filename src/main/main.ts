@@ -1,6 +1,10 @@
 import { app, BrowserWindow, Menu, Tray, dialog, ipcMain, type MenuItemConstructorOptions } from "electron";
 import path from "node:path";
+import fs from "node:fs";
+import crypto from "node:crypto";
 import log from "electron-log";
+import { autoUpdater } from "electron-updater";
+import got from "got";
 import { MAIN_CONSTANTS } from "./main-constants";
 import setupLogHandler from "./handlers/logHandler";
 import windowControlsHandler from "./handlers/windowControlsHandler";
@@ -91,6 +95,96 @@ let tray: Tray | null = null;
 let settings: LauncherSettings = { minimizeToTray: false };
 let isQuiting = false;
 let traySyncTimer: NodeJS.Timeout | null = null;
+const LATEST_YML_URL = "https://github.com/Xielain-art/gerbarium-releases/releases/latest/download/latest.yml";
+const ASAR_SHA256_KEY_RE = /^(?:appAsarSha256|asarSha256|asar_sha256):\s*["']?([a-fA-F0-9]{64})["']?\s*$/m;
+
+function normalizeHexHash(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function isHexHash(value: string): boolean {
+  return /^[a-f0-9]{64}$/i.test(value);
+}
+
+async function calculateFileSha256(filePath: string): Promise<string> {
+  return await new Promise((resolve, reject) => {
+    const hash = crypto.createHash("sha256");
+    const stream = fs.createReadStream(filePath);
+
+    stream.on("error", reject);
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.on("end", () => resolve(hash.digest("hex")));
+  });
+}
+
+async function triggerRecoveryUpdate(): Promise<void> {
+  try {
+    await autoUpdater.checkForUpdates();
+    await autoUpdater.downloadUpdate();
+  } catch (error) {
+    log.error("Failed to trigger recovery update after integrity mismatch", error);
+  }
+}
+
+function extractAsarSha256FromLatestYml(content: string): string | null {
+  const match = content.match(ASAR_SHA256_KEY_RE);
+  return match?.[1] ?? null;
+}
+
+async function fetchExpectedAsarSha256(): Promise<string | null> {
+  try {
+    const latestYml = await got(LATEST_YML_URL, {
+      timeout: { request: 7000 },
+      retry: { limit: 1 },
+    }).text();
+    const expectedHash = extractAsarSha256FromLatestYml(latestYml);
+
+    if (!expectedHash) {
+      log.warn("ASAR integrity check skipped: latest.yml does not contain appAsarSha256/asarSha256");
+      return null;
+    }
+
+    return expectedHash;
+  } catch (error) {
+    log.error("Failed to fetch latest.yml for ASAR integrity check", error);
+    return null;
+  }
+}
+
+async function verifyAsarIntegrity(): Promise<void> {
+  if (isDev) {
+    return;
+  }
+
+  const expectedHashRaw = await fetchExpectedAsarSha256();
+  if (!expectedHashRaw || !isHexHash(expectedHashRaw)) {
+    log.warn("ASAR integrity check skipped: expected hash is missing or invalid");
+    return;
+  }
+
+  const asarPath = path.join(process.resourcesPath, "app.asar");
+  if (!fs.existsSync(asarPath)) {
+    log.warn("ASAR integrity check skipped: app.asar not found", asarPath);
+    return;
+  }
+
+  try {
+    const expectedHash = normalizeHexHash(expectedHashRaw);
+    const actualHash = normalizeHexHash(await calculateFileSha256(asarPath));
+    if (actualHash === expectedHash) {
+      return;
+    }
+
+    log.warn("ASAR integrity mismatch detected", { expectedHash, actualHash });
+    dialog.showErrorBox(
+      "Нарушена целостность лаунчера",
+      "Файлы лаунчера были изменены. Запускается восстановление через обновление."
+    );
+    await triggerRecoveryUpdate();
+  } catch (error) {
+    log.error("ASAR integrity check failed", error);
+  }
+}
 
 function getPlatformIcon(filename: string): string {
   const ext = process.platform === MAIN_CONSTANTS.PLATFORMS.WINDOWS ? "ico" : "png";
@@ -219,6 +313,7 @@ app.on("before-quit", () => {
 });
 
 app.whenReady().then(() => {
+  void verifyAsarIntegrity();
   LangLoader.setupLanguage();
   mainWindow = createWindow();
   createMenu();
