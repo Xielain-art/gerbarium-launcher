@@ -56,6 +56,29 @@ export const IPC_CHANNELS = {
   },
 } as const;
 
+export interface GameLaunchOptions {
+  username: string;
+  version: string;
+  memory: { min: string; max: string };
+  javaPath: string;
+  gamePath?: string;
+  fullscreen: boolean;
+  jvmArgs: string[];
+}
+
+export type GameProgressPayload =
+  | { type: "data"; content: string }
+  | {
+      type: "progress";
+      content: {
+        percent?: number;
+        status?: string;
+        [key: string]: unknown;
+      };
+    }
+  | { type: "state"; content: { phase: "spawned" } }
+  | { type: "close"; content: number };
+
 // Карта типов для всех наших IPC событий
 export interface IpcChannelMap {
   [IPC_CHANNELS.HELLO.SAY_HELLO]: {
@@ -198,11 +221,11 @@ export interface IpcChannelMap {
     return: string;
   };
   [IPC_CHANNELS.GAME.LAUNCH]: {
-    args: [{ username: string; version: string; memory: { min: string; max: string }; javaPath: string; gamePath?: string; fullscreen: boolean; jvmArgs: string[] }];
+    args: [GameLaunchOptions];
     return: { success: boolean; error?: string };
   };
   [IPC_CHANNELS.GAME.PROGRESS]: {
-    args: [{ type: 'data' | 'progress' | 'close'; content: any }];
+    args: [GameProgressPayload];
     return: void;
   };
   [IPC_CHANNELS.GAME.GET_INSTALLED_VERSIONS]: {

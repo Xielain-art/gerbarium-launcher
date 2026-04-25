@@ -2,6 +2,8 @@ import {
   IpcChannelMap,
   WindowState,
   DownloadStatus,
+  GameLaunchOptions,
+  GameProgressPayload,
 } from "../shared/constants/ipc-chanels";
 
 type IpcArgs<K extends keyof IpcChannelMap> = IpcChannelMap[K]["args"];
@@ -85,18 +87,9 @@ export interface IElectronAPI {
 
     // Game management
     game: {
-      launch: (options: {
-        username: string;
-        version: string;
-        memory: { min: string; max: string };
-        javaPath: string;
-        gamePath?: string;
-      }) => Promise<{ success: boolean; error?: string }>;
+      launch: (options: GameLaunchOptions) => Promise<{ success: boolean; error?: string }>;
       onProgress: (
-        callback: (data: {
-          type: "data" | "progress" | "close";
-          content: any;
-        }) => void,
+        callback: (data: GameProgressPayload) => void,
       ) => () => void;
       getInstalledVersions: () => Promise<string[]>;
     };

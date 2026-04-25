@@ -4,7 +4,7 @@
   "productName": "Gerbarium",
   "description": "Gerbarium Launcher",
   "author": "Radmir Klimau (https://github.com/Xielain-art/)",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "homepage": "https://github.com/Xielain-art/gerbarium-releases",
   "bugs": {
     "url": "https://github.com/Xielain-art/gerbarium-releases/issues"
@@ -14,8 +14,8 @@
   "scripts": {
     "start": "electron .",
     "build:ui": "vite build",
-    "build:main": "npx esbuild src/main/handlers/*.ts --bundle --platform=node --outdir=dist/main/handlers --external:electron --external:electron-log && npx esbuild src/main/main-constants.ts --bundle --platform=node --outfile=dist/main/main-constants.js --external:electron --external:electron-log",
-    "build:preload": "npx esbuild src/preload/preload.ts --bundle --platform=node --outfile=dist/preload/preload.js --external:electron",
+    "build:main": "node scripts/esbuild-main.mjs",
+    "build:preload": "node scripts/esbuild-preload.mjs",
     "build": "npm run build:ui && npm run build:main && npm run build:preload",
     "dist": "npm run build && electron-builder build",
     "dist:win": "npm run dist -- -w",
@@ -23,8 +23,8 @@
     "dist:linux": "npm run dist -- -l",
     "lint": "eslint .",
     "dev:ui": "vite",
-    "dev:main": "concurrently \"npx esbuild src/main/handlers/*.ts --bundle --platform=node --outdir=dist/main/handlers --external:electron --external:electron-log --watch\" \"npx esbuild src/main/main-constants.ts --bundle --platform=node --outfile=dist/main/main-constants.js --external:electron --external:electron-log --watch\"",
-    "dev:preload": "npx esbuild src/preload/preload.ts --bundle --platform=node --outfile=dist/preload/preload.js --external:electron --watch",
+    "dev:main": "node scripts/esbuild-main.mjs --watch",
+    "dev:preload": "node scripts/esbuild-preload.mjs --watch",
     "dev:electron": "wait-on http://localhost:5173 && npm run build:preload && npm run build:main && electron .",
     "dev": "concurrently -n \"UI,MAIN,PRELOAD,APP\" -c \"bgBlue,bgGreen,bgMagenta,bgCyan\" \"npm run dev:ui\" \"npm run dev:main\" \"npm run dev:preload\" \"npm run dev:electron\"",
     "publish-app": "npm run build && electron-builder build -p always"
@@ -49,7 +49,6 @@
     "got": "^11.8.5",
     "helios-core": "~2.3.0",
     "helios-distribution-types": "^1.3.0",
-    "jquery": "^3.7.1",
     "lodash.merge": "^4.6.2",
     "minecraft-launcher-core": "^3.18.2",
     "react": "^19.2.5",

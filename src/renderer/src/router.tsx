@@ -15,6 +15,8 @@ const checkAuth = () => {
   return useAuthStore.getState().isAuthenticated;
 };
 
+const isDevMode = import.meta.env.DEV;
+
 // Root route with Outlet for nested routes
 const rootRoute = createRootRoute({
   component: () => (
@@ -28,7 +30,7 @@ const rootRoute = createRootRoute({
 const updateRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: ROUTES.HOME,
-  component: UpdateScreen,
+  component: isDevMode ? LoginScreen : UpdateScreen,
 });
 
 // Login route

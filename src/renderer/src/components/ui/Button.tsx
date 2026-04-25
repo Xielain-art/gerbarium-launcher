@@ -60,6 +60,7 @@ export function Button({
     sm: 'px-4 py-2 text-xs min-h-[32px]',
     md: 'px-6 py-3 text-sm min-h-[40px]',
     lg: 'px-8 py-4 text-base min-h-[52px]',
+    xl: 'px-10 py-5 text-lg min-h-[60px]',
   };
 
   const disabledStyles =
