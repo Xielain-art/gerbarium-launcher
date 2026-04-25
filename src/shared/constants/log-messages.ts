@@ -38,6 +38,16 @@ export const LOG_MESSAGES = {
   SECURE_STORAGE_GET_FAILED: '[STORAGE] Failed to retrieve key:',
   SECURE_STORAGE_DELETE: '[STORAGE] Deleting key:',
   SECURE_STORAGE_DELETE_FAILED: '[STORAGE] Failed to delete key:',
+  AUTH_LOGIN_ATTEMPT: '[AUTH] Login attempt:',
+  AUTH_LOGIN_SUCCESS: '[AUTH] Login success:',
+  AUTH_LOGIN_FAILED: '[AUTH] Login failed:',
+  AUTH_LOGIN_OFFLINE_ATTEMPT: '[AUTH] Offline login attempt:',
+  AUTH_LOGIN_OFFLINE_SUCCESS: '[AUTH] Offline login success:',
+  AUTH_LOGIN_OFFLINE_FAILED: '[AUTH] Offline login failed:',
+  AUTH_SESSION_READ: '[AUTH] Read auth session',
+  AUTH_SESSION_READ_FAILED: '[AUTH] Failed to read auth session:',
+  AUTH_LOGOUT: '[AUTH] Logout requested',
+  AUTH_LOGOUT_FAILED: '[AUTH] Logout failed:',
 
   // Log Export
   LOG_EXPORT_STARTED: '[LOG] Export started',

@@ -6,6 +6,7 @@ import {
   GameProgressPayload,
   UpdateInfoPayload,
   IntegrityCheckResult,
+  AuthSessionUser,
 } from "../shared/constants/ipc-chanels";
 
 type IpcArgs<K extends keyof IpcChannelMap> = IpcChannelMap[K]["args"];
@@ -48,16 +49,22 @@ export interface IElectronAPI {
   downloadUpdate: () => Promise<{ success: boolean; error?: string }>;
   installUpdateAndRestart: () => void;
 
-  // Secure storage for sensitive data
-  secureStorage: {
-    set: (
-      key: string,
-      value: string,
-    ) => Promise<{ success: boolean; error?: string }>;
-    get: (
-      key: string,
-    ) => Promise<{ success: boolean; value?: string | null; error?: string }>;
-    delete: (key: string) => Promise<{ success: boolean; error?: string }>;
+  // Auth session API (token is not exposed to renderer)
+  auth: {
+    login: (
+      credentials: { login: string; password: string },
+    ) => Promise<{ success: boolean; user?: AuthSessionUser; error?: string }>;
+    loginOffline: (
+      payload: { username: string },
+    ) => Promise<{ success: boolean; user?: AuthSessionUser; error?: string }>;
+    getSession: () => Promise<{
+      success: boolean;
+      user?: AuthSessionUser | null;
+      isAuthenticated?: boolean;
+      error?: string;
+    }>;
+    logout: () => Promise<{ success: boolean; error?: string }>;
+    getProfile: () => Promise<AuthSessionUser | null>;
   };
 
   // Java management

@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "../stores/useAuthStore";
 import { WindowControls } from "../components";
 import { useTranslation } from "../hooks/useTranslation";
-import { ROUTES, STORAGE_KEYS } from "../../../shared/constants/system";
+import { ROUTES } from "../../../shared/constants/system";
 import logoImage from "../assets/photo_2026-04-23_10-34-22.jpg";
 import { LoginFormCard } from "../components/login";
 
@@ -29,18 +29,6 @@ export function LoginScreen() {
 
   useEffect(() => {
     void loadToken();
-
-    const stored = localStorage.getItem(STORAGE_KEYS.USER);
-    if (!stored) return;
-
-    try {
-      const user = JSON.parse(stored) as { username?: string };
-      if (user.username) {
-        setLocalUsername(user.username);
-      }
-    } catch {
-      // ignore corrupted localStorage payload
-    }
   }, [loadToken]);
 
   useEffect(() => {

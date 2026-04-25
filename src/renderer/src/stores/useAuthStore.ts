@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { AuthUser, AuthCredentials } from '../types';
-import { STORAGE_KEYS, LOG_ACTIONS } from '../../../shared/constants/system';
+import { LOG_ACTIONS } from '../../../shared/constants/system';
 import { UI_STRINGS } from '../../../shared/constants/ui-strings';
 
 // Auto-log helper
@@ -48,38 +48,40 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
    loadToken: async () => {
      try {
-       const result = await window.electronAPI.secureStorage.get(STORAGE_KEYS.TOKEN);
-       if (result.success && result.value) {
-         // Also load user data from localStorage (non-sensitive)
-         const stored = localStorage.getItem(STORAGE_KEYS.USER);
-         let user: AuthUser | null = null;
-         if (stored) {
-           try {
-             user = JSON.parse(stored);
-           } catch {
-             // Invalid user data
-           }
-         }
-         set({ 
-           token: result.value, 
+       const result = await window.electronAPI.auth.getSession();
+       if (result.success && result.isAuthenticated && result.user) {
+         set({
+           token: null,
            isAuthenticated: true,
-           user 
+           user: {
+             id: result.user.id,
+             username: result.user.username,
+             email: result.user.email,
+           },
          });
-         logAction(LOG_ACTIONS.TOKEN_LOADED, user ? `User: ${user.username}` : 'Token only');
+         logAction(LOG_ACTIONS.TOKEN_LOADED, `User: ${result.user.username}`);
+         return;
        }
+
+       set({
+         token: null,
+         isAuthenticated: false,
+         user: null,
+       });
      } catch (err) {
        const errorMsg = err instanceof Error ? err.message : 'Unknown error';
        logAction(LOG_ACTIONS.TOKEN_LOAD_ERROR, errorMsg);
-       console.error('Failed to load auth token:', err);
+       set({
+         token: null,
+         isAuthenticated: false,
+         user: null,
+       });
      }
    },
 
   logout: async () => {
     logAction(LOG_ACTIONS.LOGOUT, 'User logged out');
-    // Clear secure storage
-    await window.electronAPI.secureStorage.delete(STORAGE_KEYS.TOKEN);
-    // Clear localStorage
-    localStorage.removeItem(STORAGE_KEYS.USER);
+    await window.electronAPI.auth.logout();
     set(defaultState);
   },
 
@@ -87,8 +89,6 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
        if (!credentials.login.trim() || !credentials.password.trim()) {
          logAction(LOG_ACTIONS.LOGIN_VALIDATION_ERROR, 'Empty login or password');
          const errorMsg = UI_STRINGS.STORE_ERRORS.AUTH_EMPTY_FIELDS;
@@ -96,33 +96,27 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
          return { success: false, error: errorMsg };
        }
 
-      const mockUser: AuthUser = {
-        id: 'user_' + Date.now(),
-        username: credentials.login,
-        email: credentials.login.includes('@') ? credentials.login : undefined,
-      };
-
-      const mockToken = 'mock_token_' + Date.now();
-
-      // Store token in secure storage
-      const secureResult = await window.electronAPI.secureStorage.set(STORAGE_KEYS.TOKEN, mockToken);
-      if (!secureResult.success) {
-        const errorMsg = 'Failed to store token securely';
+      const authResult = await window.electronAPI.auth.login(credentials);
+      if (!authResult.success || !authResult.user) {
+        const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_LOGIN;
         set({ isLoading: false, error: errorMsg });
         return { success: false, error: errorMsg };
       }
 
-      // Store non-sensitive user data in localStorage
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(mockUser));
+      const user: AuthUser = {
+        id: authResult.user.id,
+        username: authResult.user.username,
+        email: authResult.user.email,
+      };
 
       set({
-        user: mockUser,
-        token: mockToken,
+        user,
+        token: null,
         isAuthenticated: true,
         isLoading: false,
       });
 
-      logAction(LOG_ACTIONS.LOGIN_SUCCESS, `User logged in: ${mockUser.username}`);
+      logAction(LOG_ACTIONS.LOGIN_SUCCESS, `User logged in: ${user.username}`);
       return { success: true };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.AUTH_LOGIN;
@@ -136,29 +130,28 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
       if (!username.trim()) {
         const errorMsg = UI_STRINGS.STORE_ERRORS.AUTH_EMPTY_USERNAME;
         set({ isLoading: false, error: errorMsg });
         return { success: false, error: errorMsg };
       }
 
-      const mockUser: AuthUser = {
-        id: 'offline_' + Date.now(),
-        username: username,
+      const authResult = await window.electronAPI.auth.loginOffline({ username });
+      if (!authResult.success || !authResult.user) {
+        const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_OFFLINE;
+        set({ isLoading: false, error: errorMsg });
+        return { success: false, error: errorMsg };
+      }
+
+      const user: AuthUser = {
+        id: authResult.user.id,
+        username: authResult.user.username,
+        email: authResult.user.email,
       };
 
-      const mockToken = 'offline_token';
-
-      // Store token in secure storage
-      await window.electronAPI.secureStorage.set(STORAGE_KEYS.TOKEN, mockToken);
-      // Store non-sensitive user data in localStorage
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(mockUser));
-
       set({
-        user: mockUser,
-        token: mockToken,
+        user,
+        token: null,
         isAuthenticated: true,
         isLoading: false,
       });

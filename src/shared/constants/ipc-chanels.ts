@@ -24,6 +24,12 @@ export const IPC_CHANNELS = {
     GET: "secure-storage:get",
     DELETE: "secure-storage:delete",
   },
+  AUTH: {
+    LOGIN: "auth:login",
+    LOGIN_OFFLINE: "auth:login-offline",
+    GET_SESSION: "auth:get-session",
+    LOGOUT: "auth:logout",
+  },
   JAVA: {
     CHECK_VERSION: "java:check-version",
     FIND_SYSTEM: "java:find-system",
@@ -66,6 +72,12 @@ export interface GameLaunchOptions {
   gamePath?: string;
   fullscreen: boolean;
   jvmArgs: string[];
+}
+
+export interface AuthSessionUser {
+  id: string;
+  username: string;
+  email?: string;
 }
 
 export type GameProgressPayload =
@@ -167,6 +179,35 @@ export interface IpcChannelMap {
   };
   [IPC_CHANNELS.SECURE_STORAGE.DELETE]: {
     args: [key: string];
+    return: { success: boolean; error?: string };
+  };
+  [IPC_CHANNELS.AUTH.LOGIN]: {
+    args: [credentials: { login: string; password: string }];
+    return: {
+      success: boolean;
+      user?: AuthSessionUser;
+      error?: string;
+    };
+  };
+  [IPC_CHANNELS.AUTH.LOGIN_OFFLINE]: {
+    args: [payload: { username: string }];
+    return: {
+      success: boolean;
+      user?: AuthSessionUser;
+      error?: string;
+    };
+  };
+  [IPC_CHANNELS.AUTH.GET_SESSION]: {
+    args: [];
+    return: {
+      success: boolean;
+      user?: AuthSessionUser | null;
+      isAuthenticated?: boolean;
+      error?: string;
+    };
+  };
+  [IPC_CHANNELS.AUTH.LOGOUT]: {
+    args: [];
     return: { success: boolean; error?: string };
   };
   [IPC_CHANNELS.JAVA.CHECK_VERSION]: {

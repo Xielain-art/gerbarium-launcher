@@ -6,7 +6,7 @@ import { useJava } from "../hooks/useJava";
 import { useDownloadStore } from "../stores/useDownloadStore";
 import { Card, ConfirmModal } from "../components";
 import { useTranslation } from "../hooks/useTranslation";
-import { ROUTES, STORAGE_KEYS } from "../../../shared/constants/system";
+import { ROUTES } from "../../../shared/constants/system";
 import {
   AdvancedSettingsTab,
   GeneralSettingsTab,
@@ -98,7 +98,6 @@ export function SettingsScreen() {
   const handleLogout = () => {
     setShouldLogout(true);
     logout();
-    localStorage.removeItem(STORAGE_KEYS.AUTH);
   };
 
   const handleExportLogs = async () => {

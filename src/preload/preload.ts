@@ -7,6 +7,7 @@ import {
   GameProgressPayload,
   UpdateInfoPayload,
   IntegrityCheckResult,
+  AuthSessionUser,
 } from "../shared/constants/ipc-chanels";
 
 async function typedInvoke<K extends keyof IpcChannelMap>(
@@ -106,13 +107,18 @@ contextBridge.exposeInMainWorld("electronAPI", {
   installUpdateAndRestart: () =>
     ipcRenderer.send(IPC_CHANNELS.UPDATE.INSTALL_AND_RESTART),
 
-  // Secure storage for sensitive data (tokens, passwords)
-  secureStorage: {
-    set: (key: string, value: string) =>
-      typedInvoke(IPC_CHANNELS.SECURE_STORAGE.SET, key, value),
-    get: (key: string) => typedInvoke(IPC_CHANNELS.SECURE_STORAGE.GET, key),
-    delete: (key: string) =>
-      typedInvoke(IPC_CHANNELS.SECURE_STORAGE.DELETE, key),
+  // Auth API (tokens never leave Main process)
+  auth: {
+    login: (credentials: { login: string; password: string }) =>
+      typedInvoke(IPC_CHANNELS.AUTH.LOGIN, credentials),
+    loginOffline: (payload: { username: string }) =>
+      typedInvoke(IPC_CHANNELS.AUTH.LOGIN_OFFLINE, payload),
+    getSession: () => typedInvoke(IPC_CHANNELS.AUTH.GET_SESSION),
+    logout: () => typedInvoke(IPC_CHANNELS.AUTH.LOGOUT),
+    getProfile: async (): Promise<AuthSessionUser | null> => {
+      const session = await typedInvoke(IPC_CHANNELS.AUTH.GET_SESSION);
+      return session.success && session.isAuthenticated ? (session.user ?? null) : null;
+    },
   },
 
   // Java management

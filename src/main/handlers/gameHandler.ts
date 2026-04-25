@@ -30,16 +30,14 @@ gameLog.transports.file.resolvePathFn = () => {
 };
 
 const DEFAULT_GAME_ROOT = path.join(os.homedir(), ".gerbarium");
-const MAX_JVM_ARGS = 30;
+const MAX_JVM_ARGS = 12;
 const MAX_JVM_ARG_LENGTH = 256;
-const JVM_ARG_SAFE_RE = /^[A-Za-z0-9_\-.:/=+,@%*\\]+$/;
-const BLOCKED_JVM_ARG_PREFIXES = [
-  "-jar",
-  "-cp",
-  "-classpath",
-  "-javaagent",
-  "-agentlib",
-  "-agentpath",
+const ALLOWED_JVM_ARG_EXACT = new Set(["-XX:+UseG1GC"]);
+const ALLOWED_JVM_ARG_PATTERNS: RegExp[] = [
+  /^-XX:MaxGCPauseMillis=\d{1,4}$/,
+  /^-XX:G1HeapRegionSize=\d{1,3}[mM]$/,
+  /^-XX:InitiatingHeapOccupancyPercent=\d{1,3}$/,
+  /^-Dfile\.encoding=UTF-8$/,
 ];
 const PROGRESS_EMIT_INTERVAL_MS = 50;
 
@@ -90,9 +88,17 @@ function validateAbsolutePath(inputPath: string, field: string): string {
 async function validateJavaPath(inputPath: string): Promise<string> {
   const resolvedPath = validateAbsolutePath(inputPath, "javaPath");
   const javaExecutableNames = new Set(["java", "java.exe", "javaw.exe"]);
+  const parentDirName = path.basename(path.dirname(resolvedPath)).toLowerCase();
+  const javaHomeDirName = path.basename(path.dirname(path.dirname(resolvedPath))).toLowerCase();
 
   if (!javaExecutableNames.has(path.basename(resolvedPath).toLowerCase())) {
     throw new Error("javaPath must point to a Java executable");
+  }
+  if (parentDirName !== "bin") {
+    throw new Error("javaPath must point to a Java executable inside a bin directory");
+  }
+  if (!/(java|jdk|jre)/.test(javaHomeDirName)) {
+    throw new Error("javaPath must point to a Java runtime or JDK directory");
   }
 
   try {
@@ -100,6 +106,7 @@ async function validateJavaPath(inputPath: string): Promise<string> {
     if (!stat.isFile()) {
       throw new Error("javaPath must be a file");
     }
+    await fs.promises.access(resolvedPath, fs.constants.R_OK);
   } catch (error) {
     throw new Error(`Invalid javaPath: ${toErrorMessage(error)}`);
   }
@@ -134,19 +141,35 @@ function sanitizeJvmArgs(jvmArgs: string[]): string[] {
       if (arg.length > MAX_JVM_ARG_LENGTH) {
         throw new Error("JVM argument is too long");
       }
-      if (!JVM_ARG_SAFE_RE.test(arg)) {
-        throw new Error(`JVM argument contains unsafe characters: ${arg}`);
+
+      if (ALLOWED_JVM_ARG_EXACT.has(arg)) {
+        return arg;
       }
-      const lowerArg = arg.toLowerCase();
-      if (BLOCKED_JVM_ARG_PREFIXES.some((prefix) => lowerArg.startsWith(prefix))) {
+
+      const isAllowedPattern = ALLOWED_JVM_ARG_PATTERNS.some((pattern) => pattern.test(arg));
+      if (!isAllowedPattern) {
         throw new Error(`Blocked JVM argument: ${arg}`);
       }
+
       return arg;
     });
 }
 
 function sendProgress(mainWindow: BrowserWindow, payload: GameProgressPayload): void {
-  mainWindow.webContents.send(IPC_CHANNELS.GAME.PROGRESS, payload);
+  if (mainWindow.isDestroyed()) {
+    return;
+  }
+
+  const { webContents } = mainWindow;
+  if (webContents.isDestroyed() || webContents.isCrashed()) {
+    return;
+  }
+
+  try {
+    webContents.send(IPC_CHANNELS.GAME.PROGRESS, payload);
+  } catch (error) {
+    log.warn("Failed to emit game progress event", error);
+  }
 }
 
 function parseJavaMajor(version: string): number {

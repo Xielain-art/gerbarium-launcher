@@ -7,7 +7,7 @@ import { useServerStatusStore } from "../stores/useServerStatusStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
 import { WindowControls } from "../components";
 import { useTranslation } from "../hooks/useTranslation";
-import { ROUTES, STORAGE_KEYS, LOG_ACTIONS } from "../../../shared/constants/system";
+import { ROUTES, LOG_ACTIONS } from "../../../shared/constants/system";
 import type { GameVersion } from "../types";
 import newsPlaceholder from "../assets/photo_2026-04-23_10-34-22.jpg";
 import { DashboardSidebar } from "../components/dashboard/DashboardSidebar";
@@ -246,7 +246,6 @@ export function DashboardScreen() {
   const handleLogout = () => {
     setShouldLogout(true);
     logout();
-    localStorage.removeItem(STORAGE_KEYS.AUTH);
   };
 
   const handleToggleConsole = () => {

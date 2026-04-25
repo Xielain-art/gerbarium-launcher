@@ -10,6 +10,7 @@ import { IPC_CHANNELS, type IntegrityCheckResult } from "../shared/constants/ipc
 import setupLogHandler from "./handlers/logHandler";
 import windowControlsHandler from "./handlers/windowControlsHandler";
 import secureStorageHandler from "./handlers/secureStorageHandler";
+import authHandler from "./handlers/authHandler";
 import updateHandler from "./handlers/updateHandler";
 import javaHandler from "./handlers/javaHandlerWrapper";
 import systemHandler from "./handlers/systemHandler";
@@ -351,6 +352,7 @@ app.whenReady().then(() => {
 
   windowControlsHandler(app);
   secureStorageHandler(app);
+  authHandler(app);
   updateHandler(app);
   javaHandler(app);
   systemHandler(app, () => settings);
