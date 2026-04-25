@@ -4,11 +4,12 @@ import log from 'electron-log';
 import { IPC_CHANNELS } from '@shared/constants/ipc-chanels';
 import type { UpdateInfoPayload } from '@shared/constants/ipc-chanels';
 import { LOG_MESSAGES, UI_MESSAGES } from '@shared/constants/log-messages';
-import { ENVIRONMENTS, PLATFORMS, FILENAMES, TIMEOUTS } from '@shared/constants/system';
+import { ENVIRONMENTS, FILENAMES, TIMEOUTS } from '@shared/constants/system';
 import path from 'path';
 
 export default function updateHandler(app: App) {
   let mainWindow: BrowserWindow | null = null;
+  let updateEventsBound = false;
 
   const toUpdateInfoPayload = (info: {
     version: string;
@@ -39,6 +40,10 @@ export default function updateHandler(app: App) {
 
   ipcMain.on(IPC_CHANNELS.UPDATE.INIT, () => {
     mainWindow = getMainWindow();
+    if (updateEventsBound) {
+      return;
+    }
+    updateEventsBound = true;
 
     if (process.env.NODE_ENV === ENVIRONMENTS.DEVELOPMENT) {
       autoUpdater.autoInstallOnAppQuit = false;
@@ -47,9 +52,7 @@ export default function updateHandler(app: App) {
       );
     }
 
-    if (process.platform === PLATFORMS.MACOS) {
-      autoUpdater.autoDownload = false;
-    }
+    autoUpdater.autoDownload = false;
 
     autoUpdater.on('checking-for-update', () => {
       log.info(LOG_MESSAGES.UPDATE_CHECKING);
@@ -64,6 +67,18 @@ export default function updateHandler(app: App) {
         win.webContents.send(IPC_CHANNELS.UPDATE.MESSAGE, UI_MESSAGES.UPDATE_FOUND);
         win.webContents.send(IPC_CHANNELS.UPDATE.INFO, toUpdateInfoPayload(info));
       }
+
+      autoUpdater.downloadUpdate().catch((err) => {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        log.error(LOG_MESSAGES.UPDATE_DOWNLOAD_FAILED, errorMessage);
+        const targetWin = getMainWindow();
+        if (targetWin) {
+          targetWin.webContents.send(
+            IPC_CHANNELS.UPDATE.MESSAGE,
+            `${UI_MESSAGES.UPDATE_ERROR_PREFIX} ${errorMessage}`
+          );
+        }
+      });
     });
 
     autoUpdater.on('update-not-available', () => {

@@ -5,6 +5,7 @@ import {
   GameLaunchOptions,
   GameProgressPayload,
   UpdateInfoPayload,
+  IntegrityCheckResult,
 } from "../shared/constants/ipc-chanels";
 
 type IpcArgs<K extends keyof IpcChannelMap> = IpcChannelMap[K]["args"];
@@ -19,6 +20,7 @@ export interface IElectronAPI {
   // App controls
   closeApp: () => void;
   getAppVersion: () => Promise<string>;
+  verifyIntegrity: () => Promise<IntegrityCheckResult>;
 
   // Window controls
   minimizeWindow: () => Promise<void>;

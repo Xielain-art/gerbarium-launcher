@@ -16,6 +16,7 @@ export function AdvancedSettingsTab({
 
       <div className="rounded border-[2px] border-[#3a3a3a] bg-[#232428] p-4 space-y-3">
         <Checkbox
+          id="show-launch-console"
           label={
             advancedTranslations.SHOW_LAUNCH_CONSOLE
           }

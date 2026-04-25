@@ -6,6 +6,7 @@ import {
   GameLaunchOptions,
   GameProgressPayload,
   UpdateInfoPayload,
+  IntegrityCheckResult,
 } from "../shared/constants/ipc-chanels";
 
 async function typedInvoke<K extends keyof IpcChannelMap>(
@@ -24,6 +25,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   closeApp: () => typedInvoke(IPC_CHANNELS.WINDOW.CLOSE),
   // App version
   getAppVersion: () => typedInvoke(IPC_CHANNELS.APP.GET_VERSION),
+  verifyIntegrity: () => typedInvoke(IPC_CHANNELS.APP.VERIFY_INTEGRITY),
 
   // Window controls
   minimizeWindow: () => typedInvoke(IPC_CHANNELS.WINDOW.MINIMIZE),
