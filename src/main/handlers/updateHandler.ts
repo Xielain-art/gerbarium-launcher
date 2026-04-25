@@ -2,12 +2,36 @@ import { ipcMain, BrowserWindow, App } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { IPC_CHANNELS } from '@shared/constants/ipc-chanels';
+import type { UpdateInfoPayload } from '@shared/constants/ipc-chanels';
 import { LOG_MESSAGES, UI_MESSAGES } from '@shared/constants/log-messages';
 import { ENVIRONMENTS, PLATFORMS, FILENAMES, TIMEOUTS } from '@shared/constants/system';
 import path from 'path';
 
 export default function updateHandler(app: App) {
   let mainWindow: BrowserWindow | null = null;
+
+  const toUpdateInfoPayload = (info: {
+    version: string;
+    releaseName?: string | null;
+    releaseNotes?: string | Array<{ note?: string }> | null;
+    releaseDate?: string;
+  }): UpdateInfoPayload => {
+    const normalizedNotes = Array.isArray(info.releaseNotes)
+      ? info.releaseNotes
+          .map((entry) => (typeof entry.note === 'string' ? entry.note.trim() : ''))
+          .filter(Boolean)
+          .join('\n')
+      : typeof info.releaseNotes === 'string'
+        ? info.releaseNotes
+        : null;
+
+    return {
+      version: info.version,
+      releaseName: info.releaseName ?? null,
+      releaseNotes: normalizedNotes,
+      releaseDate: info.releaseDate,
+    };
+  };
 
   const getMainWindow = (): BrowserWindow | null => {
     return mainWindow || BrowserWindow.getAllWindows()[0] || null;
@@ -38,7 +62,7 @@ export default function updateHandler(app: App) {
       const win = getMainWindow();
       if (win) {
         win.webContents.send(IPC_CHANNELS.UPDATE.MESSAGE, UI_MESSAGES.UPDATE_FOUND);
-        win.webContents.send(IPC_CHANNELS.UPDATE.INFO, info);
+        win.webContents.send(IPC_CHANNELS.UPDATE.INFO, toUpdateInfoPayload(info));
       }
     });
 

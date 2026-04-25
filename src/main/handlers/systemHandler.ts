@@ -1,15 +1,80 @@
-import os from 'os';
-import { ipcMain, shell } from 'electron';
-import log from 'electron-log';
-import { IPC_CHANNELS } from '../../shared/constants/ipc-chanels';
-import { LOG_MESSAGES } from '../../shared/constants/log-messages';
+import os from "node:os";
+import path from "node:path";
+import fs from "node:fs/promises";
+import { ipcMain, shell, dialog, app, type App } from "electron";
+import log from "electron-log";
+import { IPC_CHANNELS } from "../../shared/constants/ipc-chanels";
+import { LOG_MESSAGES } from "../../shared/constants/log-messages";
+import { EXTERNAL_URLS, GITHUB_TEMPLATES } from "../../shared/constants/system";
 
 export interface SystemMemory {
   total: number;
   free: number;
 }
 
-export default function systemHandler() {
+type RuntimeSettings = {
+  gamePath?: string;
+};
+
+type SettingsReader = () => RuntimeSettings;
+
+const DEFAULT_GAME_ROOT = path.join(os.homedir(), ".gerbarium");
+
+function isSafeHttpUrl(rawUrl: string): boolean {
+  try {
+    const parsed = new URL(rawUrl);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function isSubPath(candidate: string, root: string): boolean {
+  const relative = path.relative(root, candidate);
+  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+}
+
+function resolveAllowedRoots(electronApp: App, settings: RuntimeSettings): string[] {
+  const roots = [
+    path.resolve(DEFAULT_GAME_ROOT),
+    path.resolve(electronApp.getPath("userData")),
+  ];
+
+  if (settings.gamePath && settings.gamePath.trim()) {
+    roots.push(path.resolve(settings.gamePath.trim()));
+  }
+
+  return Array.from(new Set(roots));
+}
+
+async function resolveValidatedDirectory(
+  electronApp: App,
+  rawPath: string,
+  settingsReader: SettingsReader,
+): Promise<string | null> {
+  const trimmed = rawPath.trim();
+  const resolved = trimmed ? path.resolve(trimmed) : path.resolve(DEFAULT_GAME_ROOT);
+
+  let stat;
+  try {
+    stat = await fs.stat(resolved);
+  } catch {
+    return null;
+  }
+
+  if (!stat.isDirectory()) {
+    return null;
+  }
+
+  const allowedRoots = resolveAllowedRoots(electronApp, settingsReader());
+  const isAllowed = allowedRoots.some((root) => isSubPath(resolved, root));
+  return isAllowed ? resolved : null;
+}
+
+export default function systemHandler(
+  electronApp: App,
+  settingsReader: SettingsReader = () => ({}),
+) {
   ipcMain.handle(IPC_CHANNELS.SYSTEM.GET_MEMORY, (): SystemMemory => {
     log.debug(LOG_MESSAGES.SYSTEM_GET_MEMORY);
     return {
@@ -23,58 +88,53 @@ export default function systemHandler() {
     return os.cpus().length;
   });
 
-  // App version — replaces magic string "get-app-version" in index.js
   ipcMain.handle(IPC_CHANNELS.APP.GET_VERSION, () => {
-    const { app } = require('electron') as typeof import('electron');
-    return app.getVersion();
+    return electronApp.getVersion();
   });
 
-  // Open external URL
   ipcMain.handle(IPC_CHANNELS.SYSTEM.OPEN_EXTERNAL, async (_event, url: string) => {
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      await shell.openExternal(url);
+    if (!isSafeHttpUrl(url)) {
+      log.warn("Blocked unsafe external URL", url);
+      return;
     }
+
+    await shell.openExternal(url);
   });
 
-  // Open GitHub Issue with template
   ipcMain.handle(IPC_CHANNELS.SYSTEM.OPEN_GITHUB_ISSUE, async () => {
-    const { app } = require('electron') as typeof import('electron');
-    const { GITHUB_TEMPLATES, EXTERNAL_URLS } = require('../../shared/constants/system');
-    
     const issueBody = encodeURIComponent(
-      GITHUB_TEMPLATES.CONTACT_BODY(process.platform, process.arch, app.getVersion())
+      GITHUB_TEMPLATES.CONTACT_BODY(process.platform, process.arch, electronApp.getVersion()),
     );
-    await shell.openExternal(
-      `${EXTERNAL_URLS.GITHUB_ISSUES}?body=${issueBody}`
-    );
+
+    await shell.openExternal(`${EXTERNAL_URLS.GITHUB_ISSUES}?body=${issueBody}`);
   });
 
-  // Select directory dialog
   ipcMain.handle(IPC_CHANNELS.SYSTEM.SELECT_DIRECTORY, async () => {
-    const { dialog } = require('electron') as typeof import('electron');
     const result = await dialog.showOpenDialog({
-      properties: ['openDirectory', 'createDirectory'],
+      properties: ["openDirectory", "createDirectory"],
     });
     return result.canceled ? null : result.filePaths[0];
   });
 
-  // Open local path (folder or file)
   ipcMain.handle(IPC_CHANNELS.SYSTEM.OPEN_PATH, async (_event, targetPath: string) => {
-    const path = require('path');
-    const os = require('os');
-    
-    let finalPath = targetPath;
-    if (!finalPath) {
-       finalPath = path.join(os.homedir(), ".gerbarium");
+    const safeDirectory = await resolveValidatedDirectory(
+      electronApp,
+      typeof targetPath === "string" ? targetPath : "",
+      settingsReader,
+    );
+
+    if (!safeDirectory) {
+      log.warn("Blocked unsafe openPath target", targetPath);
+      return;
     }
-    
-    if (finalPath) {
-      await shell.openPath(finalPath);
+
+    const openError = await shell.openPath(safeDirectory);
+    if (openError) {
+      log.error("Failed to open path", { safeDirectory, openError });
     }
   });
 
   ipcMain.handle(IPC_CHANNELS.SYSTEM.OPEN_DATA_FOLDER, async () => {
-    const { app } = require('electron') as typeof import('electron');
-    await shell.openPath(app.getPath('userData'));
+    await shell.openPath(electronApp.getPath("userData"));
   });
 }

@@ -161,7 +161,7 @@ export const ROUTES = {
 } as const;
 
 export const APP_CONFIG = {
-  DEV_URL: 'http://localhost:5173',
+  DEV_URL: 'http://127.0.0.1:5173',
   PROD_INDEX: 'dist/index.html',
   BG_COLOR: '#171614',
 } as const;

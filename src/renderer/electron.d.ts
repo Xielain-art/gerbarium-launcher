@@ -4,6 +4,7 @@ import {
   DownloadStatus,
   GameLaunchOptions,
   GameProgressPayload,
+  UpdateInfoPayload,
 } from "../shared/constants/ipc-chanels";
 
 type IpcArgs<K extends keyof IpcChannelMap> = IpcChannelMap[K]["args"];
@@ -41,7 +42,7 @@ export interface IElectronAPI {
 
   // Update control
   initUpdate: () => void;
-  onUpdateInfo: (callback: (info: any) => void) => () => void;
+  onUpdateInfo: (callback: (info: UpdateInfoPayload) => void) => () => void;
   downloadUpdate: () => Promise<{ success: boolean; error?: string }>;
   installUpdateAndRestart: () => void;
 

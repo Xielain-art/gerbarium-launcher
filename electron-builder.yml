@@ -7,10 +7,17 @@ copyright: 'Copyright © 2026 Gerbarium Radmir Klimau'
 asar: true
 compression: 'maximum'
 
+electronFuses:
+  runAsNode: false
+  enableCookieEncryption: true
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  enableEmbeddedAsarIntegrityValidation: true
+  onlyLoadAppFromAsar: true
+
 # Указываем, какие файлы брать, а какие игнорировать
 files:
   - 'dist/**/*'
-  - 'index.js'
   - 'package.json'
   - '_legacy_app/**/*'
   - 'libraries/**/*'

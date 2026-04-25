@@ -14,12 +14,7 @@ export function SettingsTabNav({
     { id: "general", label: t.SETTINGS.TABS.general },
     { id: "java", label: t.SETTINGS.TABS.java },
     { id: "profile", label: t.SETTINGS.TABS.profile },
-    {
-      id: "advanced",
-      label:
-        (t.SETTINGS.TABS as unknown as { advanced?: string }).advanced ||
-        "ADVANCED",
-    },
+    { id: "advanced", label: t.SETTINGS.TABS.advanced },
     { id: "support", label: t.SETTINGS.TABS.support },
   ];
 

@@ -63,6 +63,7 @@ const RU = {
       general: "ОБЩИЕ",
       java: "JAVA",
       profile: "ПРОФИЛЬ",
+      advanced: "ADVANCED",
       support: "ПОДДЕРЖКА",
     },
     GENERAL: {
@@ -95,6 +96,11 @@ const RU = {
       DOWNLOAD_BUTTON: (v: number) => `Скачать Java ${v}`,
       ALREADY_INSTALLED: (v: number) => `Java ${v} уже установлена`,
     },
+    ADVANCED: {
+      TITLE: "Advanced",
+      SHOW_LAUNCH_CONSOLE: "Show console while Minecraft launches",
+      SHOW_LAUNCH_CONSOLE_HELP: "Disable this to keep the console hidden by default during startup.",
+    },
     PROFILE: {
       TITLE: "Настройки профиля",
       USERNAME_LABEL: "Игрок",
@@ -117,6 +123,7 @@ const RU = {
       HELP_TEXT: "Если вы столкнулись с проблемой, выгрузите логи и прикрепите их к баг-репорту на GitHub.",
       EXPORT_BUTTON: "Сообщить об ошибке (Экспорт логов)",
       EXPORTING: "Архивация...",
+      OPEN_DEVTOOLS_BUTTON: "Open DevTools",
       EXPORT_SUCCESS: (path: string) => `Логи успешно сохранены в:\n${path}\n\nОткроется браузер для создания Issue.`,
       EXPORT_ERROR: (err: string) => `Ошибка при сохранении логов:\n${err}`,
       EXPORT_UNEXPECTED_ERROR: "Произошла непредвиденная ошибка при экспорте логов.",
@@ -240,6 +247,7 @@ const EN = {
       general: "GENERAL",
       java: "JAVA",
       profile: "PROFILE",
+      advanced: "ADVANCED",
       support: "SUPPORT",
     },
     GENERAL: {
@@ -272,6 +280,11 @@ const EN = {
       DOWNLOAD_BUTTON: (v: number) => `Download Java ${v}`,
       ALREADY_INSTALLED: (v: number) => `Java ${v} is already installed`,
     },
+    ADVANCED: {
+      TITLE: "Advanced Settings",
+      SHOW_LAUNCH_CONSOLE: "Show console while Minecraft launches",
+      SHOW_LAUNCH_CONSOLE_HELP: "Disable this to keep the console hidden by default during startup.",
+    },
     PROFILE: {
       TITLE: "Profile Settings",
       USERNAME_LABEL: "Player",
@@ -294,6 +307,7 @@ const EN = {
       HELP_TEXT: "If you encounter a problem, export the logs and attach them to a bug report on GitHub.",
       EXPORT_BUTTON: "Report an issue (Export logs)",
       EXPORTING: "Archiving...",
+      OPEN_DEVTOOLS_BUTTON: "Open DevTools",
       EXPORT_SUCCESS: (path: string) => `Logs successfully saved to:\n${path}\n\nA browser will open to create an Issue.`,
       EXPORT_ERROR: (err: string) => `Error saving logs:\n${err}`,
       EXPORT_UNEXPECTED_ERROR: "An unexpected error occurred while exporting logs.",
@@ -357,4 +371,7 @@ export const TRANSLATIONS = {
   en: EN
 };
 
-export type TranslationType = typeof RU;
+const _ruShapeCheck: typeof EN = RU;
+void _ruShapeCheck;
+
+export type TranslationType = typeof EN;

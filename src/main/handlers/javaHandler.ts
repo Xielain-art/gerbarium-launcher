@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs-extra";
 import util from "util";
 import got from "got";
+import crypto from "node:crypto";
 import extract from "extract-zip";
 import tar from "tar-fs";
 import zlib from "zlib";
@@ -27,6 +28,7 @@ import {
 import log from "electron-log";
 
 const execPromise = util.promisify(exec);
+const SHA256_HEX_RE = /\b([a-fA-F0-9]{64})\b/;
 
 export interface ProgressUpdate {
   status: DownloadStatus;
@@ -170,6 +172,13 @@ export async function downloadAndExtractJRE(
         .on("error", (err) => reject(err));
     });
 
+    onProgress({ status: DOWNLOAD_STATUS.VERIFYING as DownloadStatus });
+    const expectedChecksum = await fetchExpectedSha256(url);
+    const actualChecksum = await calculateFileSha256(archivePath);
+    if (actualChecksum.toLowerCase() !== expectedChecksum.toLowerCase()) {
+      throw new Error(`${ERROR_CODES.JAVA_CORRUPTED}: checksum mismatch`);
+    }
+
     onProgress({ status: DOWNLOAD_STATUS.EXTRACTING as DownloadStatus });
     if (url.endsWith(`.${FILE_EXTENSIONS.ZIP}`)) {
       await extract(archivePath, { dir: targetDir });
@@ -182,11 +191,18 @@ export async function downloadAndExtractJRE(
     }
     await fs.remove(archivePath);
 
-    onProgress({ status: DOWNLOAD_STATUS.VERIFYING as DownloadStatus });
     const files = await fs.readdir(targetDir);
-    const jreFolder = files.find((f) =>
-      fs.statSync(path.join(targetDir, f)).isDirectory(),
-    );
+    let jreFolder: string | undefined;
+
+    for (const file of files) {
+      const entryPath = path.join(targetDir, file);
+      const stat = await fs.stat(entryPath);
+      if (stat.isDirectory()) {
+        jreFolder = file;
+        break;
+      }
+    }
+
     if (!jreFolder) throw new Error(ERROR_CODES.JAVA_FOLDER_NOT_FOUND);
 
     const javaBinaryPath = path.join(
@@ -210,4 +226,28 @@ export async function downloadAndExtractJRE(
     await fs.remove(archivePath);
     throw err;
   }
+}
+
+async function fetchExpectedSha256(archiveUrl: string): Promise<string> {
+  const checksumText = await got(`${archiveUrl}.sha256.txt`, {
+    timeout: { socket: TIMEOUTS.JAVA_DOWNLOAD_SOCKET },
+  }).text();
+
+  const match = checksumText.match(SHA256_HEX_RE);
+  if (!match?.[1]) {
+    throw new Error(`${ERROR_CODES.JAVA_CORRUPTED}: sha256 metadata is invalid`);
+  }
+
+  return match[1];
+}
+
+async function calculateFileSha256(filePath: string): Promise<string> {
+  return await new Promise((resolve, reject) => {
+    const hash = crypto.createHash("sha256");
+    const stream = fs.createReadStream(filePath);
+
+    stream.on("error", reject);
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.on("end", () => resolve(hash.digest("hex")));
+  });
 }

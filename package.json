@@ -10,7 +10,7 @@
     "url": "https://github.com/Xielain-art/gerbarium-releases/issues"
   },
   "private": true,
-  "main": "index.js",
+  "main": "dist/main/main.js",
   "scripts": {
     "start": "electron .",
     "build:ui": "vite build",
@@ -25,18 +25,17 @@
     "dev:ui": "vite",
     "dev:main": "node scripts/esbuild-main.mjs --watch",
     "dev:preload": "node scripts/esbuild-preload.mjs --watch",
-    "dev:electron": "wait-on http://localhost:5173 && npm run build:preload && npm run build:main && electron .",
-    "dev": "concurrently -n \"UI,MAIN,PRELOAD,APP\" -c \"bgBlue,bgGreen,bgMagenta,bgCyan\" \"npm run dev:ui\" \"npm run dev:main\" \"npm run dev:preload\" \"npm run dev:electron\"",
+    "dev:electron": "electron .",
+    "dev": "npm run build:main && npm run build:preload && vite",
     "publish-app": "npm run build && electron-builder build -p always"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=20.18.0"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.4",
     "@tanstack/react-router": "^1.168.23",
     "@types/archiver": "^7.0.0",
-    "adm-zip": "^0.5.16",
     "archiver": "^7.0.1",
     "discord-rpc-patch": "^4.0.1",
     "ejs": "^3.1.10",
@@ -56,7 +55,6 @@
     "semver": "^7.7.3",
     "tailwindcss": "^4.2.4",
     "tar-fs": "^3.1.2",
-    "tar-stream": "^3.1.8",
     "toml": "^3.0.0",
     "zustand": "^5.0.12"
   },
@@ -65,14 +63,12 @@
     "@eslint/js": "^9.39.4",
     "@rolldown/plugin-babel": "^0.2.3",
     "@stylistic/eslint-plugin": "^5.6.1",
-    "@types/adm-zip": "^0.5.8",
     "@types/babel__core": "^7.20.5",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "babel-plugin-react-compiler": "^1.0.0",
-    "concurrently": "^9.2.1",
     "electron": "^39.2.7",
     "electron-builder": "^26.4.0",
     "esbuild": "^0.28.0",
@@ -83,7 +79,7 @@
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
     "vite": "^8.0.9",
-    "wait-on": "^9.0.5"
+    "vite-plugin-electron": "^0.29.1"
   },
   "repository": {
     "type": "git",

@@ -21,7 +21,7 @@ try {
 } catch (e) {
   // Fallback if not yet bundled
   CONSTANTS = {
-    APP_CONFIG: { DEV_URL: 'http://localhost:5173', PROD_INDEX: 'dist/index.html', BG_COLOR: '#171614' },
+    APP_CONFIG: { DEV_URL: 'http://127.0.0.1:5173', PROD_INDEX: 'dist/index.html', BG_COLOR: '#171614' },
     WINDOW_CONFIG: { WIDTH: 980, HEIGHT: 552 },
     DIRECTORIES: { LOGS: 'logs', USER_DATA: 'userData' },
     LOG_FILE_NAMES: { MAIN: 'main.log' },

@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron';
+import { ipcMain, dialog } from 'electron';
 import {
   checkJavaVersion,
   findJavaInSystem,
@@ -14,6 +14,7 @@ import { DIALOG_FILTERS, FILE_EXTENSIONS, PLATFORMS } from '../../shared/constan
 import log from 'electron-log';
 
 const downloadLocks: Map<number, boolean> = new Map();
+const DOWNLOAD_PROGRESS_INTERVAL_MS = 50;
 
 export default function javaHandler() {
   ipcMain.handle(IPC_CHANNELS.JAVA.CHECK_VERSION, async (_, javaPath: string) => {
@@ -46,7 +47,6 @@ export default function javaHandler() {
   });
 
   ipcMain.handle(IPC_CHANNELS.JAVA.SELECT_EXECUTABLE, async () => {
-    const { dialog } = require('electron') as typeof import('electron');
     const filters =
       process.platform === PLATFORMS.WINDOWS
         ? [{ name: DIALOG_FILTERS.JAVA_EXECUTABLE, extensions: [FILE_EXTENSIONS.EXE] }]
@@ -60,6 +60,7 @@ export default function javaHandler() {
 
   ipcMain.handle(IPC_CHANNELS.JAVA.DOWNLOAD, async (event, javaVersion: number) => {
     const version = javaVersion as 8 | 17 | 21;
+    let lastProgressEmitTs = 0;
 
     if (downloadLocks.get(version)) {
       log.warn(LOG_MESSAGES.JAVA_DOWNLOAD_IN_PROGRESS, version);
@@ -71,6 +72,13 @@ export default function javaHandler() {
       log.info(LOG_MESSAGES.JAVA_DOWNLOAD_START, version);
 
       const javaPath = await downloadAndExtractJRE(version, (update) => {
+        if (typeof update.progress === "number") {
+          const now = Date.now();
+          if (now - lastProgressEmitTs < DOWNLOAD_PROGRESS_INTERVAL_MS) {
+            return;
+          }
+          lastProgressEmitTs = now;
+        }
         event.sender.send(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, update);
       });
 
