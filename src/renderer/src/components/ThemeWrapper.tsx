@@ -7,8 +7,10 @@ export function ThemeWrapper({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Remove all theme classes
     document.body.classList.remove('theme-dark', 'theme-light', 'theme-gerbarium');
+    document.documentElement.classList.remove('theme-dark', 'theme-light', 'theme-gerbarium');
     // Add current theme class
     document.body.classList.add(`theme-${theme}`);
+    document.documentElement.classList.add(`theme-${theme}`);
     
     // For specific themes, we might want to change background-color on the html element too
     const html = document.documentElement;
@@ -19,6 +21,11 @@ export function ThemeWrapper({ children }: { children: React.ReactNode }) {
     } else {
       html.style.backgroundColor = '#171614'; // Gerbarium default
     }
+
+    return () => {
+      document.body.classList.remove('theme-dark', 'theme-light', 'theme-gerbarium');
+      document.documentElement.classList.remove('theme-dark', 'theme-light', 'theme-gerbarium');
+    };
   }, [theme]);
 
   return <>{children}</>;

@@ -29,6 +29,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   maximizeWindow: () => typedInvoke(IPC_CHANNELS.WINDOW.MAXIMIZE),
   closeWindow: () => typedInvoke(IPC_CHANNELS.WINDOW.CLOSE),
   toggleFullScreen: () => typedInvoke(IPC_CHANNELS.WINDOW.TOGGLE_FULLSCREEN),
+  openDevTools: () => typedInvoke(IPC_CHANNELS.WINDOW.OPEN_DEVTOOLS),
 
   // Window state listener
   onWindowStateChange: (callback: (state: WindowState) => void) => {

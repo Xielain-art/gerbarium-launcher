@@ -3,6 +3,7 @@ export { SettingsTabNav } from "./SettingsTabNav";
 export { GeneralSettingsTab } from "./GeneralSettingsTab";
 export { JavaSettingsTab } from "./JavaSettingsTab";
 export { ProfileSettingsTab } from "./ProfileSettingsTab";
+export { AdvancedSettingsTab } from "./AdvancedSettingsTab";
 export { SupportSettingsTab } from "./SupportSettingsTab";
 export { SettingsActionBar } from "./SettingsActionBar";
 export type {

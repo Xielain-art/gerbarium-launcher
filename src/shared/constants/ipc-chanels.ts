@@ -7,6 +7,7 @@ export const IPC_CHANNELS = {
     MAXIMIZE: "window:maximize",
     CLOSE: "window:close",
     TOGGLE_FULLSCREEN: "window:toggle-fullscreen",
+    OPEN_DEVTOOLS: "window:open-devtools",
     ON_STATE_CHANGE: "window:on-state-change",
   },
   UPDATE: {
@@ -98,6 +99,10 @@ export interface IpcChannelMap {
     return: void;
   };
   [IPC_CHANNELS.WINDOW.TOGGLE_FULLSCREEN]: {
+    args: [];
+    return: void;
+  };
+  [IPC_CHANNELS.WINDOW.OPEN_DEVTOOLS]: {
     args: [];
     return: void;
   };

@@ -40,6 +40,13 @@ export default function windowControlsHandler(app: App) {
     }
   });
 
+  ipcMain.handle(IPC_CHANNELS.WINDOW.OPEN_DEVTOOLS, () => {
+    const win = getMainWindow();
+    if (win) {
+      win.webContents.openDevTools({ mode: "detach" });
+    }
+  });
+
   // Listen to window state changes and notify renderer
   const setupWindowStateListeners = () => {
     const win = getMainWindow();

@@ -34,6 +34,7 @@ export interface SettingsGeneral {
   jvmArgs: string;
   gamePath?: string;
   fullscreen: boolean;
+  showLaunchConsole: boolean;
   theme: 'dark' | 'light' | 'gerbarium';
 }
 
