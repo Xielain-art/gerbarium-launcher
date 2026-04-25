@@ -23,8 +23,12 @@ window.addEventListener("unhandledrejection", (event) => {
 // Отмечаем запуск фронтенда
 window.electronAPI?.system.logAction("APP_START", "React Renderer Initialized").catch(() => {});
 
+import { ThemeWrapper } from "./src/components/ThemeWrapper";
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <ThemeWrapper>
+      <RouterProvider router={router} />
+    </ThemeWrapper>
   </StrictMode>,
 );

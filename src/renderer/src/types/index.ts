@@ -32,6 +32,9 @@ export interface SettingsGeneral {
   minimizeToTray: boolean;
   discordRPC: boolean;
   jvmArgs: string;
+  gamePath?: string;
+  fullscreen: boolean;
+  theme: 'dark' | 'light' | 'gerbarium';
 }
 
 export interface SettingsMods {

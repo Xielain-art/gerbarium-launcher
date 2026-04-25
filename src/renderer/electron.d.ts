@@ -71,13 +71,35 @@ export interface IElectronAPI {
   };
 
    // System info
-   system: {
-     getMemory: () => Promise<{ total: number; free: number }>;
-     getCpus: () => Promise<number>;
-     logAction: (action: string, details?: string) => Promise<void>;
-     openExternal: (url: string) => Promise<void>;
-     openGitHubIssue: () => Promise<void>;
-   };
+    system: {
+      getMemory: () => Promise<{ total: number; free: number }>;
+      getCpus: () => Promise<number>;
+      logAction: (action: string, details?: string) => Promise<void>;
+      openExternal: (url: string) => Promise<void>;
+      openGitHubIssue: () => Promise<void>;
+      selectDirectory: () => Promise<string | null>;
+      openPath: (path: string) => Promise<void>;
+      openDataFolder: () => Promise<void>;
+      sendSettingsUpdate: (settings: any) => void;
+    };
+
+    // Game management
+    game: {
+      launch: (options: {
+        username: string;
+        version: string;
+        memory: { min: string; max: string };
+        javaPath: string;
+        gamePath?: string;
+      }) => Promise<{ success: boolean; error?: string }>;
+      onProgress: (
+        callback: (data: {
+          type: "data" | "progress" | "close";
+          content: any;
+        }) => void,
+      ) => () => void;
+      getInstalledVersions: () => Promise<string[]>;
+    };
 
    // Logs export and report
    logs: {

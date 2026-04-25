@@ -1,5 +1,5 @@
 // Requirements
-const { app, BrowserWindow, Menu } = require("electron");
+const { app, BrowserWindow, Menu, Tray, ipcMain } = require("electron");
 const isDev = require("./_legacy_app/assets/js/isdev");
 const path = require("path");
 const LangLoader = require("./_legacy_app/assets/js/langloader");
@@ -12,6 +12,7 @@ const secureStorageHandler = require("./dist/main/handlers/secureStorageHandler"
 const updateHandler = require("./dist/main/handlers/updateHandler").default;
 const javaHandler = require("./dist/main/handlers/javaHandlerWrapper").default;
 const systemHandler = require("./dist/main/handlers/systemHandler").default;
+const gameHandler = require("./dist/main/handlers/gameHandler").default;
 
 // Try to load bundled constants
 let CONSTANTS;
@@ -183,6 +184,52 @@ function getPlatformIcon(filename) {
   );
 }
 
+let tray = null;
+let settings = { minimizeToTray: false };
+
+function createTray() {
+  if (tray) return;
+  
+  tray = new Tray(getPlatformIcon("SealCircle"));
+  const contextMenu = Menu.buildFromTemplate([
+    { label: "Показать лаунчер", click: () => {
+      if (win) {
+        win.show();
+        if (win.isMinimized()) win.restore();
+        win.focus();
+      }
+    }},
+    { type: "separator" },
+    { label: "Выход", click: () => {
+      app.isQuiting = true;
+      app.quit();
+    }}
+  ]);
+
+  tray.setToolTip("Gerbarium Launcher");
+  tray.setContextMenu(contextMenu);
+  
+  tray.on("double-click", () => {
+    if (win) {
+      win.show();
+      if (win.isMinimized()) win.restore();
+      win.focus();
+    }
+  });
+}
+
+ipcMain.on('settings-updated', (event, newSettings) => {
+  settings = { ...settings, ...newSettings };
+  if (settings.minimizeToTray) {
+    createTray();
+  } else {
+    if (tray) {
+      tray.destroy();
+      tray = null;
+    }
+  }
+});
+
 app.on("ready", () => {
    createWindow();
    createMenu();
@@ -191,14 +238,36 @@ app.on("ready", () => {
    updateHandler(app);
    javaHandler(app);
    systemHandler(app);
+   gameHandler(win);
    setupLogHandler(app);
+   
+   // Handle close/minimize behavior
+   if (win) {
+     win.on('minimize', (event) => {
+       if (settings.minimizeToTray) {
+         event.preventDefault();
+         win.hide();
+       }
+     });
+
+     win.on('close', (event) => {
+       if (!app.isQuiting && settings.minimizeToTray) {
+         event.preventDefault();
+         win.hide();
+       }
+       return false;
+     });
+   }
 });
 
 app.on("window-all-closed", () => {
   if (process.platform !== CONSTANTS.PLATFORMS.MACOS) {
-    app.quit();
+    if (!settings.minimizeToTray) {
+      app.quit();
+    }
   }
 });
+
 
 app.on("activate", () => {
   if (win === null) {

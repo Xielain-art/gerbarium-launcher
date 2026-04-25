@@ -143,10 +143,40 @@ contextBridge.exposeInMainWorld("electronAPI", {
       typedInvoke(IPC_CHANNELS.SYSTEM.OPEN_EXTERNAL, url),
     openGitHubIssue: () =>
       typedInvoke(IPC_CHANNELS.SYSTEM.OPEN_GITHUB_ISSUE),
+    selectDirectory: () =>
+      typedInvoke(IPC_CHANNELS.SYSTEM.SELECT_DIRECTORY),
+    openPath: (path: string) =>
+      typedInvoke(IPC_CHANNELS.SYSTEM.OPEN_PATH, path),
+    openDataFolder: () =>
+      typedInvoke(IPC_CHANNELS.SYSTEM.OPEN_DATA_FOLDER),
+    sendSettingsUpdate: (settings: any) =>
+      ipcRenderer.send('settings-updated', settings),
   },
 
   // Logs export and report
   logs: {
     exportAndReport: () => typedInvoke(IPC_CHANNELS.LOG.EXPORT_AND_REPORT),
+  },
+
+  // Game controls
+  game: {
+    launch: (options: { 
+      username: string; 
+      version: string; 
+      memory: { min: string; max: string }; 
+      javaPath: string;
+      gamePath?: string;
+      fullscreen: boolean;
+      jvmArgs: string[];
+    }) =>
+      typedInvoke(IPC_CHANNELS.GAME.LAUNCH, options),
+    onProgress: (callback: (data: { type: 'data' | 'progress' | 'close'; content: any }) => void) => {
+      const subscription = (_event: any, data: { type: 'data' | 'progress' | 'close'; content: any }) => callback(data);
+      ipcRenderer.on(IPC_CHANNELS.GAME.PROGRESS, subscription);
+      return () => {
+        ipcRenderer.removeListener(IPC_CHANNELS.GAME.PROGRESS, subscription);
+      };
+    },
+    getInstalledVersions: () => typedInvoke(IPC_CHANNELS.GAME.GET_INSTALLED_VERSIONS),
   },
 });

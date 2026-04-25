@@ -34,6 +34,9 @@ const defaultSettings: SettingsStateType = {
     minimizeToTray: false,
     discordRPC: true,
     jvmArgs: DEFAULT_SETTINGS.JVM_ARGS,
+    gamePath: '',
+    fullscreen: false,
+    theme: 'gerbarium',
   },
   mods: {
     enabledMods: [],
@@ -61,10 +64,16 @@ export const useSettingsStore = create<SettingsState>()(
       setJavaError: (err) => set({ javaError: err }),
       setIsJavaLoading: (val) => set({ isJavaLoading: val }),
       
-      updateGeneral: (updates) =>
-        set((state) => ({
-          general: { ...state.general, ...updates },
-        })),
+      updateGeneral: (updates) => {
+        set((state) => {
+          const newState = { ...state.general, ...updates };
+          // Sync with main process
+          if (window.electronAPI?.system?.sendSettingsUpdate) {
+            window.electronAPI.system.sendSettingsUpdate(newState);
+          }
+          return { general: newState };
+        });
+      },
       
       updateMods: (updates) =>
         set((state) => ({
