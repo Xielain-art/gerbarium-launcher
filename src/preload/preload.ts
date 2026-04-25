@@ -5,6 +5,7 @@ import {
   WindowState,
   GameLaunchOptions,
   GameProgressPayload,
+  UpdateInfoPayload,
 } from "../shared/constants/ipc-chanels";
 
 async function typedInvoke<K extends keyof IpcChannelMap>(
@@ -82,8 +83,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
 
   // Update control methods
-  onUpdateInfo: (callback: (info: any) => void) => {
-    const subscription = (_event: unknown, info: unknown) => callback(info);
+  onUpdateInfo: (callback: (info: UpdateInfoPayload) => void) => {
+    const subscription = (_event: unknown, info: UpdateInfoPayload) => callback(info);
     ipcRenderer.on(IPC_CHANNELS.UPDATE.INFO, subscription);
     return () => {
       ipcRenderer.removeListener(IPC_CHANNELS.UPDATE.INFO, subscription);

@@ -80,6 +80,13 @@ export type GameProgressPayload =
   | { type: "state"; content: { phase: "spawned" } }
   | { type: "close"; content: number };
 
+export interface UpdateInfoPayload {
+  version: string;
+  releaseName?: string | null;
+  releaseNotes?: string | null;
+  releaseDate?: string;
+}
+
 // Карта типов для всех наших IPC событий
 export interface IpcChannelMap {
   [IPC_CHANNELS.HELLO.SAY_HELLO]: {
@@ -130,7 +137,7 @@ export interface IpcChannelMap {
     return: void;
   };
   [IPC_CHANNELS.UPDATE.INFO]: {
-    args: [info: any];
+    args: [info: UpdateInfoPayload];
     return: void;
   };
   [IPC_CHANNELS.UPDATE.DOWNLOAD]: {

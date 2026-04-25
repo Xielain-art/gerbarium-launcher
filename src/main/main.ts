@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, Tray, ipcMain, type MenuItemConstructorOptions } from "electron";
+import { app, BrowserWindow, Menu, Tray, dialog, ipcMain, type MenuItemConstructorOptions } from "electron";
 import path from "node:path";
 import log from "electron-log";
 import { MAIN_CONSTANTS } from "./main-constants";
@@ -16,6 +16,7 @@ type LegacyLangLoader = {
 
 type LauncherSettings = {
   minimizeToTray: boolean;
+  gamePath?: string;
 };
 
 const appRoot = path.resolve(__dirname, "..", "..");
@@ -32,28 +33,52 @@ function getDateFolder(): string {
 }
 
 const dateFolder = getDateFolder();
+let isHandlingFatalError = false;
 
 log.transports.file.level = "info";
 log.transports.console.level = "debug";
 log.transports.file.fileName = MAIN_CONSTANTS.LOG_FILE_NAMES.MAIN;
-log.transports.file.resolvePathFn = () =>
-  path.join(
+function getMainLogPath(): string {
+  return path.join(
     app.getPath(MAIN_CONSTANTS.DIRECTORIES.USER_DATA),
     MAIN_CONSTANTS.DIRECTORIES.LOGS,
     dateFolder,
     MAIN_CONSTANTS.LOG_FILE_NAMES.MAIN
   );
+}
+
+log.transports.file.resolvePathFn = getMainLogPath;
+
+function handleFatalError(title: string, details: unknown): void {
+  if (isHandlingFatalError) {
+    return;
+  }
+  isHandlingFatalError = true;
+
+  log.error(title, details);
+
+  let logPath = "unknown";
+  try {
+    logPath = getMainLogPath();
+  } catch {
+    // Ignore path resolution errors and still exit.
+  }
+
+  dialog.showErrorBox(
+    "Критическая ошибка",
+    `Лаунчер завершил работу из-за критической ошибки.\nЛоги сохранены в:\n${logPath}`
+  );
+
+  app.exit(1);
+}
 
 process.on("uncaughtException", (error) => {
-  log.error(MAIN_CONSTANTS.LOG_MESSAGES.APP_UNCAUGHT_EXCEPTION, error);
-  app.exit(1);
+  handleFatalError(MAIN_CONSTANTS.LOG_MESSAGES.APP_UNCAUGHT_EXCEPTION, error);
 });
 
 process.on("unhandledRejection", (reason) => {
-  log.error(MAIN_CONSTANTS.LOG_MESSAGES.APP_UNHANDLED_REJECTION, reason);
+  handleFatalError(MAIN_CONSTANTS.LOG_MESSAGES.APP_UNHANDLED_REJECTION, reason);
 });
-
-LangLoader.setupLanguage();
 
 log.info(MAIN_CONSTANTS.LOG_MESSAGES.APP_STARTING, {
   version: app.getVersion(),
@@ -65,6 +90,7 @@ let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let settings: LauncherSettings = { minimizeToTray: false };
 let isQuiting = false;
+let traySyncTimer: NodeJS.Timeout | null = null;
 
 function getPlatformIcon(filename: string): string {
   const ext = process.platform === MAIN_CONSTANTS.PLATFORMS.WINDOWS ? "ico" : "png";
@@ -108,32 +134,10 @@ function createMenu(): void {
   }
 
   const menuTemplate: MenuItemConstructorOptions[] = [
-    {
-      label: "Application",
-      submenu: [
-        { label: "About Application", selector: "orderFrontStandardAboutPanel:" },
-        { type: "separator" },
-        {
-          label: "Quit",
-          accelerator: "Command+Q",
-          click: () => {
-            app.quit();
-          },
-        },
-      ],
-    },
-    {
-      label: "Edit",
-      submenu: [
-        { label: "Undo", accelerator: "CmdOrCtrl+Z", selector: "undo:" },
-        { label: "Redo", accelerator: "Shift+CmdOrCtrl+Z", selector: "redo:" },
-        { type: "separator" },
-        { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
-        { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-        { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
-        { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" },
-      ],
-    },
+    { role: "appMenu" },
+    { role: "editMenu" },
+    { role: "viewMenu" },
+    { role: "windowMenu" },
   ];
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
@@ -177,21 +181,45 @@ function createTray(): void {
   });
 }
 
-ipcMain.on("settings-updated", (_event, newSettings: Partial<LauncherSettings>) => {
-  settings = { ...settings, ...newSettings };
+function destroyTray(): void {
+  if (!tray) {
+    return;
+  }
 
+  tray.removeAllListeners();
+  tray.destroy();
+  tray = null;
+}
+
+function syncTrayState(): void {
   if (settings.minimizeToTray) {
     createTray();
     return;
   }
+  destroyTray();
+}
 
-  if (tray) {
-    tray.destroy();
-    tray = null;
+function scheduleTrayStateSync(): void {
+  if (traySyncTimer) {
+    clearTimeout(traySyncTimer);
   }
+  traySyncTimer = setTimeout(() => {
+    traySyncTimer = null;
+    syncTrayState();
+  }, 120);
+}
+
+ipcMain.on("settings-updated", (_event, newSettings: Partial<LauncherSettings>) => {
+  settings = { ...settings, ...newSettings };
+  scheduleTrayStateSync();
 });
 
-app.on("ready", () => {
+app.on("before-quit", () => {
+  isQuiting = true;
+});
+
+app.whenReady().then(() => {
+  LangLoader.setupLanguage();
   mainWindow = createWindow();
   createMenu();
 
@@ -199,7 +227,7 @@ app.on("ready", () => {
   secureStorageHandler(app);
   updateHandler(app);
   javaHandler(app);
-  systemHandler(app);
+  systemHandler(app, () => settings);
   gameHandler(mainWindow);
   setupLogHandler(app);
 

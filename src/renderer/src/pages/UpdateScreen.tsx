@@ -3,11 +3,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { WindowControls } from "../components";
 import { UI_STRINGS } from "../../../shared/constants/ui-strings";
 import { ROUTES } from "../../../shared/constants/system";
+import type { UpdateInfoPayload } from "../../../shared/constants/ipc-chanels";
 import { UpdateStatusCard } from "../components/update";
-
-interface UpdateInfoPayload {
-  updateAvailable?: boolean;
-}
 
 export function UpdateScreen() {
   const navigate = useNavigate();
@@ -60,15 +57,6 @@ export function UpdateScreen() {
       unsubProgress?.();
     };
   }, [navigate, isDevMode]);
-
-  useEffect(() => {
-    if (updateInfo?.updateAvailable === false) {
-      setUpdateMessage(UI_STRINGS.UPDATE_SCREEN.NOT_REQUIRED);
-      const timer = setTimeout(() => navigate({ to: ROUTES.LOGIN }), 500);
-      return () => clearTimeout(timer);
-    }
-    return undefined;
-  }, [updateInfo, navigate]);
 
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden bg-gradient-to-br from-[#1a1c20] via-[#2b2d31] to-[#1a1c20]">
