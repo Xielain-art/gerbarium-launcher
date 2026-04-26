@@ -273,8 +273,8 @@ export function DashboardScreen() {
 
   const handleSettings = () => navigate({ to: ROUTES.SETTINGS });
 
-  const handleLogout = () => {
-    void logout();
+  const handleLogout = async () => {
+    await logout();
     navigate({ to: ROUTES.LOGIN });
   };
 

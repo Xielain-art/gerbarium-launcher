@@ -129,26 +129,20 @@ function buildOnlineSession(payload: ApiAuthResponse, setCookie: string | null |
   };
 }
 
-function mapAuthFailureMessage(
-  status?: number,
-  apiErrorMessage?: string,
-): string {
+function mapAuthFailureCode(status?: number): string {
   if (status === 401 || status === 403) {
-    return "Неверный логин или пароль. Проверьте данные и попробуйте снова.";
+    return ERROR_CODES.AUTH_INVALID_CREDENTIALS;
   }
   if (status === 409) {
-    return "Аккаунт с таким email или никнеймом уже существует.";
+    return ERROR_CODES.AUTH_ALREADY_EXISTS;
   }
   if (status === 429) {
-    return "Слишком много попыток входа. Попробуйте чуть позже.";
+    return ERROR_CODES.AUTH_RATE_LIMIT;
   }
   if (status === 400) {
-    return apiErrorMessage?.trim() || "Проверьте корректность введенных данных.";
+    return ERROR_CODES.AUTH_VALIDATION_FAILED;
   }
-  if (apiErrorMessage?.trim()) {
-    return apiErrorMessage.trim();
-  }
-  return "Сервис авторизации временно недоступен. Попробуйте еще раз позже.";
+  return ERROR_CODES.AUTH_API_REQUEST_FAILED;
 }
 
 async function readStoredSession(secureDataPath: string): Promise<AuthSessionPayload | null> {
@@ -258,7 +252,7 @@ export default function authHandler(app: App) {
         if (!login || !password) {
           return {
             success: false,
-            error: ERROR_CODES.AUTH_INVALID_CREDENTIALS,
+            error: ERROR_CODES.AUTH_VALIDATION_FAILED,
           };
         }
 
@@ -271,7 +265,7 @@ export default function authHandler(app: App) {
           log.error(LOG_MESSAGES.AUTH_API_ERROR, authResult.status, authResult.errorMessage);
           return {
             success: false,
-            error: mapAuthFailureMessage(authResult.status, authResult.errorMessage),
+            error: mapAuthFailureCode(authResult.status),
           };
         }
 
@@ -308,7 +302,7 @@ export default function authHandler(app: App) {
         if (!email || !username || !password) {
           return {
             success: false,
-            error: ERROR_CODES.AUTH_INVALID_CREDENTIALS,
+            error: ERROR_CODES.AUTH_VALIDATION_FAILED,
           };
         }
 
@@ -322,7 +316,7 @@ export default function authHandler(app: App) {
           log.error(LOG_MESSAGES.AUTH_API_ERROR, registerResult.status, registerResult.errorMessage);
           return {
             success: false,
-            error: mapAuthFailureMessage(registerResult.status, registerResult.errorMessage),
+            error: mapAuthFailureCode(registerResult.status),
           };
         }
 
@@ -354,7 +348,7 @@ export default function authHandler(app: App) {
         if (!username) {
           return {
             success: false,
-            error: ERROR_CODES.AUTH_INVALID_CREDENTIALS,
+            error: ERROR_CODES.AUTH_VALIDATION_FAILED,
           };
         }
 
@@ -422,13 +416,16 @@ export default function authHandler(app: App) {
       await clearStoredSession(secureDataPath);
 
       if (currentSession?.mode === "online" && currentSession.accessToken) {
-        const logoutResult = await logoutRequest(
+        void logoutRequest(
           currentSession.accessToken,
           currentSession.refreshCookie,
-        );
-        if (!logoutResult.success) {
-          log.error(LOG_MESSAGES.AUTH_API_ERROR, logoutResult.status, logoutResult.errorMessage);
-        }
+        ).then((logoutResult) => {
+          if (!logoutResult.success) {
+            log.error(LOG_MESSAGES.AUTH_API_ERROR, logoutResult.status, logoutResult.errorMessage);
+          }
+        }).catch((error) => {
+          log.error(LOG_MESSAGES.AUTH_LOGOUT_FAILED, error);
+        });
       }
 
       return { success: true };

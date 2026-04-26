@@ -2,41 +2,12 @@ import { create } from 'zustand';
 import type { AuthUser, AuthCredentials, AuthRegisterCredentials } from '../types';
 import { LOG_ACTIONS } from '../../../shared/constants/system';
 import { UI_STRINGS } from '../../../shared/constants/ui-strings';
+import { ERROR_CODES } from '../../../shared/constants/errors';
 
 // Auto-log helper
 const logAction = (action: string, details?: string) => {
   window.electronAPI?.system.logAction(action, details);
 };
-
-function toReadableAuthError(error?: string): string {
-  if (!error) {
-    return UI_STRINGS.STORE_ERRORS.AUTH_LOGIN;
-  }
-
-  const normalized = error.trim();
-  if (!normalized) {
-    return UI_STRINGS.STORE_ERRORS.AUTH_LOGIN;
-  }
-
-  const codeMap: Record<string, string> = {
-    ERR_AUTH_INVALID_CREDENTIALS: "Неверный логин или пароль.",
-    ERR_AUTH_LOGIN_FAILED: "Не удалось выполнить вход. Попробуйте снова.",
-    ERR_AUTH_REGISTER_FAILED: "Не удалось завершить регистрацию. Попробуйте позже.",
-    ERR_AUTH_API_REQUEST_FAILED: "Сервер авторизации недоступен. Повторите попытку позже.",
-  };
-  if (codeMap[normalized]) {
-    return codeMap[normalized];
-  }
-
-  if (/invalid credentials/i.test(normalized)) {
-    return "Неверный логин или пароль.";
-  }
-  if (/network request failed|fetch failed|network/i.test(normalized)) {
-    return "Проблема с сетью или сервером. Проверьте подключение и попробуйте снова.";
-  }
-
-  return normalized;
-}
 
 interface AuthState {
   // State
@@ -116,7 +87,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
       await window.electronAPI.auth.logout();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Logout request failed";
-      logAction(LOG_ACTIONS.LOGIN_ERROR, errorMessage);
+      logAction(LOG_ACTIONS.LOGOUT, `Logout API error: ${errorMessage}`);
     }
   },
 
@@ -126,14 +97,14 @@ export const useAuthStore = create<AuthState>()((set) => ({
     try {
        if (!credentials.login.trim() || !credentials.password.trim()) {
          logAction(LOG_ACTIONS.LOGIN_VALIDATION_ERROR, 'Empty login or password');
-         const errorMsg = UI_STRINGS.STORE_ERRORS.AUTH_EMPTY_FIELDS;
+         const errorMsg = ERROR_CODES.AUTH_VALIDATION_FAILED;
          set({ isLoading: false, error: errorMsg });
          return { success: false, error: errorMsg };
        }
 
       const authResult = await window.electronAPI.auth.login(credentials);
       if (!authResult.success || !authResult.user) {
-        const errorMsg = toReadableAuthError(authResult.error);
+         const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_LOGIN;
         set({ isLoading: false, error: errorMsg });
         return { success: false, error: errorMsg };
       }
@@ -157,8 +128,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
 
       logAction(LOG_ACTIONS.LOGIN_SUCCESS, `User logged in: ${user.username}`);
       return { success: true };
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.AUTH_LOGIN;
+    } catch {
+      const errorMessage = ERROR_CODES.AUTH_API_REQUEST_FAILED;
       set({ isLoading: false, error: errorMessage });
       logAction(LOG_ACTIONS.LOGIN_ERROR, errorMessage);
       return { success: false, error: errorMessage };
@@ -170,7 +141,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
 
     try {
       if (!payload.email.trim() || !payload.username.trim() || !payload.password.trim()) {
-        const errorMsg = UI_STRINGS.STORE_ERRORS.AUTH_EMPTY_FIELDS;
+        const errorMsg = ERROR_CODES.AUTH_VALIDATION_FAILED;
         set({ isLoading: false, error: errorMsg });
         return { success: false, error: errorMsg };
       }
@@ -181,7 +152,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
         password: payload.password,
       });
       if (!authResult.success || !authResult.user) {
-        const errorMsg = toReadableAuthError(authResult.error);
+        const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_REGISTER;
         set({ isLoading: false, error: errorMsg });
         return { success: false, error: errorMsg };
       }
@@ -205,8 +176,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
 
       logAction(LOG_ACTIONS.REGISTER_SUCCESS, `User registered: ${user.username}`);
       return { success: true };
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.AUTH_REGISTER;
+    } catch {
+      const errorMessage = ERROR_CODES.AUTH_API_REQUEST_FAILED;
       set({ isLoading: false, error: errorMessage });
       logAction(LOG_ACTIONS.REGISTER_ERROR, errorMessage);
       return { success: false, error: errorMessage };
@@ -218,14 +189,14 @@ export const useAuthStore = create<AuthState>()((set) => ({
 
     try {
       if (!username.trim()) {
-        const errorMsg = UI_STRINGS.STORE_ERRORS.AUTH_EMPTY_USERNAME;
+        const errorMsg = ERROR_CODES.AUTH_VALIDATION_FAILED;
         set({ isLoading: false, error: errorMsg });
         return { success: false, error: errorMsg };
       }
 
       const authResult = await window.electronAPI.auth.loginOffline({ username });
       if (!authResult.success || !authResult.user) {
-        const errorMsg = toReadableAuthError(authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_OFFLINE);
+        const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_OFFLINE;
         set({ isLoading: false, error: errorMsg });
         return { success: false, error: errorMsg };
       }
@@ -249,8 +220,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
 
       logAction(LOG_ACTIONS.LOGIN_OFFLINE, `Offline login: ${username}`);
       return { success: true };
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.AUTH_OFFLINE;
+    } catch {
+      const errorMessage = ERROR_CODES.AUTH_API_REQUEST_FAILED;
       set({ isLoading: false, error: errorMessage });
       logAction(LOG_ACTIONS.LOGIN_OFFLINE_ERROR, errorMessage);
       return { success: false, error: errorMessage };

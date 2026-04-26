@@ -75,7 +75,7 @@ export function LoginFormCard({
             type="email"
             value={email}
             onChange={(e) => onEmailChange(e.target.value)}
-            placeholder="Email"
+            placeholder={t.LOGIN.EMAIL_PLACEHOLDER}
             disabled={isLoading}
             autoComplete="email"
           />
@@ -85,7 +85,7 @@ export function LoginFormCard({
           type="text"
           value={username}
           onChange={(e) => onUsernameChange(e.target.value)}
-          placeholder={isRegisterMode ? "Username" : t.LOGIN.USERNAME_PLACEHOLDER}
+          placeholder={isRegisterMode ? t.LOGIN.REGISTER_USERNAME_PLACEHOLDER : t.LOGIN.USERNAME_PLACEHOLDER}
           disabled={isLoading}
           autoComplete={isRegisterMode ? "new-username" : "username"}
         />
@@ -108,7 +108,7 @@ export function LoginFormCard({
             type="password"
             value={confirmPassword}
             onChange={(e) => onConfirmPasswordChange(e.target.value)}
-            placeholder="Confirm password"
+            placeholder={t.LOGIN.CONFIRM_PASSWORD_PLACEHOLDER}
             disabled={isLoading}
             autoComplete="new-password"
             showPasswordExternal={showConfirmPassword}
@@ -172,7 +172,7 @@ export function LoginFormCard({
               onSwitchMode(isRegisterMode ? "login" : "register");
             }}
           >
-            {isRegisterMode ? t.SETTINGS.BACK_BUTTON : t.LOGIN.CREATE_ACCOUNT}
+            {isRegisterMode ? t.LOGIN.SWITCH_TO_LOGIN : t.LOGIN.CREATE_ACCOUNT}
           </a>
         </div>
       </form>

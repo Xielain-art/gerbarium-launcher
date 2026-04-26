@@ -106,8 +106,8 @@ export function SettingsScreen() {
     navigate({ to: ROUTES.DASHBOARD });
   };
 
-  const handleLogout = () => {
-    void logout();
+  const handleLogout = async () => {
+    await logout();
     navigate({ to: ROUTES.LOGIN });
   };
 

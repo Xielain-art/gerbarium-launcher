@@ -7,6 +7,39 @@ import { ROUTES } from "../../../shared/constants/system";
 import logoImage from "../assets/photo_2026-04-23_10-34-22.jpg";
 import { LoginFormCard } from "../components/login";
 
+const USERNAME_REGEX = /^[A-Za-z0-9_]+$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isValidUsername(value: string): boolean {
+  return value.length >= 3 && value.length <= 32 && USERNAME_REGEX.test(value);
+}
+
+function isValidPassword(value: string): boolean {
+  return value.length >= 10 && value.length <= 128;
+}
+
+function isValidEmail(value: string): boolean {
+  return value.length <= 320 && EMAIL_REGEX.test(value);
+}
+
+function localizeAuthError(error: string | null, t: ReturnType<typeof useTranslation>): string | null {
+  if (!error) {
+    return null;
+  }
+
+  const byCode: Record<string, string> = {
+    ERR_AUTH_INVALID_CREDENTIALS: t.STORE_ERRORS.AUTH_INVALID_CREDENTIALS,
+    ERR_AUTH_ALREADY_EXISTS: t.STORE_ERRORS.AUTH_ALREADY_EXISTS,
+    ERR_AUTH_RATE_LIMIT: t.STORE_ERRORS.AUTH_RATE_LIMIT,
+    ERR_AUTH_VALIDATION_FAILED: t.STORE_ERRORS.AUTH_VALIDATION_FAILED,
+    ERR_AUTH_API_REQUEST_FAILED: t.STORE_ERRORS.AUTH_SERVICE_UNAVAILABLE,
+    ERR_AUTH_LOGIN_FAILED: t.STORE_ERRORS.AUTH_LOGIN,
+    ERR_AUTH_REGISTER_FAILED: t.STORE_ERRORS.AUTH_REGISTER,
+  };
+
+  return byCode[error] || error;
+}
+
 export function LoginScreen() {
   const t = useTranslation();
   const navigate = useNavigate();
@@ -48,25 +81,72 @@ export function LoginScreen() {
     clearError();
 
     if (mode === "register") {
+      const email = localEmail.trim();
+      const username = localUsername.trim();
+      const password = localPassword.trim();
+
+      if (!email || !username || !password) {
+        setValidationError(t.STORE_ERRORS.AUTH_EMPTY_FIELDS);
+        return;
+      }
+      if (!isValidEmail(email)) {
+        setValidationError(t.STORE_ERRORS.AUTH_EMAIL_INVALID);
+        return;
+      }
+      if (!isValidUsername(username)) {
+        setValidationError(t.STORE_ERRORS.AUTH_USERNAME_INVALID);
+        return;
+      }
+      if (!isValidPassword(password)) {
+        setValidationError(t.STORE_ERRORS.AUTH_PASSWORD_INVALID);
+        return;
+      }
       if (localPassword !== localPasswordConfirm) {
-        setValidationError("Passwords do not match");
+        setValidationError(t.STORE_ERRORS.AUTH_PASSWORDS_MISMATCH);
         return;
       }
 
       await register({
-        email: localEmail,
-        username: localUsername,
-        password: localPassword,
+        email,
+        username,
+        password,
       });
       return;
     }
 
     if (offlineMode) {
-      await loginOffline(localUsername);
+      const username = localUsername.trim();
+      if (!isValidUsername(username)) {
+        setValidationError(t.STORE_ERRORS.AUTH_USERNAME_INVALID);
+        return;
+      }
+      await loginOffline(username);
       return;
     }
 
-    await login({ login: localUsername, password: localPassword });
+    const identifier = localUsername.trim();
+    const password = localPassword.trim();
+    if (!identifier || !password) {
+      setValidationError(t.STORE_ERRORS.AUTH_EMPTY_FIELDS);
+      return;
+    }
+
+    if (identifier.includes("@")) {
+      if (!isValidEmail(identifier)) {
+        setValidationError(t.STORE_ERRORS.AUTH_LOGIN_INVALID);
+        return;
+      }
+    } else if (!isValidUsername(identifier)) {
+      setValidationError(t.STORE_ERRORS.AUTH_LOGIN_INVALID);
+      return;
+    }
+
+    if (!isValidPassword(password)) {
+      setValidationError(t.STORE_ERRORS.AUTH_PASSWORD_INVALID);
+      return;
+    }
+
+    await login({ login: identifier, password });
   };
 
   return (
@@ -90,7 +170,7 @@ export function LoginScreen() {
         <LoginFormCard
           t={t}
           isLoading={isLoading}
-          error={validationError ?? error}
+          error={validationError ?? localizeAuthError(error, t)}
           mode={mode}
           username={localUsername}
           email={localEmail}
