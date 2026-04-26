@@ -4,6 +4,7 @@ import type { components } from "./v1";
 export type ApiUser = components["schemas"]["UserResponseDto"];
 export type ApiAuthResponse = components["schemas"]["AuthResponseDto"];
 export type ApiLoginDto = components["schemas"]["LoginDto"];
+export type ApiRegisterDto = components["schemas"]["RegisterDto"];
 
 export type ApiResult<T> = {
   success: boolean;
@@ -32,82 +33,130 @@ function extractErrorMessage(error: unknown): string | undefined {
   return undefined;
 }
 
-export async function loginRequest(payload: ApiLoginDto): Promise<ApiResult<ApiAuthResponse>> {
-  const { data, error, response } = await apiClient.POST("/api/auth/login", {
-    body: payload,
-  });
-
-  if (!response) {
-    return { success: false };
-  }
-
-  if (!response.ok || !data) {
-    return {
-      success: false,
-      status: response.status,
-      errorMessage: extractErrorMessage(error),
-    };
-  }
-
+function buildNetworkErrorResult<T>(error: unknown): ApiResult<T> {
   return {
-    success: true,
-    data,
-    status: response.status,
-    setCookie: response.headers.get("set-cookie"),
+    success: false,
+    errorMessage: extractErrorMessage(error) ?? "Network request failed",
   };
+}
+
+export async function loginRequest(payload: ApiLoginDto): Promise<ApiResult<ApiAuthResponse>> {
+  try {
+    const { data, error, response } = await apiClient.POST("/api/auth/login", {
+      body: payload,
+    });
+
+    if (!response) {
+      return { success: false };
+    }
+
+    if (!response.ok || !data) {
+      return {
+        success: false,
+        status: response.status,
+        errorMessage: extractErrorMessage(error),
+      };
+    }
+
+    return {
+      success: true,
+      data,
+      status: response.status,
+      setCookie: response.headers.get("set-cookie"),
+    };
+  } catch (error) {
+    return buildNetworkErrorResult<ApiAuthResponse>(error);
+  }
+}
+
+export async function registerRequest(payload: ApiRegisterDto): Promise<ApiResult<ApiAuthResponse>> {
+  try {
+    const { data, error, response } = await apiClient.POST("/api/auth/register", {
+      body: payload,
+    });
+
+    if (!response) {
+      return { success: false };
+    }
+
+    if (!response.ok || !data) {
+      return {
+        success: false,
+        status: response.status,
+        errorMessage: extractErrorMessage(error),
+      };
+    }
+
+    return {
+      success: true,
+      data,
+      status: response.status,
+      setCookie: response.headers.get("set-cookie"),
+    };
+  } catch (error) {
+    return buildNetworkErrorResult<ApiAuthResponse>(error);
+  }
 }
 
 export async function refreshTokenRequest(cookie: string): Promise<ApiResult<ApiAuthResponse>> {
-  const { data, error, response } = await apiClient.POST("/api/auth/refresh-token", {
-    headers: {
-      Cookie: cookie,
-    },
-  });
+  try {
+    const { data, error, response } = await apiClient.POST("/api/auth/refresh-token", {
+      headers: {
+        Cookie: cookie,
+      },
+    });
 
-  if (!response) {
-    return { success: false };
-  }
+    if (!response) {
+      return { success: false };
+    }
 
-  if (!response.ok || !data) {
+    if (!response.ok || !data) {
+      return {
+        success: false,
+        status: response.status,
+        errorMessage: extractErrorMessage(error),
+      };
+    }
+
     return {
-      success: false,
+      success: true,
+      data,
       status: response.status,
-      errorMessage: extractErrorMessage(error),
+      setCookie: response.headers.get("set-cookie"),
     };
+  } catch (error) {
+    return buildNetworkErrorResult<ApiAuthResponse>(error);
   }
-
-  return {
-    success: true,
-    data,
-    status: response.status,
-    setCookie: response.headers.get("set-cookie"),
-  };
 }
 
 export async function profileRequest(accessToken: string): Promise<ApiResult<ApiUser>> {
-  const { data, error, response } = await apiClient.GET("/api/auth/profile", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  try {
+    const { data, error, response } = await apiClient.GET("/api/users/me", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
-  if (!response) {
-    return { success: false };
-  }
+    if (!response) {
+      return { success: false };
+    }
 
-  if (!response.ok || !data) {
+    if (!response.ok || !data) {
+      return {
+        success: false,
+        status: response.status,
+        errorMessage: extractErrorMessage(error),
+      };
+    }
+
     return {
-      success: false,
+      success: true,
+      data,
       status: response.status,
-      errorMessage: extractErrorMessage(error),
     };
+  } catch (error) {
+    return buildNetworkErrorResult<ApiUser>(error);
   }
-
-  return {
-    success: true,
-    data,
-    status: response.status,
-  };
 }
 
 export async function logoutRequest(accessToken: string, cookie?: string): Promise<ApiResult<{ success: boolean }>> {
@@ -119,25 +168,29 @@ export async function logoutRequest(accessToken: string, cookie?: string): Promi
     headers.Cookie = cookie;
   }
 
-  const { data, error, response } = await apiClient.POST("/api/auth/logout", {
-    headers,
-  });
+  try {
+    const { data, error, response } = await apiClient.POST("/api/auth/logout", {
+      headers,
+    });
 
-  if (!response) {
-    return { success: false };
-  }
+    if (!response) {
+      return { success: false };
+    }
 
-  if (!response.ok) {
+    if (!response.ok) {
+      return {
+        success: false,
+        status: response.status,
+        errorMessage: extractErrorMessage(error),
+      };
+    }
+
     return {
-      success: false,
+      success: true,
+      data: { success: data?.success ?? true },
       status: response.status,
-      errorMessage: extractErrorMessage(error),
     };
+  } catch (error) {
+    return buildNetworkErrorResult<{ success: boolean }>(error);
   }
-
-  return {
-    success: true,
-    data: { success: data?.success ?? true },
-    status: response.status,
-  };
 }

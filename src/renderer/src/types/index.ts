@@ -2,8 +2,18 @@
 export interface AuthUser {
   id: string;
   username: string;
-  email?: string;
-  roles?: ("user" | "moderator" | "admin")[];
+  email: string;
+  roles: ("user" | "moderator" | "admin")[];
+  isBanned: boolean;
+  banReason?: string;
+  playerProfile?: {
+    minecraftUuid?: string;
+    minecraftUsername?: string;
+    skinUrl?: string;
+    capeUrl?: string;
+    verificationStatus: "unlinked" | "pending" | "verified";
+    verifiedAt?: string;
+  };
   avatar?: string;
   xuid?: string;
   token?: string;
@@ -13,6 +23,12 @@ export interface AuthCredentials {
   login: string;
   password: string;
   rememberMe?: boolean;
+}
+
+export interface AuthRegisterCredentials {
+  email: string;
+  username: string;
+  password: string;
 }
 
 export interface AuthState {

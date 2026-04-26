@@ -13,6 +13,8 @@ interface DashboardActionBarProps {
   launchStatus: string;
   isConsoleVisible: boolean;
   errorMessage: string | null;
+  isPlayBlocked?: boolean;
+  playBlockReason?: string | null;
   onPlay: () => void;
   onCancelDownload: () => void;
   onToggleConsole: () => void;
@@ -28,6 +30,8 @@ export function DashboardActionBar({
   launchStatus,
   isConsoleVisible,
   errorMessage,
+  isPlayBlocked = false,
+  playBlockReason = null,
   onPlay,
   onCancelDownload,
   onToggleConsole,
@@ -48,9 +52,9 @@ export function DashboardActionBar({
 
   return (
     <div className="shrink-0 border-t-[4px] border-theme bg-[color-mix(in_srgb,var(--theme-surface)_95%,transparent)] backdrop-blur-md p-6 shadow-2xl">
-      {errorMessage && (
+      {(errorMessage || playBlockReason) && (
         <div className="mb-4 rounded border-[2px] border-[var(--mc-error-border)] bg-[var(--mc-error-bg)] px-3 py-2 font-minecraft text-xs text-[var(--mc-error-text)]">
-          {errorMessage}
+          {playBlockReason || errorMessage}
         </div>
       )}
 
@@ -81,6 +85,7 @@ export function DashboardActionBar({
             variant="primary"
             size="xl"
             className="min-w-[320px]"
+            disabled={isPlayBlocked}
           >
             <span className="text-xl">{t.DASHBOARD.PLAY_ICON}</span>
             <span className="ml-3 text-lg">{t.DASHBOARD.PLAY_BUTTON}</span>

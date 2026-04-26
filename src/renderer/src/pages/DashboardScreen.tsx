@@ -96,6 +96,10 @@ export function DashboardScreen() {
   const [isConsoleVisible, setIsConsoleVisible] = useState(true);
   const closeOnLaunchRequestedRef = useRef(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const banReason = user?.banReason?.trim();
+  const playBlockReason = user?.isBanned
+    ? `You are banned${banReason ? `: ${banReason}` : "."}`
+    : null;
 
   useEffect(() => {
     if (!window.electronAPI?.game) return;
@@ -198,6 +202,11 @@ export function DashboardScreen() {
   }, []);
 
   const handlePlay = async () => {
+    if (playBlockReason) {
+      setLaunchError(playBlockReason);
+      return;
+    }
+
     if (!selectedVersion) {
       setLaunchError(t.DASHBOARD.SELECT_VERSION_ALERT);
       return;
@@ -331,6 +340,8 @@ export function DashboardScreen() {
           launchStatus={launchStatus}
           isConsoleVisible={isConsoleVisible}
           errorMessage={launchError}
+          isPlayBlocked={Boolean(playBlockReason)}
+          playBlockReason={playBlockReason}
           onPlay={handlePlay}
           onCancelDownload={cancelDownload}
           onToggleConsole={handleToggleConsole}

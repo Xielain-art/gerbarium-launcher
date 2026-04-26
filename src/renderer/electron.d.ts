@@ -53,17 +53,21 @@ export interface IElectronAPI {
   downloadUpdate: () => Promise<{ success: boolean; error?: string }>;
   installUpdateAndRestart: () => void;
 
-  // Auth session API (token is not exposed to renderer)
+  // Auth session API
   auth: {
     login: (
       credentials: { login: string; password: string },
-    ) => Promise<{ success: boolean; user?: AuthSessionUser; error?: string }>;
+    ) => Promise<{ success: boolean; user?: AuthSessionUser; accessToken?: string; error?: string }>;
+    register: (
+      payload: { email: string; username: string; password: string },
+    ) => Promise<{ success: boolean; user?: AuthSessionUser; accessToken?: string; error?: string }>;
     loginOffline: (
       payload: { username: string },
     ) => Promise<{ success: boolean; user?: AuthSessionUser; error?: string }>;
     getSession: () => Promise<{
       success: boolean;
       user?: AuthSessionUser | null;
+      accessToken?: string;
       isAuthenticated?: boolean;
       error?: string;
     }>;

@@ -117,10 +117,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   installUpdateAndRestart: () =>
     typedSend(IPC_CHANNELS.UPDATE.INSTALL_AND_RESTART),
 
-  // Auth API (tokens never leave Main process)
+  // Auth API
   auth: {
     login: (credentials: { login: string; password: string }) =>
       typedInvoke(IPC_CHANNELS.AUTH.LOGIN, credentials),
+    register: (payload: { email: string; username: string; password: string }) =>
+      typedInvoke(IPC_CHANNELS.AUTH.REGISTER, payload),
     loginOffline: (payload: { username: string }) =>
       typedInvoke(IPC_CHANNELS.AUTH.LOGIN_OFFLINE, payload),
     getSession: () => typedInvoke(IPC_CHANNELS.AUTH.GET_SESSION),

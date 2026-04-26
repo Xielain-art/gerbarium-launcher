@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { AuthUser, AuthCredentials } from '../types';
+import type { AuthUser, AuthCredentials, AuthRegisterCredentials } from '../types';
 import { LOG_ACTIONS } from '../../../shared/constants/system';
 import { UI_STRINGS } from '../../../shared/constants/ui-strings';
 
@@ -17,13 +17,12 @@ interface AuthState {
   // UI State
   isLoading: boolean;
   error: string | null;
-  showPassword: boolean;
 
   // Actions
   login: (credentials: AuthCredentials) => Promise<{ success: boolean; error?: string }>;
+  register: (payload: AuthRegisterCredentials) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   clearError: () => void;
-  setShowPassword: (show: boolean) => void;
   loadToken: () => Promise<void>;
 
   // Offline mode
@@ -36,13 +35,10 @@ const defaultState = {
   isAuthenticated: false,
   isLoading: false,
   error: null,
-  showPassword: false,
 };
 
-export const useAuthStore = create<AuthState>()((set, get) => ({
+export const useAuthStore = create<AuthState>()((set) => ({
   ...defaultState,
-
-  setShowPassword: (show) => set({ showPassword: show }),
 
   clearError: () => set({ error: null }),
 
@@ -51,13 +47,16 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
        const result = await window.electronAPI.auth.getSession();
        if (result.success && result.isAuthenticated && result.user) {
          set({
-           token: null,
+           token: result.accessToken ?? null,
            isAuthenticated: true,
            user: {
              id: result.user.id,
              username: result.user.username,
-             email: result.user.email,
-             roles: result.user.roles,
+             email: result.user.email ?? "",
+             roles: result.user.roles ?? ["user"],
+             isBanned: result.user.isBanned ?? false,
+             banReason: result.user.banReason,
+             playerProfile: result.user.playerProfile,
            },
          });
          logAction(LOG_ACTIONS.TOKEN_LOADED, `User: ${result.user.username}`);
@@ -82,8 +81,13 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
   logout: async () => {
     logAction(LOG_ACTIONS.LOGOUT, 'User logged out');
-    await window.electronAPI.auth.logout();
     set(defaultState);
+    try {
+      await window.electronAPI.auth.logout();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Logout request failed";
+      logAction(LOG_ACTIONS.LOGIN_ERROR, errorMessage);
+    }
   },
 
   login: async (credentials: AuthCredentials) => {
@@ -107,13 +111,16 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const user: AuthUser = {
         id: authResult.user.id,
         username: authResult.user.username,
-        email: authResult.user.email,
-        roles: authResult.user.roles,
+        email: authResult.user.email ?? "",
+        roles: authResult.user.roles ?? ["user"],
+        isBanned: authResult.user.isBanned ?? false,
+        banReason: authResult.user.banReason,
+        playerProfile: authResult.user.playerProfile,
       };
 
       set({
         user,
-        token: null,
+        token: authResult.accessToken ?? null,
         isAuthenticated: true,
         isLoading: false,
       });
@@ -124,6 +131,54 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const errorMessage = err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.AUTH_LOGIN;
       set({ isLoading: false, error: errorMessage });
       logAction(LOG_ACTIONS.LOGIN_ERROR, errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  register: async (payload: AuthRegisterCredentials) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      if (!payload.email.trim() || !payload.username.trim() || !payload.password.trim()) {
+        const errorMsg = UI_STRINGS.STORE_ERRORS.AUTH_EMPTY_FIELDS;
+        set({ isLoading: false, error: errorMsg });
+        return { success: false, error: errorMsg };
+      }
+
+      const authResult = await window.electronAPI.auth.register({
+        email: payload.email,
+        username: payload.username,
+        password: payload.password,
+      });
+      if (!authResult.success || !authResult.user) {
+        const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_REGISTER;
+        set({ isLoading: false, error: errorMsg });
+        return { success: false, error: errorMsg };
+      }
+
+      const user: AuthUser = {
+        id: authResult.user.id,
+        username: authResult.user.username,
+        email: authResult.user.email ?? "",
+        roles: authResult.user.roles ?? ["user"],
+        isBanned: authResult.user.isBanned ?? false,
+        banReason: authResult.user.banReason,
+        playerProfile: authResult.user.playerProfile,
+      };
+
+      set({
+        user,
+        token: authResult.accessToken ?? null,
+        isAuthenticated: true,
+        isLoading: false,
+      });
+
+      logAction(LOG_ACTIONS.REGISTER_SUCCESS, `User registered: ${user.username}`);
+      return { success: true };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.AUTH_REGISTER;
+      set({ isLoading: false, error: errorMessage });
+      logAction(LOG_ACTIONS.REGISTER_ERROR, errorMessage);
       return { success: false, error: errorMessage };
     }
   },
@@ -148,8 +203,11 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const user: AuthUser = {
         id: authResult.user.id,
         username: authResult.user.username,
-        email: authResult.user.email,
-        roles: authResult.user.roles,
+        email: authResult.user.email ?? "",
+        roles: authResult.user.roles ?? ["user"],
+        isBanned: authResult.user.isBanned ?? false,
+        banReason: authResult.user.banReason,
+        playerProfile: authResult.user.playerProfile,
       };
 
       set({

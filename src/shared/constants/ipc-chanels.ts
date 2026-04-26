@@ -26,6 +26,7 @@ export const IPC_CHANNELS = {
   },
   AUTH: {
     LOGIN: "auth:login",
+    REGISTER: "auth:register",
     LOGIN_OFFLINE: "auth:login-offline",
     GET_SESSION: "auth:get-session",
     LOGOUT: "auth:logout",
@@ -80,8 +81,18 @@ export interface GameLaunchOptions {
 export interface AuthSessionUser {
   id: string;
   username: string;
-  email?: string;
-  roles?: ("user" | "moderator" | "admin")[];
+  email: string;
+  roles: ("user" | "moderator" | "admin")[];
+  isBanned: boolean;
+  banReason?: string;
+  playerProfile?: {
+    minecraftUuid?: string;
+    minecraftUsername?: string;
+    skinUrl?: string;
+    capeUrl?: string;
+    verificationStatus: "unlinked" | "pending" | "verified";
+    verifiedAt?: string;
+  };
 }
 
 export type GameProgressPayload =
@@ -202,6 +213,16 @@ export interface IpcChannelMap {
     return: {
       success: boolean;
       user?: AuthSessionUser;
+      accessToken?: string;
+      error?: string;
+    };
+  };
+  [IPC_CHANNELS.AUTH.REGISTER]: {
+    args: [payload: { email: string; username: string; password: string }];
+    return: {
+      success: boolean;
+      user?: AuthSessionUser;
+      accessToken?: string;
       error?: string;
     };
   };
@@ -218,6 +239,7 @@ export interface IpcChannelMap {
     return: {
       success: boolean;
       user?: AuthSessionUser | null;
+      accessToken?: string;
       isAuthenticated?: boolean;
       error?: string;
     };
