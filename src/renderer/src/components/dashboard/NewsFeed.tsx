@@ -27,7 +27,7 @@ export function NewsFeed({
 }: NewsFeedProps) {
   return (
     <div className="px-6">
-      <h2 className="mb-6 font-minecraft text-lg font-bold uppercase tracking-wider text-[#e0e0e0]">
+      <h2 className="mb-6 font-minecraft text-lg font-bold uppercase tracking-wider text-theme">
         {t.DASHBOARD.NEWS_TITLE}
       </h2>
 
@@ -35,11 +35,11 @@ export function NewsFeed({
         {isLoadingNews
           ? Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="mc-card animate-pulse">
-                <div className="mb-4 h-48 bg-gray-700" />
-                <div className="mb-3 h-6 w-2/3 bg-gray-700" />
+                <div className="mb-4 h-48 bg-[var(--mc-skeleton-base)]" />
+                <div className="mb-3 h-6 w-2/3 bg-[var(--mc-skeleton-base)]" />
                 <div className="space-y-2">
-                  <div className="h-4 w-full bg-gray-700" />
-                  <div className="h-4 w-5/6 bg-gray-700" />
+                  <div className="h-4 w-full bg-[var(--mc-skeleton-base)]" />
+                  <div className="h-4 w-5/6 bg-[var(--mc-skeleton-base)]" />
                 </div>
               </div>
             ))
@@ -48,7 +48,7 @@ export function NewsFeed({
                 key={item.id}
                 className="overflow-hidden p-0"
               >
-                <div className="mb-4 h-48 w-full overflow-hidden rounded-none border-b-[3px] border-[#1a1a1a]">
+                <div className="mb-4 h-48 w-full overflow-hidden rounded-none border-b-[3px] border-theme">
                   <img
                     src={placeholderImage}
                     alt={item.title}
@@ -58,11 +58,11 @@ export function NewsFeed({
                 </div>
                 <div className="mb-3 flex items-center gap-3">
                   <span
-                    className={`px-3 py-1 font-minecraft text-xs font-bold text-[#e0e0e0] ${getCategoryColor(item.category)}`}
+                    className={`px-3 py-1 font-minecraft text-xs font-bold text-white ${getCategoryColor(item.category)}`}
                   >
                     {t.NEWS.CATEGORIES[item.category as keyof typeof t.NEWS.CATEGORIES] || item.category}
                   </span>
-                  <span className="font-minecraft text-xs text-[#6a6a6a]">
+                  <span className="font-minecraft text-xs text-theme-muted">
                     {new Date(item.date).toLocaleDateString("ru-RU", {
                       day: "numeric",
                       month: "long",
@@ -70,10 +70,10 @@ export function NewsFeed({
                     })}
                   </span>
                 </div>
-                <h3 className="mb-3 font-minecraft text-lg font-bold text-[#e0e0e0]">
+                <h3 className="mb-3 font-minecraft text-lg font-bold text-theme">
                   {item.title}
                 </h3>
-                <p className="font-minecraft text-sm leading-relaxed text-[#a0a0a0]">
+                <p className="font-minecraft text-sm leading-relaxed text-theme-muted">
                   {item.content}
                 </p>
               </Card>

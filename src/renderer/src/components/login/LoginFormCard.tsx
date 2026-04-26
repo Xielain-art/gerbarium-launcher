@@ -95,7 +95,7 @@ export function LoginFormCard({
             />
             <div className="mc-checkbox-box">
               <svg
-                className="h-4 w-4 text-white opacity-0"
+                className="h-4 w-4 text-[var(--theme-surface)] opacity-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -104,7 +104,7 @@ export function LoginFormCard({
                 <path strokeLinecap="square" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <span className="font-minecraft text-xs text-gray-400">
+            <span className="font-minecraft text-xs text-theme-muted">
               {t.LOGIN.OFFLINE_MODE}
             </span>
           </label>
@@ -113,14 +113,14 @@ export function LoginFormCard({
         <div className="mt-4 flex flex-col items-center gap-1 text-center">
           <a
             href="#"
-            className="font-minecraft text-xs text-gray-400 transition-colors hover:text-cyan-400 hover:underline"
+            className="font-minecraft text-xs text-theme-muted transition-colors hover:text-theme hover:underline"
             onClick={(e) => e.preventDefault()}
           >
             {t.LOGIN.FORGOT_PASSWORD}
           </a>
           <a
             href="#"
-            className="font-minecraft text-xs text-cyan-400 transition-colors hover:text-cyan-300 hover:underline"
+            className="font-minecraft text-xs text-[var(--mc-progress-fill-a)] transition-colors hover:text-[var(--mc-progress-fill-b)] hover:underline"
             onClick={(e) => e.preventDefault()}
           >
             {t.LOGIN.CREATE_ACCOUNT}

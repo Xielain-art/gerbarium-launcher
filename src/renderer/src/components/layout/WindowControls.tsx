@@ -10,14 +10,14 @@ export function WindowControls() {
       {/* Minimize Button */}
       <button
         onClick={minimize}
-        className="w-10 h-10 flex items-center justify-center bg-[#3c3c3c] hover:bg-[#4a4a4a] active:bg-[#323232] transition-colors group
-          border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a]
-          active:border-t-[#1a1a1a] active:border-l-[#1a1a1a] active:border-b-[#5a5a5a] active:border-r-[#5a5a5a]
+        className="w-10 h-10 flex items-center justify-center bg-[var(--btn-bg)] hover:bg-[var(--btn-bg-hover)] active:bg-[var(--btn-bg-active)] transition-colors group
+          border-[3px] border-t-[var(--btn-border-hi)] border-l-[var(--btn-border-hi)] border-b-[var(--btn-border-lo)] border-r-[var(--btn-border-lo)]
+          active:border-t-[var(--btn-border-lo)] active:border-l-[var(--btn-border-lo)] active:border-b-[var(--btn-border-hi)] active:border-r-[var(--btn-border-hi)]
           -webkit-app-region-no-drag"
         title={t.WINDOW_CONTROLS.MINIMIZE}
       >
         <svg
-          className="w-4 h-4 text-[#e0e0e0]"
+          className="w-4 h-4 text-[var(--btn-text)]"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -30,15 +30,15 @@ export function WindowControls() {
       {/* Maximize/Restore Button */}
       <button
         onClick={maximize}
-        className="w-10 h-10 flex items-center justify-center bg-[#3c3c3c] hover:bg-[#4a4a4a] active:bg-[#323232] transition-colors group
-          border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a]
-          active:border-t-[#1a1a1a] active:border-l-[#1a1a1a] active:border-b-[#5a5a5a] active:border-r-[#5a5a5a]
+        className="w-10 h-10 flex items-center justify-center bg-[var(--btn-bg)] hover:bg-[var(--btn-bg-hover)] active:bg-[var(--btn-bg-active)] transition-colors group
+          border-[3px] border-t-[var(--btn-border-hi)] border-l-[var(--btn-border-hi)] border-b-[var(--btn-border-lo)] border-r-[var(--btn-border-lo)]
+          active:border-t-[var(--btn-border-lo)] active:border-l-[var(--btn-border-lo)] active:border-b-[var(--btn-border-hi)] active:border-r-[var(--btn-border-hi)]
           -webkit-app-region-no-drag"
         title={isMaximized ? t.WINDOW_CONTROLS.RESTORE : t.WINDOW_CONTROLS.MAXIMIZE}
       >
         {isMaximized ? (
           <svg
-            className="w-3.5 h-3.5 text-[#e0e0e0]"
+            className="w-3.5 h-3.5 text-[var(--btn-text)]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -51,7 +51,7 @@ export function WindowControls() {
           </svg>
         ) : (
           <svg
-            className="w-3.5 h-3.5 text-[#e0e0e0]"
+            className="w-3.5 h-3.5 text-[var(--btn-text)]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -71,15 +71,15 @@ export function WindowControls() {
       {/* Close Button */}
       <button
         onClick={close}
-        className="w-10 h-10 flex items-center justify-center bg-[#3c3c3c] hover:bg-[#e81123] active:bg-[#c4101f] transition-colors group
-          border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a]
-          active:border-t-[#1a1a1a] active:border-l-[#1a1a1a] active:border-b-[#5a5a5a] active:border-r-[#5a5a5a]
-          hover:border-t-[#aa3a3a] hover:border-l-[#aa3a3a] hover:border-b-[#5a1a1a] hover:border-r-[#5a1a1a]
+        className="w-10 h-10 flex items-center justify-center bg-[var(--btn-bg)] hover:bg-[var(--mc-window-danger-hover)] active:bg-[var(--mc-window-danger-active)] transition-colors group
+          border-[3px] border-t-[var(--btn-border-hi)] border-l-[var(--btn-border-hi)] border-b-[var(--btn-border-lo)] border-r-[var(--btn-border-lo)]
+          active:border-t-[var(--btn-border-lo)] active:border-l-[var(--btn-border-lo)] active:border-b-[var(--btn-border-hi)] active:border-r-[var(--btn-border-hi)]
+          hover:border-t-[var(--btn-danger-border-hi)] hover:border-l-[var(--btn-danger-border-hi)] hover:border-b-[var(--btn-danger-border-lo)] hover:border-r-[var(--btn-danger-border-lo)]
           -webkit-app-region-no-drag"
         title={t.WINDOW_CONTROLS.CLOSE}
       >
         <svg
-          className="w-4 h-4 text-[#e0e0e0]"
+          className="w-4 h-4 text-[var(--btn-text)]"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

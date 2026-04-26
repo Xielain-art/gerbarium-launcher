@@ -14,24 +14,24 @@ export function UpdateStatusCard({
   return (
     <div className="w-full max-w-md">
       <div className="mb-8 flex justify-center">
-        <div className="flex h-24 w-24 items-center justify-center rounded-lg bg-[#2b2d31]/50 shadow-2xl">
+        <div className="flex h-24 w-24 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--theme-surface)_50%,transparent)] shadow-2xl">
           <span className="text-5xl">UP</span>
         </div>
       </div>
 
-      <h1 className="mb-2 text-center font-minecraft text-2xl font-bold text-[#e0e0e0]">
+      <h1 className="mb-2 text-center font-minecraft text-2xl font-bold text-theme">
         Gerbarium Launcher
       </h1>
 
       {appVersion && (
-        <p className="mb-8 text-center font-minecraft text-sm text-[#8a8a8a]">
+        <p className="mb-8 text-center font-minecraft text-sm text-theme-muted">
           {UI_STRINGS.COMMON.VERSION}: {appVersion}
         </p>
       )}
 
       <div className="mc-card">
         <div className="mb-4 text-center">
-          <p className="font-minecraft text-sm text-[#55aaff]">{updateMessage}</p>
+          <p className="font-minecraft text-sm text-[var(--mc-progress-fill-a)]">{updateMessage}</p>
         </div>
 
         {updateProgress > 0 && (
@@ -51,7 +51,7 @@ export function UpdateStatusCard({
         )}
       </div>
 
-      <p className="mt-6 text-center font-minecraft text-xs text-[#5a5a5a]">
+      <p className="mt-6 text-center font-minecraft text-xs text-theme-muted">
         {UI_STRINGS.UPDATE_SCREEN.COPYRIGHT}
       </p>
     </div>

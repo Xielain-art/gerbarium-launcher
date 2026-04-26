@@ -47,6 +47,26 @@
   --btn-danger-bg-hover-b: #6a2a2a;
   --btn-danger-border-hi: #aa3a3a;
   --btn-danger-border-lo: #5a1a1a;
+  --mc-panel-bg: var(--theme-surface);
+  --mc-panel-border-hi: var(--theme-border-hi);
+  --mc-panel-border-lo: var(--theme-border);
+  --mc-panel-hover: color-mix(in srgb, var(--theme-surface) 82%, var(--theme-text) 18%);
+  --mc-input-bg: var(--theme-surface);
+  --mc-input-text: var(--theme-text);
+  --mc-input-placeholder: color-mix(in srgb, var(--theme-text-muted) 70%, transparent);
+  --mc-input-focus: color-mix(in srgb, var(--theme-border-hi) 80%, var(--theme-text) 20%);
+  --mc-error-border: color-mix(in srgb, var(--btn-danger-bg-a) 45%, transparent);
+  --mc-error-bg: color-mix(in srgb, var(--btn-danger-bg-a) 28%, transparent);
+  --mc-error-text: color-mix(in srgb, var(--btn-danger-border-hi) 75%, var(--theme-text) 25%);
+  --mc-skeleton-base: color-mix(in srgb, var(--theme-surface) 88%, var(--theme-text) 12%);
+  --mc-skeleton-highlight: color-mix(in srgb, var(--theme-surface) 74%, var(--theme-text) 26%);
+  --mc-accent: var(--btn-primary-bg-a);
+  --mc-accent-hi: var(--btn-primary-border-hi);
+  --mc-progress-fill-a: #55aaff;
+  --mc-progress-fill-b: var(--btn-primary-bg-hover-a);
+  --mc-progress-fill-c: var(--btn-primary-bg-a);
+  --mc-window-danger-hover: #e81123;
+  --mc-window-danger-active: #c4101f;
 }
 
 body.theme-gerbarium {
@@ -66,6 +86,14 @@ body.theme-gerbarium {
   --btn-text: #f3ebe0;
   --btn-border-hi: #6a5d4f;
   --btn-border-lo: #1b1712;
+  --mc-panel-bg: #2f2a24;
+  --mc-panel-border-hi: #5f5448;
+  --mc-panel-border-lo: #0f0d0b;
+  --mc-input-bg: #2f2a24;
+  --mc-input-text: #f3ebe0;
+  --mc-input-placeholder: rgba(184, 171, 154, 0.7);
+  --mc-input-focus: #7f7365;
+  --mc-panel-hover: #3a342d;
 }
 
 body.theme-dark {
@@ -85,6 +113,14 @@ body.theme-dark {
   --btn-text: #e5edf7;
   --btn-border-hi: #4b617b;
   --btn-border-lo: #0b1220;
+  --mc-panel-bg: #1f2937;
+  --mc-panel-border-hi: #334155;
+  --mc-panel-border-lo: #020617;
+  --mc-input-bg: #1f2937;
+  --mc-input-text: #e5edf7;
+  --mc-input-placeholder: rgba(148, 163, 184, 0.7);
+  --mc-input-focus: #5b6f87;
+  --mc-panel-hover: #293547;
 }
 
 body.theme-light {
@@ -108,6 +144,31 @@ body.theme-light {
   --btn-secondary-bg-hover: #c4cfdf;
   --btn-secondary-border-hi: #f1f5f9;
   --btn-secondary-border-lo: #94a3b8;
+  --btn-primary-bg-a: #4f8a4f;
+  --btn-primary-bg-b: #3c6e3c;
+  --btn-primary-bg-hover-a: #5b9b5b;
+  --btn-primary-bg-hover-b: #4a7f4a;
+  --btn-primary-border-hi: #78b578;
+  --btn-primary-border-lo: #356535;
+  --btn-danger-bg-a: #b84a4a;
+  --btn-danger-bg-b: #933737;
+  --btn-danger-bg-hover-a: #c45a5a;
+  --btn-danger-bg-hover-b: #a24646;
+  --btn-danger-border-hi: #d27171;
+  --btn-danger-border-lo: #8a3535;
+  --mc-panel-bg: #ffffff;
+  --mc-panel-border-hi: #e2e8f0;
+  --mc-panel-border-lo: #cbd5e1;
+  --mc-input-bg: #ffffff;
+  --mc-input-text: #0f172a;
+  --mc-input-placeholder: rgba(71, 85, 105, 0.7);
+  --mc-input-focus: #94a3b8;
+  --mc-panel-hover: #f1f5f9;
+  --mc-skeleton-base: #e2e8f0;
+  --mc-skeleton-highlight: #cbd5e1;
+  --mc-error-border: rgba(184, 74, 74, 0.4);
+  --mc-error-bg: rgba(184, 74, 74, 0.15);
+  --mc-error-text: #8a3535;
 }
 
 body {
@@ -216,24 +277,24 @@ a {
 @layer components {
   /* Base Minecraft panel with 3D border effect */
   .mc-panel {
-    background-color: #2b2d31;
+    background-color: var(--mc-panel-bg);
     border-width: 3px;
-    border-top-color: #5a5a5a;
-    border-left-color: #5a5a5a;
-    border-bottom-color: #1a1a1a;
-    border-right-color: #1a1a1a;
-    box-shadow: inset 2px 2px 0px #5a5a5a, inset -2px -2px 0px #1a1a1a;
+    border-top-color: var(--mc-panel-border-hi);
+    border-left-color: var(--mc-panel-border-hi);
+    border-bottom-color: var(--mc-panel-border-lo);
+    border-right-color: var(--mc-panel-border-lo);
+    box-shadow: inset 2px 2px 0px var(--mc-panel-border-hi), inset -2px -2px 0px var(--mc-panel-border-lo);
   }
 
   /* Active/selected panel with green accent */
   .mc-panel-active {
-    background-color: #2b2d31;
+    background-color: var(--mc-panel-bg);
     border-width: 3px;
-    border-top-color: #3a753a;
-    border-left-color: #3a753a;
-    border-bottom-color: #2a5a2a;
-    border-right-color: #2a5a2a;
-    box-shadow: inset 2px 2px 0px #4a9a4a, inset -2px -2px 0px #2a5a2a;
+    border-top-color: var(--mc-accent);
+    border-left-color: var(--mc-accent);
+    border-bottom-color: var(--btn-primary-border-lo);
+    border-right-color: var(--btn-primary-border-lo);
+    box-shadow: inset 2px 2px 0px var(--mc-accent-hi), inset -2px -2px 0px var(--btn-primary-border-lo);
   }
 
   /* Minecraft-style button */
@@ -355,25 +416,26 @@ a {
   .mc-input {
     width: 100%;
     padding: 0.75rem 1rem;
-    background-color: #2b2d31;
+    background-color: var(--mc-input-bg);
     border-width: 3px;
-    border-top-color: #1a1a1a;
-    border-left-color: #1a1a1a;
-    border-bottom-color: #5a5a5a;
-    border-right-color: #5a5a5a;
-    color: #e0e0e0;
+    border-top-color: var(--mc-panel-border-lo);
+    border-left-color: var(--mc-panel-border-lo);
+    border-bottom-color: var(--mc-panel-border-hi);
+    border-right-color: var(--mc-panel-border-hi);
+    color: var(--mc-input-text);
     font-family: 'Minecraft', 'Press Start 2P', monospace;
     font-size: 1rem;
+    box-shadow: inset 2px 2px 0px var(--mc-panel-border-lo), inset -2px -2px 0px var(--mc-panel-border-hi);
   }
 
   .mc-input::placeholder {
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--mc-input-placeholder);
   }
 
   .mc-input:focus {
     outline: none;
-    border-top-color: #3a3a3a;
-    border-left-color: #3a3a3a;
+    border-top-color: var(--mc-input-focus);
+    border-left-color: var(--mc-input-focus);
   }
 
   .mc-input:disabled {
@@ -400,13 +462,13 @@ a {
   .mc-checkbox-box {
     height: 1.5rem;
     width: 1.5rem;
-    background-color: #2b2d31;
+    background-color: var(--mc-panel-bg);
     border-width: 3px;
-    border-top-color: #1a1a1a;
-    border-left-color: #1a1a1a;
-    border-bottom-color: #5a5a5a;
-    border-right-color: #5a5a5a;
-    box-shadow: inset 2px 2px 0px #1a1a1a, inset -2px -2px 0px #5a5a5a;
+    border-top-color: var(--mc-panel-border-lo);
+    border-left-color: var(--mc-panel-border-lo);
+    border-bottom-color: var(--mc-panel-border-hi);
+    border-right-color: var(--mc-panel-border-hi);
+    box-shadow: inset 2px 2px 0px var(--mc-panel-border-lo), inset -2px -2px 0px var(--mc-panel-border-hi);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -414,7 +476,7 @@ a {
   }
 
   .mc-checkbox:checked + .mc-checkbox-box {
-    background-color: #3a753a;
+    background-color: var(--mc-accent);
   }
 
   .mc-checkbox:focus-visible + .mc-checkbox-box {
@@ -430,34 +492,34 @@ a {
   .mc-select {
     width: 100%;
     padding: 0.75rem 1rem;
-    background-color: #2b2d31;
+    background-color: var(--mc-input-bg);
     border-width: 3px;
-    border-top-color: #1a1a1a;
-    border-left-color: #1a1a1a;
-    border-bottom-color: #5a5a5a;
-    border-right-color: #5a5a5a;
-    color: #e0e0e0;
+    border-top-color: var(--mc-panel-border-lo);
+    border-left-color: var(--mc-panel-border-lo);
+    border-bottom-color: var(--mc-panel-border-hi);
+    border-right-color: var(--mc-panel-border-hi);
+    color: var(--mc-input-text);
     font-family: 'Minecraft', 'Press Start 2P', monospace;
     font-size: 1rem;
-    box-shadow: inset 2px 2px 0px #1a1a1a, inset -2px -2px 0px #5a5a5a;
+    box-shadow: inset 2px 2px 0px var(--mc-panel-border-lo), inset -2px -2px 0px var(--mc-panel-border-hi);
     cursor: pointer;
   }
 
   .mc-select:focus {
     outline: none;
-    border-top-color: #3a3a3a;
-    border-left-color: #3a3a3a;
+    border-top-color: var(--mc-input-focus);
+    border-left-color: var(--mc-input-focus);
   }
 
   /* Minecraft-style card */
   .mc-card {
-    background-color: #2b2d31;
+    background-color: var(--mc-panel-bg);
     border-width: 3px;
-    border-top-color: #5a5a5a;
-    border-left-color: #5a5a5a;
-    border-bottom-color: #1a1a1a;
-    border-right-color: #1a1a1a;
-    box-shadow: inset 2px 2px 0px #5a5a5a, inset -2px -2px 0px #1a1a1a;
+    border-top-color: var(--mc-panel-border-hi);
+    border-left-color: var(--mc-panel-border-hi);
+    border-bottom-color: var(--mc-panel-border-lo);
+    border-right-color: var(--mc-panel-border-lo);
+    box-shadow: inset 2px 2px 0px var(--mc-panel-border-hi), inset -2px -2px 0px var(--mc-panel-border-lo);
     padding: 1rem;
   }
 
@@ -467,7 +529,7 @@ a {
   }
 
   .mc-card-clickable:hover {
-    background-color: #36393f;
+    background-color: var(--mc-panel-hover);
   }
 
   /* Error message box */
@@ -476,10 +538,10 @@ a {
     align-items: center;
     gap: 0.75rem;
     border-radius: 0.5rem;
-    border: 1px solid rgba(220, 38, 38, 0.3);
-    background-color: rgba(220, 38, 38, 0.15);
+    border: 1px solid var(--mc-error-border);
+    background-color: var(--mc-error-bg);
     padding: 0.875rem 1rem;
-    color: #fca5a5;
+    color: var(--mc-error-text);
     font-family: 'Minecraft', 'Press Start 2P', monospace;
     font-size: 0.875rem;
     animation: shake 0.3s ease-in-out;
@@ -505,36 +567,36 @@ a {
     justify-content: center;
     border-radius: 0.5rem;
     border-width: 3px;
-    border-top-color: #5a5a5a;
-    border-left-color: #5a5a5a;
-    border-bottom-color: #1a1a1a;
-    border-right-color: #1a1a1a;
-    background-color: #3c3c3c;
+    border-top-color: var(--btn-border-hi);
+    border-left-color: var(--btn-border-hi);
+    border-bottom-color: var(--btn-border-lo);
+    border-right-color: var(--btn-border-lo);
+    background-color: var(--btn-bg);
     transition: all 0.075s;
   }
 
   .mc-social-btn:hover:not(:disabled) {
-    background-color: #4a4a4a;
+    background-color: var(--btn-bg-hover);
   }
 
   .mc-social-btn:active:not(:disabled) {
-    border-top-color: #1a1a1a;
-    border-left-color: #1a1a1a;
-    border-bottom-color: #5a5a5a;
-    border-right-color: #5a5a5a;
+    border-top-color: var(--btn-border-lo);
+    border-left-color: var(--btn-border-lo);
+    border-bottom-color: var(--btn-border-hi);
+    border-right-color: var(--btn-border-hi);
   }
 
   /* Progress bar container */
   .mc-progress {
     position: relative;
     height: 1.5rem;
-    background-color: #2b2d31;
+    background-color: var(--mc-panel-bg);
     border-width: 3px;
-    border-top-color: #1a1a1a;
-    border-left-color: #1a1a1a;
-    border-bottom-color: #5a5a5a;
-    border-right-color: #5a5a5a;
-    box-shadow: inset 2px 2px 0px #1a1a1a, inset -2px -2px 0px #5a5a5a;
+    border-top-color: var(--mc-panel-border-lo);
+    border-left-color: var(--mc-panel-border-lo);
+    border-bottom-color: var(--mc-panel-border-hi);
+    border-right-color: var(--mc-panel-border-hi);
+    box-shadow: inset 2px 2px 0px var(--mc-panel-border-lo), inset -2px -2px 0px var(--mc-panel-border-hi);
     overflow: hidden;
   }
 
@@ -542,7 +604,7 @@ a {
   .mc-progress-fill {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to right, #3a753a, #4a9a4a);
+    background: linear-gradient(to right, var(--btn-primary-bg-b), var(--btn-primary-bg-hover-a));
     transition: width 0.2s;
   }
 

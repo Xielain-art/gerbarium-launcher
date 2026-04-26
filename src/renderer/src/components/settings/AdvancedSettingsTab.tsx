@@ -10,11 +10,11 @@ export function AdvancedSettingsTab({
 
   return (
     <div className="space-y-6">
-      <h2 className="font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
+      <h2 className="font-minecraft text-xl font-bold uppercase text-theme">
         {advancedTranslations.TITLE}
       </h2>
 
-      <div className="rounded border-[2px] border-[#3a3a3a] bg-[#232428] p-4 space-y-3">
+      <div className="rounded border-[2px] border-theme bg-[var(--theme-surface-soft)] p-4 space-y-3">
         <Checkbox
           id="show-launch-console"
           label={
@@ -23,7 +23,7 @@ export function AdvancedSettingsTab({
           checked={general.showLaunchConsole}
           onChange={(e) => onUpdateGeneral({ showLaunchConsole: e.target.checked })}
         />
-        <p className="font-minecraft text-xs text-[#8a8a8a]">
+        <p className="font-minecraft text-xs text-theme-muted">
           {advancedTranslations.SHOW_LAUNCH_CONSOLE_HELP}
         </p>
       </div>

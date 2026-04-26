@@ -33,7 +33,7 @@ export function Input({
       {label && (
         <label
           htmlFor={inputId}
-          className="text-[#e0e0e0] text-sm font-bold uppercase font-minecraft tracking-wide"
+          className="text-theme text-sm font-bold uppercase font-minecraft tracking-wide"
         >
           {label}
         </label>
@@ -43,21 +43,10 @@ export function Input({
           id={inputId}
           type={effectiveType}
           className={`
-            w-full px-4 py-3 
-            bg-[#2b2d31] 
-            border-[3px] 
-            border-t-[#1a1a1a] 
-            border-l-[#1a1a1a] 
-            border-b-[#5a5a5a] 
-            border-r-[#5a5a5a] 
-            text-[#e0e0e0] 
-            font-minecraft text-base
-            placeholder-[#6a6a6a]
-            focus:outline-none 
-            focus:border-t-[#3a3a3a] focus:border-l-[#3a3a3a]
+            mc-input
+            text-base
             transition-colors duration-75
             disabled:opacity-50 disabled:cursor-not-allowed
-            shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]
             ${isPassword ? 'pr-12' : ''}
           `}
           {...props}
@@ -69,7 +58,7 @@ export function Input({
             type="button"
             onClick={togglePassword}
             className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center
-              text-[#8a8a8a] hover:text-[#e0e0e0] transition-colors
+              text-theme-muted hover:text-theme transition-colors
               focus:outline-none"
             title={showPassword ? t.LOGIN.PASSWORD_HIDE : t.LOGIN.PASSWORD_SHOW}
           >
@@ -88,7 +77,7 @@ export function Input({
         )}
       </div>
       {error && (
-        <span className="text-[#ff5555] text-xs font-minecraft mt-1">
+        <span className="text-[var(--mc-error-text)] text-xs font-minecraft mt-1">
           {error}
         </span>
       )}

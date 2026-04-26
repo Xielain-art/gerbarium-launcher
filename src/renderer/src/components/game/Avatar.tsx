@@ -58,10 +58,10 @@ export function Avatar({
         />
       ) : (
         // Head only (face icon)
-        <div className="w-full h-full bg-[#3a753a] border-[3px] border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a] flex items-center justify-center overflow-hidden">
+        <div className="w-full h-full bg-[var(--mc-accent)] border-[3px] border-t-[var(--mc-accent-hi)] border-l-[var(--mc-accent-hi)] border-b-[var(--btn-primary-border-lo)] border-r-[var(--btn-primary-border-lo)] flex items-center justify-center overflow-hidden">
           {imageUrl.startsWith('data:') ? (
             // Default avatar (initial letter)
-            <span className="text-[#e0e0e0] font-minecraft font-bold text-lg">
+            <span className="text-[var(--theme-surface)] font-minecraft font-bold text-lg">
               {username?.charAt(0).toUpperCase() || 'S'}
             </span>
           ) : (

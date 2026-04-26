@@ -26,7 +26,7 @@ export function ProfileSettingsTab({
 
   return (
     <div className="space-y-6">
-      <h2 className="font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
+      <h2 className="font-minecraft text-xl font-bold uppercase text-theme">
         {t.SETTINGS.PROFILE.TITLE}
       </h2>
 
@@ -58,10 +58,10 @@ export function ProfileSettingsTab({
       </div>
 
       <div className="space-y-2">
-        <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
+        <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-theme">
           {t.SETTINGS.PROFILE.SKIN_PREVIEW_TITLE}
         </label>
-        <div className="flex items-center justify-center rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] p-4 shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a]">
+        <div className="flex items-center justify-center rounded border-[3px] border-t-[var(--mc-panel-border-lo)] border-l-[var(--mc-panel-border-lo)] border-b-[var(--mc-panel-border-hi)] border-r-[var(--mc-panel-border-hi)] bg-[var(--mc-input-bg)] p-4 shadow-[inset_2px_2px_0px_var(--mc-panel-border-lo),inset_-2px_-2px_0px_var(--mc-panel-border-hi)]">
           <div className="bg-theme-bg flex h-32 w-32 items-center justify-center">
             <span className="text-theme-muted font-minecraft text-sm">
               {profile.skinUrl ? t.SETTINGS.PROFILE.SKIN_LOADING : t.SETTINGS.PROFILE.SKIN_NOT_SELECTED}

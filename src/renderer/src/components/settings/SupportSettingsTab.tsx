@@ -12,12 +12,12 @@ export function SupportSettingsTab({
 }: SupportSettingsTabProps) {
   return (
     <div className="space-y-6">
-      <h2 className="font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
+      <h2 className="font-minecraft text-xl font-bold uppercase text-theme">
         {t.SETTINGS.DEBUG.TITLE}
       </h2>
 
       <div className="space-y-4">
-        <p className="font-minecraft text-sm text-[#e0e0e0]">
+        <p className="font-minecraft text-sm text-theme">
           {t.SETTINGS.DEBUG.HELP_TEXT}
         </p>
 
@@ -25,8 +25,8 @@ export function SupportSettingsTab({
           <div
             className={`rounded border-[2px] px-3 py-2 font-minecraft text-xs whitespace-pre-line ${
               notice.type === "success"
-                ? "border-[#2a5a2a] bg-[#3a753a]/20 text-[#b7ffb7]"
-                : "border-[#5a1a1a] bg-[#8b2a2a]/20 text-[#ffb3b3]"
+                ? "border-[var(--btn-primary-border-lo)] bg-[color-mix(in_srgb,var(--mc-accent)_22%,transparent)] text-[color-mix(in_srgb,var(--mc-accent-hi)_50%,white)]"
+                : "border-[var(--mc-error-border)] bg-[var(--mc-error-bg)] text-[var(--mc-error-text)]"
             }`}
           >
             {notice.text}

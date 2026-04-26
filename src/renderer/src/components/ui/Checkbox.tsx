@@ -25,7 +25,7 @@ export function Checkbox({ label, className = '', id, ...props }: CheckboxProps)
           <path strokeLinecap="square" strokeLinejoin="miter" d="M5 13l4 4L19 7" />
         </svg>
       </div>
-      <span className="text-[#e0e0e0] text-sm font-minecraft group-hover:text-[#ffffff] transition-colors">
+      <span className="text-theme text-sm font-minecraft group-hover:text-[var(--mc-accent-hi)] transition-colors">
         {label}
       </span>
     </label>

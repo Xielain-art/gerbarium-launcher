@@ -12,7 +12,7 @@ export function Skeleton({
   className = '' 
 }: SkeletonProps) {
   const baseStyles = `
-    bg-[#3a3a3a] 
+    bg-[var(--mc-skeleton-base)] 
     animate-pulse 
     rounded-none
     overflow-hidden
@@ -26,7 +26,7 @@ export function Skeleton({
     after:inset-0 
     after:bg-gradient-to-r 
     after:from-transparent 
-    after:via-[#4a4a4a] 
+    after:via-[var(--mc-skeleton-highlight)] 
     after:to-transparent 
     after:animate-shimmer
   `;
@@ -52,7 +52,7 @@ export function Skeleton({
 
 export function NewsCardSkeleton() {
   return (
-    <div className="bg-[#2b2d31] border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] p-4">
+    <div className="mc-card p-4">
       <div className="flex gap-2 mb-3">
         <Skeleton variant="rect" width={80} height={20} />
         <Skeleton variant="text" width={120} height={20} />

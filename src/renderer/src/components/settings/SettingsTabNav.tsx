@@ -19,7 +19,7 @@ export function SettingsTabNav({
   ];
 
   return (
-    <div className="flex w-48 flex-col shrink-0 border-r-[3px] border-[#1a1a1a] bg-[#252525]">
+    <div className="flex w-48 flex-col shrink-0 border-r-[3px] border-theme bg-theme-sidebar">
       <div className="space-y-2 p-4">
         {tabs.map((tab) => (
           <button
@@ -27,8 +27,8 @@ export function SettingsTabNav({
             onClick={() => onChangeTab(tab.id)}
             className={`w-full border-[3px] px-4 py-3 text-left font-minecraft text-sm font-bold uppercase transition-colors ${
               activeTab === tab.id
-                ? "border-t-[#4a9a4a] border-l-[#4a9a4a] border-b-[#2a5a2a] border-r-[#2a5a2a] bg-[#3a753a] text-[#e0e0e0]"
-                : "border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] text-[#8a8a8a] hover:bg-[#3c3c3c] hover:text-[#e0e0e0]"
+                ? "border-t-[var(--mc-accent-hi)] border-l-[var(--mc-accent-hi)] border-b-[var(--btn-primary-border-lo)] border-r-[var(--btn-primary-border-lo)] bg-[var(--mc-accent)] text-white"
+                : "border-t-[var(--mc-panel-border-hi)] border-l-[var(--mc-panel-border-hi)] border-b-[var(--mc-panel-border-lo)] border-r-[var(--mc-panel-border-lo)] text-theme-muted hover:bg-[var(--mc-panel-hover)] hover:text-theme"
             }`}
           >
             {tab.label}

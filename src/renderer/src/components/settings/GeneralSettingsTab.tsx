@@ -11,7 +11,7 @@ export function GeneralSettingsTab({
 }: GeneralSettingsTabProps) {
   return (
     <div className="space-y-6">
-      <h2 className="font-minecraft text-xl font-bold uppercase text-[#e0e0e0]">
+      <h2 className="font-minecraft text-xl font-bold uppercase text-theme">
         {t.SETTINGS.GENERAL.TITLE}
       </h2>
 
@@ -58,8 +58,8 @@ export function GeneralSettingsTab({
         />
       </div>
 
-      <div className="space-y-2 pt-4 border-t border-[#1a1a1a]">
-        <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-[#e0e0e0]">
+      <div className="space-y-2 pt-4 border-t border-theme">
+        <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-theme">
           Game Files Path
         </label>
         <div className="flex gap-2">
@@ -68,11 +68,11 @@ export function GeneralSettingsTab({
             value={general.gamePath || ""}
             readOnly
             placeholder="Default (~/.gerbarium)"
-            className="flex-1 rounded border-[3px] border-t-[#1a1a1a] border-l-[#1a1a1a] border-b-[#5a5a5a] border-r-[#5a5a5a] bg-[#2b2d31] px-4 py-3 font-minecraft text-base text-[#e0e0e0] shadow-[inset_2px_2px_0px_#1a1a1a,inset_-2px_-2px_0px_#5a5a5a] focus:outline-none"
+            className="mc-input flex-1"
           />
           <button
             onClick={() => void onSelectGameDirectory()}
-            className="rounded border-[3px] border-t-[#5a5a5a] border-l-[#5a5a5a] border-b-[#1a1a1a] border-r-[#1a1a1a] bg-[#2b2d31] px-4 py-3 font-minecraft text-sm text-[#e0e0e0] transition-colors hover:bg-[#3c3c3c]"
+            className="mc-btn px-4 py-3 font-minecraft text-sm transition-colors"
           >
             Browse
           </button>
@@ -80,14 +80,14 @@ export function GeneralSettingsTab({
         <div className="flex gap-2 mt-2">
           <button
             onClick={onOpenGamePath}
-            className="font-minecraft text-xs text-[#55aaff] hover:underline"
+            className="font-minecraft text-xs text-[var(--mc-progress-fill-a)] hover:underline"
           >
             Open game folder
           </button>
-          <span className="text-[#3c3c3c]">|</span>
+          <span className="text-theme-muted">|</span>
           <button
             onClick={onOpenDataFolder}
-            className="font-minecraft text-xs text-[#55aaff] hover:underline"
+            className="font-minecraft text-xs text-[var(--mc-progress-fill-a)] hover:underline"
           >
             Open launcher data
           </button>

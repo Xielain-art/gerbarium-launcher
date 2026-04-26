@@ -92,16 +92,16 @@ export function IntegrityCheckScreen() {
   }, [navigate, isDevMode]);
 
   return (
-    <div className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-br from-[#121418] via-[#1f2328] to-[#0f1115]">
-      <div className="absolute inset-0 opacity-40 pointer-events-none bg-[radial-gradient(circle_at_top,_rgba(85,170,255,0.2),_transparent_55%)]" />
-      <div className="relative w-full max-w-2xl rounded-xl border border-[#2f3b4a] bg-[#11151bcc] p-8 shadow-2xl backdrop-blur-md">
-        <div className="mb-4 font-minecraft text-xs uppercase tracking-wider text-[#7fb4ff]">
+    <div className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-theme-main-gradient">
+      <div className="absolute inset-0 opacity-40 pointer-events-none bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--mc-progress-fill-a)_22%,transparent),transparent_55%)]" />
+      <div className="relative w-full max-w-2xl rounded-xl border border-theme bg-[color-mix(in_srgb,var(--theme-bg)_74%,black_26%)] p-8 shadow-2xl backdrop-blur-md">
+        <div className="mb-4 font-minecraft text-xs uppercase tracking-wider text-[var(--mc-progress-fill-a)]">
           Security Preflight
         </div>
-        <h1 className="mb-2 font-minecraft text-2xl text-[#e9f2ff]">Checking Launcher Integrity</h1>
-        <p className="mb-6 font-minecraft text-sm text-[#9fb3c9]">{statusMessage}</p>
+        <h1 className="mb-2 font-minecraft text-2xl text-theme">Checking Launcher Integrity</h1>
+        <p className="mb-6 font-minecraft text-sm text-theme-muted">{statusMessage}</p>
         <ProgressBar progress={progress} status={phaseText} className="mb-2" />
-        <div className="font-minecraft text-xs text-[#73839a]">{progress}%</div>
+        <div className="font-minecraft text-xs text-theme-muted">{progress}%</div>
       </div>
     </div>
   );

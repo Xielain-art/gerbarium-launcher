@@ -47,9 +47,9 @@ export function DashboardActionBar({
               : "Minecraft is running";
 
   return (
-    <div className="shrink-0 border-t-[4px] border-[#1a1a1a] bg-[#2b2d31]/95 backdrop-blur-md p-6 shadow-2xl">
+    <div className="shrink-0 border-t-[4px] border-theme bg-[color-mix(in_srgb,var(--theme-surface)_95%,transparent)] backdrop-blur-md p-6 shadow-2xl">
       {errorMessage && (
-        <div className="mb-4 rounded border-[2px] border-[#5a1a1a] bg-[#8b2a2a]/30 px-3 py-2 font-minecraft text-xs text-[#ffb3b3]">
+        <div className="mb-4 rounded border-[2px] border-[var(--mc-error-border)] bg-[var(--mc-error-bg)] px-3 py-2 font-minecraft text-xs text-[var(--mc-error-text)]">
           {errorMessage}
         </div>
       )}
@@ -58,17 +58,17 @@ export function DashboardActionBar({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 min-w-0">
             <div className="min-w-0">
-              <div className="font-minecraft text-xs text-gray-400">
+              <div className="font-minecraft text-xs text-theme-muted">
                 {t.DASHBOARD.SELECTED_VERSION_LABEL}
               </div>
-              <div className="font-minecraft text-base font-bold text-[#e0e0e0] truncate">
+              <div className="font-minecraft text-base font-bold text-theme truncate">
                 {selectedVersion?.name || t.DASHBOARD.VERSION_NOT_SELECTED}
               </div>
               <div className="font-minecraft text-xs">
                 {selectedVersion?.isInstalled ? (
-                  <span className="text-[#5a5]">{t.DASHBOARD.READY_TO_PLAY}</span>
+                  <span className="text-[#55ff55]">{t.DASHBOARD.READY_TO_PLAY}</span>
                 ) : (
-                  <span className="text-[#8a8a8a]">
+                  <span className="text-theme-muted">
                     {t.DASHBOARD.NEEDS_INSTALLATION}
                   </span>
                 )}
@@ -89,23 +89,23 @@ export function DashboardActionBar({
       ) : isLaunching ? (
         <div className="flex items-center justify-between gap-6">
           <div className="flex min-w-0 flex-1 items-center gap-4">
-            <div className="h-8 w-8 rounded-full border-4 border-[#55aaff] border-t-transparent animate-spin" />
+            <div className="h-8 w-8 rounded-full border-4 border-[var(--mc-progress-fill-a)] border-t-transparent animate-spin" />
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between mb-1">
-                <div className="font-minecraft text-sm text-[#55aaff] flex items-center gap-2">
+                <div className="font-minecraft text-sm text-[var(--mc-progress-fill-a)] flex items-center gap-2">
                   <span className="capitalize">{launchStatus || launchPhase}</span>
                   {launchPercent === null && <span className="animate-pulse">...</span>}
                 </div>
                 {launchPercent !== null && (
-                  <div className="font-minecraft text-xs text-[#55aaff]">
+                  <div className="font-minecraft text-xs text-[var(--mc-progress-fill-a)]">
                     {launchPercent}%
                   </div>
                 )}
               </div>
-              <div className="font-minecraft text-base font-bold text-[#e0e0e0] truncate">
+              <div className="font-minecraft text-base font-bold text-theme truncate">
                 {selectedVersion?.name || "Minecraft"}
               </div>
-              <div className="mt-1 font-minecraft text-xs text-[#7f95af]">{launchPhase}</div>
+              <div className="mt-1 font-minecraft text-xs text-theme-muted">{launchPhase}</div>
 
               <ProgressBar
                 progress={launchPercent !== null ? launchPercent : 0}
@@ -130,10 +130,10 @@ export function DashboardActionBar({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div>
-                <div className="font-minecraft text-sm text-gray-400">
+                <div className="font-minecraft text-sm text-theme-muted">
                   {progress?.status || t.COMMON.LOADING}
                 </div>
-                <div className="font-minecraft text-sm text-[#55aaff]">
+                <div className="font-minecraft text-sm text-[var(--mc-progress-fill-a)]">
                   {progress?.speed && <span>{progress.speed}</span>}
                   {progress?.speed && progress?.eta && <span className="mx-2">|</span>}
                   {progress?.eta && <span>{t.DASHBOARD.TIME_REMAINING_LABEL} {progress.eta}</span>}

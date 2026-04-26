@@ -36,24 +36,24 @@ export function DashboardSidebar({
   onOpenSettings,
 }: DashboardSidebarProps) {
   return (
-    <aside className="relative z-40 flex h-full w-80 flex-col border-r-[4px] border-[#1a1a1a] bg-[#1e2025]/95 backdrop-blur-md shadow-2xl">
-      <div className="border-b-[3px] border-[#1a1a1a] bg-[#2b2d31]/50 p-5">
+    <aside className="relative z-40 flex h-full w-80 flex-col border-r-[4px] border-theme bg-[color-mix(in_srgb,var(--theme-sidebar)_95%,transparent)] backdrop-blur-md shadow-2xl">
+      <div className="border-b-[3px] border-theme bg-[color-mix(in_srgb,var(--theme-surface)_50%,transparent)] p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar username={user?.username} size="lg" />
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span
-                  className="font-minecraft text-sm font-bold text-[#e0e0e0] truncate"
+                  className="font-minecraft text-sm font-bold text-theme truncate"
                   title={user?.username || ""}
                 >
                   {user?.username || t.DASHBOARD.PLAYER_DEFAULT}
                 </span>
-                <span className="rounded bg-[#3a753a] px-1.5 py-0.5 font-minecraft text-[10px] font-bold text-white">
+                <span className="rounded bg-[var(--mc-accent)] px-1.5 py-0.5 font-minecraft text-[10px] font-bold text-white">
                   {t.DASHBOARD.PLAYER_RANK_VIP}
                 </span>
               </div>
-              <div className="font-minecraft text-xs text-[#8a8a8a]">
+              <div className="font-minecraft text-xs text-theme-muted">
                 {t.DASHBOARD.PLAYER_ID_LABEL} {user?.id?.slice(0, 8) || t.DASHBOARD.PLAYER_ID_UNKNOWN}
               </div>
             </div>
@@ -81,21 +81,21 @@ export function DashboardSidebar({
       </div>
 
       {serverStatus && (
-        <div className="border-b-[3px] border-[#1a1a1a] bg-[#25272c]/50 p-4">
+        <div className="border-b-[3px] border-theme bg-[color-mix(in_srgb,var(--theme-surface-soft)_50%,transparent)] p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div
                 className={`h-2.5 w-2.5 rounded-full ${serverStatus.online ? "bg-[#55ff55] animate-pulse" : "bg-[#ff5555]"}`}
               />
-              <span className="font-minecraft text-xs font-bold text-[#e0e0e0]">
+              <span className="font-minecraft text-xs font-bold text-theme">
                 {serverStatus.online ? t.DASHBOARD.SERVER_ONLINE : t.DASHBOARD.SERVER_OFFLINE}
               </span>
             </div>
             {serverStatus.online && (
               <div className="font-minecraft text-xs">
-                <span className="text-[#55aaff]">{serverStatus.players.online}</span>
-                <span className="text-[#6a6a6a]"> / </span>
-                <span className="text-[#55aaff]">{serverStatus.players.max}</span>
+                <span className="text-[var(--mc-progress-fill-a)]">{serverStatus.players.online}</span>
+                <span className="text-theme-muted"> / </span>
+                <span className="text-[var(--mc-progress-fill-a)]">{serverStatus.players.max}</span>
               </div>
             )}
           </div>
@@ -103,8 +103,8 @@ export function DashboardSidebar({
       )}
 
       <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="border-b-[2px] border-[#1a1a1a] bg-[#2b2d31]/30 px-4 py-3">
-          <h2 className="font-minecraft text-xs font-bold uppercase tracking-wider text-[#8a8a8a]">
+        <div className="border-b-[2px] border-theme bg-[color-mix(in_srgb,var(--theme-surface)_30%,transparent)] px-4 py-3">
+          <h2 className="font-minecraft text-xs font-bold uppercase tracking-wider text-theme-muted">
             {t.DASHBOARD.VERSIONS_TITLE}
           </h2>
         </div>
@@ -121,11 +121,11 @@ export function DashboardSidebar({
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{getVersionIcon(version.type)}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="font-minecraft text-sm font-bold text-[#e0e0e0] truncate">
+                    <div className="font-minecraft text-sm font-bold text-theme truncate">
                       {version.name}
                     </div>
                     <div
-                      className={`font-minecraft text-xs ${version.isInstalled ? "text-[#5a5]" : "text-[#8a8a8a]"}`}
+                      className={`font-minecraft text-xs ${version.isInstalled ? "text-[#55ff55]" : "text-theme-muted"}`}
                     >
                       {version.isInstalled
                         ? t.DASHBOARD.VERSION_INSTALLED
@@ -144,7 +144,7 @@ export function DashboardSidebar({
         </div>
       </div>
 
-      <div className="border-t-[3px] border-[#1a1a1a] bg-[#2b2d31]/95 p-4">
+      <div className="border-t-[3px] border-theme bg-[color-mix(in_srgb,var(--theme-surface)_95%,transparent)] p-4">
         <Button
           onClick={onOpenSettings}
           className="w-full justify-start"
