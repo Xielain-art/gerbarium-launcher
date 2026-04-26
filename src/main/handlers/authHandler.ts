@@ -1,8 +1,15 @@
-import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { App, ipcMain, safeStorage } from "electron";
 import log from "electron-log";
+import {
+  loginRequest,
+  logoutRequest,
+  profileRequest,
+  refreshTokenRequest,
+  type ApiAuthResponse,
+  type ApiUser,
+} from "../../lib/api/auth";
 import { IPC_CHANNELS, type AuthSessionUser } from "../../shared/constants/ipc-chanels";
 import { ERROR_CODES } from "../../shared/constants/errors";
 import { LOG_MESSAGES } from "../../shared/constants/log-messages";
@@ -14,8 +21,11 @@ const AUTH_SESSION_KEY = "auth:session";
 type SecureData = Record<string, string>;
 
 type AuthSessionPayload = {
-  token: string;
+  mode: "online" | "offline";
   user: AuthSessionUser;
+  accessToken?: string;
+  accessTokenExpiresAt?: number;
+  refreshCookie?: string;
 };
 
 async function readSecureData(secureDataPath: string): Promise<SecureData> {
@@ -54,23 +64,144 @@ function decryptSession(encryptedBase64: string): AuthSessionPayload {
   const encrypted = Buffer.from(encryptedBase64, "base64");
   const decrypted = safeStorage.decryptString(encrypted);
   const parsed = JSON.parse(decrypted) as AuthSessionPayload;
-  if (!parsed?.token || !parsed?.user?.username || !parsed?.user?.id) {
+  if (
+    !parsed?.mode ||
+    !parsed?.user?.username ||
+    !parsed?.user?.id ||
+    (parsed.mode === "online" &&
+      (!parsed.accessToken || typeof parsed.accessTokenExpiresAt !== "number"))
+  ) {
     throw new Error(ERROR_CODES.AUTH_INVALID_SESSION);
   }
   return parsed;
 }
 
-function createSessionUser(login: string): AuthSessionUser {
+function createOfflineUser(login: string): AuthSessionUser {
   return {
-    id: `user_${Date.now()}`,
+    id: `offline_${Date.now()}`,
     username: login,
     email: login.includes("@") ? login : undefined,
   };
 }
 
-function createToken(prefix: "online" | "offline"): string {
-  const randomPart = crypto.randomBytes(24).toString("hex");
-  return `${prefix}_${crypto.randomUUID()}_${randomPart}`;
+function mapApiUserToSessionUser(user: ApiUser): AuthSessionUser {
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    roles: user.roles,
+  };
+}
+
+function getTokenExpiresAt(expiresInSeconds: number): number {
+  const safeExpiresIn = Number.isFinite(expiresInSeconds) && expiresInSeconds > 0
+    ? expiresInSeconds
+    : 900;
+  return Date.now() + safeExpiresIn * 1000;
+}
+
+function buildOnlineSession(payload: ApiAuthResponse, setCookie: string | null | undefined): AuthSessionPayload {
+  return {
+    mode: "online",
+    accessToken: payload.accessToken,
+    accessTokenExpiresAt: getTokenExpiresAt(payload.expiresIn),
+    refreshCookie: setCookie ?? undefined,
+    user: mapApiUserToSessionUser(payload.user),
+  };
+}
+
+async function readStoredSession(secureDataPath: string): Promise<AuthSessionPayload | null> {
+  return await secureStorageLock.runExclusive(async () => {
+    const secureData = await readSecureData(secureDataPath);
+    const encryptedSession = secureData[AUTH_SESSION_KEY];
+    if (!encryptedSession) {
+      return null;
+    }
+    return decryptSession(encryptedSession);
+  });
+}
+
+async function writeStoredSession(secureDataPath: string, payload: AuthSessionPayload): Promise<void> {
+  await secureStorageLock.runExclusive(async () => {
+    const secureData = await readSecureData(secureDataPath);
+    secureData[AUTH_SESSION_KEY] = encryptSession(payload);
+    await writeSecureData(secureDataPath, secureData);
+  });
+}
+
+async function clearStoredSession(secureDataPath: string): Promise<void> {
+  await secureStorageLock.runExclusive(async () => {
+    const secureData = await readSecureData(secureDataPath);
+    if (secureData[AUTH_SESSION_KEY]) {
+      delete secureData[AUTH_SESSION_KEY];
+      await writeSecureData(secureDataPath, secureData);
+    }
+  });
+}
+
+async function refreshOnlineSession(session: AuthSessionPayload): Promise<AuthSessionPayload | null> {
+  if (!session.refreshCookie) {
+    return null;
+  }
+
+  log.info(LOG_MESSAGES.AUTH_TOKEN_REFRESH_ATTEMPT);
+  const refreshResult = await refreshTokenRequest(session.refreshCookie);
+  if (!refreshResult.success || !refreshResult.data) {
+    log.error(LOG_MESSAGES.AUTH_TOKEN_REFRESH_FAILED, refreshResult.status, refreshResult.errorMessage);
+    return null;
+  }
+
+  log.info(LOG_MESSAGES.AUTH_TOKEN_REFRESH_SUCCESS);
+  return buildOnlineSession(refreshResult.data, refreshResult.setCookie ?? session.refreshCookie);
+}
+
+async function resolveOnlineSession(session: AuthSessionPayload): Promise<AuthSessionPayload | null> {
+  let activeSession = session;
+
+  if (
+    !activeSession.accessToken ||
+    typeof activeSession.accessTokenExpiresAt !== "number"
+  ) {
+    return null;
+  }
+
+  if (Date.now() >= activeSession.accessTokenExpiresAt) {
+    const refreshed = await refreshOnlineSession(activeSession);
+    if (!refreshed) {
+      return null;
+    }
+    activeSession = refreshed;
+  }
+
+  const profileResult = await profileRequest(activeSession.accessToken);
+  if (!profileResult.success || !profileResult.data) {
+    if (profileResult.status === 401 || profileResult.status === 403) {
+      const refreshed = await refreshOnlineSession(activeSession);
+      if (!refreshed) {
+        log.error(LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED, profileResult.status, profileResult.errorMessage);
+        return null;
+      }
+
+      const refreshedProfile = await profileRequest(refreshed.accessToken ?? "");
+      if (!refreshedProfile.success || !refreshedProfile.data) {
+        log.error(LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED, refreshedProfile.status, refreshedProfile.errorMessage);
+        return null;
+      }
+
+      return {
+        ...refreshed,
+        user: mapApiUserToSessionUser(refreshedProfile.data),
+      };
+    }
+
+    log.error(LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED, profileResult.status, profileResult.errorMessage);
+    return activeSession;
+  }
+
+  return {
+    ...activeSession,
+    user: mapApiUserToSessionUser(profileResult.data),
+  };
 }
 
 export default function authHandler(app: App) {
@@ -90,25 +221,32 @@ export default function authHandler(app: App) {
           };
         }
 
-        const user = createSessionUser(login);
-        const encryptedSession = encryptSession({
-          token: createToken("online"),
-          user,
+        const authResult = await loginRequest({
+          identifier: login,
+          password,
         });
 
-        await secureStorageLock.runExclusive(async () => {
-          const secureData = await readSecureData(secureDataPath);
-          secureData[AUTH_SESSION_KEY] = encryptedSession;
-          await writeSecureData(secureDataPath, secureData);
-        });
+        if (!authResult.success || !authResult.data) {
+          log.error(LOG_MESSAGES.AUTH_API_ERROR, authResult.status, authResult.errorMessage);
+          return {
+            success: false,
+            error:
+              authResult.status === 401 || authResult.status === 403
+                ? ERROR_CODES.AUTH_INVALID_CREDENTIALS
+                : ERROR_CODES.AUTH_API_REQUEST_FAILED,
+          };
+        }
 
-        log.info(LOG_MESSAGES.AUTH_LOGIN_SUCCESS, user.username);
-        return { success: true, user };
+        const session = buildOnlineSession(authResult.data, authResult.setCookie);
+        await writeStoredSession(secureDataPath, session);
+
+        log.info(LOG_MESSAGES.AUTH_LOGIN_SUCCESS, session.user.username);
+        return { success: true, user: session.user };
       } catch (error) {
         log.error(LOG_MESSAGES.AUTH_LOGIN_FAILED, error);
         return {
           success: false,
-          error: error instanceof Error ? error.message : ERROR_CODES.AUTH_LOGIN_FAILED,
+          error: ERROR_CODES.AUTH_LOGIN_FAILED,
         };
       }
     },
@@ -127,19 +265,10 @@ export default function authHandler(app: App) {
           };
         }
 
-        const user: AuthSessionUser = {
-          id: `offline_${Date.now()}`,
-          username,
-        };
-        const encryptedSession = encryptSession({
-          token: createToken("offline"),
+        const user = createOfflineUser(username);
+        await writeStoredSession(secureDataPath, {
+          mode: "offline",
           user,
-        });
-
-        await secureStorageLock.runExclusive(async () => {
-          const secureData = await readSecureData(secureDataPath);
-          secureData[AUTH_SESSION_KEY] = encryptedSession;
-          await writeSecureData(secureDataPath, secureData);
         });
 
         log.info(LOG_MESSAGES.AUTH_LOGIN_OFFLINE_SUCCESS, user.username);
@@ -148,7 +277,7 @@ export default function authHandler(app: App) {
         log.error(LOG_MESSAGES.AUTH_LOGIN_OFFLINE_FAILED, error);
         return {
           success: false,
-          error: error instanceof Error ? error.message : ERROR_CODES.AUTH_LOGIN_FAILED,
+          error: ERROR_CODES.AUTH_LOGIN_FAILED,
         };
       }
     },
@@ -157,25 +286,36 @@ export default function authHandler(app: App) {
   ipcMain.handle(IPC_CHANNELS.AUTH.GET_SESSION, async () => {
     log.debug(LOG_MESSAGES.AUTH_SESSION_READ);
     try {
-      return await secureStorageLock.runExclusive(async () => {
-        const secureData = await readSecureData(secureDataPath);
-        const encryptedSession = secureData[AUTH_SESSION_KEY];
-        if (!encryptedSession) {
-          return { success: true, isAuthenticated: false, user: null };
-        }
+      const storedSession = await readStoredSession(secureDataPath);
+      if (!storedSession) {
+        return { success: true, isAuthenticated: false, user: null };
+      }
 
-        const session = decryptSession(encryptedSession);
+      if (storedSession.mode === "offline") {
         return {
           success: true,
           isAuthenticated: true,
-          user: session.user,
+          user: storedSession.user,
         };
-      });
+      }
+
+      const resolvedSession = await resolveOnlineSession(storedSession);
+      if (!resolvedSession) {
+        await clearStoredSession(secureDataPath);
+        return { success: true, isAuthenticated: false, user: null };
+      }
+
+      await writeStoredSession(secureDataPath, resolvedSession);
+      return {
+        success: true,
+        isAuthenticated: true,
+        user: resolvedSession.user,
+      };
     } catch (error) {
       log.error(LOG_MESSAGES.AUTH_SESSION_READ_FAILED, error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : ERROR_CODES.AUTH_SESSION_READ_FAILED,
+        error: ERROR_CODES.AUTH_SESSION_READ_FAILED,
       };
     }
   });
@@ -183,19 +323,24 @@ export default function authHandler(app: App) {
   ipcMain.handle(IPC_CHANNELS.AUTH.LOGOUT, async () => {
     log.info(LOG_MESSAGES.AUTH_LOGOUT);
     try {
-      await secureStorageLock.runExclusive(async () => {
-        const secureData = await readSecureData(secureDataPath);
-        if (secureData[AUTH_SESSION_KEY]) {
-          delete secureData[AUTH_SESSION_KEY];
-          await writeSecureData(secureDataPath, secureData);
+      const currentSession = await readStoredSession(secureDataPath);
+      if (currentSession?.mode === "online" && currentSession.accessToken) {
+        const logoutResult = await logoutRequest(
+          currentSession.accessToken,
+          currentSession.refreshCookie,
+        );
+        if (!logoutResult.success) {
+          log.error(LOG_MESSAGES.AUTH_API_ERROR, logoutResult.status, logoutResult.errorMessage);
         }
-      });
+      }
+
+      await clearStoredSession(secureDataPath);
       return { success: true };
     } catch (error) {
       log.error(LOG_MESSAGES.AUTH_LOGOUT_FAILED, error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : ERROR_CODES.AUTH_SESSION_WRITE_FAILED,
+        error: ERROR_CODES.AUTH_SESSION_WRITE_FAILED,
       };
     }
   });

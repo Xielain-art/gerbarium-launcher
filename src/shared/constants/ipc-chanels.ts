@@ -81,6 +81,7 @@ export interface AuthSessionUser {
   id: string;
   username: string;
   email?: string;
+  roles?: ("user" | "moderator" | "admin")[];
 }
 
 export type GameProgressPayload =

@@ -1,6 +1,8 @@
 import * as esbuild from "esbuild";
 
 const isWatch = process.argv.includes("--watch");
+process.loadEnvFile?.(".env");
+
 const mainConfig = {
   bundle: true,
   platform: "node",
@@ -9,6 +11,9 @@ const mainConfig = {
   external: ["electron", "electron-log"],
   entryPoints: ["src/main/main.ts"],
   outfile: "dist/main/main.js",
+  define: {
+    "process.env.API_BASE_URL": JSON.stringify(process.env.API_BASE_URL ?? ""),
+  },
 };
 
 if (isWatch) {
