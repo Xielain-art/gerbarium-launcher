@@ -37,7 +37,7 @@ export function SettingsScreen() {
     error,
     isDownloadingJava,
   } = useSettingsStore();
-  const { logout, isAuthenticated } = useAuthStore();
+  const { user, logout, isAuthenticated } = useAuthStore();
   const {
     checkJava,
     findJava,
@@ -67,6 +67,18 @@ export function SettingsScreen() {
       navigate({ to: ROUTES.HOME });
     }
   }, [isAuthenticated, shouldLogout, navigate]);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    updateProfile({
+      username: user.username,
+      skinUrl: user.playerProfile?.skinUrl,
+      capeUrl: user.playerProfile?.capeUrl,
+    });
+  }, [user, updateProfile]);
 
   useEffect(() => {
     if (activeTab !== "java") {
@@ -227,6 +239,7 @@ export function SettingsScreen() {
         <ProfileSettingsTab
           t={t}
           profile={profile}
+          user={user}
           onUpdateProfile={updateProfile}
         />
       );

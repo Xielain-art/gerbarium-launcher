@@ -14,8 +14,8 @@ const sizeMap = {
 };
 
 /**
- * Renders a Minecraft player avatar (head or full body)
- * Uses Crafatar or other skin rendering service
+ * Renders a player avatar (head or full body)
+ * Uses provided skin URL, otherwise DiceBear initials fallback
  */
 export function Avatar({ 
   username, 
@@ -24,24 +24,14 @@ export function Avatar({
   showBody = false,
   className = '' 
 }: AvatarProps) {
-  // Generate avatar URL from username or skin
-  // Using Crafatar service (free, no API key needed)
+  // Generate avatar URL from skin or initials
   const getAvatarUrl = () => {
-    if (skinUrl) {
+    if (skinUrl?.trim()) {
       return skinUrl;
     }
-    
-    if (username) {
-      // Crafatar avatar URL
-      const sizePx = size === 'sm' ? 32 : size === 'md' ? 64 : size === 'lg' ? 128 : 256;
-      if (showBody) {
-        return `https://crafatar.com/renders/body/${username}?scale=${sizePx}&overlay`;
-      }
-      return `https://crafatar.com/avatars/${username}?size=${sizePx}&overlay`;
-    }
-    
-    // Default Steve avatar
-    return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAABNSURBVBiVjYuxDoAgCEXvG4zOjm5+gONu19HRxdnJxcnJr3AwIiF6CQgdjPeS95K+xFwA3Kc0TZvW2gMAqu6q6qRt2yEAqupRVUdVnQEAqu6q6qTt+wGq7qrqpO37vwGq7qrqpO37vwGq7qrqpO37vwGq7qrqpO37vwGq7qrqpO37vwEqAEl5kR3vAAAAAElFTkSuQmCC';
+
+    const seed = encodeURIComponent((username || "Player").trim() || "Player");
+    return `https://api.dicebear.com/7.x/initials/svg?seed=${seed}`;
   };
 
   const imageUrl = getAvatarUrl();
@@ -59,19 +49,12 @@ export function Avatar({
       ) : (
         // Head only (face icon)
         <div className="w-full h-full bg-[var(--mc-accent)] border-[3px] border-t-[var(--mc-accent-hi)] border-l-[var(--mc-accent-hi)] border-b-[var(--btn-primary-border-lo)] border-r-[var(--btn-primary-border-lo)] flex items-center justify-center overflow-hidden">
-          {imageUrl.startsWith('data:') ? (
-            // Default avatar (initial letter)
-            <span className="text-[var(--theme-surface)] font-minecraft font-bold text-lg">
-              {username?.charAt(0).toUpperCase() || 'S'}
-            </span>
-          ) : (
-            <img
-              src={imageUrl}
-              alt={username || 'Player'}
-              className="w-full h-full object-cover"
-              style={{ imageRendering: 'pixelated' }}
-            />
-          )}
+          <img
+            src={imageUrl}
+            alt={username || 'Player'}
+            className="w-full h-full object-cover"
+            style={{ imageRendering: 'pixelated' }}
+          />
         </div>
       )}
     </div>

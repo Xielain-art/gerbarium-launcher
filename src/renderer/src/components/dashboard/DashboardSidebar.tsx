@@ -14,16 +14,22 @@ function getVersionIcon(type: string) {
   return icons[type] || "PK";
 }
 
-function getUserRoleLabel(user: AuthUser | null): string {
-  const primaryRole = user?.roles?.[0] ?? "user";
-  switch (primaryRole) {
-    case "admin":
-      return "ADMIN";
-    case "moderator":
-      return "MODERATOR";
-    default:
-      return "USER";
-  }
+function formatRole(role: "user" | "moderator" | "admin"): string {
+  if (role === "admin") return "ADMIN";
+  if (role === "moderator") return "MODERATOR";
+  return "USER";
+}
+
+function getRoleLabels(user: AuthUser | null): string[] {
+  const roles = user?.roles ?? ["user"];
+  const unique = Array.from(new Set(roles));
+  const order: Record<"user" | "moderator" | "admin", number> = {
+    admin: 0,
+    moderator: 1,
+    user: 2,
+  };
+  unique.sort((a, b) => order[a] - order[b]);
+  return unique.map(formatRole);
 }
 
 interface DashboardSidebarProps {
@@ -47,25 +53,34 @@ export function DashboardSidebar({
   onLogout,
   onOpenSettings,
 }: DashboardSidebarProps) {
-  const roleLabel = getUserRoleLabel(user);
+  const roleLabels = getRoleLabels(user);
 
   return (
     <aside className="relative z-40 flex h-full w-80 flex-col border-r-[4px] border-theme bg-[color-mix(in_srgb,var(--theme-sidebar)_95%,transparent)] backdrop-blur-md shadow-2xl">
       <div className="border-b-[3px] border-theme bg-[color-mix(in_srgb,var(--theme-surface)_50%,transparent)] p-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Avatar username={user?.username} size="lg" />
+            <Avatar
+              username={user?.playerProfile?.minecraftUsername || user?.username}
+              skinUrl={user?.playerProfile?.skinUrl}
+              size="lg"
+            />
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <span
                   className="font-minecraft text-sm font-bold text-theme truncate"
                   title={user?.username || ""}
                 >
                   {user?.username || t.DASHBOARD.PLAYER_DEFAULT}
                 </span>
-                <span className="rounded bg-[var(--mc-accent)] px-1.5 py-0.5 font-minecraft text-[10px] font-bold text-white">
-                  {roleLabel}
-                </span>
+                {roleLabels.map((role) => (
+                  <span
+                    key={role}
+                    className="rounded bg-[var(--mc-accent)] px-1.5 py-0.5 font-minecraft text-[10px] font-bold text-white"
+                  >
+                    {role}
+                  </span>
+                ))}
               </div>
               <div className="font-minecraft text-xs text-theme-muted">
                 {t.DASHBOARD.PLAYER_ID_LABEL} {user?.id?.slice(0, 8) || t.DASHBOARD.PLAYER_ID_UNKNOWN}

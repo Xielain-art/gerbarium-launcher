@@ -52,8 +52,11 @@ export const useAuthStore = create<AuthState>()((set) => ({
            user: {
              id: result.user.id,
              username: result.user.username,
-             email: result.user.email,
-             roles: result.user.roles,
+             email: result.user.email ?? "",
+             roles: result.user.roles ?? ["user"],
+             isBanned: result.user.isBanned ?? false,
+             banReason: result.user.banReason,
+             playerProfile: result.user.playerProfile,
            },
          });
          logAction(LOG_ACTIONS.TOKEN_LOADED, `User: ${result.user.username}`);
@@ -78,8 +81,13 @@ export const useAuthStore = create<AuthState>()((set) => ({
 
   logout: async () => {
     logAction(LOG_ACTIONS.LOGOUT, 'User logged out');
-    await window.electronAPI.auth.logout();
     set(defaultState);
+    try {
+      await window.electronAPI.auth.logout();
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Logout request failed";
+      logAction(LOG_ACTIONS.LOGIN_ERROR, errorMessage);
+    }
   },
 
   login: async (credentials: AuthCredentials) => {
@@ -103,8 +111,11 @@ export const useAuthStore = create<AuthState>()((set) => ({
       const user: AuthUser = {
         id: authResult.user.id,
         username: authResult.user.username,
-        email: authResult.user.email,
-        roles: authResult.user.roles,
+        email: authResult.user.email ?? "",
+        roles: authResult.user.roles ?? ["user"],
+        isBanned: authResult.user.isBanned ?? false,
+        banReason: authResult.user.banReason,
+        playerProfile: authResult.user.playerProfile,
       };
 
       set({
@@ -148,8 +159,11 @@ export const useAuthStore = create<AuthState>()((set) => ({
       const user: AuthUser = {
         id: authResult.user.id,
         username: authResult.user.username,
-        email: authResult.user.email,
-        roles: authResult.user.roles,
+        email: authResult.user.email ?? "",
+        roles: authResult.user.roles ?? ["user"],
+        isBanned: authResult.user.isBanned ?? false,
+        banReason: authResult.user.banReason,
+        playerProfile: authResult.user.playerProfile,
       };
 
       set({
@@ -189,8 +203,11 @@ export const useAuthStore = create<AuthState>()((set) => ({
       const user: AuthUser = {
         id: authResult.user.id,
         username: authResult.user.username,
-        email: authResult.user.email,
-        roles: authResult.user.roles,
+        email: authResult.user.email ?? "",
+        roles: authResult.user.roles ?? ["user"],
+        isBanned: authResult.user.isBanned ?? false,
+        banReason: authResult.user.banReason,
+        playerProfile: authResult.user.playerProfile,
       };
 
       set({

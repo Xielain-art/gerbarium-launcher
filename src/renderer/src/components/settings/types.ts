@@ -1,4 +1,5 @@
 import type { SettingsGeneral, SettingsProfile } from "../../types";
+import type { AuthUser } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
 import type { DownloadStatus } from "../../../../shared/constants/ipc-chanels";
 
@@ -49,6 +50,7 @@ export interface JavaSettingsTabProps extends SettingsBaseProps {
 
 export interface ProfileSettingsTabProps extends SettingsBaseProps {
   profile: SettingsProfile;
+  user: AuthUser | null;
   onUpdateProfile: (updates: Partial<SettingsProfile>) => void;
 }
 

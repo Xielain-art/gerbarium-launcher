@@ -131,7 +131,7 @@ export async function refreshTokenRequest(cookie: string): Promise<ApiResult<Api
 
 export async function profileRequest(accessToken: string): Promise<ApiResult<ApiUser>> {
   try {
-    const { data, error, response } = await apiClient.GET("/api/auth/profile", {
+    const { data, error, response } = await apiClient.GET("/api/users/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
