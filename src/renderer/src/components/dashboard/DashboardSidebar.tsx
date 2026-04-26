@@ -14,6 +14,18 @@ function getVersionIcon(type: string) {
   return icons[type] || "PK";
 }
 
+function getUserRoleLabel(user: AuthUser | null): string {
+  const primaryRole = user?.roles?.[0] ?? "user";
+  switch (primaryRole) {
+    case "admin":
+      return "ADMIN";
+    case "moderator":
+      return "MODERATOR";
+    default:
+      return "USER";
+  }
+}
+
 interface DashboardSidebarProps {
   t: TranslationType;
   user: AuthUser | null;
@@ -35,6 +47,8 @@ export function DashboardSidebar({
   onLogout,
   onOpenSettings,
 }: DashboardSidebarProps) {
+  const roleLabel = getUserRoleLabel(user);
+
   return (
     <aside className="relative z-40 flex h-full w-80 flex-col border-r-[4px] border-theme bg-[color-mix(in_srgb,var(--theme-sidebar)_95%,transparent)] backdrop-blur-md shadow-2xl">
       <div className="border-b-[3px] border-theme bg-[color-mix(in_srgb,var(--theme-surface)_50%,transparent)] p-5">
@@ -50,7 +64,7 @@ export function DashboardSidebar({
                   {user?.username || t.DASHBOARD.PLAYER_DEFAULT}
                 </span>
                 <span className="rounded bg-[var(--mc-accent)] px-1.5 py-0.5 font-minecraft text-[10px] font-bold text-white">
-                  {t.DASHBOARD.PLAYER_RANK_VIP}
+                  {roleLabel}
                 </span>
               </div>
               <div className="font-minecraft text-xs text-theme-muted">

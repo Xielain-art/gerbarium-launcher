@@ -14,18 +14,23 @@ export function LoginScreen() {
   const {
     isLoading,
     error,
-    showPassword,
     isAuthenticated,
     login,
+    register,
     loginOffline,
     loadToken,
     clearError,
-    setShowPassword,
   } = useAuthStore();
 
+  const [mode, setMode] = useState<"login" | "register">("login");
   const [localUsername, setLocalUsername] = useState("");
+  const [localEmail, setLocalEmail] = useState("");
   const [localPassword, setLocalPassword] = useState("");
+  const [localPasswordConfirm, setLocalPasswordConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
     void loadToken();
@@ -39,7 +44,22 @@ export function LoginScreen() {
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
+    setValidationError(null);
     clearError();
+
+    if (mode === "register") {
+      if (localPassword !== localPasswordConfirm) {
+        setValidationError("Passwords do not match");
+        return;
+      }
+
+      await register({
+        email: localEmail,
+        username: localUsername,
+        password: localPassword,
+      });
+      return;
+    }
 
     if (offlineMode) {
       await loginOffline(localUsername);
@@ -70,15 +90,43 @@ export function LoginScreen() {
         <LoginFormCard
           t={t}
           isLoading={isLoading}
-          error={error}
+          error={validationError ?? error}
+          mode={mode}
           username={localUsername}
+          email={localEmail}
           password={localPassword}
+          confirmPassword={localPasswordConfirm}
           showPassword={showPassword}
+          showConfirmPassword={showConfirmPassword}
           offlineMode={offlineMode}
-          onUsernameChange={setLocalUsername}
-          onPasswordChange={setLocalPassword}
+          onUsernameChange={(value) => {
+            setValidationError(null);
+            setLocalUsername(value);
+          }}
+          onEmailChange={(value) => {
+            setValidationError(null);
+            setLocalEmail(value);
+          }}
+          onPasswordChange={(value) => {
+            setValidationError(null);
+            setLocalPassword(value);
+          }}
+          onConfirmPasswordChange={(value) => {
+            setValidationError(null);
+            setLocalPasswordConfirm(value);
+          }}
           onTogglePassword={() => setShowPassword(!showPassword)}
-          onToggleOfflineMode={setOfflineMode}
+          onToggleConfirmPassword={() => setShowConfirmPassword(!showConfirmPassword)}
+          onToggleOfflineMode={(enabled) => {
+            setValidationError(null);
+            setMode("login");
+            setOfflineMode(enabled);
+          }}
+          onSwitchMode={(nextMode) => {
+            setValidationError(null);
+            setMode(nextMode);
+            setOfflineMode(false);
+          }}
           onSubmit={handleLogin}
         />
 

@@ -6,14 +6,22 @@ interface LoginFormCardProps {
   t: TranslationType;
   isLoading: boolean;
   error: string | null;
+  mode: "login" | "register";
   username: string;
+  email: string;
   password: string;
+  confirmPassword: string;
   showPassword: boolean;
+  showConfirmPassword: boolean;
   offlineMode: boolean;
   onUsernameChange: (value: string) => void;
+  onEmailChange: (value: string) => void;
   onPasswordChange: (value: string) => void;
+  onConfirmPasswordChange: (value: string) => void;
   onTogglePassword: () => void;
+  onToggleConfirmPassword: () => void;
   onToggleOfflineMode: (enabled: boolean) => void;
+  onSwitchMode: (mode: "login" | "register") => void;
   onSubmit: (e: FormEvent) => Promise<void>;
 }
 
@@ -21,16 +29,26 @@ export function LoginFormCard({
   t,
   isLoading,
   error,
+  mode,
   username,
+  email,
   password,
+  confirmPassword,
   showPassword,
+  showConfirmPassword,
   offlineMode,
   onUsernameChange,
+  onEmailChange,
   onPasswordChange,
+  onConfirmPasswordChange,
   onTogglePassword,
+  onToggleConfirmPassword,
   onToggleOfflineMode,
+  onSwitchMode,
   onSubmit,
 }: LoginFormCardProps) {
+  const isRegisterMode = mode === "register";
+
   return (
     <div className="w-full max-h-[90vh] overflow-y-auto rounded-2xl mc-panel p-6 backdrop-blur-md">
       {error && (
@@ -52,25 +70,49 @@ export function LoginFormCard({
       )}
 
       <form onSubmit={(e) => void onSubmit(e)} className="flex flex-col gap-3">
+        {isRegisterMode && (
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => onEmailChange(e.target.value)}
+            placeholder="Email"
+            disabled={isLoading}
+            autoComplete="email"
+          />
+        )}
+
         <Input
           type="text"
           value={username}
           onChange={(e) => onUsernameChange(e.target.value)}
-          placeholder={t.LOGIN.USERNAME_PLACEHOLDER}
+          placeholder={isRegisterMode ? "Username" : t.LOGIN.USERNAME_PLACEHOLDER}
           disabled={isLoading}
-          autoComplete="username"
+          autoComplete={isRegisterMode ? "new-username" : "username"}
         />
 
-        {!offlineMode && (
+        {(!offlineMode || isRegisterMode) && (
           <Input
             type="password"
             value={password}
             onChange={(e) => onPasswordChange(e.target.value)}
             placeholder={t.LOGIN.PASSWORD_PLACEHOLDER}
             disabled={isLoading}
-            autoComplete="current-password"
+            autoComplete={isRegisterMode ? "new-password" : "current-password"}
             showPasswordExternal={showPassword}
             onTogglePassword={onTogglePassword}
+          />
+        )}
+
+        {isRegisterMode && (
+          <Input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => onConfirmPasswordChange(e.target.value)}
+            placeholder="Confirm password"
+            disabled={isLoading}
+            autoComplete="new-password"
+            showPasswordExternal={showConfirmPassword}
+            onTogglePassword={onToggleConfirmPassword}
           />
         )}
 
@@ -81,9 +123,10 @@ export function LoginFormCard({
           className="mt-2 w-full"
           isLoading={isLoading}
         >
-          {t.LOGIN.SUBMIT_BUTTON}
+          {isRegisterMode ? t.LOGIN.CREATE_ACCOUNT : t.LOGIN.SUBMIT_BUTTON}
         </Button>
 
+        {!isRegisterMode && (
         <div className="flex items-center justify-center pt-1">
           <label className="mc-checkbox-label">
             <input
@@ -109,21 +152,27 @@ export function LoginFormCard({
             </span>
           </label>
         </div>
+        )}
 
         <div className="mt-4 flex flex-col items-center gap-1 text-center">
-          <a
-            href="#"
-            className="font-minecraft text-xs text-theme-muted transition-colors hover:text-theme hover:underline"
-            onClick={(e) => e.preventDefault()}
-          >
-            {t.LOGIN.FORGOT_PASSWORD}
-          </a>
+          {!isRegisterMode && (
+            <a
+              href="#"
+              className="font-minecraft text-xs text-theme-muted transition-colors hover:text-theme hover:underline"
+              onClick={(e) => e.preventDefault()}
+            >
+              {t.LOGIN.FORGOT_PASSWORD}
+            </a>
+          )}
           <a
             href="#"
             className="font-minecraft text-xs text-[var(--mc-progress-fill-a)] transition-colors hover:text-[var(--mc-progress-fill-b)] hover:underline"
-            onClick={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              onSwitchMode(isRegisterMode ? "login" : "register");
+            }}
           >
-            {t.LOGIN.CREATE_ACCOUNT}
+            {isRegisterMode ? t.SETTINGS.BACK_BUTTON : t.LOGIN.CREATE_ACCOUNT}
           </a>
         </div>
       </form>

@@ -1,9 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import crypto from "node:crypto";
 import { App, ipcMain, safeStorage } from "electron";
 import log from "electron-log";
 import {
   loginRequest,
+  registerRequest,
   logoutRequest,
   profileRequest,
   refreshTokenRequest,
@@ -77,8 +79,17 @@ function decryptSession(encryptedBase64: string): AuthSessionPayload {
 }
 
 function createOfflineUser(login: string): AuthSessionUser {
+  const digest = crypto
+    .createHash("md5")
+    .update(`OfflinePlayer:${login}`)
+    .digest();
+  digest[6] = (digest[6] & 0x0f) | 0x30;
+  digest[8] = (digest[8] & 0x3f) | 0x80;
+  const hex = digest.toString("hex");
+  const uuid = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+
   return {
-    id: `offline_${Date.now()}`,
+    id: uuid,
     username: login,
     email: login.includes("@") ? login : undefined,
   };
@@ -241,12 +252,67 @@ export default function authHandler(app: App) {
         await writeStoredSession(secureDataPath, session);
 
         log.info(LOG_MESSAGES.AUTH_LOGIN_SUCCESS, session.user.username);
-        return { success: true, user: session.user };
+        return {
+          success: true,
+          user: session.user,
+          accessToken: session.accessToken,
+        };
       } catch (error) {
         log.error(LOG_MESSAGES.AUTH_LOGIN_FAILED, error);
         return {
           success: false,
           error: ERROR_CODES.AUTH_LOGIN_FAILED,
+        };
+      }
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.AUTH.REGISTER,
+    async (
+      _event,
+      payload: { email: string; username: string; password: string },
+    ) => {
+      log.info(LOG_MESSAGES.AUTH_REGISTER_ATTEMPT, payload?.email, payload?.username);
+      try {
+        const email = payload?.email?.trim() ?? "";
+        const username = payload?.username?.trim() ?? "";
+        const password = payload?.password?.trim() ?? "";
+        if (!email || !username || !password) {
+          return {
+            success: false,
+            error: ERROR_CODES.AUTH_INVALID_CREDENTIALS,
+          };
+        }
+
+        const registerResult = await registerRequest({
+          email,
+          username,
+          password,
+        });
+
+        if (!registerResult.success || !registerResult.data) {
+          log.error(LOG_MESSAGES.AUTH_API_ERROR, registerResult.status, registerResult.errorMessage);
+          return {
+            success: false,
+            error: ERROR_CODES.AUTH_REGISTER_FAILED,
+          };
+        }
+
+        const session = buildOnlineSession(registerResult.data, registerResult.setCookie);
+        await writeStoredSession(secureDataPath, session);
+
+        log.info(LOG_MESSAGES.AUTH_REGISTER_SUCCESS, session.user.username);
+        return {
+          success: true,
+          user: session.user,
+          accessToken: session.accessToken,
+        };
+      } catch (error) {
+        log.error(LOG_MESSAGES.AUTH_REGISTER_FAILED, error);
+        return {
+          success: false,
+          error: ERROR_CODES.AUTH_REGISTER_FAILED,
         };
       }
     },
@@ -296,6 +362,7 @@ export default function authHandler(app: App) {
           success: true,
           isAuthenticated: true,
           user: storedSession.user,
+          accessToken: undefined,
         };
       }
 
@@ -310,6 +377,7 @@ export default function authHandler(app: App) {
         success: true,
         isAuthenticated: true,
         user: resolvedSession.user,
+        accessToken: resolvedSession.accessToken,
       };
     } catch (error) {
       log.error(LOG_MESSAGES.AUTH_SESSION_READ_FAILED, error);

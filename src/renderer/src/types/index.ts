@@ -15,6 +15,12 @@ export interface AuthCredentials {
   rememberMe?: boolean;
 }
 
+export interface AuthRegisterCredentials {
+  email: string;
+  username: string;
+  password: string;
+}
+
 export interface AuthState {
   user: AuthUser | null;
   token: string | null;

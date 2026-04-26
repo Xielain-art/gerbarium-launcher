@@ -26,6 +26,7 @@ export const IPC_CHANNELS = {
   },
   AUTH: {
     LOGIN: "auth:login",
+    REGISTER: "auth:register",
     LOGIN_OFFLINE: "auth:login-offline",
     GET_SESSION: "auth:get-session",
     LOGOUT: "auth:logout",
@@ -202,6 +203,16 @@ export interface IpcChannelMap {
     return: {
       success: boolean;
       user?: AuthSessionUser;
+      accessToken?: string;
+      error?: string;
+    };
+  };
+  [IPC_CHANNELS.AUTH.REGISTER]: {
+    args: [payload: { email: string; username: string; password: string }];
+    return: {
+      success: boolean;
+      user?: AuthSessionUser;
+      accessToken?: string;
       error?: string;
     };
   };
@@ -218,6 +229,7 @@ export interface IpcChannelMap {
     return: {
       success: boolean;
       user?: AuthSessionUser | null;
+      accessToken?: string;
       isAuthenticated?: boolean;
       error?: string;
     };

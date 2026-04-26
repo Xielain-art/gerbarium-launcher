@@ -187,6 +187,7 @@ export const UI_STRINGS = {
     SERVER_STATUS: "Не удалось получить статус сервера",
     NEWS_LOAD: "Не удалось загрузить новости",
     AUTH_LOGIN: "Ошибка входа",
+    AUTH_REGISTER: "Registration error",
     AUTH_OFFLINE: "Ошибка оффлайн входа",
     AUTH_EMPTY_FIELDS: "Введите логин и пароль",
     AUTH_EMPTY_USERNAME: "Введите имя пользователя",
