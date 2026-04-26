@@ -3,6 +3,7 @@ export interface AuthUser {
   id: string;
   username: string;
   email?: string;
+  roles?: ("user" | "moderator" | "admin")[];
   avatar?: string;
   xuid?: string;
   token?: string;

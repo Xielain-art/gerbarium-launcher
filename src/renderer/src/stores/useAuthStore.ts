@@ -57,6 +57,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
              id: result.user.id,
              username: result.user.username,
              email: result.user.email,
+             roles: result.user.roles,
            },
          });
          logAction(LOG_ACTIONS.TOKEN_LOADED, `User: ${result.user.username}`);
@@ -107,6 +108,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         id: authResult.user.id,
         username: authResult.user.username,
         email: authResult.user.email,
+        roles: authResult.user.roles,
       };
 
       set({
@@ -147,6 +149,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         id: authResult.user.id,
         username: authResult.user.username,
         email: authResult.user.email,
+        roles: authResult.user.roles,
       };
 
       set({

@@ -27,7 +27,8 @@
     "dev:preload": "node scripts/esbuild-preload.mjs --watch",
     "dev:electron": "electron .",
     "dev": "vite",
-    "publish-app": "npm run build && electron-builder build -p always"
+    "publish-app": "npm run build && electron-builder build -p always",
+    "gen-types": "npx openapi-typescript https://gerbarium-api.vercel.app/api/docs-json -o ./src/lib/api/v1.d.ts"
   },
   "engines": {
     "node": ">=20.18.0"
@@ -50,6 +51,7 @@
     "helios-distribution-types": "^1.3.0",
     "lodash.merge": "^4.6.2",
     "minecraft-launcher-core": "^3.18.2",
+    "openapi-fetch": "^0.17.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "semver": "^7.7.3",
