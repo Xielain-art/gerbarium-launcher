@@ -54,7 +54,6 @@ export function SettingsScreen() {
 
   const [activeTab, setActiveTab] = useState<SettingsTab>("general");
   const [showConfirmReset, setShowConfirmReset] = useState(false);
-  const [shouldLogout, setShouldLogout] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [supportNotice, setSupportNotice] = useState<SettingsNotice | null>(null);
   const [javaVersion, setJavaVersion] = useState<string | null>(null);
@@ -63,10 +62,10 @@ export function SettingsScreen() {
   const [javaVersions, setJavaVersions] = useState<number[]>([]);
 
   useEffect(() => {
-    if (!isAuthenticated && shouldLogout) {
-      navigate({ to: ROUTES.HOME });
+    if (!isAuthenticated) {
+      navigate({ to: ROUTES.LOGIN });
     }
-  }, [isAuthenticated, shouldLogout, navigate]);
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     if (!user) {
@@ -108,8 +107,8 @@ export function SettingsScreen() {
   };
 
   const handleLogout = () => {
-    setShouldLogout(true);
-    logout();
+    void logout();
+    navigate({ to: ROUTES.LOGIN });
   };
 
   const handleExportLogs = async () => {

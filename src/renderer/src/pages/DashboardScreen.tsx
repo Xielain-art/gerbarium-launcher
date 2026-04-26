@@ -86,7 +86,6 @@ export function DashboardScreen() {
   );
   const selectedVersion = versions.find((v) => v.id === selectedVersionId);
 
-  const [shouldLogout, setShouldLogout] = useState(false);
   const [appVersion, setAppVersion] = useState<string>("");
   const [logs, setLogs] = useState<string[]>([]);
   const [isLaunching, setIsLaunching] = useState(false);
@@ -184,10 +183,10 @@ export function DashboardScreen() {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated && shouldLogout) {
-      navigate({ to: ROUTES.HOME });
+    if (!isAuthenticated) {
+      navigate({ to: ROUTES.LOGIN });
     }
-  }, [isAuthenticated, shouldLogout, navigate]);
+  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     if (!window.electronAPI) return;
@@ -275,8 +274,8 @@ export function DashboardScreen() {
   const handleSettings = () => navigate({ to: ROUTES.SETTINGS });
 
   const handleLogout = () => {
-    setShouldLogout(true);
-    logout();
+    void logout();
+    navigate({ to: ROUTES.LOGIN });
   };
 
   const handleToggleConsole = () => {

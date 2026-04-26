@@ -8,6 +8,36 @@ const logAction = (action: string, details?: string) => {
   window.electronAPI?.system.logAction(action, details);
 };
 
+function toReadableAuthError(error?: string): string {
+  if (!error) {
+    return UI_STRINGS.STORE_ERRORS.AUTH_LOGIN;
+  }
+
+  const normalized = error.trim();
+  if (!normalized) {
+    return UI_STRINGS.STORE_ERRORS.AUTH_LOGIN;
+  }
+
+  const codeMap: Record<string, string> = {
+    ERR_AUTH_INVALID_CREDENTIALS: "Неверный логин или пароль.",
+    ERR_AUTH_LOGIN_FAILED: "Не удалось выполнить вход. Попробуйте снова.",
+    ERR_AUTH_REGISTER_FAILED: "Не удалось завершить регистрацию. Попробуйте позже.",
+    ERR_AUTH_API_REQUEST_FAILED: "Сервер авторизации недоступен. Повторите попытку позже.",
+  };
+  if (codeMap[normalized]) {
+    return codeMap[normalized];
+  }
+
+  if (/invalid credentials/i.test(normalized)) {
+    return "Неверный логин или пароль.";
+  }
+  if (/network request failed|fetch failed|network/i.test(normalized)) {
+    return "Проблема с сетью или сервером. Проверьте подключение и попробуйте снова.";
+  }
+
+  return normalized;
+}
+
 interface AuthState {
   // State
   user: AuthUser | null;
@@ -103,7 +133,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
 
       const authResult = await window.electronAPI.auth.login(credentials);
       if (!authResult.success || !authResult.user) {
-        const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_LOGIN;
+        const errorMsg = toReadableAuthError(authResult.error);
         set({ isLoading: false, error: errorMsg });
         return { success: false, error: errorMsg };
       }
@@ -151,7 +181,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
         password: payload.password,
       });
       if (!authResult.success || !authResult.user) {
-        const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_REGISTER;
+        const errorMsg = toReadableAuthError(authResult.error);
         set({ isLoading: false, error: errorMsg });
         return { success: false, error: errorMsg };
       }
@@ -195,7 +225,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
 
       const authResult = await window.electronAPI.auth.loginOffline({ username });
       if (!authResult.success || !authResult.user) {
-        const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_OFFLINE;
+        const errorMsg = toReadableAuthError(authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_OFFLINE);
         set({ isLoading: false, error: errorMsg });
         return { success: false, error: errorMsg };
       }
