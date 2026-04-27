@@ -14,7 +14,7 @@ export default function updateHandler(app: App) {
   const toUpdateInfoPayload = (info: {
     version: string;
     releaseName?: string | null;
-    releaseNotes?: string | Array<{ note?: string }> | null;
+    releaseNotes?: string | Array<{ note?: string | null }> | null;
     releaseDate?: string;
   }): UpdateInfoPayload => {
     const normalizedNotes = Array.isArray(info.releaseNotes)

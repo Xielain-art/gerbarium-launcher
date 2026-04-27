@@ -21,6 +21,8 @@ interface AuthState {
 
   // UI State
   isLoading: boolean;
+  isSessionLoading: boolean;
+  hasCheckedSession: boolean;
   error: string | null;
 
   // Actions
@@ -45,6 +47,8 @@ const defaultState = {
   token: null,
   isAuthenticated: false,
   isLoading: false,
+  isSessionLoading: false,
+  hasCheckedSession: false,
   error: null,
 };
 
@@ -54,6 +58,7 @@ export const useAuthStore = create<AuthState>()((set) => ({
   clearError: () => set({ error: null }),
 
   loadToken: async () => {
+    set({ isSessionLoading: true });
     try {
       const result = await window.electronAPI.auth.getSession();
       if (result.success && result.isAuthenticated && result.user) {
@@ -69,6 +74,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
             banReason: result.user.banReason,
             playerProfile: result.user.playerProfile,
           },
+          isSessionLoading: false,
+          hasCheckedSession: true,
         });
         logAction(LOG_ACTIONS.TOKEN_LOADED, `User: ${result.user.username}`);
         return;
@@ -78,6 +85,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
         token: null,
         isAuthenticated: false,
         user: null,
+        isSessionLoading: false,
+        hasCheckedSession: true,
       });
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Unknown error";
@@ -86,6 +95,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
         token: null,
         isAuthenticated: false,
         user: null,
+        isSessionLoading: false,
+        hasCheckedSession: true,
       });
     }
   },

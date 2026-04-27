@@ -158,7 +158,7 @@ export function useDashboardScreen() {
     try {
       const installedJava = await window.electronAPI.java.getInstalledJava();
       const bestJava = installedJava.find((j) => j.version >= 17) || installedJava[0];
-      let javaPath = bestJava?.path;
+      let javaPath: string | null | undefined = bestJava?.path;
       if (!javaPath) javaPath = await window.electronAPI.java.findSystemJava();
       if (!javaPath) throw new Error("Java not found. Install Java in settings.");
 

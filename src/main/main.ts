@@ -519,19 +519,23 @@ app.whenReady().then(() => {
   gameHandler(mainWindow);
   setupLogHandler(app);
 
-  mainWindow.on("minimize", (event) => {
+  const currentWindow = mainWindow;
+  if (!currentWindow) {
+    return;
+  }
+
+  currentWindow.on("minimize", () => {
     if (!settings.minimizeToTray) return;
-    event.preventDefault();
-    mainWindow?.hide();
+    currentWindow.hide();
   });
 
-  mainWindow.on("close", (event) => {
+  currentWindow.on("close", (event) => {
     if (isQuiting || !settings.minimizeToTray) {
       return;
     }
 
     event.preventDefault();
-    mainWindow?.hide();
+    currentWindow.hide();
   });
 });
 

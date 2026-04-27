@@ -6,6 +6,23 @@ import { LoginFormCard } from "../components/login";
 export function LoginScreen() {
   const vm = useLoginScreen();
 
+  if (vm.showSessionSpinner) {
+    return (
+      <div className="bg-theme-main-gradient relative flex h-screen w-full items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 bg-pattern opacity-30" />
+        <div className="absolute right-4 top-4 z-50">
+          <WindowControls />
+        </div>
+        <div className="relative z-10 flex flex-col items-center gap-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-[var(--mc-accent)]" />
+          <div className="font-minecraft text-sm text-theme-muted">
+            {vm.t.COMMON.LOADING}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-theme-main-gradient relative flex h-screen w-full items-center justify-center overflow-hidden">
       <div className="absolute inset-0 bg-pattern opacity-30" />

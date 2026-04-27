@@ -14,7 +14,7 @@ import { checkJavaVersion } from "./javaHandler";
 import { getRequiredJavaVersion } from "../config/javaConfig";
 
 // Create a separate logger for Minecraft
-const gameLog = log.create("minecraft");
+const gameLog = log.create({ logId: "minecraft" });
 gameLog.transports.file.resolvePathFn = () => {
   const now = new Date();
   const day = now.getDate();
@@ -214,7 +214,7 @@ function createProgressSender(mainWindow: BrowserWindow): (payload: GameProgress
 
 function waitForLaunchStart(
   launcher: Client,
-  launchPromise: Promise<void>,
+  launchPromise: Promise<unknown>,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     let isSettled = false;
@@ -282,7 +282,6 @@ export default function setupGameHandlers(mainWindow: BrowserWindow) {
         const emitProgress = createProgressSender(mainWindow);
 
         const opts = {
-          clientPackage: null,
           authorization: auth,
           root: rootPath,
           version: {

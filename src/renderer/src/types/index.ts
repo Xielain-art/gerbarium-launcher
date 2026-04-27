@@ -36,6 +36,8 @@ export interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isSessionLoading: boolean;
+  hasCheckedSession: boolean;
   error: string | null;
 }
 

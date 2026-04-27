@@ -45,6 +45,8 @@ export function useLoginScreen() {
   const navigate = useNavigate();
   const {
     isLoading,
+    isSessionLoading,
+    hasCheckedSession,
     error,
     isAuthenticated,
     login,
@@ -184,6 +186,7 @@ export function useLoginScreen() {
   return {
     t,
     isLoading,
+    showSessionSpinner: isSessionLoading || !hasCheckedSession,
     mode,
     localUsername,
     localEmail,
