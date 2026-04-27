@@ -15,6 +15,21 @@ interface AdminState {
   ) => Promise<boolean>;
 }
 
+function extractUsersPayload(payload: unknown): ApiUser[] {
+  if (Array.isArray(payload)) {
+    return payload as ApiUser[];
+  }
+
+  if (payload && typeof payload === "object") {
+    const nestedData = (payload as { data?: unknown }).data;
+    if (Array.isArray(nestedData)) {
+      return nestedData as ApiUser[];
+    }
+  }
+
+  return [];
+}
+
 export const useAdminStore = create<AdminState>()((set, get) => ({
   users: [],
   isLoading: false,
@@ -25,8 +40,8 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const result = await window.electronAPI.admin.getUsers(search);
-      if (result.success && result.data.data) {
-        set({ users: result.data.data as ApiUser[], isLoading: false });
+      if (result.success && result.data) {
+        set({ users: extractUsersPayload(result.data), isLoading: false });
       } else {
         set({
           error: result.error || "Failed to fetch users",

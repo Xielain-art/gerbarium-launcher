@@ -7,6 +7,15 @@ export const LOG_MESSAGES = {
   APP_STARTING: 'Gerbarium starting...',
   APP_UNCAUGHT_EXCEPTION: 'Uncaught Exception:',
   APP_UNHANDLED_REJECTION: 'Unhandled Rejection:',
+  APP_DEV_MODE: 'Running in development mode',
+  APP_RECOVERY_UPDATE_FAILED: 'Failed to trigger recovery update after integrity mismatch',
+  APP_LATEST_YML_MISSING_HASH: 'ASAR integrity check skipped: latest.yml does not contain appAsarSha256/asarSha256',
+  APP_LATEST_YML_FETCH_FAILED: 'Failed to fetch latest.yml for ASAR integrity check',
+  APP_EXPECTED_HASH_INVALID: 'ASAR integrity check skipped: expected hash is missing or invalid',
+  APP_ASAR_NOT_FOUND: 'ASAR integrity check skipped: app.asar not found',
+  APP_ASAR_INTEGRITY_OK: 'ASAR integrity check passed',
+  APP_ASAR_INTEGRITY_MISMATCH: 'ASAR integrity mismatch detected',
+  APP_ASAR_INTEGRITY_FAILED: 'ASAR integrity check failed',
 
   // Java
   JAVA_DOWNLOAD_START: '[JAVA] Starting download Java',
@@ -15,6 +24,10 @@ export const LOG_MESSAGES = {
   JAVA_DOWNLOAD_IN_PROGRESS: '[JAVA] Download already in progress for version:',
   JAVA_REMOVE_FAILED: '[JAVA] Failed to remove Java:',
   JAVA_REMOVE_OK: '[JAVA] Removed Java version:',
+  JAVA_ARM64_FALLBACK_ROSETTA:
+    '[JAVA] Native ARM64 build not found, falling back to x64 via Rosetta 2',
+  JAVA_ARM64_FALLBACK_X64:
+    '[JAVA] Native ARM64 build not found, falling back to x64',
 
   // Update
   UPDATE_CHECKING: '[UPDATE] Checking for updates...',
@@ -54,6 +67,7 @@ export const LOG_MESSAGES = {
   AUTH_PROFILE_FETCH_FAILED: '[AUTH] Profile fetch failed:',
   AUTH_SESSION_READ: '[AUTH] Read auth session',
   AUTH_SESSION_READ_FAILED: '[AUTH] Failed to read auth session:',
+  AUTH_ADMIN_SESSION_READ_FAILED: '[AUTH] Failed to read session for admin actions:',
   AUTH_LOGOUT: '[AUTH] Logout requested',
   AUTH_LOGOUT_FAILED: '[AUTH] Logout failed:',
   APP_CRASH_REPORT_WRITE_FAILED: '[APP] Failed to write crash report:',
@@ -65,11 +79,26 @@ export const LOG_MESSAGES = {
   LOG_EXPORT_OK: '[LOG] Export completed:',
   LOG_EXPORT_FAILED: '[LOG] Failed to export logs:',
   LOG_EXPORT_CANCELED: '[LOG] Export canceled by user',
+  LOG_EXPORT_RUNTIME_ERROR: '[LOG] Log export runtime error:',
 
   // System
   SYSTEM_GET_MEMORY: '[SYSTEM] Memory requested',
   SYSTEM_GET_CPUS: '[SYSTEM] CPUs requested',
   SYSTEM_USER_ACTION: '[USER_ACTION]',
+  SYSTEM_BLOCKED_UNSAFE_EXTERNAL_URL: '[SYSTEM] Blocked unsafe external URL',
+  SYSTEM_BLOCKED_UNSAFE_OPEN_PATH: '[SYSTEM] Blocked unsafe openPath target',
+  SYSTEM_OPEN_PATH_FAILED: '[SYSTEM] Failed to open path',
+
+  // Admin
+  ADMIN_GET_USERS_FAILED: '[ADMIN] GET_USERS failed',
+  ADMIN_BAN_USER_FAILED: '[ADMIN] BAN_USER failed',
+  ADMIN_UNBAN_USER_FAILED: '[ADMIN] UNBAN_USER failed',
+  ADMIN_UPDATE_ROLES_FAILED: '[ADMIN] UPDATE_ROLES failed',
+
+  // Game
+  GAME_PROGRESS_EMIT_FAILED: '[GAME] Failed to emit game progress event',
+  GAME_LAUNCH_ASYNC_FAILED: '[GAME] Failed to launch game asynchronously',
+  GAME_LAUNCH_SETUP_FAILED: '[GAME] Failed to setup/launch game',
 } as const;
 
 /**

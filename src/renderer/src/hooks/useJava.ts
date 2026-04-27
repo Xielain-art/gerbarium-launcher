@@ -1,7 +1,10 @@
 import { useState, useCallback, useEffect } from "react";
 import { useDownloadStore } from "../stores/useDownloadStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
-import { DownloadStatus } from "../../../shared/constants/ipc-chanels";
+import {
+  DownloadStatus,
+  JavaDownloadProgressPayload,
+} from "../../../shared/constants/ipc-chanels";
 import { LOG_ACTIONS } from "../../../shared/constants/system";
 
 const logAction = (action: string, details?: string) => {
@@ -21,7 +24,7 @@ export function useJava() {
 
   useEffect(() => {
     const unsubscribe = window.electronAPI.java.onDownloadProgress(
-      (update: { status: DownloadStatus; progress?: number }) => {
+      (update: JavaDownloadProgressPayload) => {
         setStatus(update.status);
         if (update.progress !== undefined) setJavaProgress(update.progress);
       },
@@ -40,8 +43,8 @@ export function useJava() {
          const version = await window.electronAPI.java.checkVersion(javaPath);
          if (version) logAction(LOG_ACTIONS.CHECK_JAVA_SUCCESS, `Version: ${version}`);
          return version;
-       } catch (err) {
-         const errMsg = (err as Error).message;
+      } catch (err: unknown) {
+        const errMsg = err instanceof Error ? err.message : "Unknown error";
          setJavaError(errMsg);
          logAction(LOG_ACTIONS.CHECK_JAVA_ERROR, errMsg);
          return null;
@@ -61,8 +64,8 @@ export function useJava() {
        if (javaPath) logAction(LOG_ACTIONS.FIND_JAVA_SUCCESS, javaPath);
        else logAction(LOG_ACTIONS.FIND_JAVA_NOT_FOUND, 'No system Java found');
        return javaPath;
-     } catch (err) {
-       const errMsg = (err as Error).message;
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : "Unknown error";
        setJavaError(errMsg);
        logAction(LOG_ACTIONS.FIND_JAVA_ERROR, errMsg);
        return null;
@@ -82,9 +85,9 @@ export function useJava() {
         if (!result.success) throw new Error(result.error || 'Unknown error');
         logAction(LOG_ACTIONS.DOWNLOAD_JAVA_COMPLETE, `Java ${javaVersion} - ${result.javaPath}`);
         return result.javaPath;
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("Error in downloadJava hook:", err);
-        const errMsg = (err as Error).message;
+        const errMsg = err instanceof Error ? err.message : "Unknown error";
         setJavaError(errMsg);
         logAction(LOG_ACTIONS.DOWNLOAD_JAVA_ERROR, errMsg);
         return null;
@@ -103,8 +106,8 @@ export function useJava() {
        const list = await window.electronAPI.java.getInstalledJava();
        logAction(LOG_ACTIONS.GET_INSTALLED_JAVA_SUCCESS, `Found ${list.length} installations`);
        return list;
-     } catch (err) {
-       const errMsg = (err as Error).message;
+     } catch (err: unknown) {
+       const errMsg = err instanceof Error ? err.message : "Unknown error";
        logAction(LOG_ACTIONS.GET_INSTALLED_JAVA_ERROR, errMsg);
        console.error("Error getting installed Java:", err);
        return [];
@@ -117,8 +120,8 @@ export function useJava() {
        const versions = await window.electronAPI.java.getJavaVersions();
        logAction(LOG_ACTIONS.GET_JAVA_VERSIONS_SUCCESS, `Available: ${versions.join(', ')}`);
        return versions;
-     } catch (err) {
-       const errMsg = (err as Error).message;
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : "Unknown error";
        logAction(LOG_ACTIONS.GET_JAVA_VERSIONS_ERROR, errMsg);
        console.error("Error getting Java versions:", err);
        return [];
@@ -132,9 +135,9 @@ export function useJava() {
       if (!result.success) throw new Error(result.error || 'Unknown error');
       logAction(LOG_ACTIONS.REMOVE_JAVA_COMPLETE, `Java ${javaVersion}`);
       return true;
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error removing Java:", err);
-      const errMsg = (err as Error).message;
+      const errMsg = err instanceof Error ? err.message : "Unknown error";
       logAction(LOG_ACTIONS.REMOVE_JAVA_ERROR, errMsg);
       return false;
     }

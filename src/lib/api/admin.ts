@@ -1,46 +1,7 @@
 import { apiClient } from "./client";
-import type { components } from "./v1";
-
-export type ApiUser = components["schemas"]["UserResponseDto"];
-export type ApiUserMeta = {
-  limit: number;
-  page: number;
-  total: number;
-  totalPages: number;
-};
-
-export type ApiResult<T> = {
-  success: boolean;
-  data?: T;
-  status?: number;
-  errorMessage?: string;
-};
-
-function extractErrorMessage(error: unknown): string | undefined {
-  if (!error || typeof error !== "object") {
-    return undefined;
-  }
-
-  const maybeRecord = error as Record<string, unknown>;
-  const message = maybeRecord.message;
-  if (typeof message === "string" && message.trim()) {
-    return message.trim();
-  }
-
-  const errorText = maybeRecord.error;
-  if (typeof errorText === "string" && errorText.trim()) {
-    return errorText.trim();
-  }
-
-  return undefined;
-}
-
-function buildNetworkErrorResult<T>(error: unknown): ApiResult<T> {
-  return {
-    success: false,
-    errorMessage: extractErrorMessage(error) ?? "Network request failed",
-  };
-}
+import { buildApiResult, buildNetworkErrorResult } from "./result";
+import type { ApiResult, ApiUser } from "./types";
+export type { ApiResult, ApiUser } from "./types";
 
 export async function getUsersRequest(
   accessToken: string,
@@ -54,21 +15,7 @@ export async function getUsersRequest(
       },
     });
 
-    if (!response) return { success: false };
-
-    if (!response.ok || !data) {
-      return {
-        success: false,
-        status: response.status,
-        errorMessage: extractErrorMessage(error),
-      };
-    }
-
-    return {
-      success: true,
-      data,
-      status: response.status,
-    };
+    return buildApiResult<ApiUser[]>({ response, data, error });
   } catch (error) {
     return buildNetworkErrorResult<ApiUser[]>(error);
   }
@@ -91,21 +38,7 @@ export async function banUserRequest(
       },
     );
 
-    if (!response) return { success: false };
-
-    if (!response.ok || !data) {
-      return {
-        success: false,
-        status: response.status,
-        errorMessage: extractErrorMessage(error),
-      };
-    }
-
-    return {
-      success: true,
-      data,
-      status: response.status,
-    };
+    return buildApiResult<ApiUser>({ response, data, error });
   } catch (error) {
     return buildNetworkErrorResult<ApiUser>(error);
   }
@@ -126,21 +59,7 @@ export async function unbanUserRequest(
       },
     );
 
-    if (!response) return { success: false };
-
-    if (!response.ok || !data) {
-      return {
-        success: false,
-        status: response.status,
-        errorMessage: extractErrorMessage(error),
-      };
-    }
-
-    return {
-      success: true,
-      data,
-      status: response.status,
-    };
+    return buildApiResult<ApiUser>({ response, data, error });
   } catch (error) {
     return buildNetworkErrorResult<ApiUser>(error);
   }
@@ -163,21 +82,7 @@ export async function updateUserRolesRequest(
       },
     );
 
-    if (!response) return { success: false };
-
-    if (!response.ok || !data) {
-      return {
-        success: false,
-        status: response.status,
-        errorMessage: extractErrorMessage(error),
-      };
-    }
-
-    return {
-      success: true,
-      data,
-      status: response.status,
-    };
+    return buildApiResult<ApiUser>({ response, data, error });
   } catch (error) {
     return buildNetworkErrorResult<ApiUser>(error);
   }

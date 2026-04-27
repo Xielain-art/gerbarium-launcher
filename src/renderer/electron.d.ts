@@ -1,8 +1,8 @@
-import { ApiUser, ApiUserMeta } from "src/lib/api/admin";
 import {
-  IpcChannelMap,
   WindowState,
-  DownloadStatus,
+  AdminUsersResponse,
+  AdminUserMutationResponse,
+  JavaDownloadProgressPayload,
   GameLaunchOptions,
   GameProgressPayload,
   UpdateInfoPayload,
@@ -12,15 +12,7 @@ import {
   LauncherSettings,
 } from "../shared/constants/ipc-chanels";
 
-type IpcArgs<K extends keyof IpcChannelMap> = IpcChannelMap[K]["args"];
-type IpcReturn<K extends keyof IpcChannelMap> = IpcChannelMap[K]["return"];
-
 export interface IElectronAPI {
-  // Hello handler
-  hello: (
-    ...args: IpcArgs<"hello:say-hello">
-  ) => Promise<IpcReturn<"hello:say-hello">>;
-
   // App controls
   closeApp: () => void;
   getAppVersion: () => Promise<string>;
@@ -92,22 +84,18 @@ export interface IElectronAPI {
 
   // Admin API
   admin: {
-    getUsers: (search?: string) => Promise<{
-      success: boolean;
-      data?: any[];
-      error?: string;
-    }>;
+    getUsers: (search?: string) => Promise<AdminUsersResponse>;
     banUser: (
       userId: string,
       reason: string,
-    ) => Promise<{ success: boolean; data?: any; error?: string }>;
+    ) => Promise<AdminUserMutationResponse>;
     unbanUser: (
       userId: string,
-    ) => Promise<{ success: boolean; data?: any; error?: string }>;
+    ) => Promise<AdminUserMutationResponse>;
     updateRoles: (
       userId: string,
       roles: ("user" | "moderator" | "admin")[],
-    ) => Promise<{ success: boolean; data?: any; error?: string }>;
+    ) => Promise<AdminUserMutationResponse>;
   };
 
   // Java management
@@ -126,7 +114,7 @@ export interface IElectronAPI {
       javaVersion: number,
     ) => Promise<{ success: boolean; error?: string }>;
     onDownloadProgress: (
-      callback: (update: { status: DownloadStatus; progress?: number }) => void,
+      callback: (update: JavaDownloadProgressPayload) => void,
     ) => () => void;
   };
 

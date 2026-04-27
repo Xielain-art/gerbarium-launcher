@@ -32,7 +32,7 @@ async function getValidAccessToken(app: App): Promise<string | null> {
     }
     return resolvedSession.accessToken;
   } catch (err) {
-    log.error("Failed to read session for admin actions", err);
+    log.error(LOG_MESSAGES.AUTH_ADMIN_SESSION_READ_FAILED, err);
     return null;
   }
 }
@@ -46,18 +46,17 @@ export default function adminHandler(app: App) {
         if (!token) {
           return {
             success: false,
-            error: ERROR_CODES.AUTH_UNAUTHORIZED || "Unauthorized",
+            error: ERROR_CODES.AUTH_UNAUTHORIZED,
           };
         }
         const result = await getUsersRequest(token, search);
         if (!result.success) {
-          return { success: false, error: result.errorMessage };
+          return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
         }
-        console.log(result.data);
         return { success: true, data: result.data };
       } catch (error) {
-        log.error("GET_USERS failed", error);
-        return { success: false, error: "Internal error" };
+        log.error(LOG_MESSAGES.ADMIN_GET_USERS_FAILED, error);
+        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
       }
     },
   );
@@ -70,17 +69,17 @@ export default function adminHandler(app: App) {
         if (!token) {
           return {
             success: false,
-            error: ERROR_CODES.AUTH_UNAUTHORIZED || "Unauthorized",
+            error: ERROR_CODES.AUTH_UNAUTHORIZED,
           };
         }
         const result = await banUserRequest(token, userId, reason);
         if (!result.success) {
-          return { success: false, error: result.errorMessage };
+          return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
         }
         return { success: true, data: result.data };
       } catch (error) {
-        log.error("BAN_USER failed", error);
-        return { success: false, error: "Internal error" };
+        log.error(LOG_MESSAGES.ADMIN_BAN_USER_FAILED, error);
+        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
       }
     },
   );
@@ -93,17 +92,17 @@ export default function adminHandler(app: App) {
         if (!token) {
           return {
             success: false,
-            error: ERROR_CODES.AUTH_UNAUTHORIZED || "Unauthorized",
+            error: ERROR_CODES.AUTH_UNAUTHORIZED,
           };
         }
         const result = await unbanUserRequest(token, userId);
         if (!result.success) {
-          return { success: false, error: result.errorMessage };
+          return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
         }
         return { success: true, data: result.data };
       } catch (error) {
-        log.error("UNBAN_USER failed", error);
-        return { success: false, error: "Internal error" };
+        log.error(LOG_MESSAGES.ADMIN_UNBAN_USER_FAILED, error);
+        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
       }
     },
   );
@@ -120,17 +119,17 @@ export default function adminHandler(app: App) {
         if (!token) {
           return {
             success: false,
-            error: ERROR_CODES.AUTH_UNAUTHORIZED || "Unauthorized",
+            error: ERROR_CODES.AUTH_UNAUTHORIZED,
           };
         }
         const result = await updateUserRolesRequest(token, userId, roles);
         if (!result.success) {
-          return { success: false, error: result.errorMessage };
+          return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
         }
         return { success: true, data: result.data };
       } catch (error) {
-        log.error("UPDATE_ROLES failed", error);
-        return { success: false, error: "Internal error" };
+        log.error(LOG_MESSAGES.ADMIN_UPDATE_ROLES_FAILED, error);
+        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
       }
     },
   );

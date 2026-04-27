@@ -9,6 +9,7 @@ import {
   IntegrityCheckResult,
   AuthSessionUser,
   LauncherSettings,
+  JavaDownloadProgressPayload,
 } from "../shared/constants/ipc-chanels";
 
 async function typedInvoke<K extends keyof IpcChannelMap>(
@@ -26,10 +27,6 @@ function typedSend<K extends keyof IpcChannelMap>(
 }
 
 contextBridge.exposeInMainWorld("electronAPI", {
-  // Hello handler
-  hello: (username: string) =>
-    typedInvoke(IPC_CHANNELS.HELLO.SAY_HELLO, username),
-
   // App controls (legacy support)
   closeApp: () => typedInvoke(IPC_CHANNELS.WINDOW.CLOSE),
   // App version
@@ -154,8 +151,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getJavaVersions: () => typedInvoke(IPC_CHANNELS.JAVA.GET_VERSIONS),
     removeJava: (javaVersion: number) =>
       typedInvoke(IPC_CHANNELS.JAVA.REMOVE, javaVersion),
-    onDownloadProgress: (callback: (percent: number) => void) => {
-      const subscription = (_event: unknown, percent: number) => callback(percent);
+    onDownloadProgress: (callback: (update: JavaDownloadProgressPayload) => void) => {
+      const subscription = (_event: unknown, update: JavaDownloadProgressPayload) =>
+        callback(update);
       ipcRenderer.on(IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS, subscription);
       return () => {
         ipcRenderer.removeListener(

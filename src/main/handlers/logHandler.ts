@@ -16,18 +16,7 @@ import {
   GITHUB_TEMPLATES,
   EXTERNAL_URLS
 } from '../../shared/constants/system';
-
-/**
- * Returns the date-based folder name in D.MM.YYYY format (e.g. "24.04.2026").
- * Used to organize logs into per-day subdirectories.
- */
-export function getDateFolder(): string {
-  const now = new Date();
-  const day = now.getDate();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const year = now.getFullYear();
-  return `${day}.${month}.${year}`;
-}
+import { getDateFolder } from '../utils/dateFolder';
 
 /**
  * Creates and exports the user-actions logger instance.
@@ -100,8 +89,8 @@ export default function setupLogHandler(app: Electron.App) {
       return { success: true, path: filePath };
     } catch (e) {
       const error = e as Error;
-      log.error(LOG_MESSAGES.LOG_EXPORT_FAILED, error);
-      return { success: false, error: error.message };
+      log.error(LOG_MESSAGES.LOG_EXPORT_RUNTIME_ERROR, error);
+      return { success: false, error: ERROR_CODES.LOG_EXPORT_FAILED };
     }
   });
 }

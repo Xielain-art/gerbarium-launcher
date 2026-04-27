@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { WindowState } from '../types';
+import type { WindowState } from '../../../shared/constants/ipc-chanels';
 
 export function useWindowControls() {
   const [windowState, setWindowState] = useState<WindowState>({

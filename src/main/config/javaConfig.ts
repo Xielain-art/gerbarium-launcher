@@ -1,3 +1,6 @@
+import log from "electron-log";
+import { LOG_MESSAGES } from "../../shared/constants/log-messages";
+
 export type JavaVersion = 8 | 17 | 21;
 
 export const JAVA_VERSIONS: JavaVersion[] = [8, 17, 21];
@@ -80,13 +83,13 @@ export function getJavaDownloadUrl(javaVersion: JavaVersion): string {
       key = "darwin_x64";
       build = config.builds[key];
       if (build) {
-        console.log(`[Java] Native ARM64 build not found for Java ${javaVersion}, falling back to x64 via Rosetta 2`);
+        log.warn(LOG_MESSAGES.JAVA_ARM64_FALLBACK_ROSETTA, javaVersion);
       }
     } else if (platform === "linux" && arch === "arm64") {
       key = "linux_x64";
       build = config.builds[key];
       if (build) {
-        console.log(`[Java] Native ARM64 build not found for Java ${javaVersion}, falling back to x64`);
+        log.warn(LOG_MESSAGES.JAVA_ARM64_FALLBACK_X64, javaVersion);
       }
     }
   }
