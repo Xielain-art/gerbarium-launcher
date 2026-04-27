@@ -31,6 +31,12 @@ export const IPC_CHANNELS = {
     GET_SESSION: "auth:get-session",
     LOGOUT: "auth:logout",
   },
+  ADMIN: {
+    GET_USERS: "admin:get-users",
+    BAN_USER: "admin:ban-user",
+    UNBAN_USER: "admin:unban-user",
+    UPDATE_ROLES: "admin:update-roles",
+  },
   JAVA: {
     CHECK_VERSION: "java:check-version",
     FIND_SYSTEM: "java:find-system",
@@ -247,6 +253,22 @@ export interface IpcChannelMap {
   [IPC_CHANNELS.AUTH.LOGOUT]: {
     args: [];
     return: { success: boolean; error?: string };
+  };
+  [IPC_CHANNELS.ADMIN.GET_USERS]: {
+    args: [search?: string];
+    return: { success: boolean; data?: any[]; error?: string };
+  };
+  [IPC_CHANNELS.ADMIN.BAN_USER]: {
+    args: [userId: string, reason: string];
+    return: { success: boolean; data?: any; error?: string };
+  };
+  [IPC_CHANNELS.ADMIN.UNBAN_USER]: {
+    args: [userId: string];
+    return: { success: boolean; data?: any; error?: string };
+  };
+  [IPC_CHANNELS.ADMIN.UPDATE_ROLES]: {
+    args: [userId: string, roles: ("user" | "moderator" | "admin")[]];
+    return: { success: boolean; data?: any; error?: string };
   };
   [IPC_CHANNELS.JAVA.CHECK_VERSION]: {
     args: [javaPath: string];

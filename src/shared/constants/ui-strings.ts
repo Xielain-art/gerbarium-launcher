@@ -188,6 +188,39 @@ export const UI_STRINGS = {
       },
     ],
   },
+  ADMIN: {
+    TITLE: "Панель администратора",
+    USERS_MANAGEMENT: "Управление пользователями",
+    BACK_BUTTON: "← Назад",
+    REFRESH: "Обновить",
+    LOADING: "Загрузка...",
+    SEARCH_PLACEHOLDER: "Поиск по нику или почте...",
+    BANNED_BADGE: "ЗАБАНЕН",
+    ID_LABEL: "ID:",
+    ROLES_LABEL: "Роли:",
+    REASON_LABEL: "Причина:",
+    NO_USERS: "Пользователи не найдены.",
+    BUTTONS: {
+      EDIT_ROLES: "Изменить роли",
+      UNBAN: "Разбанить",
+      BAN: "Забанить",
+    },
+    PROMPTS: {
+      BAN_REASON_TITLE: (username: string) => `Блокировка ${username}`,
+      BAN_REASON_PLACEHOLDER: "Например: Нарушение правил",
+      UNBAN_CONFIRM_TITLE: (username: string) => `Разбанить ${username}?`,
+      EDIT_ROLES_TITLE: (username: string) => `Роли для ${username}`,
+    },
+    ROLES: {
+      USER: "Игрок",
+      MODERATOR: "Модератор",
+      ADMIN: "Администратор",
+    },
+    ERRORS: {
+      FETCH_USERS: "Не удалось загрузить список пользователей",
+      UPDATE_USER: "Не удалось обновить данные пользователя",
+    },
+  },
 
   STORE_ERRORS: {
     SETTINGS_SAVE: "Не удалось сохранить настройки",

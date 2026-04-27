@@ -2,6 +2,12 @@ import { apiClient } from "./client";
 import type { components } from "./v1";
 
 export type ApiUser = components["schemas"]["UserResponseDto"];
+export type ApiUserMeta = {
+  limit: number;
+  page: number;
+  total: number;
+  totalPages: number;
+};
 
 export type ApiResult<T> = {
   success: boolean;
@@ -36,9 +42,13 @@ function buildNetworkErrorResult<T>(error: unknown): ApiResult<T> {
   };
 }
 
-export async function getUsersRequest(accessToken: string): Promise<ApiResult<ApiUser[]>> {
+export async function getUsersRequest(
+  accessToken: string,
+  search?: string
+): Promise<ApiResult<ApiUser[]>> {
   try {
     const { data, error, response } = await apiClient.GET("/api/admin/users", {
+      params: search ? { query: { search } } : undefined,
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -64,15 +74,22 @@ export async function getUsersRequest(accessToken: string): Promise<ApiResult<Ap
   }
 }
 
-export async function banUserRequest(accessToken: string, userId: string, reason: string): Promise<ApiResult<ApiUser>> {
+export async function banUserRequest(
+  accessToken: string,
+  userId: string,
+  reason: string,
+): Promise<ApiResult<ApiUser>> {
   try {
-    const { data, error, response } = await apiClient.POST("/api/admin/users/{id}/ban", {
-      params: { path: { id: userId } },
-      body: { reason },
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const { data, error, response } = await apiClient.POST(
+      "/api/admin/users/{id}/ban",
+      {
+        params: { path: { id: userId } },
+        body: { reason },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
 
     if (!response) return { success: false };
 
@@ -94,14 +111,20 @@ export async function banUserRequest(accessToken: string, userId: string, reason
   }
 }
 
-export async function unbanUserRequest(accessToken: string, userId: string): Promise<ApiResult<ApiUser>> {
+export async function unbanUserRequest(
+  accessToken: string,
+  userId: string,
+): Promise<ApiResult<ApiUser>> {
   try {
-    const { data, error, response } = await apiClient.POST("/api/admin/users/{id}/unban", {
-      params: { path: { id: userId } },
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const { data, error, response } = await apiClient.POST(
+      "/api/admin/users/{id}/unban",
+      {
+        params: { path: { id: userId } },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
 
     if (!response) return { success: false };
 
@@ -126,16 +149,19 @@ export async function unbanUserRequest(accessToken: string, userId: string): Pro
 export async function updateUserRolesRequest(
   accessToken: string,
   userId: string,
-  roles: ("user" | "moderator" | "admin")[]
+  roles: ("user" | "moderator" | "admin")[],
 ): Promise<ApiResult<ApiUser>> {
   try {
-    const { data, error, response } = await apiClient.PUT("/api/admin/users/{id}/roles", {
-      params: { path: { id: userId } },
-      body: { roles },
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const { data, error, response } = await apiClient.PUT(
+      "/api/admin/users/{id}/roles",
+      {
+        params: { path: { id: userId } },
+        body: { roles },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
 
     if (!response) return { success: false };
 
