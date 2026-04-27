@@ -11,6 +11,9 @@ const RU = {
     REASON_LABEL: "Причина:",
     NO_USERS: "Пользователи не найдены.",
     SEARCH_PLACEHOLDER: "Поиск пользователей...",
+    TAB_USERS: "Пользователи",
+    TAB_NEWS: "Новости",
+    USERS_TITLE: "Управление пользователями",
     BUTTONS: {
       EDIT_ROLES: "Изменить роли",
       UNBAN: "Разбанить",
@@ -244,21 +247,24 @@ const RU = {
 
 const EN = {
   ADMIN: {
-    TITLE: "Панель администратора",
-    USERS_MANAGEMENT: "Управление пользователями",
-    BACK_BUTTON: "← Назад",
-    REFRESH: "Обновить",
-    LOADING: "Загрузка...",
-    BANNED_BADGE: "ЗАБАНЕН",
+    TITLE: "Admin Panel",
+    USERS_MANAGEMENT: "User Management",
+    BACK_BUTTON: "← Back",
+    REFRESH: "Refresh",
+    LOADING: "Loading...",
+    BANNED_BADGE: "BANNED",
     ID_LABEL: "ID:",
-    ROLES_LABEL: "Роли:",
-    REASON_LABEL: "Причина:",
-    NO_USERS: "Пользователи не найдены.",
-    SEARCH_PLACEHOLDER: "Поиск пользователей...",
+    ROLES_LABEL: "Roles:",
+    REASON_LABEL: "Reason:",
+    NO_USERS: "Users not found.",
+    SEARCH_PLACEHOLDER: "Search users...",
+    TAB_USERS: "Users",
+    TAB_NEWS: "News",
+    USERS_TITLE: "User Management",
     BUTTONS: {
-      EDIT_ROLES: "Изменить роли",
-      UNBAN: "Разбанить",
-      BAN: "Забанить",
+      EDIT_ROLES: "Edit Roles",
+      UNBAN: "Unban",
+      BAN: "Ban",
     },
     ROLES: {
       USER: "USER",
@@ -267,19 +273,19 @@ const EN = {
     },
     PROMPTS: {
       BAN_REASON_TITLE: (username: string) =>
-        `Укажите причину блокировки для ${username}:`,
-      BAN_REASON_PLACEHOLDER: "Например: Нарушение правил",
+        `Specify ban reason for ${username}:`,
+      BAN_REASON_PLACEHOLDER: "e.g. Rule violation",
       UNBAN_CONFIRM_TITLE: (username: string) =>
-        `Вы уверены, что хотите разбанить пользователя ${username}?`,
+        `Are you sure you want to unban ${username}?`,
       EDIT_ROLES_TITLE: (username: string) =>
-        `Изменение ролей для ${username}:`,
+        `Changing roles for ${username}:`,
     },
     ERRORS: {
-      FETCH_USERS: "Не удалось загрузить пользователей",
-      BAN_FAILED: "Ошибка при блокировке пользователя",
-      UNBAN_FAILED: "Ошибка при разблокировке пользователя",
-      ROLES_FAILED: "Ошибка при обновлении ролей",
-      INVALID_ROLES: "Указаны неверные роли",
+      FETCH_USERS: "Failed to load users",
+      BAN_FAILED: "Error banning user",
+      UNBAN_FAILED: "Error unbanning user",
+      ROLES_FAILED: "Error updating roles",
+      INVALID_ROLES: "Invalid roles specified",
     },
   },
   COMMON: {

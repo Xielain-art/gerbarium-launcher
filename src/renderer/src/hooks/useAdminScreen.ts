@@ -1,115 +1,108 @@
-import { useEffect, useMemo, useState } from "react";
-import type { ApiUser } from "../../../lib/api/admin";
-import { useTranslation } from "./useTranslation";
+import { useState, useCallback, useEffect } from "react";
 import { useAdminStore } from "../stores/useAdminStore";
-
-type Role = "user" | "moderator" | "admin";
+import { useTranslation } from "../hooks/useTranslation";
 
 export function useAdminScreen() {
   const t = useTranslation();
   const {
     users,
     isLoading,
+    isLoadingMore,
     actionLoading,
     error,
+    hasMore,
+    search,
+    role,
+    banned,
+    setFilters,
     fetchUsers,
+    fetchMoreUsers,
     banUser,
     unbanUser,
     updateUserRoles,
   } = useAdminStore();
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const [banModalOpen, setBanModalOpen] = useState(false);
   const [banReason, setBanReason] = useState("");
   const [unbanModalOpen, setUnbanModalOpen] = useState(false);
   const [rolesModalOpen, setRolesModalOpen] = useState(false);
-  const [selectedRoles, setSelectedRoles] = useState<Role[]>([]);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      void fetchUsers(searchQuery);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchQuery, fetchUsers]);
+    void fetchUsers();
+  }, [fetchUsers]);
 
-  const openBanModal = (user: ApiUser) => {
+  const openBanModal = useCallback((user: any) => {
     setSelectedUser(user);
     setBanReason("");
     setActionError(null);
     setBanModalOpen(true);
-  };
+  }, []);
 
-  const executeBan = async () => {
-    if (!selectedUser) return;
+  const executeBan = useCallback(async () => {
+    if (!selectedUser || !banReason.trim()) return;
     const success = await banUser(selectedUser.id, banReason);
     if (success) {
       setBanModalOpen(false);
-      setSelectedUser(null);
-      return;
+    } else {
+      setActionError("Failed to ban user");
     }
-    setActionError(t.ADMIN.ERRORS.BAN_FAILED);
-  };
+  }, [selectedUser, banReason, banUser]);
 
-  const openUnbanModal = (user: ApiUser) => {
+  const openUnbanModal = useCallback((user: any) => {
     setSelectedUser(user);
     setActionError(null);
     setUnbanModalOpen(true);
-  };
+  }, []);
 
-  const executeUnban = async () => {
+  const executeUnban = useCallback(async () => {
     if (!selectedUser) return;
     const success = await unbanUser(selectedUser.id);
     if (success) {
       setUnbanModalOpen(false);
-      setSelectedUser(null);
-      return;
+    } else {
+      setActionError("Failed to unban user");
     }
-    setActionError(t.ADMIN.ERRORS.UNBAN_FAILED);
-  };
+  }, [selectedUser, unbanUser]);
 
-  const openRolesModal = (user: ApiUser) => {
+  const openRolesModal = useCallback((user: any) => {
     setSelectedUser(user);
-    setSelectedRoles(user.roles as Role[]);
+    setSelectedRoles(user.roles);
     setActionError(null);
     setRolesModalOpen(true);
-  };
+  }, []);
 
-  const toggleRole = (role: Role) => {
+  const toggleRole = useCallback((role: string) => {
     setSelectedRoles((prev) =>
-      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role],
+      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
     );
-  };
+  }, []);
 
-  const executeRolesUpdate = async () => {
+  const executeRolesUpdate = useCallback(async () => {
     if (!selectedUser) return;
-    if (selectedRoles.length === 0) {
-      setActionError(t.ADMIN.ERRORS.INVALID_ROLES);
-      return;
-    }
-
-    const success = await updateUserRoles(selectedUser.id, selectedRoles);
+    const success = await updateUserRoles(selectedUser.id, selectedRoles as any);
     if (success) {
       setRolesModalOpen(false);
-      setSelectedUser(null);
-      return;
+    } else {
+      setActionError("Failed to update roles");
     }
-    setActionError(t.ADMIN.ERRORS.ROLES_FAILED);
-  };
+  }, [selectedUser, selectedRoles, updateUserRoles]);
 
-  const availableRoles = useMemo(
-    () => ["user", "moderator", "admin"] as Role[],
-    [],
-  );
+  const availableRoles = ["user", "moderator", "admin"];
 
   return {
     users,
     isLoading,
+    isLoadingMore,
     actionLoading,
     error,
-    searchQuery,
-    setSearchQuery,
+    hasMore,
+    search,
+    role,
+    banned,
+    setFilters,
     selectedUser,
     banModalOpen,
     setBanModalOpen,
@@ -122,6 +115,7 @@ export function useAdminScreen() {
     selectedRoles,
     actionError,
     fetchUsers,
+    fetchMoreUsers,
     openBanModal,
     executeBan,
     openUnbanModal,
@@ -130,5 +124,6 @@ export function useAdminScreen() {
     toggleRole,
     executeRolesUpdate,
     availableRoles,
+    t,
   };
 }

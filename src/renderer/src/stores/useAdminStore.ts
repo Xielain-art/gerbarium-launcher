@@ -4,52 +4,94 @@ import type { ApiUser } from "../../../lib/api/admin";
 interface AdminState {
   users: ApiUser[];
   isLoading: boolean;
-  actionLoading: string | null; // ID of the user being processed
+  isLoadingMore: boolean;
+  actionLoading: string | null;
   error: string | null;
-  fetchUsers: (search?: string) => Promise<void>;
+  hasMore: boolean;
+  page: number;
+  
+  // Filters
+  search: string;
+  role?: "user" | "moderator" | "admin";
+  banned?: boolean;
+  
+  setFilters: (filters: { search?: string; role?: "user" | "moderator" | "admin"; banned?: boolean }) => void;
+  fetchUsers: () => Promise<void>;
+  fetchMoreUsers: () => Promise<void>;
   banUser: (userId: string, reason: string) => Promise<boolean>;
   unbanUser: (userId: string) => Promise<boolean>;
-  updateUserRoles: (
-    userId: string,
-    roles: ("user" | "moderator" | "admin")[],
-  ) => Promise<boolean>;
+  updateUserRoles: (userId: string, roles: ("user" | "moderator" | "admin")[]) => Promise<boolean>;
 }
 
-function extractUsersPayload(payload: unknown): ApiUser[] {
-  if (Array.isArray(payload)) {
-    return payload as ApiUser[];
-  }
+const PAGE_LIMIT = 20;
 
-  if (payload && typeof payload === "object") {
-    const nestedData = (payload as { data?: unknown }).data;
-    if (Array.isArray(nestedData)) {
-      return nestedData as ApiUser[];
-    }
+function normalizeApiUserPayload(payload: unknown): ApiUser[] {
+  if (Array.isArray(payload)) return payload as ApiUser[];
+  if (payload && typeof payload === "object" && "data" in payload) {
+    const nested = (payload as { data?: unknown }).data;
+    if (Array.isArray(nested)) return nested as ApiUser[];
   }
-
   return [];
 }
 
 export const useAdminStore = create<AdminState>()((set, get) => ({
   users: [],
   isLoading: false,
+  isLoadingMore: false,
   actionLoading: null,
   error: null,
+  hasMore: false,
+  page: 1,
+  search: "",
 
-  fetchUsers: async (search?: string) => {
-    set({ isLoading: true, error: null });
+  setFilters: (filters) => {
+    set((state) => ({ ...state, ...filters, page: 1, hasMore: false }));
+    void get().fetchUsers();
+  },
+
+  fetchUsers: async () => {
+    const { search, role, banned } = get();
+    set({ isLoading: true, error: null, page: 1, hasMore: false });
     try {
-      const result = await window.electronAPI.admin.getUsers(search);
+      const result = await window.electronAPI.admin.getUsers(search, 1, PAGE_LIMIT, role, banned);
       if (result.success && result.data) {
-        set({ users: extractUsersPayload(result.data), isLoading: false });
-      } else {
-        set({
-          error: result.error || "Failed to fetch users",
+        const users = normalizeApiUserPayload(result.data);
+        set({ 
+          users, 
           isLoading: false,
+          hasMore: users.length >= PAGE_LIMIT,
+          page: 1
         });
+      } else {
+        set({ error: result.error || "Failed to fetch users", isLoading: false });
       }
     } catch (err) {
       set({ error: "Failed to fetch users", isLoading: false });
+    }
+  },
+
+  fetchMoreUsers: async () => {
+    const { page, hasMore, isLoading, isLoadingMore, users, search, role, banned } = get();
+    if (!hasMore || isLoading || isLoadingMore) return;
+
+    set({ isLoadingMore: true });
+    try {
+      const nextPage = page + 1;
+      const result = await window.electronAPI.admin.getUsers(search, nextPage, PAGE_LIMIT, role, banned); 
+      
+      if (result.success && result.data) {
+        const newUsers = normalizeApiUserPayload(result.data);
+        set({
+          users: [...users, ...newUsers],
+          isLoadingMore: false,
+          page: nextPage,
+          hasMore: newUsers.length >= PAGE_LIMIT
+        });
+      } else {
+        set({ isLoadingMore: false });
+      }
+    } catch (err) {
+      set({ isLoadingMore: false });
     }
   },
 
@@ -58,10 +100,9 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
     try {
       const result = await window.electronAPI.admin.banUser(userId, reason);
       if (result.success) {
-        // Optimistic update
         set((state) => ({
           users: state.users.map((u) =>
-            u.id === userId ? { ...u, isBanned: true, banReason: reason } : u,
+            u.id === userId ? { ...u, isBanned: true, banReason: reason } : u
           ),
           actionLoading: null,
         }));
@@ -80,12 +121,9 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
     try {
       const result = await window.electronAPI.admin.unbanUser(userId);
       if (result.success) {
-        // Optimistic update
         set((state) => ({
           users: state.users.map((u) =>
-            u.id === userId
-              ? { ...u, isBanned: false, banReason: undefined }
-              : u,
+            u.id === userId ? { ...u, isBanned: false, banReason: undefined } : u
           ),
           actionLoading: null,
         }));
@@ -104,10 +142,9 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
     try {
       const result = await window.electronAPI.admin.updateRoles(userId, roles);
       if (result.success) {
-        // Optimistic update
         set((state) => ({
           users: state.users.map((u) =>
-            u.id === userId ? { ...u, roles: roles } : u,
+            u.id === userId ? { ...u, roles: roles } : u
           ),
           actionLoading: null,
         }));

@@ -1,17 +1,44 @@
 import { useAdminPage } from "../hooks/useAdminPage";
 import { WindowControls } from "../components";
-import { Button } from "../components/ui";
-import { Card } from "../components/ui";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Editor, {
+  Toolbar,
+  BtnBold,
+  BtnItalic,
+  BtnStrikeThrough,
+  BtnUnderline,
+  BtnLink,
+  BtnNumberedList,
+  BtnBulletList,
+  Separator,
+} from "react-simple-wysiwyg";
+import { Button as ButtonShadcn } from "@/components/shadcn/ui";
+import { Input, Select, Checkbox, Card, Button, Modal, ModalActions } from "../components";
+import { useAdminNewsStore } from "../stores/useAdminNewsStore";
+import type { ApiNews } from "../../../lib/api/news";
+import { useNavigate } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
+import { ROUTES } from "../../../shared/constants/system";
 
 export function AdminScreen() {
+  const navigate = useNavigate();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const usersEndRef = useRef<HTMLDivElement>(null);
+  const newsEndRef = useRef<HTMLDivElement>(null);
   const vm = useAdminPage();
   const {
     users,
     isLoading,
+    isLoadingMore,
     actionLoading,
     error,
-    searchQuery,
-    setSearchQuery,
+    hasMore,
+    search: userSearch,
+    role: userRole,
+    banned: userBanned,
+    setFilters: setUserFilters,
+    fetchUsers,
+    fetchMoreUsers,
     selectedUser,
     banModalOpen,
     setBanModalOpen,
@@ -23,7 +50,6 @@ export function AdminScreen() {
     setRolesModalOpen,
     selectedRoles,
     actionError,
-    fetchUsers,
     openBanModal,
     executeBan,
     openUnbanModal,
@@ -32,272 +58,601 @@ export function AdminScreen() {
     toggleRole,
     executeRolesUpdate,
     availableRoles,
+    t,
   } = vm;
 
+  const [activeTab, setActiveTab] = useState<"users" | "news">("users");
+  const [newsTab, setNewsTab] = useState<"all" | "create">("all");
+  const [newsSearch, setNewsSearch] = useState("");
+  const [newsTag, setNewsTag] = useState("");
+  const [newsFromDate, setNewsFromDate] = useState("");
+  const [newsToDate, setNewsToDate] = useState("");
+
+  const [editingNews, setEditingNews] = useState<ApiNews | null>(null);
+  const [newsTitle, setNewsTitle] = useState("");
+  const [newsSlug, setNewsSlug] = useState("");
+  const [newsImage, setNewsImage] = useState("");
+  const [newsTagsInput, setNewsTagsInput] = useState("");
+  const [newsContentHtml, setNewsContentHtml] = useState("");
+  const [newsFormError, setNewsFormError] = useState<string | null>(null);
+
+  const {
+    news,
+    isLoading: isLoadingNews,
+    isLoadingMore: isLoadingMoreNews,
+    hasMore: hasMoreNews,
+    actionLoadingId: newsActionLoadingId,
+    error: newsError,
+    sortBy: newsSortBy,
+    order: newsOrder,
+    setFilters: setNewsFilters,
+    fetchNews,
+    fetchMoreNews,
+    createNews,
+    updateNews,
+    deleteNews,
+  } = useAdminNewsStore();
+
+  // Infinite scroll for users
+  useEffect(() => {
+    if (activeTab !== "users" || !hasMore || isLoading || isLoadingMore) return;
+    const target = usersEndRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          void fetchMoreUsers();
+        }
+      },
+      { root: scrollRef.current, rootMargin: "0px 0px 400px 0px" }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [activeTab, hasMore, isLoading, isLoadingMore, fetchMoreUsers]);
+
+  // Infinite scroll for news
+  useEffect(() => {
+    if (activeTab !== "news" || newsTab !== "all" || !hasMoreNews || isLoadingNews || isLoadingMoreNews) return;
+    const target = newsEndRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          void fetchMoreNews();
+        }
+      },
+      { root: scrollRef.current, rootMargin: "0px 0px 400px 0px" }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [activeTab, newsTab, hasMoreNews, isLoadingNews, isLoadingMoreNews, fetchMoreNews]);
+
+  useEffect(() => {
+    void fetchNews();
+  }, [fetchNews]);
+
+  // Debounced news search and filters
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setNewsFilters({ 
+        search: newsSearch, 
+        tag: newsTag,
+        fromDate: newsFromDate ? new Date(newsFromDate).toISOString() : undefined,
+        toDate: newsToDate ? new Date(newsToDate).toISOString() : undefined
+      });
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [newsSearch, newsTag, newsFromDate, newsToDate, setNewsFilters]);
+
+  const handleCreateNews = async () => {
+    setNewsFormError(null);
+    if (!newsTitle || !newsSlug || !newsContentHtml) {
+      setNewsFormError("Title, slug and content are required");
+      return;
+    }
+    const success = await createNews({
+      title: newsTitle,
+      slug: newsSlug,
+      content: newsContentHtml,
+      image: newsImage || undefined,
+      tags: newsTagsInput ? (newsTagsInput.split(",").map((t) => t.trim()) as any) : undefined,
+    });
+    if (success) {
+      setNewsTab("all");
+      resetNewsForm();
+    }
+  };
+
+  const handleUpdateNews = async () => {
+    if (!editingNews) return;
+    setNewsFormError(null);
+    const success = await updateNews(editingNews.id, {
+      title: newsTitle,
+      slug: newsSlug,
+      content: newsContentHtml,
+      image: newsImage || undefined,
+      tags: newsTagsInput ? (newsTagsInput.split(",").map((t) => t.trim()) as any) : undefined,
+    });
+    if (success) {
+      setNewsTab("all");
+      resetNewsForm();
+    }
+  };
+
+  const resetNewsForm = () => {
+    setEditingNews(null);
+    setNewsTitle("");
+    setNewsSlug("");
+    setNewsImage("");
+    setNewsTagsInput("");
+    setNewsContentHtml("");
+    setNewsFormError(null);
+  };
+
+  const newsRows = useMemo(() => news, [news]);
+
   return (
-    <div className="bg-theme-main-gradient flex h-screen w-full flex-col overflow-hidden p-6 relative">
-      <div className="flex items-center justify-between mb-6 relative z-10">
+    <div className="flex h-screen flex-col bg-theme-main-gradient p-4 text-theme lg:p-8">
+      <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button
+          <ButtonShadcn
             variant="ghost"
-            onClick={vm.onBack}
-            className="text-theme-muted hover:text-theme"
+            size="icon"
+            onClick={() => navigate({ to: ROUTES.DASHBOARD })}
+            className="h-10 w-10 text-theme hover:bg-white/10"
           >
-            {vm.t.ADMIN.BACK_BUTTON}
-          </Button>
-          <h1 className="font-minecraft text-2xl font-bold text-theme">
-            {vm.t.ADMIN.TITLE}
+            <ArrowLeft className="h-6 w-6" />
+          </ButtonShadcn>
+          <h1 className="font-minecraft text-2xl font-bold tracking-tighter">
+            {t.ADMIN.TITLE}
           </h1>
         </div>
         <WindowControls />
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-2 relative z-10">
-        <Card className="p-6 bg-[color-mix(in_srgb,var(--theme-surface)_50%,transparent)] relative z-10 flex flex-col gap-6">
-          <div className="flex flex-col gap-4">
-            <div className="flex justify-between items-center">
-              <h2 className="font-minecraft text-xl font-bold text-theme">
-                {vm.t.ADMIN.USERS_MANAGEMENT}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto pr-2 relative z-10">
+        <div className="mb-6 flex gap-2">
+          <ButtonShadcn
+            variant={activeTab === "users" ? "default" : "secondary"}
+            onClick={() => setActiveTab("users")}
+            className="font-minecraft uppercase tracking-wider"
+          >
+            {t.ADMIN.TAB_USERS}
+          </ButtonShadcn>
+          <ButtonShadcn
+            variant={activeTab === "news" ? "default" : "secondary"}
+            onClick={() => setActiveTab("news")}
+            className="font-minecraft uppercase tracking-wider"
+          >
+            {t.ADMIN.TAB_NEWS}
+          </ButtonShadcn>
+        </div>
+
+        {activeTab === "users" && (
+        <Card className="p-6">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="font-minecraft text-xl font-bold">
+                {t.ADMIN.USERS_TITLE}
               </h2>
               <Button
                 variant="minecraft"
-                onClick={() => fetchUsers(searchQuery)}
+                onClick={() => fetchUsers()}
                 disabled={isLoading}
               >
-                {isLoading ? vm.t.ADMIN.LOADING : vm.t.ADMIN.REFRESH}
+                {isLoading ? t.ADMIN.LOADING : t.ADMIN.REFRESH}
               </Button>
             </div>
 
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={vm.t.ADMIN.SEARCH_PLACEHOLDER}
-                className="w-full rounded bg-black/30 p-3 pl-10 font-minecraft text-theme focus:outline-none focus:ring-1 focus:ring-[var(--mc-accent)] border border-white/10"
-              />
-              <svg
-                className="absolute left-3 top-3.5 h-5 w-5 text-theme-muted"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end">
+              <div className="flex-1">
+                <label className="mb-1.5 block font-minecraft text-[10px] uppercase text-theme-muted">Поиск пользователей</label>
+                <Input
+                  placeholder="Логин или Email..."
+                  value={userSearch}
+                  onChange={(e) => setUserFilters({ search: e.target.value })}
+                  className="w-full h-10"
                 />
-              </svg>
+              </div>
+              <div className="w-full md:w-48">
+                <label className="mb-1.5 block font-minecraft text-[10px] uppercase text-theme-muted">Роль (admin, user...)</label>
+                <Input
+                  placeholder="Все"
+                  value={userRole || ""}
+                  onChange={(e) => setUserFilters({ role: e.target.value === "" ? undefined : (e.target.value as any) })}
+                  className="w-full h-10"
+                />
+              </div>
+              <div className="w-full md:w-48">
+                <Select
+                  label="Статус"
+                  value={userBanned === undefined ? "all" : userBanned ? "banned" : "active"}
+                  onChange={(e) => {
+                    const val = typeof e === "string" ? e : e.target.value;
+                    setUserFilters({ banned: val === "all" ? undefined : val === "banned" });
+                  }}
+                  options={[
+                    { label: "Все", value: "all" },
+                    { label: "Бан", value: "banned" },
+                    { label: "Ок", value: "active" },
+                  ]}
+                />
+              </div>
             </div>
-          </div>
 
-          {error && (
-            <div className="text-red-500 font-minecraft text-sm">{error}</div>
-          )}
+          {error && <div className="mb-4 text-red-500 font-minecraft">{error}</div>}
 
-          <div className="grid gap-4">
+          <div className="grid gap-3">
             {users.map((user) => (
               <div
                 key={user.id}
-                className="flex items-center justify-between p-4 bg-[var(--theme-bg)] rounded-lg border border-[var(--theme-sidebar)]"
+                className="flex items-center justify-between rounded border border-white/5 bg-black/20 p-4 transition-colors hover:bg-black/30"
               >
-                <div className="flex flex-col">
-                  <div className="font-minecraft text-lg font-bold text-theme flex items-center gap-2">
-                    {user.username}
-                    {user.isBanned && (
-                      <span className="text-red-500 text-xs px-2 py-0.5 bg-red-500/10 rounded">
-                        {vm.t.ADMIN.BANNED_BADGE}
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-sm text-theme-muted font-minecraft">
-                    {user.email} • {vm.t.ADMIN.ID_LABEL} {user.id.slice(0, 8)}
-                  </div>
-                  <div className="text-xs text-[var(--mc-accent)] mt-1 font-minecraft flex gap-1">
-                    {vm.t.ADMIN.ROLES_LABEL}{" "}
-                    {user.roles.map((r) => (
-                      <span
-                        key={r}
-                        className="px-1 bg-white/5 rounded border border-white/5"
-                      >
-                        {vm.t.ADMIN.ROLES[r.toUpperCase() as keyof typeof vm.t.ADMIN.ROLES]}
-                      </span>
-                    ))}
-                  </div>
-                  {user.isBanned && user.banReason && (
-                    <div className="text-xs text-red-400 mt-1 font-minecraft italic">
-                      {vm.t.ADMIN.REASON_LABEL} {user.banReason}
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 overflow-hidden rounded bg-white/10">
+                    <div className="flex h-full w-full items-center justify-center font-minecraft text-xl uppercase">
+                      {user.username[0]}
                     </div>
-                  )}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-minecraft font-bold text-theme">
+                        {user.username}
+                      </span>
+                      {user.isBanned && (
+                        <span className="rounded bg-red-500/20 px-1.5 py-0.5 font-minecraft text-[10px] font-bold text-red-500 uppercase">
+                          Banned
+                        </span>
+                      )}
+                      <div className="flex gap-1">
+                        {user.roles.map((r) => (
+                          <span
+                            key={r}
+                            className="rounded bg-theme/10 px-1.5 py-0.5 font-minecraft text-[10px] font-bold text-theme-muted uppercase"
+                          >
+                            {r}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="font-minecraft text-xs text-theme-muted">
+                      {user.email} • {user.id.slice(0, 8)}
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
+                <div className="flex gap-2">
+                  <ButtonShadcn
+                    variant="outline"
                     size="sm"
                     onClick={() => openRolesModal(user)}
-                    disabled={user.id === vm.currentUser?.id || actionLoading === user.id}
+                    disabled={!!actionLoading}
                   >
-                    {actionLoading === user.id ? "..." : vm.t.ADMIN.BUTTONS.EDIT_ROLES}
-                  </Button>
-
+                    Roles
+                  </ButtonShadcn>
                   {user.isBanned ? (
-                    <Button
-                      variant="minecraft"
+                    <ButtonShadcn
+                      variant="secondary"
                       size="sm"
                       onClick={() => openUnbanModal(user)}
-                      className="bg-green-600 hover:bg-green-500"
-                      disabled={actionLoading === user.id}
+                      disabled={!!actionLoading}
                     >
-                      {actionLoading === user.id ? "..." : vm.t.ADMIN.BUTTONS.UNBAN}
-                    </Button>
+                      Unban
+                    </ButtonShadcn>
                   ) : (
-                    <Button
-                      variant="minecraft"
+                    <ButtonShadcn
+                      variant="destructive"
                       size="sm"
                       onClick={() => openBanModal(user)}
-                      disabled={user.id === vm.currentUser?.id || actionLoading === user.id}
-                      className="bg-red-600 hover:bg-red-500"
+                      disabled={!!actionLoading}
                     >
-                      {actionLoading === user.id ? "..." : vm.t.ADMIN.BUTTONS.BAN}
-                    </Button>
+                      Ban
+                    </ButtonShadcn>
                   )}
                 </div>
               </div>
             ))}
-
             {users.length === 0 && !isLoading && (
               <div className="text-center text-theme-muted py-8 font-minecraft">
-                {vm.t.ADMIN.NO_USERS}
+                {t.ADMIN.NO_USERS}
+              </div>
+            )}
+            <div ref={usersEndRef} className="h-4 w-full" />
+            {isLoadingMore && (
+              <div className="py-4 text-center font-minecraft text-xs text-theme-muted">
+                Загрузка пользователей...
               </div>
             )}
           </div>
         </Card>
-      </div>
+        )}
 
-      {/* BAN MODAL */}
-      {banModalOpen && selectedUser && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <Card className="w-full max-w-md p-6 bg-[var(--theme-bg)] border border-[var(--theme-sidebar)]">
-            <h3 className="font-minecraft text-xl font-bold text-theme mb-4">
-              {vm.t.ADMIN.PROMPTS.BAN_REASON_TITLE(selectedUser.username)}
-            </h3>
-            <div className="flex flex-col gap-4">
-              <input
-                type="text"
-                autoFocus
-                value={banReason}
-                onChange={(e) => setBanReason(e.target.value)}
-                placeholder={vm.t.ADMIN.PROMPTS.BAN_REASON_PLACEHOLDER}
-                className="w-full rounded bg-black/50 p-2 font-minecraft text-theme focus:outline-none focus:ring-1 focus:ring-[var(--mc-accent)] border border-white/10"
-              />
-              {actionError && (
-                <div className="text-red-500 font-minecraft text-xs">
-                  {actionError}
-                </div>
-              )}
-              <div className="flex justify-end gap-2 mt-2">
-                <Button variant="ghost" onClick={() => setBanModalOpen(false)}>
-                  {vm.t.COMMON.CANCEL}
-                </Button>
-                <Button
-                  variant="minecraft"
-                  onClick={executeBan}
-                  className="bg-red-600 hover:bg-red-500"
-                >
-                  {vm.t.ADMIN.BUTTONS.BAN}
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* UNBAN MODAL */}
-      {unbanModalOpen && selectedUser && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <Card className="w-full max-w-md p-6 bg-[var(--theme-bg)] border border-[var(--theme-sidebar)]">
-            <h3 className="font-minecraft text-xl font-bold text-theme mb-4 text-center">
-              {vm.t.ADMIN.PROMPTS.UNBAN_CONFIRM_TITLE(selectedUser.username)}
-            </h3>
-            {actionError && (
-              <div className="text-red-500 mb-4 font-minecraft text-xs text-center">
-                {actionError}
-              </div>
-            )}
-            <div className="flex justify-center gap-4">
-              <Button variant="ghost" onClick={() => setUnbanModalOpen(false)}>
-                {vm.t.COMMON.CANCEL}
-              </Button>
-              <Button
-                variant="minecraft"
-                onClick={executeUnban}
-                className="bg-green-600 hover:bg-green-500"
+        {activeTab === "news" && (
+        <Card className="p-6">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="font-minecraft text-xl font-bold">Управление новостями</h2>
+            <div className="flex gap-2">
+              <ButtonShadcn
+                variant={newsTab === "all" ? "default" : "secondary"}
+                onClick={() => setNewsTab("all")}
+                className="font-minecraft uppercase text-xs"
               >
-                {vm.t.COMMON.CONFIRM}
-              </Button>
+                Все новости
+              </ButtonShadcn>
+              <ButtonShadcn
+                variant={newsTab === "create" ? "default" : "secondary"}
+                onClick={() => {
+                  resetNewsForm();
+                  setNewsTab("create");
+                }}
+                className="font-minecraft uppercase text-xs"
+              >
+                Создать
+              </ButtonShadcn>
             </div>
-          </Card>
-        </div>
-      )}
+          </div>
 
-      {/* ROLES MODAL */}
-      {rolesModalOpen && selectedUser && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <Card className="w-full max-w-md p-6 bg-[var(--theme-bg)] border border-[var(--theme-sidebar)]">
-            <h3 className="font-minecraft text-xl font-bold text-theme mb-6">
-              {vm.t.ADMIN.PROMPTS.EDIT_ROLES_TITLE(selectedUser.username)}
-            </h3>
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-3">
-                {availableRoles.map((role) => (
-                  <label
-                    key={role}
-                    className="flex items-center gap-3 cursor-pointer group"
-                  >
-                    <div
-                      onClick={() => toggleRole(role)}
-                      className={`w-6 h-6 border-2 flex items-center justify-center transition-all ${
-                        selectedRoles.includes(role)
-                          ? "bg-[var(--mc-accent)] border-[var(--mc-accent)]"
-                          : "border-white/20 bg-black/30 group-hover:border-white/40"
-                      }`}
-                    >
-                      {selectedRoles.includes(role) && (
-                        <svg className="w-4 h-4 text-black" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
+          {newsTab === "all" && (
+          <div className="grid gap-3">
+            <div className="mb-6 space-y-4 rounded-lg bg-black/10 p-4 border border-white/5">
+              {/* Row 1: Search and Tag */}
+              <div className="flex flex-col gap-4 md:flex-row md:items-end">
+                <div className="flex-[2]">
+                  <label className="mb-1.5 block font-minecraft text-[10px] uppercase text-theme-muted">Поиск по контенту</label>
+                  <Input
+                    placeholder="Название или часть текста..."
+                    value={newsSearch}
+                    onChange={(e) => setNewsSearch(e.target.value)}
+                    className="w-full h-10"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="mb-1.5 block font-minecraft text-[10px] uppercase text-theme-muted">Тег</label>
+                  <Input
+                    placeholder=" survival..."
+                    value={newsTag}
+                    onChange={(e) => setNewsTag(e.target.value)}
+                    className="w-full h-10"
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Dates and Sorting */}
+              <div className="flex flex-col gap-4 md:flex-row md:items-end">
+                <div className="flex-1">
+                  <label className="mb-1.5 block font-minecraft text-[10px] uppercase text-theme-muted">От даты</label>
+                  <Input
+                    type="datetime-local"
+                    value={newsFromDate}
+                    onChange={(e) => setNewsFromDate(e.target.value)}
+                    className="h-10 text-xs px-2 w-full"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="mb-1.5 block font-minecraft text-[10px] uppercase text-theme-muted">До даты</label>
+                  <Input
+                    type="datetime-local"
+                    value={newsToDate}
+                    onChange={(e) => setNewsToDate(e.target.value)}
+                    className="h-10 text-xs px-2 w-full"
+                  />
+                </div>
+                <div className="flex-1">
+                  <Select
+                    label="Сортировка"
+                    value={newsSortBy}
+                    onChange={(e) => {
+                      const val = typeof e === "string" ? e : e.target.value;
+                      setNewsFilters({ sortBy: val as any });
+                    }}
+                    options={[
+                      { label: "По созданию", value: "createdAt" },
+                      { label: "По обновлению", value: "updatedAt" },
+                      { label: "По названию", value: "title" },
+                    ]}
+                  />
+                </div>
+                <div className="flex-1">
+                  <Select
+                    label="Порядок"
+                    value={newsOrder}
+                    onChange={(e) => {
+                      const val = typeof e === "string" ? e : e.target.value;
+                      setNewsFilters({ order: val as any });
+                    }}
+                    options={[
+                      { label: "Новые", value: "DESC" },
+                      { label: "Старые", value: "ASC" },
+                    ]}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-3">
+              {newsRows.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between rounded border border-white/5 bg-black/20 p-4 transition-colors hover:bg-black/30"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 overflow-hidden rounded bg-white/10">
+                      {item.image ? (
+                        <img src={item.image} className="h-full w-full object-cover" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center font-minecraft text-[10px] text-theme-muted uppercase">
+                          No Img
+                        </div>
                       )}
                     </div>
-                    <span className="font-minecraft text-theme select-none uppercase">
-                      {vm.t.ADMIN.ROLES[role.toUpperCase() as keyof typeof vm.t.ADMIN.ROLES]}
-                    </span>
-                  </label>
-                ))}
-              </div>
-
-              {actionError && (
-                <div className="text-red-500 font-minecraft text-xs">
-                  {actionError}
+                    <div>
+                      <div className="font-minecraft font-bold text-theme">{item.title}</div>
+                      <div className="font-minecraft text-[10px] text-theme-muted uppercase tracking-tighter">
+                        {item.slug} • {new Date(item.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <ButtonShadcn
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEditingNews(item);
+                        setNewsTitle(item.title);
+                        setNewsSlug(item.slug);
+                        setNewsImage(item.image || "");
+                        setNewsTagsInput(item.tags?.join(", ") || "");
+                        setNewsContentHtml(item.content);
+                        setNewsTab("create");
+                      }}
+                      className="font-minecraft text-[10px] h-8"
+                    >
+                      Edit
+                    </ButtonShadcn>
+                    <ButtonShadcn
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => deleteNews(item.id)}
+                      className="font-minecraft text-[10px] h-8"
+                    >
+                      Delete
+                    </ButtonShadcn>
+                  </div>
+                </div>
+              ))}
+              {newsRows.length === 0 && !isLoadingNews && (
+                <div className="text-center text-theme-muted py-10 font-minecraft">
+                  Новости не найдены по вашим критериям.
                 </div>
               )}
+              <div ref={newsEndRef} className="h-4 w-full" />
+              {isLoadingMoreNews && (
+                <div className="py-4 text-center font-minecraft text-xs text-theme-muted">
+                  Загрузка новостей...
+                </div>
+              )}
+            </div>
+          </div>
+          )}
 
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="ghost"
-                  onClick={() => setRolesModalOpen(false)}
-                >
-                  {vm.t.COMMON.CANCEL}
-                </Button>
-                <Button variant="minecraft" onClick={executeRolesUpdate}>
-                  {vm.t.COMMON.SAVE}
-                </Button>
+          {newsTab === "create" && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <label className="font-minecraft text-xs uppercase text-theme-muted">Заголовок</label>
+                <Input value={newsTitle} onChange={(e) => setNewsTitle(e.target.value)} placeholder="Моё обновление" />
+              </div>
+              <div className="space-y-2">
+                <label className="font-minecraft text-xs uppercase text-theme-muted">Слаг (URL)</label>
+                <Input value={newsSlug} onChange={(e) => setNewsSlug(e.target.value)} placeholder="my-update" />
               </div>
             </div>
-          </Card>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <label className="font-minecraft text-xs uppercase text-theme-muted">Изображение (URL)</label>
+                <Input value={newsImage} onChange={(e) => setNewsImage(e.target.value)} placeholder="https://..." />
+              </div>
+              <div className="space-y-2">
+                <label className="font-minecraft text-xs uppercase text-theme-muted">Теги (через запятую)</label>
+                <Input value={newsTagsInput} onChange={(e) => setNewsTagsInput(e.target.value)} placeholder="update, fabric, event" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="font-minecraft text-xs uppercase text-theme-muted">Контент (HTML)</label>
+              <div className="min-h-[300px] rounded border border-white/10 bg-black/20 p-2">
+                <Editor value={newsContentHtml} onChange={(e) => setNewsContentHtml(e.target.value)}>
+                  <Toolbar>
+                    <BtnBold />
+                    <BtnItalic />
+                    <BtnUnderline />
+                    <BtnStrikeThrough />
+                    <Separator />
+                    <BtnNumberedList />
+                    <BtnBulletList />
+                    <Separator />
+                    <BtnLink />
+                  </Toolbar>
+                </Editor>
+              </div>
+            </div>
+
+            {newsFormError && <div className="text-red-500 font-minecraft text-sm">{newsFormError}</div>}
+
+            <div className="flex justify-end gap-2">
+              <ButtonShadcn variant="secondary" onClick={() => setNewsTab("all")}>Отмена</ButtonShadcn>
+              <ButtonShadcn
+                variant="default"
+                onClick={editingNews ? handleUpdateNews : handleCreateNews}
+                disabled={!!newsActionLoadingId}
+              >
+                {newsActionLoadingId ? "Сохранение..." : editingNews ? "Обновить" : "Создать"}
+              </ButtonShadcn>
+            </div>
+          </div>
+          )}
+        </Card>
+        )}
+      </div>
+
+      <Modal
+        isOpen={banModalOpen}
+        onClose={() => setBanModalOpen(false)}
+        title={`Ban User: ${selectedUser?.username}`}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-theme-muted">Provide a reason for banning this user.</p>
+          <Input
+            placeholder="Reason..."
+            value={banReason}
+            onChange={(e) => setBanReason(e.target.value)}
+          />
+          {actionError && <div className="text-red-500 text-sm">{actionError}</div>}
         </div>
-      )}
+        <ModalActions>
+          <Button variant="secondary" onClick={() => setBanModalOpen(false)}>Cancel</Button>
+          <Button variant="minecraft" onClick={executeBan}>Confirm Ban</Button>
+        </ModalActions>
+      </Modal>
+
+      <Modal
+        isOpen={unbanModalOpen}
+        onClose={() => setUnbanModalOpen(false)}
+        title={`Unban User: ${selectedUser?.username}`}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-theme-muted">Are you sure you want to unban this user?</p>
+          {actionError && <div className="text-red-500 text-sm">{actionError}</div>}
+        </div>
+        <ModalActions>
+          <Button variant="secondary" onClick={() => setUnbanModalOpen(false)}>Cancel</Button>
+          <Button variant="minecraft" onClick={executeUnban}>Confirm Unban</Button>
+        </ModalActions>
+      </Modal>
+
+      <Modal
+        isOpen={rolesModalOpen}
+        onClose={() => setRolesModalOpen(false)}
+        title={`Manage Roles: ${selectedUser?.username}`}
+      >
+        <div className="space-y-4">
+          <div className="grid gap-2">
+            {availableRoles.map((role) => (
+                <Checkbox
+                  key={role}
+                  label={role.toUpperCase()}
+                  checked={selectedRoles.includes(role)}
+                  onChange={() => toggleRole(role)}
+                />
+            ))}
+          </div>
+          {actionError && <div className="text-red-500 text-sm">{actionError}</div>}
+        </div>
+        <ModalActions>
+          <Button variant="secondary" onClick={() => setRolesModalOpen(false)}>Cancel</Button>
+          <Button variant="minecraft" onClick={executeRolesUpdate}>Save Roles</Button>
+        </ModalActions>
+      </Modal>
     </div>
   );
 }

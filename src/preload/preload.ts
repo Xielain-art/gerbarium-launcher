@@ -11,6 +11,7 @@ import {
   LauncherSettings,
   JavaDownloadProgressPayload,
 } from "../shared/constants/ipc-chanels";
+import type { ApiCreateNewsDto, ApiUpdateNewsDto } from "../lib/api/news";
 
 async function typedInvoke<K extends keyof IpcChannelMap>(
   channel: K,
@@ -136,6 +137,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
     banUser: (userId: string, reason: string) => typedInvoke(IPC_CHANNELS.ADMIN.BAN_USER, userId, reason),
     unbanUser: (userId: string) => typedInvoke(IPC_CHANNELS.ADMIN.UNBAN_USER, userId),
     updateRoles: (userId: string, roles: ("user" | "moderator" | "admin")[]) => typedInvoke(IPC_CHANNELS.ADMIN.UPDATE_ROLES, userId, roles),
+    getNews: (search?: string) => typedInvoke(IPC_CHANNELS.ADMIN.GET_NEWS, search),
+    createNews: (payload: ApiCreateNewsDto) =>
+      typedInvoke(IPC_CHANNELS.ADMIN.CREATE_NEWS, payload),
+    updateNews: (newsId: string, payload: ApiUpdateNewsDto) =>
+      typedInvoke(IPC_CHANNELS.ADMIN.UPDATE_NEWS, newsId, payload),
+    deleteNews: (newsId: string) => typedInvoke(IPC_CHANNELS.ADMIN.DELETE_NEWS, newsId),
   },
 
   // Java management

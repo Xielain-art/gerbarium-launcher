@@ -8,7 +8,7 @@ import { useSettingsStore } from "../stores/useSettingsStore";
 import { useTranslation } from "./useTranslation";
 import { ROUTES, LOG_ACTIONS } from "../../../shared/constants/system";
 import type { LauncherSettings } from "../../../shared/constants/ipc-chanels";
-import type { GameVersion } from "../types";
+import type { GameVersion, NewsItem } from "../types";
 
 const INITIAL_VERSIONS: GameVersion[] = [
   { id: "gerbarium-1.2", name: "Gerbarium v1.2", type: "gerbarium", isInstalled: false, version: "1.20.4" },
@@ -39,7 +39,16 @@ export function useDashboardScreen() {
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuthStore();
   const { isDownloading, progress, cancelDownload } = useDownloadStore();
-  const { items: news, isLoading: isLoadingNews } = useNewsStore();
+  const {
+    items: news,
+    isLoading: isLoadingNews,
+    isLoadingMore: isLoadingMoreNews,
+    hasMore: hasMoreNews,
+    isInitialLoaded: isNewsInitialLoaded,
+    fetchNews,
+    fetchMoreNews,
+    error: newsError,
+  } = useNewsStore();
   const { data: serverStatus } = useServerStatusStore();
 
   const [versions, setVersions] = useState<GameVersion[]>(INITIAL_VERSIONS);
@@ -54,6 +63,7 @@ export function useDashboardScreen() {
   const [launchStatus, setLaunchStatus] = useState("");
   const [launchError, setLaunchError] = useState<string | null>(null);
   const [isConsoleVisible, setIsConsoleVisible] = useState(true);
+  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   const closeOnLaunchRequestedRef = useRef(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
   const banReason = user?.banReason?.trim();
@@ -141,6 +151,7 @@ export function useDashboardScreen() {
     window.electronAPI.system?.sendSettingsUpdate?.(
       toLauncherSettingsPatch(currentSettings),
     );
+    void fetchNews();
   }, []);
 
   const onPlay = async () => {
@@ -221,6 +232,11 @@ export function useDashboardScreen() {
     appVersion,
     news,
     isLoadingNews,
+    isLoadingMoreNews,
+    hasMoreNews,
+    isNewsInitialLoaded,
+    onLoadMoreNews: fetchMoreNews,
+    newsError,
     isDownloading,
     progress,
     isLaunching,
@@ -237,5 +253,8 @@ export function useDashboardScreen() {
     onOpenSettings,
     onOpenAdminPanel,
     onLogout,
+    selectedNews,
+    onSelectNews: setSelectedNews,
+    onCloseNews: () => setSelectedNews(null),
   };
 }

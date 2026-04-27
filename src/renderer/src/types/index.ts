@@ -121,7 +121,9 @@ export type NewsCategory = 'update' | 'event' | 'community' | 'announcement';
 export interface NewsItem {
   id: string;
   title: string;
+  slug?: string;
   content: string;
+  htmlContent?: string;
   date: string;
   imageUrl?: string;
   category: NewsCategory;

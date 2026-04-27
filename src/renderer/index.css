@@ -67,7 +67,29 @@
   --mc-progress-fill-c: var(--btn-primary-bg-a);
   --mc-window-danger-hover: #e81123;
   --mc-window-danger-active: #c4101f;
+  /* shadcn semantic tokens (mapped to existing launcher theme vars) */
+  --background: var(--theme-bg);
+  --foreground: var(--theme-text);
+  --card: var(--theme-surface);
+  --card-foreground: var(--theme-text);
+  --popover: var(--theme-surface-soft);
+  --popover-foreground: var(--theme-text);
+  --primary: var(--btn-primary-bg-a);
+  --primary-foreground: #ffffff;
+  --secondary: var(--btn-secondary-bg);
+  --secondary-foreground: var(--btn-text);
+  --muted: var(--theme-surface-soft);
+  --muted-foreground: var(--theme-text-muted);
+  --accent: var(--theme-surface-soft);
+  --accent-foreground: var(--theme-text);
+  --destructive: var(--btn-danger-bg-a);
+  --destructive-foreground: #ffffff;
+  --border: var(--theme-border);
+  --input: var(--theme-border-hi);
+  --ring: var(--mc-input-focus);
+  --radius: 0.5rem;
 }
+
 
 body.theme-gerbarium {
   --theme-bg: #15130f;
@@ -176,6 +198,7 @@ body {
   color: var(--theme-text);
   transition: background-color 180ms ease, color 180ms ease;
 }
+
 
 html {
   background-color: var(--theme-bg);

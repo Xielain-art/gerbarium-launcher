@@ -6,10 +6,22 @@ export type { ApiResult, ApiUser } from "./types";
 export async function getUsersRequest(
   accessToken: string,
   search?: string,
+  page?: number,
+  limit?: number,
+  role?: string,
+  banned?: boolean,
 ): Promise<ApiResult<ApiUser[]>> {
   try {
     const { data, error, response } = await apiClient.GET("/api/admin/users", {
-      params: search ? { query: { search } } : undefined,
+      params: { 
+        query: { 
+          search,
+          page,
+          limit,
+          role,
+          banned
+        } as any 
+      },
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -68,7 +80,7 @@ export async function unbanUserRequest(
 export async function updateUserRolesRequest(
   accessToken: string,
   userId: string,
-  roles: ("user" | "moderator" | "admin")[],
+  roles: string[],
 ): Promise<ApiResult<ApiUser>> {
   try {
     const { data, error, response } = await apiClient.PUT(

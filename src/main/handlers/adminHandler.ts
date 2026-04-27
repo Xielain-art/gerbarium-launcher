@@ -11,6 +11,12 @@ import {
   updateUserRolesRequest,
 } from "../../lib/api/admin";
 import {
+  listNewsRequest,
+  createNewsRequest,
+  updateNewsRequest,
+  deleteNewsRequest,
+} from "../../lib/api/news";
+import {
   readStoredSession,
   resolveOnlineSession,
   SECURE_STORAGE_FILE_NAME,
@@ -40,7 +46,7 @@ async function getValidAccessToken(app: App): Promise<string | null> {
 export default function adminHandler(app: App) {
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.GET_USERS,
-    async (_event, search?: string) => {
+    async (_event, search?: string, page?: number, limit?: number, role?: any, banned?: boolean) => {
       try {
         const token = await getValidAccessToken(app);
         if (!token) {
@@ -49,7 +55,7 @@ export default function adminHandler(app: App) {
             error: ERROR_CODES.AUTH_UNAUTHORIZED,
           };
         }
-        const result = await getUsersRequest(token, search);
+        const result = await getUsersRequest(token, search, page, limit, role, banned);
         if (!result.success) {
           return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
         }
@@ -129,6 +135,100 @@ export default function adminHandler(app: App) {
         return { success: true, data: result.data };
       } catch (error) {
         log.error(LOG_MESSAGES.ADMIN_UPDATE_ROLES_FAILED, error);
+        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+      }
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.GET_NEWS,
+    async (_event, search?: string, page?: number, limit?: number, sortBy?: any, order?: any, tag?: string, fromDate?: string, toDate?: string) => {
+      try {
+        const result = await listNewsRequest({
+          search: search?.trim() || undefined,
+          tag: tag?.trim() || undefined,
+          fromDate: fromDate || undefined,
+          toDate: toDate || undefined,
+          sortBy: sortBy || "createdAt",
+          order: order || "DESC",
+          page,
+          limit,
+        });
+        if (!result.success) {
+          return {
+            success: false,
+            error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
+          };
+        }
+        return { success: true, data: result.data.items };
+      } catch (error) {
+        log.error(LOG_MESSAGES.ADMIN_GET_NEWS_FAILED, error);
+        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+      }
+    },
+  );
+
+  ipcMain.handle(IPC_CHANNELS.ADMIN.CREATE_NEWS, async (_event, payload) => {
+    try {
+      const token = await getValidAccessToken(app);
+      if (!token) {
+        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+      }
+      const result = await createNewsRequest(token, payload);
+      if (!result.success) {
+        return {
+          success: false,
+          error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
+        };
+      }
+      return { success: true, data: result.data };
+    } catch (error) {
+      log.error(LOG_MESSAGES.ADMIN_CREATE_NEWS_FAILED, error);
+      return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+    }
+  });
+
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.UPDATE_NEWS,
+    async (_event, newsId: string, payload) => {
+      try {
+        const token = await getValidAccessToken(app);
+        if (!token) {
+          return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+        }
+        const result = await updateNewsRequest(token, newsId, payload);
+        if (!result.success) {
+          return {
+            success: false,
+            error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
+          };
+        }
+        return { success: true, data: result.data };
+      } catch (error) {
+        log.error(LOG_MESSAGES.ADMIN_UPDATE_NEWS_FAILED, error);
+        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+      }
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.DELETE_NEWS,
+    async (_event, newsId: string) => {
+      try {
+        const token = await getValidAccessToken(app);
+        if (!token) {
+          return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+        }
+        const result = await deleteNewsRequest(token, newsId);
+        if (!result.success) {
+          return {
+            success: false,
+            error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
+          };
+        }
+        return { success: true };
+      } catch (error) {
+        log.error(LOG_MESSAGES.ADMIN_DELETE_NEWS_FAILED, error);
         return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
       }
     },

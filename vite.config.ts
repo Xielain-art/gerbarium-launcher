@@ -64,6 +64,7 @@ export default defineConfig(({ command }) => ({
   },
   resolve: {
     alias: {
+      "@": path.resolve(__dirname, "src/renderer/src"),
       "@renderer": path.resolve(__dirname, "src/renderer"),
       "@shared": path.resolve(__dirname, "src/shared"),
     },

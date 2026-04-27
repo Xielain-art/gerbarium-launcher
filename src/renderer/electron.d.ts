@@ -2,6 +2,9 @@ import {
   WindowState,
   AdminUsersResponse,
   AdminUserMutationResponse,
+  AdminNewsListResponse,
+  AdminNewsMutationResponse,
+  AdminNewsDeleteResponse,
   JavaDownloadProgressPayload,
   GameLaunchOptions,
   GameProgressPayload,
@@ -11,6 +14,7 @@ import {
   CrashReportPayload,
   LauncherSettings,
 } from "../shared/constants/ipc-chanels";
+import type { ApiCreateNewsDto, ApiUpdateNewsDto } from "../lib/api/news";
 
 export interface IElectronAPI {
   // App controls
@@ -84,7 +88,7 @@ export interface IElectronAPI {
 
   // Admin API
   admin: {
-    getUsers: (search?: string) => Promise<AdminUsersResponse>;
+    getUsers: (search?: string, page?: number, limit?: number, role?: string, banned?: boolean) => Promise<AdminUsersResponse>;
     banUser: (
       userId: string,
       reason: string,
@@ -96,6 +100,10 @@ export interface IElectronAPI {
       userId: string,
       roles: ("user" | "moderator" | "admin")[],
     ) => Promise<AdminUserMutationResponse>;
+    getNews: (search?: string, page?: number, limit?: number, sortBy?: string, order?: string, tag?: string, fromDate?: string, toDate?: string) => Promise<AdminNewsListResponse>;
+    createNews: (payload: ApiCreateNewsDto) => Promise<AdminNewsMutationResponse>;
+    updateNews: (newsId: string, payload: ApiUpdateNewsDto) => Promise<AdminNewsMutationResponse>;
+    deleteNews: (newsId: string) => Promise<AdminNewsDeleteResponse>;
   };
 
   // Java management

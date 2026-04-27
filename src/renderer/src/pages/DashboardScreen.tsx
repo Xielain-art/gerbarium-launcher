@@ -5,9 +5,15 @@ import { DashboardSidebar } from "../components/dashboard/DashboardSidebar";
 import { NewsFeed } from "../components/dashboard/NewsFeed";
 import { LaunchConsole } from "../components/dashboard/LaunchConsole";
 import { DashboardActionBar } from "../components/dashboard/DashboardActionBar";
+import DOMPurify from "dompurify";
+import { useMemo } from "react";
 
 export function DashboardScreen() {
   const vm = useDashboardScreen();
+  const sanitizedFullHtml = useMemo(
+    () => (vm.selectedNews?.htmlContent ? DOMPurify.sanitize(vm.selectedNews.htmlContent) : ""),
+    [vm.selectedNews],
+  );
 
   return (
     <div className="bg-theme-main-gradient flex h-screen w-full overflow-hidden">
@@ -48,7 +54,13 @@ export function DashboardScreen() {
               t={vm.t}
               news={vm.news}
               isLoadingNews={vm.isLoadingNews}
+              isLoadingMoreNews={vm.isLoadingMoreNews}
+              hasMoreNews={vm.hasMoreNews}
+              isNewsInitialLoaded={vm.isNewsInitialLoaded}
+              onLoadMoreNews={vm.onLoadMoreNews}
               placeholderImage={newsPlaceholder}
+              newsError={vm.newsError}
+              onSelectNews={vm.onSelectNews}
             />
           )}
         </div>
@@ -70,6 +82,36 @@ export function DashboardScreen() {
           onToggleConsole={vm.onToggleConsole}
         />
       </main>
+
+      {vm.selectedNews && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-6 backdrop-blur-md">
+          <div className="mc-card max-h-[85vh] w-full max-w-4xl overflow-y-auto p-0">
+            <div className="flex items-center justify-between border-b-[3px] border-theme p-4">
+              <h3 className="font-minecraft text-lg text-theme">{vm.selectedNews.title}</h3>
+              <button
+                type="button"
+                className="mc-btn mc-btn-sm"
+                onClick={vm.onCloseNews}
+              >
+                Закрыть
+              </button>
+            </div>
+            <div className="p-5">
+              <img
+                src={vm.selectedNews.imageUrl || newsPlaceholder}
+                alt={vm.selectedNews.title}
+                className="mb-4 max-h-72 w-full rounded object-cover"
+              />
+              <div
+                className="font-minecraft text-sm leading-relaxed text-theme-muted [&_a]:text-[var(--mc-accent)] [&_a]:underline"
+                dangerouslySetInnerHTML={{
+                  __html: sanitizedFullHtml || vm.selectedNews.content,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

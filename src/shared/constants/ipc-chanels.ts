@@ -1,4 +1,5 @@
 import type { ApiUser } from "../../lib/api/admin";
+import type { ApiNews, ApiCreateNewsDto, ApiUpdateNewsDto } from "../../lib/api/news";
 
 export const IPC_CHANNELS = {
   WINDOW: {
@@ -35,6 +36,10 @@ export const IPC_CHANNELS = {
     BAN_USER: "admin:ban-user",
     UNBAN_USER: "admin:unban-user",
     UPDATE_ROLES: "admin:update-roles",
+    GET_NEWS: "admin:get-news",
+    CREATE_NEWS: "admin:create-news",
+    UPDATE_NEWS: "admin:update-news",
+    DELETE_NEWS: "admin:delete-news",
   },
   JAVA: {
     CHECK_VERSION: "java:check-version",
@@ -109,6 +114,23 @@ export interface AdminUsersResponse {
 export interface AdminUserMutationResponse {
   success: boolean;
   data?: ApiUser;
+  error?: string;
+}
+
+export interface AdminNewsListResponse {
+  success: boolean;
+  data?: ApiNews[];
+  error?: string;
+}
+
+export interface AdminNewsMutationResponse {
+  success: boolean;
+  data?: ApiNews;
+  error?: string;
+}
+
+export interface AdminNewsDeleteResponse {
+  success: boolean;
   error?: string;
 }
 
@@ -280,6 +302,22 @@ export interface IpcChannelMap {
   [IPC_CHANNELS.ADMIN.UPDATE_ROLES]: {
     args: [userId: string, roles: ("user" | "moderator" | "admin")[]];
     return: AdminUserMutationResponse;
+  };
+  [IPC_CHANNELS.ADMIN.GET_NEWS]: {
+    args: [search?: string];
+    return: AdminNewsListResponse;
+  };
+  [IPC_CHANNELS.ADMIN.CREATE_NEWS]: {
+    args: [payload: ApiCreateNewsDto];
+    return: AdminNewsMutationResponse;
+  };
+  [IPC_CHANNELS.ADMIN.UPDATE_NEWS]: {
+    args: [newsId: string, payload: ApiUpdateNewsDto];
+    return: AdminNewsMutationResponse;
+  };
+  [IPC_CHANNELS.ADMIN.DELETE_NEWS]: {
+    args: [newsId: string];
+    return: AdminNewsDeleteResponse;
   };
   [IPC_CHANNELS.JAVA.CHECK_VERSION]: {
     args: [javaPath: string];
