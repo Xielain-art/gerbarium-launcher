@@ -1,118 +1,38 @@
-import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { useTranslation } from "../hooks/useTranslation";
-import { useAuthStore } from "../stores/useAuthStore";
-import { useAdminStore } from "../stores/useAdminStore";
-import { ROUTES } from "../../../shared/constants/system";
+import { useAdminPage } from "../hooks/useAdminPage";
 import { WindowControls } from "../components";
 import { Button } from "../components/ui";
 import { Card } from "../components/ui";
-import type { ApiUser } from "../../../lib/api/admin";
-
-type Role = "user" | "moderator" | "admin";
 
 export function AdminScreen() {
-  const t = useTranslation();
-  const navigate = useNavigate();
-  const { user: currentUser } = useAuthStore();
+  const vm = useAdminPage();
   const {
     users,
     isLoading,
     actionLoading,
     error,
+    searchQuery,
+    setSearchQuery,
+    selectedUser,
+    banModalOpen,
+    setBanModalOpen,
+    banReason,
+    setBanReason,
+    unbanModalOpen,
+    setUnbanModalOpen,
+    rolesModalOpen,
+    setRolesModalOpen,
+    selectedRoles,
+    actionError,
     fetchUsers,
-    banUser,
-    unbanUser,
-    updateUserRoles,
-  } = useAdminStore();
-
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Modal states
-  const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
-  const [banModalOpen, setBanModalOpen] = useState(false);
-  const [banReason, setBanReason] = useState("");
-
-  const [unbanModalOpen, setUnbanModalOpen] = useState(false);
-
-  const [rolesModalOpen, setRolesModalOpen] = useState(false);
-  const [selectedRoles, setSelectedRoles] = useState<Role[]>([]);
-
-  const [actionError, setActionError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchUsers(searchQuery);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchQuery, fetchUsers]);
-
-  // Handlers for Ban
-  const openBanModal = (user: ApiUser) => {
-    setSelectedUser(user);
-    setBanReason("");
-    setActionError(null);
-    setBanModalOpen(true);
-  };
-
-  const executeBan = async () => {
-    if (!selectedUser) return;
-    const success = await banUser(selectedUser.id, banReason);
-    if (success) {
-      setBanModalOpen(false);
-      setSelectedUser(null);
-    } else {
-      setActionError(t.ADMIN.ERRORS.BAN_FAILED);
-    }
-  };
-
-  // Handlers for Unban
-  const openUnbanModal = (user: ApiUser) => {
-    setSelectedUser(user);
-    setActionError(null);
-    setUnbanModalOpen(true);
-  };
-
-  const executeUnban = async () => {
-    if (!selectedUser) return;
-    const success = await unbanUser(selectedUser.id);
-    if (success) {
-      setUnbanModalOpen(false);
-      setSelectedUser(null);
-    } else {
-      setActionError(t.ADMIN.ERRORS.UNBAN_FAILED);
-    }
-  };
-
-  // Handlers for Roles
-  const openRolesModal = (user: ApiUser) => {
-    setSelectedUser(user);
-    setSelectedRoles(user.roles as Role[]);
-    setActionError(null);
-    setRolesModalOpen(true);
-  };
-
-  const toggleRole = (role: Role) => {
-    setSelectedRoles((prev) =>
-      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
-    );
-  };
-
-  const executeRolesUpdate = async () => {
-    if (!selectedUser) return;
-    if (selectedRoles.length === 0) {
-      setActionError(t.ADMIN.ERRORS.INVALID_ROLES);
-      return;
-    }
-
-    const success = await updateUserRoles(selectedUser.id, selectedRoles);
-    if (success) {
-      setRolesModalOpen(false);
-      setSelectedUser(null);
-    } else {
-      setActionError(t.ADMIN.ERRORS.ROLES_FAILED);
-    }
-  };
+    openBanModal,
+    executeBan,
+    openUnbanModal,
+    executeUnban,
+    openRolesModal,
+    toggleRole,
+    executeRolesUpdate,
+    availableRoles,
+  } = vm;
 
   return (
     <div className="bg-theme-main-gradient flex h-screen w-full flex-col overflow-hidden p-6 relative">
@@ -120,13 +40,13 @@ export function AdminScreen() {
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
-            onClick={() => navigate({ to: ROUTES.DASHBOARD })}
+            onClick={vm.onBack}
             className="text-theme-muted hover:text-theme"
           >
-            {t.ADMIN.BACK_BUTTON}
+            {vm.t.ADMIN.BACK_BUTTON}
           </Button>
           <h1 className="font-minecraft text-2xl font-bold text-theme">
-            {t.ADMIN.TITLE}
+            {vm.t.ADMIN.TITLE}
           </h1>
         </div>
         <WindowControls />
@@ -137,14 +57,14 @@ export function AdminScreen() {
           <div className="flex flex-col gap-4">
             <div className="flex justify-between items-center">
               <h2 className="font-minecraft text-xl font-bold text-theme">
-                {t.ADMIN.USERS_MANAGEMENT}
+                {vm.t.ADMIN.USERS_MANAGEMENT}
               </h2>
               <Button
                 variant="minecraft"
                 onClick={() => fetchUsers(searchQuery)}
                 disabled={isLoading}
               >
-                {isLoading ? t.ADMIN.LOADING : t.ADMIN.REFRESH}
+                {isLoading ? vm.t.ADMIN.LOADING : vm.t.ADMIN.REFRESH}
               </Button>
             </div>
 
@@ -153,7 +73,7 @@ export function AdminScreen() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t.ADMIN.SEARCH_PLACEHOLDER}
+                placeholder={vm.t.ADMIN.SEARCH_PLACEHOLDER}
                 className="w-full rounded bg-black/30 p-3 pl-10 font-minecraft text-theme focus:outline-none focus:ring-1 focus:ring-[var(--mc-accent)] border border-white/10"
               />
               <svg
@@ -187,27 +107,27 @@ export function AdminScreen() {
                     {user.username}
                     {user.isBanned && (
                       <span className="text-red-500 text-xs px-2 py-0.5 bg-red-500/10 rounded">
-                        {t.ADMIN.BANNED_BADGE}
+                        {vm.t.ADMIN.BANNED_BADGE}
                       </span>
                     )}
                   </div>
                   <div className="text-sm text-theme-muted font-minecraft">
-                    {user.email} • {t.ADMIN.ID_LABEL} {user.id.slice(0, 8)}
+                    {user.email} • {vm.t.ADMIN.ID_LABEL} {user.id.slice(0, 8)}
                   </div>
                   <div className="text-xs text-[var(--mc-accent)] mt-1 font-minecraft flex gap-1">
-                    {t.ADMIN.ROLES_LABEL}{" "}
+                    {vm.t.ADMIN.ROLES_LABEL}{" "}
                     {user.roles.map((r) => (
                       <span
                         key={r}
                         className="px-1 bg-white/5 rounded border border-white/5"
                       >
-                        {t.ADMIN.ROLES[r.toUpperCase() as keyof typeof t.ADMIN.ROLES]}
+                        {vm.t.ADMIN.ROLES[r.toUpperCase() as keyof typeof vm.t.ADMIN.ROLES]}
                       </span>
                     ))}
                   </div>
                   {user.isBanned && user.banReason && (
                     <div className="text-xs text-red-400 mt-1 font-minecraft italic">
-                      {t.ADMIN.REASON_LABEL} {user.banReason}
+                      {vm.t.ADMIN.REASON_LABEL} {user.banReason}
                     </div>
                   )}
                 </div>
@@ -217,9 +137,9 @@ export function AdminScreen() {
                     variant="ghost"
                     size="sm"
                     onClick={() => openRolesModal(user)}
-                    disabled={user.id === currentUser?.id || actionLoading === user.id}
+                    disabled={user.id === vm.currentUser?.id || actionLoading === user.id}
                   >
-                    {actionLoading === user.id ? "..." : t.ADMIN.BUTTONS.EDIT_ROLES}
+                    {actionLoading === user.id ? "..." : vm.t.ADMIN.BUTTONS.EDIT_ROLES}
                   </Button>
 
                   {user.isBanned ? (
@@ -230,17 +150,17 @@ export function AdminScreen() {
                       className="bg-green-600 hover:bg-green-500"
                       disabled={actionLoading === user.id}
                     >
-                      {actionLoading === user.id ? "..." : t.ADMIN.BUTTONS.UNBAN}
+                      {actionLoading === user.id ? "..." : vm.t.ADMIN.BUTTONS.UNBAN}
                     </Button>
                   ) : (
                     <Button
                       variant="minecraft"
                       size="sm"
                       onClick={() => openBanModal(user)}
-                      disabled={user.id === currentUser?.id || actionLoading === user.id}
+                      disabled={user.id === vm.currentUser?.id || actionLoading === user.id}
                       className="bg-red-600 hover:bg-red-500"
                     >
-                      {actionLoading === user.id ? "..." : t.ADMIN.BUTTONS.BAN}
+                      {actionLoading === user.id ? "..." : vm.t.ADMIN.BUTTONS.BAN}
                     </Button>
                   )}
                 </div>
@@ -249,7 +169,7 @@ export function AdminScreen() {
 
             {users.length === 0 && !isLoading && (
               <div className="text-center text-theme-muted py-8 font-minecraft">
-                {t.ADMIN.NO_USERS}
+                {vm.t.ADMIN.NO_USERS}
               </div>
             )}
           </div>
@@ -261,7 +181,7 @@ export function AdminScreen() {
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <Card className="w-full max-w-md p-6 bg-[var(--theme-bg)] border border-[var(--theme-sidebar)]">
             <h3 className="font-minecraft text-xl font-bold text-theme mb-4">
-              {t.ADMIN.PROMPTS.BAN_REASON_TITLE(selectedUser.username)}
+              {vm.t.ADMIN.PROMPTS.BAN_REASON_TITLE(selectedUser.username)}
             </h3>
             <div className="flex flex-col gap-4">
               <input
@@ -269,7 +189,7 @@ export function AdminScreen() {
                 autoFocus
                 value={banReason}
                 onChange={(e) => setBanReason(e.target.value)}
-                placeholder={t.ADMIN.PROMPTS.BAN_REASON_PLACEHOLDER}
+                placeholder={vm.t.ADMIN.PROMPTS.BAN_REASON_PLACEHOLDER}
                 className="w-full rounded bg-black/50 p-2 font-minecraft text-theme focus:outline-none focus:ring-1 focus:ring-[var(--mc-accent)] border border-white/10"
               />
               {actionError && (
@@ -279,14 +199,14 @@ export function AdminScreen() {
               )}
               <div className="flex justify-end gap-2 mt-2">
                 <Button variant="ghost" onClick={() => setBanModalOpen(false)}>
-                  {t.COMMON.CANCEL}
+                  {vm.t.COMMON.CANCEL}
                 </Button>
                 <Button
                   variant="minecraft"
                   onClick={executeBan}
                   className="bg-red-600 hover:bg-red-500"
                 >
-                  {t.ADMIN.BUTTONS.BAN}
+                  {vm.t.ADMIN.BUTTONS.BAN}
                 </Button>
               </div>
             </div>
@@ -299,7 +219,7 @@ export function AdminScreen() {
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <Card className="w-full max-w-md p-6 bg-[var(--theme-bg)] border border-[var(--theme-sidebar)]">
             <h3 className="font-minecraft text-xl font-bold text-theme mb-4 text-center">
-              {t.ADMIN.PROMPTS.UNBAN_CONFIRM_TITLE(selectedUser.username)}
+              {vm.t.ADMIN.PROMPTS.UNBAN_CONFIRM_TITLE(selectedUser.username)}
             </h3>
             {actionError && (
               <div className="text-red-500 mb-4 font-minecraft text-xs text-center">
@@ -308,14 +228,14 @@ export function AdminScreen() {
             )}
             <div className="flex justify-center gap-4">
               <Button variant="ghost" onClick={() => setUnbanModalOpen(false)}>
-                {t.COMMON.CANCEL}
+                {vm.t.COMMON.CANCEL}
               </Button>
               <Button
                 variant="minecraft"
                 onClick={executeUnban}
                 className="bg-green-600 hover:bg-green-500"
               >
-                {t.COMMON.CONFIRM}
+                {vm.t.COMMON.CONFIRM}
               </Button>
             </div>
           </Card>
@@ -327,11 +247,11 @@ export function AdminScreen() {
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <Card className="w-full max-w-md p-6 bg-[var(--theme-bg)] border border-[var(--theme-sidebar)]">
             <h3 className="font-minecraft text-xl font-bold text-theme mb-6">
-              {t.ADMIN.PROMPTS.EDIT_ROLES_TITLE(selectedUser.username)}
+              {vm.t.ADMIN.PROMPTS.EDIT_ROLES_TITLE(selectedUser.username)}
             </h3>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-3">
-                {(["user", "moderator", "admin"] as Role[]).map((role) => (
+                {availableRoles.map((role) => (
                   <label
                     key={role}
                     className="flex items-center gap-3 cursor-pointer group"
@@ -351,7 +271,7 @@ export function AdminScreen() {
                       )}
                     </div>
                     <span className="font-minecraft text-theme select-none uppercase">
-                      {t.ADMIN.ROLES[role.toUpperCase() as keyof typeof t.ADMIN.ROLES]}
+                      {vm.t.ADMIN.ROLES[role.toUpperCase() as keyof typeof vm.t.ADMIN.ROLES]}
                     </span>
                   </label>
                 ))}
@@ -368,10 +288,10 @@ export function AdminScreen() {
                   variant="ghost"
                   onClick={() => setRolesModalOpen(false)}
                 >
-                  {t.COMMON.CANCEL}
+                  {vm.t.COMMON.CANCEL}
                 </Button>
                 <Button variant="minecraft" onClick={executeRolesUpdate}>
-                  {t.COMMON.SAVE}
+                  {vm.t.COMMON.SAVE}
                 </Button>
               </div>
             </div>

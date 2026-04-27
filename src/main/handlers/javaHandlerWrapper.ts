@@ -42,7 +42,7 @@ export default function javaHandler() {
       return { success };
     } catch (error) {
       log.error(LOG_MESSAGES.JAVA_REMOVE_FAILED, error);
-      return { success: false, error: (error as Error).message };
+      return { success: false, error: ERROR_CODES.DOWNLOAD_FAILED };
     }
   });
 
@@ -86,7 +86,7 @@ export default function javaHandler() {
       return { success: true, javaPath };
     } catch (error) {
       log.error(LOG_MESSAGES.JAVA_DOWNLOAD_FAILED, error);
-      return { success: false, error: (error as Error).message };
+      return { success: false, error: ERROR_CODES.DOWNLOAD_FAILED };
     } finally {
       downloadLocks.delete(version);
     }

@@ -21,6 +21,7 @@ import {
 } from "../shared/constants/ipc-chanels";
 import { ERROR_CODES } from "../shared/constants/errors";
 import { LOG_MESSAGES } from "../shared/constants/log-messages";
+import { getDateFolder } from "./utils/dateFolder";
 import setupLogHandler from "./handlers/logHandler";
 import windowControlsHandler from "./handlers/windowControlsHandler";
 import secureStorageHandler from "./handlers/secureStorageHandler";
@@ -63,14 +64,6 @@ const isDev = !app.isPackaged;
 const LangLoader = require(
   path.join(appRoot, "_legacy_app", "assets", "js", "langloader"),
 ) as LegacyLangLoader;
-
-function getDateFolder(): string {
-  const now = new Date();
-  const day = now.getDate();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const year = now.getFullYear();
-  return `${day}.${month}.${year}`;
-}
 
 const dateFolder = getDateFolder();
 let isHandlingFatalError = false;
@@ -243,10 +236,7 @@ async function triggerRecoveryUpdate(): Promise<void> {
     await autoUpdater.checkForUpdates();
     await autoUpdater.downloadUpdate();
   } catch (error) {
-    log.error(
-      "Failed to trigger recovery update after integrity mismatch",
-      error,
-    );
+    log.error(LOG_MESSAGES.APP_RECOVERY_UPDATE_FAILED, error);
   }
 }
 
@@ -281,15 +271,13 @@ async function fetchExpectedAsarSha256(): Promise<string | null> {
     const expectedHash = extractAsarSha256FromLatestYml(latestYml);
 
     if (!expectedHash) {
-      log.warn(
-        "ASAR integrity check skipped: latest.yml does not contain appAsarSha256/asarSha256",
-      );
+      log.warn(LOG_MESSAGES.APP_LATEST_YML_MISSING_HASH);
       return null;
     }
 
     return expectedHash;
   } catch (error) {
-    log.warn("Failed to fetch latest.yml for ASAR integrity check", error);
+    log.warn(LOG_MESSAGES.APP_LATEST_YML_FETCH_FAILED, error);
     return null;
   }
 }
@@ -305,9 +293,7 @@ async function verifyAsarIntegrity(): Promise<IntegrityCheckResult> {
 
   const expectedHashRaw = await fetchExpectedAsarSha256();
   if (!expectedHashRaw || !isHexHash(expectedHashRaw)) {
-    log.warn(
-      "ASAR integrity check skipped: expected hash is missing or invalid",
-    );
+    log.warn(LOG_MESSAGES.APP_EXPECTED_HASH_INVALID);
     return {
       ok: true,
       status: "offline",
@@ -316,8 +302,10 @@ async function verifyAsarIntegrity(): Promise<IntegrityCheckResult> {
   }
 
   const asarPath = path.join(process.resourcesPath, "app.asar");
-  if (!fs.existsSync(asarPath)) {
-    log.warn("ASAR integrity check skipped: app.asar not found", asarPath);
+  try {
+    await fs.promises.access(asarPath, fs.constants.F_OK);
+  } catch {
+    log.warn(LOG_MESSAGES.APP_ASAR_NOT_FOUND, asarPath);
     return {
       ok: true,
       status: "skipped",
@@ -329,7 +317,7 @@ async function verifyAsarIntegrity(): Promise<IntegrityCheckResult> {
     const expectedHash = normalizeHexHash(expectedHashRaw);
     const actualHash = normalizeHexHash(await calculateFileSha256(asarPath));
     if (actualHash === expectedHash) {
-      log.info("ASAR integrity check passed");
+      log.info(LOG_MESSAGES.APP_ASAR_INTEGRITY_OK);
       return {
         ok: true,
         status: "ok",
@@ -339,7 +327,7 @@ async function verifyAsarIntegrity(): Promise<IntegrityCheckResult> {
       };
     }
 
-    log.warn("ASAR integrity mismatch detected", { expectedHash, actualHash });
+    log.warn(LOG_MESSAGES.APP_ASAR_INTEGRITY_MISMATCH, { expectedHash, actualHash });
     await triggerRecoveryUpdate();
     return {
       ok: false,
@@ -350,7 +338,7 @@ async function verifyAsarIntegrity(): Promise<IntegrityCheckResult> {
       actualHash,
     };
   } catch (error) {
-    log.error("ASAR integrity check failed", error);
+    log.error(LOG_MESSAGES.APP_ASAR_INTEGRITY_FAILED, error);
     return {
       ok: false,
       status: "error",
@@ -389,7 +377,7 @@ function createWindow(): BrowserWindow {
   });
 
   if (isDev) {
-    console.log("DEV MODE!");
+    log.info(LOG_MESSAGES.APP_DEV_MODE);
     window.loadURL(MAIN_CONSTANTS.APP_CONFIG.DEV_URL);
     window.webContents.once("did-finish-load", () => {
       window.webContents.openDevTools({ mode: "detach" });

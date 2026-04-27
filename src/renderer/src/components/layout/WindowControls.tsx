@@ -1,4 +1,4 @@
-import { useWindowControls } from '../../hooks';
+import { useWindowControls } from '../../hooks/useWindowControls';
 import { useTranslation } from '../../hooks/useTranslation';
 
 export function WindowControls() {

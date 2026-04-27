@@ -94,7 +94,7 @@ export default function systemHandler(
 
   ipcMain.handle(IPC_CHANNELS.SYSTEM.OPEN_EXTERNAL, async (_event, url: string) => {
     if (!isSafeHttpUrl(url)) {
-      log.warn("Blocked unsafe external URL", url);
+      log.warn(LOG_MESSAGES.SYSTEM_BLOCKED_UNSAFE_EXTERNAL_URL, url);
       return;
     }
 
@@ -124,13 +124,13 @@ export default function systemHandler(
     );
 
     if (!safeDirectory) {
-      log.warn("Blocked unsafe openPath target", targetPath);
+      log.warn(LOG_MESSAGES.SYSTEM_BLOCKED_UNSAFE_OPEN_PATH, targetPath);
       return;
     }
 
     const openError = await shell.openPath(safeDirectory);
     if (openError) {
-      log.error("Failed to open path", { safeDirectory, openError });
+      log.error(LOG_MESSAGES.SYSTEM_OPEN_PATH_FAILED, { safeDirectory, openError });
     }
   });
 

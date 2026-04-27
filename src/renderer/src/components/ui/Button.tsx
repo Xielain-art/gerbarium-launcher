@@ -1,28 +1,40 @@
-import type { ButtonProps } from '../types';
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+
+type ButtonVariant = "minecraft" | "primary" | "secondary" | "danger" | "ghost";
+type ButtonSize = "sm" | "md" | "lg" | "xl";
+
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  isLoading?: boolean;
+  className?: string;
+  children?: ReactNode;
+}
 
 export function Button({
-  variant = 'minecraft',
-  size = 'md',
+  variant = "minecraft",
+  size = "md",
   isLoading = false,
-  className = '',
+  className = "",
   children,
   disabled,
   ...props
 }: ButtonProps) {
-  const baseStyles = 'mc-btn gap-2';
+  const baseStyles = "mc-btn gap-2";
 
   const variantStyles = {
-    minecraft: '',
-    primary: 'mc-btn-primary',
-    secondary: 'mc-btn-secondary',
-    danger: 'mc-btn-danger',
+    minecraft: "",
+    primary: "mc-btn-primary",
+    secondary: "mc-btn-secondary",
+    danger: "mc-btn-danger",
+    ghost: "mc-btn-ghost",
   };
 
   const sizeStyles = {
-    sm: 'mc-btn-sm',
-    md: 'mc-btn-md',
-    lg: 'mc-btn-lg',
-    xl: 'mc-btn-xl',
+    sm: "mc-btn-sm",
+    md: "mc-btn-md",
+    lg: "mc-btn-lg",
+    xl: "mc-btn-xl",
   };
 
   return (
@@ -58,7 +70,7 @@ export function Button({
           />
         </svg>
       )}
-      <span className={isLoading ? 'opacity-90' : ''}>{children}</span>
+      <span className={isLoading ? "opacity-90" : ""}>{children}</span>
     </button>
   );
 }

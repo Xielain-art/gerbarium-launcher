@@ -1,7 +1,6 @@
+import type { ApiUser } from "../../lib/api/admin";
+
 export const IPC_CHANNELS = {
-  HELLO: {
-    SAY_HELLO: "hello:say-hello",
-  },
   WINDOW: {
     MINIMIZE: "window:minimize",
     MAXIMIZE: "window:maximize",
@@ -101,6 +100,18 @@ export interface AuthSessionUser {
   };
 }
 
+export interface AdminUsersResponse {
+  success: boolean;
+  data?: ApiUser[] | { data: ApiUser[] };
+  error?: string;
+}
+
+export interface AdminUserMutationResponse {
+  success: boolean;
+  data?: ApiUser;
+  error?: string;
+}
+
 export type GameProgressPayload =
   | { type: "data"; content: string }
   | {
@@ -143,10 +154,6 @@ export interface CrashReportPayload {
 
 // Карта типов для всех наших IPC событий
 export interface IpcChannelMap {
-  [IPC_CHANNELS.HELLO.SAY_HELLO]: {
-    args: [username: string];
-    return: string;
-  };
   [IPC_CHANNELS.WINDOW.MINIMIZE]: {
     args: [];
     return: void;
@@ -165,6 +172,10 @@ export interface IpcChannelMap {
   };
   [IPC_CHANNELS.WINDOW.OPEN_DEVTOOLS]: {
     args: [];
+    return: void;
+  };
+  [IPC_CHANNELS.WINDOW.ON_STATE_CHANGE]: {
+    args: [state: WindowState];
     return: void;
   };
   [IPC_CHANNELS.UPDATE.MESSAGE]: {
@@ -256,19 +267,19 @@ export interface IpcChannelMap {
   };
   [IPC_CHANNELS.ADMIN.GET_USERS]: {
     args: [search?: string];
-    return: { success: boolean; data?: any[]; error?: string };
+    return: AdminUsersResponse;
   };
   [IPC_CHANNELS.ADMIN.BAN_USER]: {
     args: [userId: string, reason: string];
-    return: { success: boolean; data?: any; error?: string };
+    return: AdminUserMutationResponse;
   };
   [IPC_CHANNELS.ADMIN.UNBAN_USER]: {
     args: [userId: string];
-    return: { success: boolean; data?: any; error?: string };
+    return: AdminUserMutationResponse;
   };
   [IPC_CHANNELS.ADMIN.UPDATE_ROLES]: {
     args: [userId: string, roles: ("user" | "moderator" | "admin")[]];
-    return: { success: boolean; data?: any; error?: string };
+    return: AdminUserMutationResponse;
   };
   [IPC_CHANNELS.JAVA.CHECK_VERSION]: {
     args: [javaPath: string];
@@ -287,7 +298,7 @@ export interface IpcChannelMap {
     return: { success: boolean; javaPath?: string; error?: string };
   };
   [IPC_CHANNELS.JAVA.DOWNLOAD_PROGRESS]: {
-    args: [percent: number];
+    args: [update: JavaDownloadProgressPayload];
     return: void;
   };
   [IPC_CHANNELS.JAVA.GET_INSTALLED]: {
@@ -384,3 +395,8 @@ export type DownloadStatus =
   | "EXTRACTING"
   | "VERIFYING"
   | "DONE";
+
+export interface JavaDownloadProgressPayload {
+  status: DownloadStatus;
+  progress?: number;
+}

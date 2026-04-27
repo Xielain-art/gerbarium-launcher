@@ -4,6 +4,7 @@ import {
   GameLaunchOptions,
   GameProgressPayload,
 } from "../../shared/constants/ipc-chanels";
+import { LOG_MESSAGES } from "../../shared/constants/log-messages";
 import { Client, Authenticator } from "minecraft-launcher-core";
 import os from "node:os";
 import path from "node:path";
@@ -161,7 +162,7 @@ function sendProgress(mainWindow: BrowserWindow, payload: GameProgressPayload): 
   try {
     webContents.send(IPC_CHANNELS.GAME.PROGRESS, payload);
   } catch (error) {
-    log.warn("Failed to emit game progress event", error);
+    log.warn(LOG_MESSAGES.GAME_PROGRESS_EMIT_FAILED, error);
   }
 }
 
@@ -344,7 +345,7 @@ export default function setupGameHandlers(mainWindow: BrowserWindow) {
         const launchPromise = launcher.launch(opts);
         launchPromise.catch((error) => {
           const errorMessage = toErrorMessage(error);
-          log.error("Failed to launch game asynchronously", error);
+          log.error(LOG_MESSAGES.GAME_LAUNCH_ASYNC_FAILED, error);
           emitProgress({ type: "error", content: errorMessage });
         });
 
@@ -352,7 +353,7 @@ export default function setupGameHandlers(mainWindow: BrowserWindow) {
 
         return { success: true };
       } catch (error: unknown) {
-        log.error("Failed to setup/launch game", error);
+        log.error(LOG_MESSAGES.GAME_LAUNCH_SETUP_FAILED, error);
         return { success: false, error: toErrorMessage(error) };
       }
     }
