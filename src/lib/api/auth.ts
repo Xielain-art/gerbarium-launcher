@@ -1,69 +1,25 @@
 import { apiClient } from "./client";
-import type { components } from "./v1";
-
-export type ApiUser = components["schemas"]["UserResponseDto"];
-export type ApiAuthResponse = components["schemas"]["AuthResponseDto"];
-export type ApiLoginDto = components["schemas"]["LoginDto"];
-export type ApiRegisterDto = components["schemas"]["RegisterDto"];
-
-export type ApiResult<T> = {
-  success: boolean;
-  data?: T;
-  status?: number;
-  errorMessage?: string;
-  setCookie?: string | null;
-};
-
-function extractErrorMessage(error: unknown): string | undefined {
-  if (!error || typeof error !== "object") {
-    return undefined;
-  }
-
-  const maybeRecord = error as Record<string, unknown>;
-  const message = maybeRecord.message;
-  if (typeof message === "string" && message.trim()) {
-    return message.trim();
-  }
-
-  const errorText = maybeRecord.error;
-  if (typeof errorText === "string" && errorText.trim()) {
-    return errorText.trim();
-  }
-
-  return undefined;
-}
-
-function buildNetworkErrorResult<T>(error: unknown): ApiResult<T> {
-  return {
-    success: false,
-    errorMessage: extractErrorMessage(error) ?? "Network request failed",
-  };
-}
+import { buildApiResult, buildNetworkErrorResult } from "./result";
+import type {
+  ApiAuthResponse,
+  ApiLoginDto,
+  ApiRegisterDto,
+  ApiResult,
+  ApiUser,
+} from "./types";
+export type { ApiAuthResponse, ApiLoginDto, ApiRegisterDto, ApiResult, ApiUser } from "./types";
 
 export async function loginRequest(payload: ApiLoginDto): Promise<ApiResult<ApiAuthResponse>> {
   try {
     const { data, error, response } = await apiClient.POST("/api/auth/login", {
       body: payload,
     });
-
-    if (!response) {
-      return { success: false };
-    }
-
-    if (!response.ok || !data) {
-      return {
-        success: false,
-        status: response.status,
-        errorMessage: extractErrorMessage(error),
-      };
-    }
-
-    return {
-      success: true,
+    return buildApiResult<ApiAuthResponse>({
+      response,
       data,
-      status: response.status,
-      setCookie: response.headers.get("set-cookie"),
-    };
+      error,
+      includeSetCookie: true,
+    });
   } catch (error) {
     return buildNetworkErrorResult<ApiAuthResponse>(error);
   }
@@ -74,25 +30,12 @@ export async function registerRequest(payload: ApiRegisterDto): Promise<ApiResul
     const { data, error, response } = await apiClient.POST("/api/auth/register", {
       body: payload,
     });
-
-    if (!response) {
-      return { success: false };
-    }
-
-    if (!response.ok || !data) {
-      return {
-        success: false,
-        status: response.status,
-        errorMessage: extractErrorMessage(error),
-      };
-    }
-
-    return {
-      success: true,
+    return buildApiResult<ApiAuthResponse>({
+      response,
       data,
-      status: response.status,
-      setCookie: response.headers.get("set-cookie"),
-    };
+      error,
+      includeSetCookie: true,
+    });
   } catch (error) {
     return buildNetworkErrorResult<ApiAuthResponse>(error);
   }
@@ -105,25 +48,12 @@ export async function refreshTokenRequest(cookie: string): Promise<ApiResult<Api
         Cookie: cookie,
       },
     });
-
-    if (!response) {
-      return { success: false };
-    }
-
-    if (!response.ok || !data) {
-      return {
-        success: false,
-        status: response.status,
-        errorMessage: extractErrorMessage(error),
-      };
-    }
-
-    return {
-      success: true,
+    return buildApiResult<ApiAuthResponse>({
+      response,
       data,
-      status: response.status,
-      setCookie: response.headers.get("set-cookie"),
-    };
+      error,
+      includeSetCookie: true,
+    });
   } catch (error) {
     return buildNetworkErrorResult<ApiAuthResponse>(error);
   }
@@ -136,24 +66,7 @@ export async function profileRequest(accessToken: string): Promise<ApiResult<Api
         Authorization: `Bearer ${accessToken}`,
       },
     });
-
-    if (!response) {
-      return { success: false };
-    }
-
-    if (!response.ok || !data) {
-      return {
-        success: false,
-        status: response.status,
-        errorMessage: extractErrorMessage(error),
-      };
-    }
-
-    return {
-      success: true,
-      data,
-      status: response.status,
-    };
+    return buildApiResult<ApiUser>({ response, data, error });
   } catch (error) {
     return buildNetworkErrorResult<ApiUser>(error);
   }
@@ -172,23 +85,17 @@ export async function logoutRequest(accessToken: string, cookie?: string): Promi
     const { data, error, response } = await apiClient.POST("/api/auth/logout", {
       headers,
     });
-
-    if (!response) {
-      return { success: false };
+    const result = buildApiResult<{ success: boolean }>({
+      response,
+      data,
+      error,
+    });
+    if (!result.success) {
+      return result;
     }
-
-    if (!response.ok) {
-      return {
-        success: false,
-        status: response.status,
-        errorMessage: extractErrorMessage(error),
-      };
-    }
-
     return {
-      success: true,
-      data: { success: data?.success ?? true },
-      status: response.status,
+      ...result,
+      data: { success: result.data.success ?? true },
     };
   } catch (error) {
     return buildNetworkErrorResult<{ success: boolean }>(error);
