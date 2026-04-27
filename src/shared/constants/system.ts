@@ -161,6 +161,7 @@ export const ROUTES = {
   LOGIN: '/login',
   DASHBOARD: '/dashboard',
   SETTINGS: '/settings',
+  ADMIN: '/admin',
 } as const;
 
 export const APP_CONFIG = {

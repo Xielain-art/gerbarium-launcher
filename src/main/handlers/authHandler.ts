@@ -12,7 +12,10 @@ import {
   type ApiAuthResponse,
   type ApiUser,
 } from "../../lib/api/auth";
-import { IPC_CHANNELS, type AuthSessionUser } from "../../shared/constants/ipc-chanels";
+import {
+  IPC_CHANNELS,
+  type AuthSessionUser,
+} from "../../shared/constants/ipc-chanels";
 import { ERROR_CODES } from "../../shared/constants/errors";
 import { LOG_MESSAGES } from "../../shared/constants/log-messages";
 import { secureStorageLock } from "../utils/secureStorageLock";
@@ -34,7 +37,9 @@ async function readSecureData(secureDataPath: string): Promise<SecureData> {
   try {
     const raw = await fs.readFile(secureDataPath, "utf-8");
     const parsed = JSON.parse(raw);
-    return typeof parsed === "object" && parsed !== null ? (parsed as SecureData) : {};
+    return typeof parsed === "object" && parsed !== null
+      ? (parsed as SecureData)
+      : {};
   } catch (error) {
     const err = error as NodeJS.ErrnoException;
     if (err.code === "ENOENT") {
@@ -44,7 +49,10 @@ async function readSecureData(secureDataPath: string): Promise<SecureData> {
   }
 }
 
-async function writeSecureData(secureDataPath: string, data: SecureData): Promise<void> {
+async function writeSecureData(
+  secureDataPath: string,
+  data: SecureData,
+): Promise<void> {
   await fs.mkdir(path.dirname(secureDataPath), { recursive: true });
   await fs.writeFile(secureDataPath, JSON.stringify(data, null, 2), "utf-8");
 }
@@ -113,13 +121,17 @@ function mapApiUserToSessionUser(user: ApiUser): AuthSessionUser {
 }
 
 function getTokenExpiresAt(expiresInSeconds: number): number {
-  const safeExpiresIn = Number.isFinite(expiresInSeconds) && expiresInSeconds > 0
-    ? expiresInSeconds
-    : 900;
+  const safeExpiresIn =
+    Number.isFinite(expiresInSeconds) && expiresInSeconds > 0
+      ? expiresInSeconds
+      : 900;
   return Date.now() + safeExpiresIn * 1000;
 }
 
-function buildOnlineSession(payload: ApiAuthResponse, setCookie: string | null | undefined): AuthSessionPayload {
+function buildOnlineSession(
+  payload: ApiAuthResponse,
+  setCookie: string | null | undefined,
+): AuthSessionPayload {
   return {
     mode: "online",
     accessToken: payload.accessToken,
@@ -145,7 +157,9 @@ function mapAuthFailureCode(status?: number): string {
   return ERROR_CODES.AUTH_API_REQUEST_FAILED;
 }
 
-async function readStoredSession(secureDataPath: string): Promise<AuthSessionPayload | null> {
+async function readStoredSession(
+  secureDataPath: string,
+): Promise<AuthSessionPayload | null> {
   return await secureStorageLock.runExclusive(async () => {
     const secureData = await readSecureData(secureDataPath);
     const encryptedSession = secureData[AUTH_SESSION_KEY];
@@ -156,7 +170,10 @@ async function readStoredSession(secureDataPath: string): Promise<AuthSessionPay
   });
 }
 
-async function writeStoredSession(secureDataPath: string, payload: AuthSessionPayload): Promise<void> {
+async function writeStoredSession(
+  secureDataPath: string,
+  payload: AuthSessionPayload,
+): Promise<void> {
   await secureStorageLock.runExclusive(async () => {
     const secureData = await readSecureData(secureDataPath);
     secureData[AUTH_SESSION_KEY] = encryptSession(payload);
@@ -174,7 +191,9 @@ async function clearStoredSession(secureDataPath: string): Promise<void> {
   });
 }
 
-async function refreshOnlineSession(session: AuthSessionPayload): Promise<AuthSessionPayload | null> {
+async function refreshOnlineSession(
+  session: AuthSessionPayload,
+): Promise<AuthSessionPayload | null> {
   if (!session.refreshCookie) {
     return null;
   }
@@ -182,15 +201,24 @@ async function refreshOnlineSession(session: AuthSessionPayload): Promise<AuthSe
   log.info(LOG_MESSAGES.AUTH_TOKEN_REFRESH_ATTEMPT);
   const refreshResult = await refreshTokenRequest(session.refreshCookie);
   if (!refreshResult.success || !refreshResult.data) {
-    log.error(LOG_MESSAGES.AUTH_TOKEN_REFRESH_FAILED, refreshResult.status, refreshResult.errorMessage);
+    log.error(
+      LOG_MESSAGES.AUTH_TOKEN_REFRESH_FAILED,
+      refreshResult.status,
+      refreshResult.errorMessage,
+    );
     return null;
   }
 
   log.info(LOG_MESSAGES.AUTH_TOKEN_REFRESH_SUCCESS);
-  return buildOnlineSession(refreshResult.data, refreshResult.setCookie ?? session.refreshCookie);
+  return buildOnlineSession(
+    refreshResult.data,
+    refreshResult.setCookie ?? session.refreshCookie,
+  );
 }
 
-async function resolveOnlineSession(session: AuthSessionPayload): Promise<AuthSessionPayload | null> {
+async function resolveOnlineSession(
+  session: AuthSessionPayload,
+): Promise<AuthSessionPayload | null> {
   let activeSession = session;
 
   if (
@@ -208,18 +236,32 @@ async function resolveOnlineSession(session: AuthSessionPayload): Promise<AuthSe
     activeSession = refreshed;
   }
 
+  if (!activeSession.accessToken) {
+    log.error(LOG_MESSAGES.AUTH_TOKEN_REFRESH_FAILED);
+    return null;
+  }
   const profileResult = await profileRequest(activeSession.accessToken);
   if (!profileResult.success || !profileResult.data) {
     if (profileResult.status === 401 || profileResult.status === 403) {
       const refreshed = await refreshOnlineSession(activeSession);
       if (!refreshed) {
-        log.error(LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED, profileResult.status, profileResult.errorMessage);
+        log.error(
+          LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
+          profileResult.status,
+          profileResult.errorMessage,
+        );
         return null;
       }
 
-      const refreshedProfile = await profileRequest(refreshed.accessToken ?? "");
+      const refreshedProfile = await profileRequest(
+        refreshed.accessToken ?? "",
+      );
       if (!refreshedProfile.success || !refreshedProfile.data) {
-        log.error(LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED, refreshedProfile.status, refreshedProfile.errorMessage);
+        log.error(
+          LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
+          refreshedProfile.status,
+          refreshedProfile.errorMessage,
+        );
         return null;
       }
 
@@ -229,7 +271,11 @@ async function resolveOnlineSession(session: AuthSessionPayload): Promise<AuthSe
       };
     }
 
-    log.error(LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED, profileResult.status, profileResult.errorMessage);
+    log.error(
+      LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
+      profileResult.status,
+      profileResult.errorMessage,
+    );
     return activeSession;
   }
 
@@ -240,7 +286,10 @@ async function resolveOnlineSession(session: AuthSessionPayload): Promise<AuthSe
 }
 
 export default function authHandler(app: App) {
-  const secureDataPath = path.join(app.getPath("userData"), SECURE_STORAGE_FILE_NAME);
+  const secureDataPath = path.join(
+    app.getPath("userData"),
+    SECURE_STORAGE_FILE_NAME,
+  );
 
   ipcMain.handle(
     IPC_CHANNELS.AUTH.LOGIN,
@@ -262,14 +311,21 @@ export default function authHandler(app: App) {
         });
 
         if (!authResult.success || !authResult.data) {
-          log.error(LOG_MESSAGES.AUTH_API_ERROR, authResult.status, authResult.errorMessage);
+          log.error(
+            LOG_MESSAGES.AUTH_API_ERROR,
+            authResult.status,
+            authResult.errorMessage,
+          );
           return {
             success: false,
             error: mapAuthFailureCode(authResult.status),
           };
         }
 
-        const session = buildOnlineSession(authResult.data, authResult.setCookie);
+        const session = buildOnlineSession(
+          authResult.data,
+          authResult.setCookie,
+        );
         await writeStoredSession(secureDataPath, session);
 
         log.info(LOG_MESSAGES.AUTH_LOGIN_SUCCESS, session.user.username);
@@ -294,7 +350,11 @@ export default function authHandler(app: App) {
       _event,
       payload: { email: string; username: string; password: string },
     ) => {
-      log.info(LOG_MESSAGES.AUTH_REGISTER_ATTEMPT, payload?.email, payload?.username);
+      log.info(
+        LOG_MESSAGES.AUTH_REGISTER_ATTEMPT,
+        payload?.email,
+        payload?.username,
+      );
       try {
         const email = payload?.email?.trim() ?? "";
         const username = payload?.username?.trim() ?? "";
@@ -313,14 +373,21 @@ export default function authHandler(app: App) {
         });
 
         if (!registerResult.success || !registerResult.data) {
-          log.error(LOG_MESSAGES.AUTH_API_ERROR, registerResult.status, registerResult.errorMessage);
+          log.error(
+            LOG_MESSAGES.AUTH_API_ERROR,
+            registerResult.status,
+            registerResult.errorMessage,
+          );
           return {
             success: false,
             error: mapAuthFailureCode(registerResult.status),
           };
         }
 
-        const session = buildOnlineSession(registerResult.data, registerResult.setCookie);
+        const session = buildOnlineSession(
+          registerResult.data,
+          registerResult.setCookie,
+        );
         await writeStoredSession(secureDataPath, session);
 
         log.info(LOG_MESSAGES.AUTH_REGISTER_SUCCESS, session.user.username);
@@ -419,13 +486,19 @@ export default function authHandler(app: App) {
         void logoutRequest(
           currentSession.accessToken,
           currentSession.refreshCookie,
-        ).then((logoutResult) => {
-          if (!logoutResult.success) {
-            log.error(LOG_MESSAGES.AUTH_API_ERROR, logoutResult.status, logoutResult.errorMessage);
-          }
-        }).catch((error) => {
-          log.error(LOG_MESSAGES.AUTH_LOGOUT_FAILED, error);
-        });
+        )
+          .then((logoutResult) => {
+            if (!logoutResult.success) {
+              log.error(
+                LOG_MESSAGES.AUTH_API_ERROR,
+                logoutResult.status,
+                logoutResult.errorMessage,
+              );
+            }
+          })
+          .catch((error) => {
+            log.error(LOG_MESSAGES.AUTH_LOGOUT_FAILED, error);
+          });
       }
 
       return { success: true };

@@ -1,4 +1,11 @@
-import { app, BrowserWindow, Menu, Tray, ipcMain, type MenuItemConstructorOptions } from "electron";
+import {
+  app,
+  BrowserWindow,
+  Menu,
+  Tray,
+  ipcMain,
+  type MenuItemConstructorOptions,
+} from "electron";
 import path from "node:path";
 import fs from "node:fs";
 import crypto from "node:crypto";
@@ -27,7 +34,9 @@ type LegacyLangLoader = {
   setupLanguage: () => void;
 };
 
-function sanitizeSettingsPatch(newSettings: unknown): Partial<LauncherSettings> {
+function sanitizeSettingsPatch(
+  newSettings: unknown,
+): Partial<LauncherSettings> {
   if (!newSettings || typeof newSettings !== "object") {
     return {};
   }
@@ -50,7 +59,9 @@ function sanitizeSettingsPatch(newSettings: unknown): Partial<LauncherSettings> 
 const appRoot = path.resolve(__dirname, "..", "..");
 
 const isDev = !app.isPackaged;
-const LangLoader = require(path.join(appRoot, "_legacy_app", "assets", "js", "langloader")) as LegacyLangLoader;
+const LangLoader = require(
+  path.join(appRoot, "_legacy_app", "assets", "js", "langloader"),
+) as LegacyLangLoader;
 
 function getDateFolder(): string {
   const now = new Date();
@@ -71,7 +82,7 @@ function getMainLogPath(): string {
     app.getPath(MAIN_CONSTANTS.DIRECTORIES.USER_DATA),
     MAIN_CONSTANTS.DIRECTORIES.LOGS,
     dateFolder,
-    MAIN_CONSTANTS.LOG_FILE_NAMES.MAIN
+    MAIN_CONSTANTS.LOG_FILE_NAMES.MAIN,
   );
 }
 
@@ -83,20 +94,23 @@ function handleFatalError(title: string, details: unknown): void {
   }
   isHandlingFatalError = true;
 
-  const message = details instanceof Error
-    ? details.stack || details.message
-    : String(details);
+  const message =
+    details instanceof Error
+      ? details.stack || details.message
+      : String(details);
 
   log.error(title, details);
   void writeCrashReport({
     title,
     message,
     timestamp: new Date().toISOString(),
-  }).catch((error) => {
-    log.error(LOG_MESSAGES.APP_CRASH_REPORT_WRITE_FAILED, error);
-  }).finally(() => {
-    app.exit(1);
-  });
+  })
+    .catch((error) => {
+      log.error(LOG_MESSAGES.APP_CRASH_REPORT_WRITE_FAILED, error);
+    })
+    .finally(() => {
+      app.exit(1);
+    });
 }
 
 process.on("uncaughtException", (error) => {
@@ -117,7 +131,8 @@ let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let settings: LauncherSettings = { minimizeToTray: false };
 let isQuiting = false;
-const LATEST_YML_URL = "https://github.com/Xielain-art/gerbarium-releases/releases/latest/download/latest.yml";
+const LATEST_YML_URL =
+  "https://github.com/Xielain-art/gerbarium-releases/releases/latest/download/latest.yml";
 const LAST_CRASH_REPORT_FILE = "last-crash-report.json";
 
 function getCrashReportPath(): string {
@@ -130,7 +145,11 @@ function getCrashReportPath(): string {
 async function writeCrashReport(report: CrashReportPayload): Promise<void> {
   const crashPath = getCrashReportPath();
   await fs.promises.mkdir(path.dirname(crashPath), { recursive: true });
-  await fs.promises.writeFile(crashPath, JSON.stringify(report, null, 2), "utf-8");
+  await fs.promises.writeFile(
+    crashPath,
+    JSON.stringify(report, null, 2),
+    "utf-8",
+  );
 }
 
 async function readCrashReport(): Promise<CrashReportPayload | null> {
@@ -174,7 +193,9 @@ function isSimpleYamlComment(value: string): boolean {
   return value.startsWith("#");
 }
 
-function parseSimpleYamlKeyValue(line: string): { key: string; value: string } | null {
+function parseSimpleYamlKeyValue(
+  line: string,
+): { key: string; value: string } | null {
   const separatorIndex = line.indexOf(":");
   if (separatorIndex <= 0) {
     return null;
@@ -195,7 +216,10 @@ function parseSimpleYamlKeyValue(line: string): { key: string; value: string } |
     value = value.slice(0, hashCommentIndex).trim();
   }
 
-  if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
     value = value.slice(1, -1).trim();
   }
 
@@ -218,7 +242,10 @@ async function triggerRecoveryUpdate(): Promise<void> {
     await autoUpdater.checkForUpdates();
     await autoUpdater.downloadUpdate();
   } catch (error) {
-    log.error("Failed to trigger recovery update after integrity mismatch", error);
+    log.error(
+      "Failed to trigger recovery update after integrity mismatch",
+      error,
+    );
   }
 }
 
@@ -253,7 +280,9 @@ async function fetchExpectedAsarSha256(): Promise<string | null> {
     const expectedHash = extractAsarSha256FromLatestYml(latestYml);
 
     if (!expectedHash) {
-      log.warn("ASAR integrity check skipped: latest.yml does not contain appAsarSha256/asarSha256");
+      log.warn(
+        "ASAR integrity check skipped: latest.yml does not contain appAsarSha256/asarSha256",
+      );
       return null;
     }
 
@@ -275,7 +304,9 @@ async function verifyAsarIntegrity(): Promise<IntegrityCheckResult> {
 
   const expectedHashRaw = await fetchExpectedAsarSha256();
   if (!expectedHashRaw || !isHexHash(expectedHashRaw)) {
-    log.warn("ASAR integrity check skipped: expected hash is missing or invalid");
+    log.warn(
+      "ASAR integrity check skipped: expected hash is missing or invalid",
+    );
     return {
       ok: true,
       status: "offline",
@@ -312,7 +343,8 @@ async function verifyAsarIntegrity(): Promise<IntegrityCheckResult> {
     return {
       ok: false,
       status: "mismatch",
-      message: "ASAR integrity mismatch detected. Recovery update was triggered.",
+      message:
+        "ASAR integrity mismatch detected. Recovery update was triggered.",
       expectedHash,
       actualHash,
     };
@@ -321,14 +353,24 @@ async function verifyAsarIntegrity(): Promise<IntegrityCheckResult> {
     return {
       ok: false,
       status: "error",
-      message: error instanceof Error ? error.message : "Unknown integrity check error",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Unknown integrity check error",
     };
   }
 }
 
 function getPlatformIcon(filename: string): string {
-  const ext = process.platform === MAIN_CONSTANTS.PLATFORMS.WINDOWS ? "ico" : "png";
-  return path.join(appRoot, "_legacy_app", "assets", "images", `${filename}.${ext}`);
+  const ext =
+    process.platform === MAIN_CONSTANTS.PLATFORMS.WINDOWS ? "ico" : "png";
+  return path.join(
+    appRoot,
+    "_legacy_app",
+    "assets",
+    "images",
+    `${filename}.${ext}`,
+  );
 }
 
 function createWindow(): BrowserWindow {
@@ -346,8 +388,11 @@ function createWindow(): BrowserWindow {
   });
 
   if (isDev) {
+    console.log("DEV MODE!");
     window.loadURL(MAIN_CONSTANTS.APP_CONFIG.DEV_URL);
-    window.webContents.openDevTools();
+    window.webContents.openDevTools({
+      mode: "detach",
+    });
   } else {
     window.loadFile(path.join(appRoot, MAIN_CONSTANTS.APP_CONFIG.PROD_INDEX));
   }
@@ -433,11 +478,14 @@ function syncTrayState(): void {
   destroyTray();
 }
 
-ipcMain.on(IPC_CHANNELS.SYSTEM.SETTINGS_UPDATED, (_event, newSettings: unknown) => {
-  const safePatch = sanitizeSettingsPatch(newSettings);
-  settings = { ...settings, ...safePatch };
-  syncTrayState();
-});
+ipcMain.on(
+  IPC_CHANNELS.SYSTEM.SETTINGS_UPDATED,
+  (_event, newSettings: unknown) => {
+    const safePatch = sanitizeSettingsPatch(newSettings);
+    settings = { ...settings, ...safePatch };
+    syncTrayState();
+  },
+);
 
 ipcMain.handle(IPC_CHANNELS.APP.VERIFY_INTEGRITY, async () => {
   return await verifyAsarIntegrity();
@@ -476,7 +524,7 @@ app.whenReady().then(() => {
   secureStorageHandler(app);
   authHandler(app);
   updateHandler(app);
-  javaHandler(app);
+  javaHandler();
   systemHandler(app, () => settings);
   gameHandler(mainWindow);
   setupLogHandler(app);
@@ -512,4 +560,3 @@ app.on("activate", () => {
     mainWindow = createWindow();
   }
 });
-

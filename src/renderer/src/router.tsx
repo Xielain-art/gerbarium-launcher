@@ -6,7 +6,14 @@ import {
   redirect,
   createHashHistory,
 } from "@tanstack/react-router";
-import { LoginScreen, DashboardScreen, SettingsScreen, UpdateScreen, IntegrityCheckScreen } from "./pages";
+import {
+  LoginScreen,
+  DashboardScreen,
+  SettingsScreen,
+  UpdateScreen,
+  IntegrityCheckScreen,
+  AdminScreen,
+} from "./pages";
 import { useAuthStore } from "./stores/useAuthStore";
 import { useStartupGateStore } from "./stores/useStartupGateStore";
 import { ROUTES } from "../../shared/constants/system";
@@ -16,6 +23,11 @@ import { CrashNoticeBanner } from "./components/layout/CrashNoticeBanner";
 const checkAuth = () => {
   return useAuthStore.getState().isAuthenticated;
 };
+
+const checkIsAdmin = () => {
+  return useAuthStore.getState().user?.roles.includes("admin");
+};
+
 const checkUpdateGate = () => {
   return useStartupGateStore.getState().updateGatePassed;
 };
@@ -88,6 +100,17 @@ const settingsRoute = createRoute({
   },
 });
 
+const adminRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: ROUTES.ADMIN,
+  component: AdminScreen,
+  beforeLoad: async () => {
+    if (!checkAuth() || !checkIsAdmin()) {
+      throw redirect({ to: ROUTES.LOGIN });
+    }
+  },
+});
+
 // Build the route tree
 const routeTree = rootRoute.addChildren([
   integrityRoute,
@@ -95,6 +118,7 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   dashboardRoute,
   settingsRoute,
+  adminRoute,
 ]);
 
 // Create the router instance

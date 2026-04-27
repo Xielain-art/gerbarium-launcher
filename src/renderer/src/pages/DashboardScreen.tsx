@@ -272,6 +272,7 @@ export function DashboardScreen() {
   };
 
   const handleSettings = () => navigate({ to: ROUTES.SETTINGS });
+  const handleAdminPanel = () => navigate({ to: ROUTES.ADMIN });
 
   const handleLogout = async () => {
     await logout();
@@ -304,6 +305,7 @@ export function DashboardScreen() {
         onSelectVersion={setSelectedVersionId}
         onLogout={handleLogout}
         onOpenSettings={handleSettings}
+        onOpenAdminPanel={handleAdminPanel}
       />
 
       <main className="relative z-10 flex flex-1 flex-col overflow-hidden">

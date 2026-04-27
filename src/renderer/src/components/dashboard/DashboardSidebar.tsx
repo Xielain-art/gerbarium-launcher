@@ -41,6 +41,7 @@ interface DashboardSidebarProps {
   onSelectVersion: (versionId: string) => void;
   onLogout: () => void;
   onOpenSettings: () => void;
+  onOpenAdminPanel?: () => void;
 }
 
 export function DashboardSidebar({
@@ -52,8 +53,10 @@ export function DashboardSidebar({
   onSelectVersion,
   onLogout,
   onOpenSettings,
+  onOpenAdminPanel,
 }: DashboardSidebarProps) {
   const roleLabels = getRoleLabels(user);
+  const isAdmin = user?.roles?.includes("admin");
 
   return (
     <aside className="relative z-40 flex h-full w-80 flex-col border-r-[4px] border-theme bg-[color-mix(in_srgb,var(--theme-sidebar)_95%,transparent)] backdrop-blur-md shadow-2xl">
@@ -199,6 +202,28 @@ export function DashboardSidebar({
           </svg>
           {t.DASHBOARD.SETTINGS_BUTTON}
         </Button>
+        {isAdmin && onOpenAdminPanel && (
+          <Button
+            onClick={onOpenAdminPanel}
+            className="w-full justify-start mt-2"
+            variant="minecraft"
+            size="md"
+          >
+            <svg
+              className="mr-2 h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="square"
+                strokeWidth={2}
+                d="M12 11c1.65 0 3-1.35 3-3s-1.35-3-3-3-3 1.35-3 3 1.35 3 3 3zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+              />
+            </svg>
+            Admin Panel
+          </Button>
+        )}
       </div>
     </aside>
   );

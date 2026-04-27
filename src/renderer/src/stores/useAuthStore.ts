@@ -1,12 +1,16 @@
-import { create } from 'zustand';
-import type { AuthUser, AuthCredentials, AuthRegisterCredentials } from '../types';
-import { LOG_ACTIONS } from '../../../shared/constants/system';
-import { UI_STRINGS } from '../../../shared/constants/ui-strings';
-import { ERROR_CODES } from '../../../shared/constants/errors';
+import { create } from "zustand";
+import type {
+  AuthUser,
+  AuthCredentials,
+  AuthRegisterCredentials,
+} from "../types";
+import { LOG_ACTIONS } from "../../../shared/constants/system";
+import { UI_STRINGS } from "../../../shared/constants/ui-strings";
+import { ERROR_CODES } from "../../../shared/constants/errors";
 
 // Auto-log helper
 const logAction = (action: string, details?: string) => {
-  window.electronAPI?.system.logAction(action, details);
+  window.electronAPI.system.logAction(action, details);
 };
 
 interface AuthState {
@@ -20,14 +24,20 @@ interface AuthState {
   error: string | null;
 
   // Actions
-  login: (credentials: AuthCredentials) => Promise<{ success: boolean; error?: string }>;
-  register: (payload: AuthRegisterCredentials) => Promise<{ success: boolean; error?: string }>;
+  login: (
+    credentials: AuthCredentials,
+  ) => Promise<{ success: boolean; error?: string }>;
+  register: (
+    payload: AuthRegisterCredentials,
+  ) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   clearError: () => void;
   loadToken: () => Promise<void>;
 
   // Offline mode
-  loginOffline: (username: string) => Promise<{ success: boolean; error?: string }>;
+  loginOffline: (
+    username: string,
+  ) => Promise<{ success: boolean; error?: string }>;
 }
 
 const defaultState = {
@@ -43,50 +53,51 @@ export const useAuthStore = create<AuthState>()((set) => ({
 
   clearError: () => set({ error: null }),
 
-   loadToken: async () => {
-     try {
-       const result = await window.electronAPI.auth.getSession();
-       if (result.success && result.isAuthenticated && result.user) {
-         set({
-           token: result.accessToken ?? null,
-           isAuthenticated: true,
-           user: {
-             id: result.user.id,
-             username: result.user.username,
-             email: result.user.email ?? "",
-             roles: result.user.roles ?? ["user"],
-             isBanned: result.user.isBanned ?? false,
-             banReason: result.user.banReason,
-             playerProfile: result.user.playerProfile,
-           },
-         });
-         logAction(LOG_ACTIONS.TOKEN_LOADED, `User: ${result.user.username}`);
-         return;
-       }
+  loadToken: async () => {
+    try {
+      const result = await window.electronAPI.auth.getSession();
+      if (result.success && result.isAuthenticated && result.user) {
+        set({
+          token: result.accessToken ?? null,
+          isAuthenticated: true,
+          user: {
+            id: result.user.id,
+            username: result.user.username,
+            email: result.user.email ?? "",
+            roles: result.user.roles ?? ["user"],
+            isBanned: result.user.isBanned ?? false,
+            banReason: result.user.banReason,
+            playerProfile: result.user.playerProfile,
+          },
+        });
+        logAction(LOG_ACTIONS.TOKEN_LOADED, `User: ${result.user.username}`);
+        return;
+      }
 
-       set({
-         token: null,
-         isAuthenticated: false,
-         user: null,
-       });
-     } catch (err) {
-       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
-       logAction(LOG_ACTIONS.TOKEN_LOAD_ERROR, errorMsg);
-       set({
-         token: null,
-         isAuthenticated: false,
-         user: null,
-       });
-     }
-   },
+      set({
+        token: null,
+        isAuthenticated: false,
+        user: null,
+      });
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Unknown error";
+      logAction(LOG_ACTIONS.TOKEN_LOAD_ERROR, errorMsg);
+      set({
+        token: null,
+        isAuthenticated: false,
+        user: null,
+      });
+    }
+  },
 
   logout: async () => {
-    logAction(LOG_ACTIONS.LOGOUT, 'User logged out');
+    logAction(LOG_ACTIONS.LOGOUT, "User logged out");
     set(defaultState);
     try {
       await window.electronAPI.auth.logout();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Logout request failed";
+      const errorMessage =
+        err instanceof Error ? err.message : "Logout request failed";
       logAction(LOG_ACTIONS.LOGOUT, `Logout API error: ${errorMessage}`);
     }
   },
@@ -95,16 +106,19 @@ export const useAuthStore = create<AuthState>()((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-       if (!credentials.login.trim() || !credentials.password.trim()) {
-         logAction(LOG_ACTIONS.LOGIN_VALIDATION_ERROR, 'Empty login or password');
-         const errorMsg = ERROR_CODES.AUTH_VALIDATION_FAILED;
-         set({ isLoading: false, error: errorMsg });
-         return { success: false, error: errorMsg };
-       }
+      if (!credentials.login.trim() || !credentials.password.trim()) {
+        logAction(
+          LOG_ACTIONS.LOGIN_VALIDATION_ERROR,
+          "Empty login or password",
+        );
+        const errorMsg = ERROR_CODES.AUTH_VALIDATION_FAILED;
+        set({ isLoading: false, error: errorMsg });
+        return { success: false, error: errorMsg };
+      }
 
       const authResult = await window.electronAPI.auth.login(credentials);
       if (!authResult.success || !authResult.user) {
-         const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_LOGIN;
+        const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_LOGIN;
         set({ isLoading: false, error: errorMsg });
         return { success: false, error: errorMsg };
       }
@@ -140,7 +154,11 @@ export const useAuthStore = create<AuthState>()((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      if (!payload.email.trim() || !payload.username.trim() || !payload.password.trim()) {
+      if (
+        !payload.email.trim() ||
+        !payload.username.trim() ||
+        !payload.password.trim()
+      ) {
         const errorMsg = ERROR_CODES.AUTH_VALIDATION_FAILED;
         set({ isLoading: false, error: errorMsg });
         return { success: false, error: errorMsg };
@@ -152,7 +170,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
         password: payload.password,
       });
       if (!authResult.success || !authResult.user) {
-        const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_REGISTER;
+        const errorMsg =
+          authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_REGISTER;
         set({ isLoading: false, error: errorMsg });
         return { success: false, error: errorMsg };
       }
@@ -174,7 +193,10 @@ export const useAuthStore = create<AuthState>()((set) => ({
         isLoading: false,
       });
 
-      logAction(LOG_ACTIONS.REGISTER_SUCCESS, `User registered: ${user.username}`);
+      logAction(
+        LOG_ACTIONS.REGISTER_SUCCESS,
+        `User registered: ${user.username}`,
+      );
       return { success: true };
     } catch {
       const errorMessage = ERROR_CODES.AUTH_API_REQUEST_FAILED;
@@ -194,9 +216,12 @@ export const useAuthStore = create<AuthState>()((set) => ({
         return { success: false, error: errorMsg };
       }
 
-      const authResult = await window.electronAPI.auth.loginOffline({ username });
+      const authResult = await window.electronAPI.auth.loginOffline({
+        username,
+      });
       if (!authResult.success || !authResult.user) {
-        const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_OFFLINE;
+        const errorMsg =
+          authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_OFFLINE;
         set({ isLoading: false, error: errorMsg });
         return { success: false, error: errorMsg };
       }

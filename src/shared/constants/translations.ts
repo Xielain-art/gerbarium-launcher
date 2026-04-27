@@ -1,4 +1,35 @@
 const RU = {
+  ADMIN: {
+    TITLE: "Панель администратора",
+    USERS_MANAGEMENT: "Управление пользователями",
+    BACK_BUTTON: "← Назад",
+    REFRESH: "Обновить",
+    LOADING: "Загрузка...",
+    BANNED_BADGE: "ЗАБАНЕН",
+    ID_LABEL: "ID:",
+    ROLES_LABEL: "Роли:",
+    REASON_LABEL: "Причина:",
+    NO_USERS: "Пользователи не найдены.",
+    BUTTONS: {
+      EDIT_ROLES: "Изменить роли",
+      UNBAN: "Разбанить",
+      BAN: "Забанить",
+    },
+    PROMPTS: {
+      BAN_REASON_TITLE: "Укажите причину блокировки:",
+      BAN_REASON_PLACEHOLDER: "Например: Нарушение правил",
+      UNBAN_CONFIRM_TITLE:
+        "Вы уверены, что хотите разбанить этого пользователя?",
+      EDIT_ROLES_TITLE: "Укажите роли через запятую (user, moderator, admin):",
+    },
+    ERRORS: {
+      FETCH_USERS: "Не удалось загрузить пользователей",
+      BAN_FAILED: "Ошибка при блокировке пользователя",
+      UNBAN_FAILED: "Ошибка при разблокировке пользователя",
+      ROLES_FAILED: "Ошибка при обновлении ролей",
+      INVALID_ROLES: "Указаны неверные роли",
+    },
+  },
   COMMON: {
     VERSION: "Версия",
     ERROR: "Ошибка",
@@ -85,7 +116,7 @@ const RU = {
         gerbarium: "Gerbarium (Кристальная)",
         dark: "Темная (Classic)",
         light: "Светлая",
-      }
+      },
     },
     JAVA: {
       TITLE: "Настройки Java",
@@ -103,7 +134,8 @@ const RU = {
     ADVANCED: {
       TITLE: "Advanced",
       SHOW_LAUNCH_CONSOLE: "Show console while Minecraft launches",
-      SHOW_LAUNCH_CONSOLE_HELP: "Disable this to keep the console hidden by default during startup.",
+      SHOW_LAUNCH_CONSOLE_HELP:
+        "Disable this to keep the console hidden by default during startup.",
     },
     PROFILE: {
       TITLE: "Настройки профиля",
@@ -125,13 +157,16 @@ const RU = {
     },
     DEBUG: {
       TITLE: "Отладка и Поддержка",
-      HELP_TEXT: "Если вы столкнулись с проблемой, выгрузите логи и прикрепите их к баг-репорту на GitHub.",
+      HELP_TEXT:
+        "Если вы столкнулись с проблемой, выгрузите логи и прикрепите их к баг-репорту на GitHub.",
       EXPORT_BUTTON: "Сообщить об ошибке (Экспорт логов)",
       EXPORTING: "Архивация...",
       OPEN_DEVTOOLS_BUTTON: "Open DevTools",
-      EXPORT_SUCCESS: (path: string) => `Логи успешно сохранены в:\n${path}\n\nОткроется браузер для создания Issue.`,
+      EXPORT_SUCCESS: (path: string) =>
+        `Логи успешно сохранены в:\n${path}\n\nОткроется браузер для создания Issue.`,
       EXPORT_ERROR: (err: string) => `Ошибка при сохранении логов:\n${err}`,
-      EXPORT_UNEXPECTED_ERROR: "Произошла непредвиденная ошибка при экспорте логов.",
+      EXPORT_UNEXPECTED_ERROR:
+        "Произошла непредвиденная ошибка при экспорте логов.",
       GITHUB_ISSUES_BUTTON: "Связаться через GitHub Issues",
     },
     RESET_MODAL: {
@@ -194,11 +229,43 @@ const RU = {
     AUTH_EMAIL_INVALID: "Введите корректный email (до 320 символов)",
     AUTH_USERNAME_INVALID: "Username: 3-32 символа, только A-Z, a-z, 0-9 и _",
     AUTH_PASSWORD_INVALID: "Пароль должен быть от 10 до 128 символов",
-    AUTH_LOGIN_INVALID: "Логин должен быть email или username (3-32, A-Za-z0-9_)",
+    AUTH_LOGIN_INVALID:
+      "Логин должен быть email или username (3-32, A-Za-z0-9_)",
   },
 };
 
 const EN = {
+  ADMIN: {
+    TITLE: "Панель администратора",
+    USERS_MANAGEMENT: "Управление пользователями",
+    BACK_BUTTON: "← Назад",
+    REFRESH: "Обновить",
+    LOADING: "Загрузка...",
+    BANNED_BADGE: "ЗАБАНЕН",
+    ID_LABEL: "ID:",
+    ROLES_LABEL: "Роли:",
+    REASON_LABEL: "Причина:",
+    NO_USERS: "Пользователи не найдены.",
+    BUTTONS: {
+      EDIT_ROLES: "Изменить роли",
+      UNBAN: "Разбанить",
+      BAN: "Забанить",
+    },
+    PROMPTS: {
+      BAN_REASON_TITLE: "Укажите причину блокировки:",
+      BAN_REASON_PLACEHOLDER: "Например: Нарушение правил",
+      UNBAN_CONFIRM_TITLE:
+        "Вы уверены, что хотите разбанить этого пользователя?",
+      EDIT_ROLES_TITLE: "Укажите роли через запятую (user, moderator, admin):",
+    },
+    ERRORS: {
+      FETCH_USERS: "Не удалось загрузить пользователей",
+      BAN_FAILED: "Ошибка при блокировке пользователя",
+      UNBAN_FAILED: "Ошибка при разблокировке пользователя",
+      ROLES_FAILED: "Ошибка при обновлении ролей",
+      INVALID_ROLES: "Указаны неверные роли",
+    },
+  },
   COMMON: {
     VERSION: "Version",
     ERROR: "Error",
@@ -285,7 +352,7 @@ const EN = {
         gerbarium: "Gerbarium (Crystal)",
         dark: "Dark (Classic)",
         light: "Light",
-      }
+      },
     },
     JAVA: {
       TITLE: "Java Settings",
@@ -303,7 +370,8 @@ const EN = {
     ADVANCED: {
       TITLE: "Advanced Settings",
       SHOW_LAUNCH_CONSOLE: "Show console while Minecraft launches",
-      SHOW_LAUNCH_CONSOLE_HELP: "Disable this to keep the console hidden by default during startup.",
+      SHOW_LAUNCH_CONSOLE_HELP:
+        "Disable this to keep the console hidden by default during startup.",
     },
     PROFILE: {
       TITLE: "Profile Settings",
@@ -325,13 +393,16 @@ const EN = {
     },
     DEBUG: {
       TITLE: "Debug & Support",
-      HELP_TEXT: "If you encounter a problem, export the logs and attach them to a bug report on GitHub.",
+      HELP_TEXT:
+        "If you encounter a problem, export the logs and attach them to a bug report on GitHub.",
       EXPORT_BUTTON: "Report an issue (Export logs)",
       EXPORTING: "Archiving...",
       OPEN_DEVTOOLS_BUTTON: "Open DevTools",
-      EXPORT_SUCCESS: (path: string) => `Logs successfully saved to:\n${path}\n\nA browser will open to create an Issue.`,
+      EXPORT_SUCCESS: (path: string) =>
+        `Logs successfully saved to:\n${path}\n\nA browser will open to create an Issue.`,
       EXPORT_ERROR: (err: string) => `Error saving logs:\n${err}`,
-      EXPORT_UNEXPECTED_ERROR: "An unexpected error occurred while exporting logs.",
+      EXPORT_UNEXPECTED_ERROR:
+        "An unexpected error occurred while exporting logs.",
       GITHUB_ISSUES_BUTTON: "Contact via GitHub Issues",
     },
     RESET_MODAL: {
@@ -376,6 +447,7 @@ const EN = {
       announcement: "Announcement",
     },
   },
+
   STORE_ERRORS: {
     SETTINGS_SAVE: "Failed to save settings",
     SERVER_STATUS: "Failed to get server status",
@@ -386,21 +458,24 @@ const EN = {
     AUTH_EMPTY_FIELDS: "Enter login and password",
     AUTH_EMPTY_USERNAME: "Enter username",
     AUTH_INVALID_CREDENTIALS: "Invalid username/email or password",
-    AUTH_ALREADY_EXISTS: "An account with this email or username already exists",
+    AUTH_ALREADY_EXISTS:
+      "An account with this email or username already exists",
     AUTH_RATE_LIMIT: "Too many attempts. Please try again later",
     AUTH_VALIDATION_FAILED: "Please check the entered data",
     AUTH_SERVICE_UNAVAILABLE: "Auth service is temporarily unavailable",
     AUTH_PASSWORDS_MISMATCH: "Passwords do not match",
     AUTH_EMAIL_INVALID: "Enter a valid email (up to 320 characters)",
-    AUTH_USERNAME_INVALID: "Username must be 3-32 chars and contain only A-Z, a-z, 0-9, _",
+    AUTH_USERNAME_INVALID:
+      "Username must be 3-32 chars and contain only A-Z, a-z, 0-9, _",
     AUTH_PASSWORD_INVALID: "Password must be 10-128 characters long",
-    AUTH_LOGIN_INVALID: "Login must be a valid email or username (3-32, A-Za-z0-9_)",
+    AUTH_LOGIN_INVALID:
+      "Login must be a valid email or username (3-32, A-Za-z0-9_)",
   },
 };
 
 export const TRANSLATIONS = {
   ru: RU,
-  en: EN
+  en: EN,
 };
 
 const _ruShapeCheck: typeof EN = RU;
