@@ -82,6 +82,9 @@ const dashboardRoute = createRoute({
     if (!checkAuth()) {
       throw redirect({ to: ROUTES.LOGIN });
     }
+    return {
+      isAdmin: checkIsAdmin(),
+    };
   },
 });
 

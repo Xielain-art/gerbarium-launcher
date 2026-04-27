@@ -133,6 +133,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
     },
   },
 
+  // Admin API
+  admin: {
+    getUsers: (search?: string) => typedInvoke(IPC_CHANNELS.ADMIN.GET_USERS, search),
+    banUser: (userId: string, reason: string) => typedInvoke(IPC_CHANNELS.ADMIN.BAN_USER, userId, reason),
+    unbanUser: (userId: string) => typedInvoke(IPC_CHANNELS.ADMIN.UNBAN_USER, userId),
+    updateRoles: (userId: string, roles: ("user" | "moderator" | "admin")[]) => typedInvoke(IPC_CHANNELS.ADMIN.UPDATE_ROLES, userId, roles),
+  },
+
   // Java management
   java: {
     checkVersion: (javaPath: string) =>

@@ -26,6 +26,7 @@ import windowControlsHandler from "./handlers/windowControlsHandler";
 import secureStorageHandler from "./handlers/secureStorageHandler";
 import authHandler from "./handlers/authHandler";
 import updateHandler from "./handlers/updateHandler";
+import adminHandler from "./handlers/adminHandler";
 import javaHandler from "./handlers/javaHandlerWrapper";
 import systemHandler from "./handlers/systemHandler";
 import gameHandler from "./handlers/gameHandler";
@@ -390,8 +391,8 @@ function createWindow(): BrowserWindow {
   if (isDev) {
     console.log("DEV MODE!");
     window.loadURL(MAIN_CONSTANTS.APP_CONFIG.DEV_URL);
-    window.webContents.openDevTools({
-      mode: "detach",
+    window.webContents.once("did-finish-load", () => {
+      window.webContents.openDevTools({ mode: "detach" });
     });
   } else {
     window.loadFile(path.join(appRoot, MAIN_CONSTANTS.APP_CONFIG.PROD_INDEX));
@@ -523,6 +524,7 @@ app.whenReady().then(() => {
   windowControlsHandler(app);
   secureStorageHandler(app);
   authHandler(app);
+  adminHandler(app);
   updateHandler(app);
   javaHandler();
   systemHandler(app, () => settings);

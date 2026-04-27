@@ -3,6 +3,8 @@ import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import type { AuthUser, GameVersion, ServerStatusData } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
+import { Route, useRouteContext } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 function getVersionIcon(type: string) {
   const icons: Record<string, string> = {
@@ -56,7 +58,7 @@ export function DashboardSidebar({
   onOpenAdminPanel,
 }: DashboardSidebarProps) {
   const roleLabels = getRoleLabels(user);
-  const isAdmin = user?.roles?.includes("admin");
+  const { isAdmin } = useRouteContext({ from: "/dashboard" });
 
   return (
     <aside className="relative z-40 flex h-full w-80 flex-col border-r-[4px] border-theme bg-[color-mix(in_srgb,var(--theme-sidebar)_95%,transparent)] backdrop-blur-md shadow-2xl">
@@ -64,7 +66,9 @@ export function DashboardSidebar({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar
-              username={user?.playerProfile?.minecraftUsername || user?.username}
+              username={
+                user?.playerProfile?.minecraftUsername || user?.username
+              }
               skinUrl={user?.playerProfile?.skinUrl}
               size="lg"
             />
@@ -86,7 +90,8 @@ export function DashboardSidebar({
                 ))}
               </div>
               <div className="font-minecraft text-xs text-theme-muted">
-                {t.DASHBOARD.PLAYER_ID_LABEL} {user?.id?.slice(0, 8) || t.DASHBOARD.PLAYER_ID_UNKNOWN}
+                {t.DASHBOARD.PLAYER_ID_LABEL}{" "}
+                {user?.id?.slice(0, 8) || t.DASHBOARD.PLAYER_ID_UNKNOWN}
               </div>
             </div>
           </div>
@@ -120,14 +125,20 @@ export function DashboardSidebar({
                 className={`h-2.5 w-2.5 rounded-full ${serverStatus.online ? "bg-[#55ff55] animate-pulse" : "bg-[#ff5555]"}`}
               />
               <span className="font-minecraft text-xs font-bold text-theme">
-                {serverStatus.online ? t.DASHBOARD.SERVER_ONLINE : t.DASHBOARD.SERVER_OFFLINE}
+                {serverStatus.online
+                  ? t.DASHBOARD.SERVER_ONLINE
+                  : t.DASHBOARD.SERVER_OFFLINE}
               </span>
             </div>
             {serverStatus.online && (
               <div className="font-minecraft text-xs">
-                <span className="text-[var(--mc-progress-fill-a)]">{serverStatus.players.online}</span>
+                <span className="text-[var(--mc-progress-fill-a)]">
+                  {serverStatus.players.online}
+                </span>
                 <span className="text-theme-muted"> / </span>
-                <span className="text-[var(--mc-progress-fill-a)]">{serverStatus.players.max}</span>
+                <span className="text-[var(--mc-progress-fill-a)]">
+                  {serverStatus.players.max}
+                </span>
               </div>
             )}
           </div>
@@ -151,7 +162,9 @@ export function DashboardSidebar({
                 className="p-3"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{getVersionIcon(version.type)}</span>
+                  <span className="text-2xl">
+                    {getVersionIcon(version.type)}
+                  </span>
                   <div className="flex-1 min-w-0">
                     <div className="font-minecraft text-sm font-bold text-theme truncate">
                       {version.name}

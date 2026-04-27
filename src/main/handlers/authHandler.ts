@@ -20,12 +20,12 @@ import { ERROR_CODES } from "../../shared/constants/errors";
 import { LOG_MESSAGES } from "../../shared/constants/log-messages";
 import { secureStorageLock } from "../utils/secureStorageLock";
 
-const SECURE_STORAGE_FILE_NAME = "secure-storage.json";
+export const SECURE_STORAGE_FILE_NAME = "secure-storage.json";
 const AUTH_SESSION_KEY = "auth:session";
 
 type SecureData = Record<string, string>;
 
-type AuthSessionPayload = {
+export type AuthSessionPayload = {
   mode: "online" | "offline";
   user: AuthSessionUser;
   accessToken?: string;
@@ -157,7 +157,7 @@ function mapAuthFailureCode(status?: number): string {
   return ERROR_CODES.AUTH_API_REQUEST_FAILED;
 }
 
-async function readStoredSession(
+export async function readStoredSession(
   secureDataPath: string,
 ): Promise<AuthSessionPayload | null> {
   return await secureStorageLock.runExclusive(async () => {
@@ -216,7 +216,7 @@ async function refreshOnlineSession(
   );
 }
 
-async function resolveOnlineSession(
+export async function resolveOnlineSession(
   session: AuthSessionPayload,
 ): Promise<AuthSessionPayload | null> {
   let activeSession = session;
