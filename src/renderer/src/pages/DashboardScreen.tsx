@@ -3,6 +3,7 @@ import { useDashboardScreen } from "../hooks/useDashboardScreen";
 import newsPlaceholder from "../assets/photo_2026-04-23_10-34-22.jpg";
 import { DashboardSidebar } from "../components/dashboard/DashboardSidebar";
 import { NewsFeed } from "../components/dashboard/NewsFeed";
+import { ChangelogFeed } from "../components/dashboard/ChangelogFeed";
 import { LaunchConsole } from "../components/dashboard/LaunchConsole";
 import { DashboardActionBar } from "../components/dashboard/DashboardActionBar";
 import DOMPurify from "dompurify";
@@ -47,8 +48,37 @@ export function DashboardScreen() {
         </div>
 
         <div className="flex-1 overflow-y-auto pt-20 pb-4 flex flex-col">
+          {!vm.isLaunching && (
+            <div className="mb-4 flex items-center gap-2 px-6">
+              <button
+                type="button"
+                onClick={() => vm.setContentTab("news")}
+                className={`mc-btn mc-btn-sm ${vm.contentTab === "news" ? "mc-btn-primary" : ""}`}
+              >
+                Новости
+              </button>
+              <button
+                type="button"
+                onClick={() => vm.setContentTab("changelog")}
+                className={`mc-btn mc-btn-sm ${vm.contentTab === "changelog" ? "mc-btn-primary" : ""}`}
+              >
+                Changelog
+              </button>
+            </div>
+          )}
           {vm.isLaunching && vm.isConsoleVisible ? (
             <LaunchConsole logs={vm.logs} logsEndRef={vm.logsEndRef} />
+          ) : vm.contentTab === "changelog" ? (
+            <ChangelogFeed
+              changelog={vm.changelog}
+              isLoading={vm.isLoadingChangelog}
+              isLoadingMore={vm.isLoadingMoreChangelog}
+              hasMore={vm.hasMoreChangelog}
+              isInitialLoaded={vm.isChangelogInitialLoaded}
+              onLoadMore={vm.onLoadMoreChangelog}
+              onSelectChangelog={vm.onSelectChangelog}
+              error={vm.changelogError}
+            />
           ) : (
             <NewsFeed
               t={vm.t}
@@ -108,6 +138,50 @@ export function DashboardScreen() {
                   __html: sanitizedFullHtml || vm.selectedNews.content,
                 }}
               />
+            </div>
+          </div>
+        </div>
+      )}
+      {vm.selectedChangelog && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-6 backdrop-blur-md">
+          <div className="mc-card max-h-[85vh] w-full max-w-3xl overflow-y-auto p-0">
+            <div className="flex items-center justify-between border-b-[3px] border-theme p-4">
+              <h3 className="font-minecraft text-lg text-theme">
+                Changelog v{vm.selectedChangelog.version}
+              </h3>
+              <button
+                type="button"
+                className="mc-btn mc-btn-sm"
+                onClick={vm.onCloseChangelog}
+              >
+                Закрыть
+              </button>
+            </div>
+            <div className="space-y-4 p-5">
+              <div className="flex items-center gap-3">
+                {vm.selectedChangelog.mandatory && (
+                  <span className="rounded bg-red-500/20 px-2 py-1 font-minecraft text-[10px] uppercase text-red-400">
+                    Mandatory
+                  </span>
+                )}
+                <span className="font-minecraft text-xs text-theme-muted">
+                  {new Date(vm.selectedChangelog.releaseDate).toLocaleDateString("ru-RU")}
+                </span>
+              </div>
+              <ul className="list-disc space-y-2 pl-5 font-minecraft text-sm leading-relaxed text-theme-muted">
+                {vm.selectedChangelog.changes.map((change, idx) => (
+                  <li key={`${vm.selectedChangelog?.id}-${idx}`}>{change}</li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                className="mc-btn mc-btn-primary"
+                onClick={() =>
+                  void window.electronAPI.system.openExternal(vm.selectedChangelog!.downloadUrl)
+                }
+              >
+                Скачать релиз
+              </button>
             </div>
           </div>
         </div>

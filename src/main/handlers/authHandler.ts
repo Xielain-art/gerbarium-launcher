@@ -170,7 +170,7 @@ export async function readStoredSession(
   });
 }
 
-async function writeStoredSession(
+export async function writeStoredSession(
   secureDataPath: string,
   payload: AuthSessionPayload,
 ): Promise<void> {
@@ -181,7 +181,7 @@ async function writeStoredSession(
   });
 }
 
-async function clearStoredSession(secureDataPath: string): Promise<void> {
+export async function clearStoredSession(secureDataPath: string): Promise<void> {
   await secureStorageLock.runExclusive(async () => {
     const secureData = await readSecureData(secureDataPath);
     if (secureData[AUTH_SESSION_KEY]) {

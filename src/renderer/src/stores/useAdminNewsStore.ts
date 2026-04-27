@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import type { ApiCreateNewsDto, ApiNews, ApiUpdateNewsDto } from "../../../lib/api/news";
+import type {
+  ApiCreateNewsDto,
+  ApiNews,
+  ApiNewsListPayload,
+  ApiUpdateNewsDto,
+} from "../../../lib/api/news";
 
 interface AdminNewsState {
   news: ApiNews[];
@@ -35,13 +40,56 @@ interface AdminNewsState {
 
 const PAGE_LIMIT = 10;
 
-function normalizeNewsPayload(payload: unknown): ApiNews[] {
-  if (Array.isArray(payload)) return payload as ApiNews[];
-  if (payload && typeof payload === "object" && "data" in payload) {
-    const nested = (payload as { data?: unknown }).data;
-    if (Array.isArray(nested)) return nested as ApiNews[];
+function normalizeNewsPayload(payload: unknown): ApiNewsListPayload {
+  const empty: ApiNewsListPayload = {
+    items: [],
+    meta: { page: 1, limit: PAGE_LIMIT, total: 0, totalPages: 1 },
+  };
+  if (!payload) return empty;
+
+  if (
+    typeof payload === "object" &&
+    payload !== null &&
+    "items" in payload &&
+    Array.isArray((payload as { items?: unknown }).items)
+  ) {
+    const typed = payload as ApiNewsListPayload;
+    return {
+      items: typed.items,
+      meta: {
+        page: typed.meta?.page ?? 1,
+        limit: typed.meta?.limit ?? PAGE_LIMIT,
+        total: typed.meta?.total ?? typed.items.length,
+        totalPages: typed.meta?.totalPages ?? 1,
+      },
+    };
   }
-  return [];
+
+  if (Array.isArray(payload)) {
+    return {
+      items: payload as ApiNews[],
+      meta: { page: 1, limit: PAGE_LIMIT, total: payload.length, totalPages: 1 },
+    };
+  }
+
+  if (typeof payload === "object" && payload !== null && "data" in payload) {
+    const nested = (payload as { data?: unknown }).data;
+    if (Array.isArray(nested)) {
+      return {
+        items: nested as ApiNews[],
+        meta: { page: 1, limit: PAGE_LIMIT, total: nested.length, totalPages: 1 },
+      };
+    }
+  }
+
+  return empty;
+}
+
+function mergeNewsById(current: ApiNews[], incoming: ApiNews[]): ApiNews[] {
+  if (incoming.length === 0) return current;
+  const seen = new Set(current.map((item) => item.id));
+  const uniqueIncoming = incoming.filter((item) => !seen.has(item.id));
+  return uniqueIncoming.length > 0 ? [...current, ...uniqueIncoming] : current;
 }
 
 export const useAdminNewsStore = create<AdminNewsState>()((set, get) => ({
@@ -81,12 +129,12 @@ export const useAdminNewsStore = create<AdminNewsState>()((set, get) => ({
         });
         return;
       }
-      const data = normalizeNewsPayload(result.data);
+      const payload = normalizeNewsPayload(result.data);
       set({
-        news: data,
+        news: payload.items,
         isLoading: false,
-        hasMore: data.length >= PAGE_LIMIT,
-        page: 1
+        hasMore: payload.meta.page < payload.meta.totalPages,
+        page: payload.meta.page,
       });
     } catch {
       set({ isLoading: false, error: "Failed to fetch news" });
@@ -108,12 +156,15 @@ export const useAdminNewsStore = create<AdminNewsState>()((set, get) => ({
       );
       
       if (result.success && result.data) {
-        const newItems = normalizeNewsPayload(result.data);
+        const payload = normalizeNewsPayload(result.data);
+        const merged = mergeNewsById(news, payload.items);
+        const gotNewItems = merged.length > news.length;
         set({
-          news: [...news, ...newItems],
+          news: merged,
           isLoadingMore: false,
-          page: nextPage,
-          hasMore: newItems.length >= PAGE_LIMIT
+          page: payload.meta.page,
+          // Stop requesting when server says no more pages or we only got duplicates.
+          hasMore: payload.meta.page < payload.meta.totalPages && gotNewItems,
         });
       } else {
         set({ isLoadingMore: false });
@@ -134,10 +185,8 @@ export const useAdminNewsStore = create<AdminNewsState>()((set, get) => ({
         });
         return false;
       }
-      set((state) => ({
-        news: [result.data!, ...state.news],
-        actionLoadingId: null,
-      }));
+      set({ actionLoadingId: null });
+      await get().fetchNews();
       return true;
     } catch {
       set({ actionLoadingId: null, error: "Failed to create news" });
@@ -156,10 +205,8 @@ export const useAdminNewsStore = create<AdminNewsState>()((set, get) => ({
         });
         return false;
       }
-      set((state) => ({
-        news: state.news.map((item) => (item.id === newsId ? result.data! : item)),
-        actionLoadingId: null,
-      }));
+      set({ actionLoadingId: null });
+      await get().fetchNews();
       return true;
     } catch {
       set({ actionLoadingId: null, error: "Failed to update news" });
@@ -178,10 +225,8 @@ export const useAdminNewsStore = create<AdminNewsState>()((set, get) => ({
         });
         return false;
       }
-      set((state) => ({
-        news: state.news.filter((item) => item.id !== newsId),
-        actionLoadingId: null,
-      }));
+      set({ actionLoadingId: null });
+      await get().fetchNews();
       return true;
     } catch {
       set({ actionLoadingId: null, error: "Failed to delete news" });

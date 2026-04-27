@@ -5,6 +5,9 @@ import {
   AdminNewsListResponse,
   AdminNewsMutationResponse,
   AdminNewsDeleteResponse,
+  AdminChangelogListResponse,
+  AdminChangelogMutationResponse,
+  AdminChangelogDeleteResponse,
   JavaDownloadProgressPayload,
   GameLaunchOptions,
   GameProgressPayload,
@@ -15,6 +18,10 @@ import {
   LauncherSettings,
 } from "../shared/constants/ipc-chanels";
 import type { ApiCreateNewsDto, ApiUpdateNewsDto } from "../lib/api/news";
+import type {
+  ApiCreateChangelogDto,
+  ApiUpdateChangelogDto,
+} from "../lib/api/changelog";
 
 export interface IElectronAPI {
   // App controls
@@ -88,7 +95,13 @@ export interface IElectronAPI {
 
   // Admin API
   admin: {
-    getUsers: (search?: string, page?: number, limit?: number, role?: string, banned?: boolean) => Promise<AdminUsersResponse>;
+    getUsers: (
+      search?: string,
+      page?: number,
+      limit?: number,
+      role?: "user" | "moderator" | "admin",
+      banned?: boolean,
+    ) => Promise<AdminUsersResponse>;
     banUser: (
       userId: string,
       reason: string,
@@ -100,10 +113,32 @@ export interface IElectronAPI {
       userId: string,
       roles: ("user" | "moderator" | "admin")[],
     ) => Promise<AdminUserMutationResponse>;
-    getNews: (search?: string, page?: number, limit?: number, sortBy?: string, order?: string, tag?: string, fromDate?: string, toDate?: string) => Promise<AdminNewsListResponse>;
+    getNews: (
+      search?: string,
+      page?: number,
+      limit?: number,
+      sortBy?: "createdAt" | "updatedAt" | "title",
+      order?: "ASC" | "DESC",
+      tag?: string,
+      fromDate?: string,
+      toDate?: string,
+    ) => Promise<AdminNewsListResponse>;
     createNews: (payload: ApiCreateNewsDto) => Promise<AdminNewsMutationResponse>;
     updateNews: (newsId: string, payload: ApiUpdateNewsDto) => Promise<AdminNewsMutationResponse>;
     deleteNews: (newsId: string) => Promise<AdminNewsDeleteResponse>;
+    getChangelog: (
+      fromDate?: string,
+      toDate?: string,
+      mandatory?: boolean,
+      sortBy?: "releaseDate" | "version" | "createdAt",
+      order?: "ASC" | "DESC",
+    ) => Promise<AdminChangelogListResponse>;
+    createChangelog: (payload: ApiCreateChangelogDto) => Promise<AdminChangelogMutationResponse>;
+    updateChangelog: (
+      changelogId: string,
+      payload: ApiUpdateChangelogDto,
+    ) => Promise<AdminChangelogMutationResponse>;
+    deleteChangelog: (changelogId: string) => Promise<AdminChangelogDeleteResponse>;
   };
 
   // Java management

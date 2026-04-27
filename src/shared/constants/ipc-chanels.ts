@@ -1,5 +1,15 @@
 import type { ApiUser } from "../../lib/api/admin";
-import type { ApiNews, ApiCreateNewsDto, ApiUpdateNewsDto } from "../../lib/api/news";
+import type {
+  ApiNews,
+  ApiCreateNewsDto,
+  ApiUpdateNewsDto,
+  ApiNewsListPayload,
+} from "../../lib/api/news";
+import type {
+  ApiChangelog,
+  ApiCreateChangelogDto,
+  ApiUpdateChangelogDto,
+} from "../../lib/api/changelog";
 
 export const IPC_CHANNELS = {
   WINDOW: {
@@ -40,6 +50,10 @@ export const IPC_CHANNELS = {
     CREATE_NEWS: "admin:create-news",
     UPDATE_NEWS: "admin:update-news",
     DELETE_NEWS: "admin:delete-news",
+    GET_CHANGELOG: "admin:get-changelog",
+    CREATE_CHANGELOG: "admin:create-changelog",
+    UPDATE_CHANGELOG: "admin:update-changelog",
+    DELETE_CHANGELOG: "admin:delete-changelog",
   },
   JAVA: {
     CHECK_VERSION: "java:check-version",
@@ -119,7 +133,7 @@ export interface AdminUserMutationResponse {
 
 export interface AdminNewsListResponse {
   success: boolean;
-  data?: ApiNews[];
+  data?: ApiNews[] | ApiNewsListPayload;
   error?: string;
 }
 
@@ -130,6 +144,23 @@ export interface AdminNewsMutationResponse {
 }
 
 export interface AdminNewsDeleteResponse {
+  success: boolean;
+  error?: string;
+}
+
+export interface AdminChangelogListResponse {
+  success: boolean;
+  data?: ApiChangelog[];
+  error?: string;
+}
+
+export interface AdminChangelogMutationResponse {
+  success: boolean;
+  data?: ApiChangelog;
+  error?: string;
+}
+
+export interface AdminChangelogDeleteResponse {
   success: boolean;
   error?: string;
 }
@@ -288,7 +319,13 @@ export interface IpcChannelMap {
     return: { success: boolean; error?: string };
   };
   [IPC_CHANNELS.ADMIN.GET_USERS]: {
-    args: [search?: string];
+    args: [
+      search?: string,
+      page?: number,
+      limit?: number,
+      role?: "user" | "moderator" | "admin",
+      banned?: boolean,
+    ];
     return: AdminUsersResponse;
   };
   [IPC_CHANNELS.ADMIN.BAN_USER]: {
@@ -304,7 +341,16 @@ export interface IpcChannelMap {
     return: AdminUserMutationResponse;
   };
   [IPC_CHANNELS.ADMIN.GET_NEWS]: {
-    args: [search?: string];
+    args: [
+      search?: string,
+      page?: number,
+      limit?: number,
+      sortBy?: "createdAt" | "updatedAt" | "title",
+      order?: "ASC" | "DESC",
+      tag?: string,
+      fromDate?: string,
+      toDate?: string,
+    ];
     return: AdminNewsListResponse;
   };
   [IPC_CHANNELS.ADMIN.CREATE_NEWS]: {
@@ -318,6 +364,28 @@ export interface IpcChannelMap {
   [IPC_CHANNELS.ADMIN.DELETE_NEWS]: {
     args: [newsId: string];
     return: AdminNewsDeleteResponse;
+  };
+  [IPC_CHANNELS.ADMIN.GET_CHANGELOG]: {
+    args: [
+      fromDate?: string,
+      toDate?: string,
+      mandatory?: boolean,
+      sortBy?: "releaseDate" | "version" | "createdAt",
+      order?: "ASC" | "DESC",
+    ];
+    return: AdminChangelogListResponse;
+  };
+  [IPC_CHANNELS.ADMIN.CREATE_CHANGELOG]: {
+    args: [payload: ApiCreateChangelogDto];
+    return: AdminChangelogMutationResponse;
+  };
+  [IPC_CHANNELS.ADMIN.UPDATE_CHANGELOG]: {
+    args: [changelogId: string, payload: ApiUpdateChangelogDto];
+    return: AdminChangelogMutationResponse;
+  };
+  [IPC_CHANNELS.ADMIN.DELETE_CHANGELOG]: {
+    args: [changelogId: string];
+    return: AdminChangelogDeleteResponse;
   };
   [IPC_CHANNELS.JAVA.CHECK_VERSION]: {
     args: [javaPath: string];

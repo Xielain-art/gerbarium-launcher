@@ -17,10 +17,23 @@ import {
   deleteNewsRequest,
 } from "../../lib/api/news";
 import {
+  listChangelogRequest,
+  createChangelogRequest,
+  updateChangelogRequest,
+  deleteChangelogRequest,
+} from "../../lib/api/changelog";
+import {
   readStoredSession,
   resolveOnlineSession,
+  writeStoredSession,
+  clearStoredSession,
   SECURE_STORAGE_FILE_NAME,
 } from "./authHandler";
+
+type AdminUserRole = "user" | "moderator" | "admin";
+type NewsSortBy = "createdAt" | "updatedAt" | "title";
+type NewsOrder = "ASC" | "DESC";
+type ChangelogSortBy = "releaseDate" | "version" | "createdAt";
 
 async function getValidAccessToken(app: App): Promise<string | null> {
   const secureDataPath = path.join(
@@ -34,8 +47,10 @@ async function getValidAccessToken(app: App): Promise<string | null> {
     }
     const resolvedSession = await resolveOnlineSession(storedSession);
     if (!resolvedSession || !resolvedSession.accessToken) {
+      await clearStoredSession(secureDataPath);
       return null;
     }
+    await writeStoredSession(secureDataPath, resolvedSession);
     return resolvedSession.accessToken;
   } catch (err) {
     log.error(LOG_MESSAGES.AUTH_ADMIN_SESSION_READ_FAILED, err);
@@ -46,7 +61,14 @@ async function getValidAccessToken(app: App): Promise<string | null> {
 export default function adminHandler(app: App) {
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.GET_USERS,
-    async (_event, search?: string, page?: number, limit?: number, role?: any, banned?: boolean) => {
+    async (
+      _event,
+      search?: string,
+      _page?: number,
+      _limit?: number,
+      role?: AdminUserRole,
+      banned?: boolean,
+    ) => {
       try {
         const token = await getValidAccessToken(app);
         if (!token) {
@@ -55,13 +77,45 @@ export default function adminHandler(app: App) {
             error: ERROR_CODES.AUTH_UNAUTHORIZED,
           };
         }
-        const result = await getUsersRequest(token, search, page, limit, role, banned);
+        const result = await getUsersRequest(token, search, role, banned);
         if (!result.success) {
           return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
         }
         return { success: true, data: result.data };
       } catch (error) {
         log.error(LOG_MESSAGES.ADMIN_GET_USERS_FAILED, error);
+        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+      }
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.GET_CHANGELOG,
+    async (
+      _event,
+      fromDate?: string,
+      toDate?: string,
+      mandatory?: boolean,
+      sortBy?: ChangelogSortBy,
+      order?: NewsOrder,
+    ) => {
+      try {
+        const result = await listChangelogRequest({
+          fromDate: fromDate || undefined,
+          toDate: toDate || undefined,
+          mandatory,
+          sortBy: sortBy || "releaseDate",
+          order: order || "DESC",
+        });
+        if (!result.success) {
+          return {
+            success: false,
+            error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
+          };
+        }
+        return { success: true, data: result.data };
+      } catch (error) {
+        log.error(LOG_MESSAGES.ADMIN_GET_CHANGELOG_FAILED, error);
         return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
       }
     },
@@ -90,6 +144,26 @@ export default function adminHandler(app: App) {
     },
   );
 
+  ipcMain.handle(IPC_CHANNELS.ADMIN.CREATE_CHANGELOG, async (_event, payload) => {
+    try {
+      const token = await getValidAccessToken(app);
+      if (!token) {
+        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+      }
+      const result = await createChangelogRequest(token, payload);
+      if (!result.success) {
+        return {
+          success: false,
+          error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
+        };
+      }
+      return { success: true, data: result.data };
+    } catch (error) {
+      log.error(LOG_MESSAGES.ADMIN_CREATE_CHANGELOG_FAILED, error);
+      return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+    }
+  });
+
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.UNBAN_USER,
     async (_event, userId: string) => {
@@ -108,6 +182,29 @@ export default function adminHandler(app: App) {
         return { success: true, data: result.data };
       } catch (error) {
         log.error(LOG_MESSAGES.ADMIN_UNBAN_USER_FAILED, error);
+        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+      }
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.UPDATE_CHANGELOG,
+    async (_event, changelogId: string, payload) => {
+      try {
+        const token = await getValidAccessToken(app);
+        if (!token) {
+          return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+        }
+        const result = await updateChangelogRequest(token, changelogId, payload);
+        if (!result.success) {
+          return {
+            success: false,
+            error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
+          };
+        }
+        return { success: true, data: result.data };
+      } catch (error) {
+        log.error(LOG_MESSAGES.ADMIN_UPDATE_CHANGELOG_FAILED, error);
         return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
       }
     },
@@ -142,7 +239,17 @@ export default function adminHandler(app: App) {
 
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.GET_NEWS,
-    async (_event, search?: string, page?: number, limit?: number, sortBy?: any, order?: any, tag?: string, fromDate?: string, toDate?: string) => {
+    async (
+      _event,
+      search?: string,
+      page?: number,
+      limit?: number,
+      sortBy?: NewsSortBy,
+      order?: NewsOrder,
+      tag?: string,
+      fromDate?: string,
+      toDate?: string,
+    ) => {
       try {
         const result = await listNewsRequest({
           search: search?.trim() || undefined,
@@ -160,7 +267,7 @@ export default function adminHandler(app: App) {
             error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
           };
         }
-        return { success: true, data: result.data.items };
+        return { success: true, data: result.data };
       } catch (error) {
         log.error(LOG_MESSAGES.ADMIN_GET_NEWS_FAILED, error);
         return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
@@ -229,6 +336,29 @@ export default function adminHandler(app: App) {
         return { success: true };
       } catch (error) {
         log.error(LOG_MESSAGES.ADMIN_DELETE_NEWS_FAILED, error);
+        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+      }
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.DELETE_CHANGELOG,
+    async (_event, changelogId: string) => {
+      try {
+        const token = await getValidAccessToken(app);
+        if (!token) {
+          return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+        }
+        const result = await deleteChangelogRequest(token, changelogId);
+        if (!result.success) {
+          return {
+            success: false,
+            error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
+          };
+        }
+        return { success: true };
+      } catch (error) {
+        log.error(LOG_MESSAGES.ADMIN_DELETE_CHANGELOG_FAILED, error);
         return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
       }
     },

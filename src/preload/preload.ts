@@ -12,6 +12,10 @@ import {
   JavaDownloadProgressPayload,
 } from "../shared/constants/ipc-chanels";
 import type { ApiCreateNewsDto, ApiUpdateNewsDto } from "../lib/api/news";
+import type {
+  ApiCreateChangelogDto,
+  ApiUpdateChangelogDto,
+} from "../lib/api/changelog";
 
 async function typedInvoke<K extends keyof IpcChannelMap>(
   channel: K,
@@ -133,16 +137,63 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // Admin API
   admin: {
-    getUsers: (search?: string) => typedInvoke(IPC_CHANNELS.ADMIN.GET_USERS, search),
+    getUsers: (
+      search?: string,
+      page?: number,
+      limit?: number,
+      role?: "user" | "moderator" | "admin",
+      banned?: boolean,
+    ) => typedInvoke(IPC_CHANNELS.ADMIN.GET_USERS, search, page, limit, role, banned),
     banUser: (userId: string, reason: string) => typedInvoke(IPC_CHANNELS.ADMIN.BAN_USER, userId, reason),
     unbanUser: (userId: string) => typedInvoke(IPC_CHANNELS.ADMIN.UNBAN_USER, userId),
     updateRoles: (userId: string, roles: ("user" | "moderator" | "admin")[]) => typedInvoke(IPC_CHANNELS.ADMIN.UPDATE_ROLES, userId, roles),
-    getNews: (search?: string) => typedInvoke(IPC_CHANNELS.ADMIN.GET_NEWS, search),
+    getNews: (
+      search?: string,
+      page?: number,
+      limit?: number,
+      sortBy?: "createdAt" | "updatedAt" | "title",
+      order?: "ASC" | "DESC",
+      tag?: string,
+      fromDate?: string,
+      toDate?: string,
+    ) =>
+      typedInvoke(
+        IPC_CHANNELS.ADMIN.GET_NEWS,
+        search,
+        page,
+        limit,
+        sortBy,
+        order,
+        tag,
+        fromDate,
+        toDate,
+      ),
     createNews: (payload: ApiCreateNewsDto) =>
       typedInvoke(IPC_CHANNELS.ADMIN.CREATE_NEWS, payload),
     updateNews: (newsId: string, payload: ApiUpdateNewsDto) =>
       typedInvoke(IPC_CHANNELS.ADMIN.UPDATE_NEWS, newsId, payload),
     deleteNews: (newsId: string) => typedInvoke(IPC_CHANNELS.ADMIN.DELETE_NEWS, newsId),
+    getChangelog: (
+      fromDate?: string,
+      toDate?: string,
+      mandatory?: boolean,
+      sortBy?: "releaseDate" | "version" | "createdAt",
+      order?: "ASC" | "DESC",
+    ) =>
+      typedInvoke(
+        IPC_CHANNELS.ADMIN.GET_CHANGELOG,
+        fromDate,
+        toDate,
+        mandatory,
+        sortBy,
+        order,
+      ),
+    createChangelog: (payload: ApiCreateChangelogDto) =>
+      typedInvoke(IPC_CHANNELS.ADMIN.CREATE_CHANGELOG, payload),
+    updateChangelog: (changelogId: string, payload: ApiUpdateChangelogDto) =>
+      typedInvoke(IPC_CHANNELS.ADMIN.UPDATE_CHANGELOG, changelogId, payload),
+    deleteChangelog: (changelogId: string) =>
+      typedInvoke(IPC_CHANNELS.ADMIN.DELETE_CHANGELOG, changelogId),
   },
 
   // Java management

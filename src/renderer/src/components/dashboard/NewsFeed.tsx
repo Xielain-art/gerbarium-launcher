@@ -51,7 +51,7 @@ export function NewsFeed({
   newsError,
   onSelectNews,
 }: NewsFeedProps) {
-  const { searchQuery, category, sortBy, order, setFilters } = useNewsStore();
+  const { searchQuery, setFilters } = useNewsStore();
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
 

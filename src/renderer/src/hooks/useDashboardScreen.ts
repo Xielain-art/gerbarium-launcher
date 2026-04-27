@@ -3,12 +3,13 @@ import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useDownloadStore } from "../stores/useDownloadStore";
 import { useNewsStore } from "../stores/useNewsStore";
+import { useChangelogStore } from "../stores/useChangelogStore";
 import { useServerStatusStore } from "../stores/useServerStatusStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
 import { useTranslation } from "./useTranslation";
 import { ROUTES, LOG_ACTIONS } from "../../../shared/constants/system";
 import type { LauncherSettings } from "../../../shared/constants/ipc-chanels";
-import type { GameVersion, NewsItem } from "../types";
+import type { ChangelogItem, GameVersion, NewsItem } from "../types";
 
 const INITIAL_VERSIONS: GameVersion[] = [
   { id: "gerbarium-1.2", name: "Gerbarium v1.2", type: "gerbarium", isInstalled: false, version: "1.20.4" },
@@ -50,6 +51,16 @@ export function useDashboardScreen() {
     error: newsError,
   } = useNewsStore();
   const { data: serverStatus } = useServerStatusStore();
+  const {
+    items: changelog,
+    isLoading: isLoadingChangelog,
+    isLoadingMore: isLoadingMoreChangelog,
+    hasMore: hasMoreChangelog,
+    isInitialLoaded: isChangelogInitialLoaded,
+    error: changelogError,
+    fetchChangelog,
+    fetchMoreChangelog,
+  } = useChangelogStore();
 
   const [versions, setVersions] = useState<GameVersion[]>(INITIAL_VERSIONS);
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(
@@ -64,6 +75,8 @@ export function useDashboardScreen() {
   const [launchError, setLaunchError] = useState<string | null>(null);
   const [isConsoleVisible, setIsConsoleVisible] = useState(true);
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
+  const [selectedChangelog, setSelectedChangelog] = useState<ChangelogItem | null>(null);
+  const [contentTab, setContentTab] = useState<"news" | "changelog">("news");
   const closeOnLaunchRequestedRef = useRef(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
   const banReason = user?.banReason?.trim();
@@ -152,6 +165,7 @@ export function useDashboardScreen() {
       toLauncherSettingsPatch(currentSettings),
     );
     void fetchNews();
+    void fetchChangelog();
   }, []);
 
   const onPlay = async () => {
@@ -231,12 +245,21 @@ export function useDashboardScreen() {
     selectedVersion,
     appVersion,
     news,
+    changelog,
+    contentTab,
+    setContentTab,
     isLoadingNews,
+    isLoadingChangelog,
+    isLoadingMoreChangelog,
+    hasMoreChangelog,
+    isChangelogInitialLoaded,
     isLoadingMoreNews,
     hasMoreNews,
     isNewsInitialLoaded,
     onLoadMoreNews: fetchMoreNews,
     newsError,
+    changelogError,
+    onLoadMoreChangelog: fetchMoreChangelog,
     isDownloading,
     progress,
     isLaunching,
@@ -256,5 +279,8 @@ export function useDashboardScreen() {
     selectedNews,
     onSelectNews: setSelectedNews,
     onCloseNews: () => setSelectedNews(null),
+    selectedChangelog,
+    onSelectChangelog: setSelectedChangelog,
+    onCloseChangelog: () => setSelectedChangelog(null),
   };
 }

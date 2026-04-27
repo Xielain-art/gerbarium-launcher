@@ -16,6 +16,26 @@ export interface ApiNewsListPayload {
   meta: ApiPaginationMeta;
 }
 
+function normalizeTagsForApi(tags: unknown): string[] | undefined {
+  if (!Array.isArray(tags)) return undefined;
+  const normalized = tags.flatMap((tag) => {
+    if (typeof tag === "string") return [tag];
+    if (Array.isArray(tag)) {
+      return tag.filter((value): value is string => typeof value === "string");
+    }
+    return [];
+  });
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+function normalizeNewsPayloadForApi<T extends { tags?: unknown }>(payload: T): T {
+  const tags = normalizeTagsForApi(payload.tags);
+  return {
+    ...payload,
+    tags,
+  };
+}
+
 export async function listNewsRequest(params?: {
   search?: string;
   tag?: string;
@@ -27,7 +47,16 @@ export async function listNewsRequest(params?: {
   limit?: number;
 }): Promise<ApiResult<ApiNewsListPayload>> {
   try {
-    const query: any = {};
+    const query: {
+      search?: string;
+      tag?: string;
+      fromDate?: string;
+      toDate?: string;
+      sortBy?: "createdAt" | "updatedAt" | "title";
+      order?: "ASC" | "DESC";
+      page?: number;
+      limit?: number;
+    } = {};
     if (params?.search) query.search = params.search;
     if (params?.tag) query.tag = params.tag;
     if (params?.fromDate) query.fromDate = params.fromDate;
@@ -39,7 +68,7 @@ export async function listNewsRequest(params?: {
 
     const { data, error, response } = await apiClient.GET("/api/news", {
       params: { query },
-    } as any);
+    });
 
     const payload = data as
       | ApiNews[]
@@ -101,8 +130,9 @@ export async function createNewsRequest(
   payload: ApiCreateNewsDto,
 ): Promise<ApiResult<ApiNews>> {
   try {
+    const normalizedPayload = normalizeNewsPayloadForApi(payload);
     const { data, error, response } = await apiClient.POST("/api/news", {
-      body: payload as any,
+      body: normalizedPayload as unknown as ApiCreateNewsDto,
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -119,9 +149,10 @@ export async function updateNewsRequest(
   payload: ApiUpdateNewsDto,
 ): Promise<ApiResult<ApiNews>> {
   try {
+    const normalizedPayload = normalizeNewsPayloadForApi(payload);
     const { data, error, response } = await apiClient.PATCH("/api/news/{id}", {
       params: { path: { id: newsId } },
-      body: payload as any,
+      body: normalizedPayload as unknown as ApiUpdateNewsDto,
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

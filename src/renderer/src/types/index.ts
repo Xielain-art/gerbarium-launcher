@@ -137,6 +137,16 @@ export interface NewsState {
   error: string | null;
 }
 
+export interface ChangelogItem {
+  id: string;
+  version: string;
+  releaseDate: string;
+  changes: string[];
+  downloadUrl: string;
+  mandatory: boolean;
+  createdAt: string;
+}
+
 // Server Status Types
 export interface ServerStatusData {
   online: boolean;

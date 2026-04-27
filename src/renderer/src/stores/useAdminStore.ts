@@ -3,6 +3,7 @@ import type { ApiUser } from "../../../lib/api/admin";
 
 interface AdminState {
   users: ApiUser[];
+  allUsers: ApiUser[];
   isLoading: boolean;
   isLoadingMore: boolean;
   actionLoading: string | null;
@@ -36,6 +37,7 @@ function normalizeApiUserPayload(payload: unknown): ApiUser[] {
 
 export const useAdminStore = create<AdminState>()((set, get) => ({
   users: [],
+  allUsers: [],
   isLoading: false,
   isLoadingMore: false,
   actionLoading: null,
@@ -51,15 +53,23 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
 
   fetchUsers: async () => {
     const { search, role, banned } = get();
-    set({ isLoading: true, error: null, page: 1, hasMore: false });
+    set({ isLoading: true, error: null, page: 1, hasMore: false, allUsers: [], users: [] });
     try {
-      const result = await window.electronAPI.admin.getUsers(search, 1, PAGE_LIMIT, role, banned);
+      const result = await window.electronAPI.admin.getUsers(
+        search,
+        undefined,
+        undefined,
+        role,
+        banned,
+      );
       if (result.success && result.data) {
-        const users = normalizeApiUserPayload(result.data);
+        const allUsers = normalizeApiUserPayload(result.data);
+        const users = allUsers.slice(0, PAGE_LIMIT);
         set({ 
+          allUsers,
           users, 
           isLoading: false,
-          hasMore: users.length >= PAGE_LIMIT,
+          hasMore: allUsers.length > PAGE_LIMIT,
           page: 1
         });
       } else {
@@ -71,26 +81,20 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
   },
 
   fetchMoreUsers: async () => {
-    const { page, hasMore, isLoading, isLoadingMore, users, search, role, banned } = get();
+    const { page, hasMore, isLoading, isLoadingMore, allUsers } = get();
     if (!hasMore || isLoading || isLoadingMore) return;
 
     set({ isLoadingMore: true });
     try {
       const nextPage = page + 1;
-      const result = await window.electronAPI.admin.getUsers(search, nextPage, PAGE_LIMIT, role, banned); 
-      
-      if (result.success && result.data) {
-        const newUsers = normalizeApiUserPayload(result.data);
-        set({
-          users: [...users, ...newUsers],
-          isLoadingMore: false,
-          page: nextPage,
-          hasMore: newUsers.length >= PAGE_LIMIT
-        });
-      } else {
-        set({ isLoadingMore: false });
-      }
-    } catch (err) {
+      const nextUsers = allUsers.slice(0, nextPage * PAGE_LIMIT);
+      set({
+        users: nextUsers,
+        isLoadingMore: false,
+        page: nextPage,
+        hasMore: nextUsers.length < allUsers.length,
+      });
+    } catch {
       set({ isLoadingMore: false });
     }
   },
@@ -102,6 +106,9 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
       if (result.success) {
         set((state) => ({
           users: state.users.map((u) =>
+            u.id === userId ? { ...u, isBanned: true, banReason: reason } : u
+          ),
+          allUsers: state.allUsers.map((u) =>
             u.id === userId ? { ...u, isBanned: true, banReason: reason } : u
           ),
           actionLoading: null,
@@ -125,6 +132,9 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
           users: state.users.map((u) =>
             u.id === userId ? { ...u, isBanned: false, banReason: undefined } : u
           ),
+          allUsers: state.allUsers.map((u) =>
+            u.id === userId ? { ...u, isBanned: false, banReason: undefined } : u
+          ),
           actionLoading: null,
         }));
         return true;
@@ -144,6 +154,9 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
       if (result.success) {
         set((state) => ({
           users: state.users.map((u) =>
+            u.id === userId ? { ...u, roles: roles } : u
+          ),
+          allUsers: state.allUsers.map((u) =>
             u.id === userId ? { ...u, roles: roles } : u
           ),
           actionLoading: null,
