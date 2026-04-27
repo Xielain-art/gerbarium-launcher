@@ -9,7 +9,10 @@ interface AdminState {
   fetchUsers: (search?: string) => Promise<void>;
   banUser: (userId: string, reason: string) => Promise<boolean>;
   unbanUser: (userId: string) => Promise<boolean>;
-  updateUserRoles: (userId: string, roles: ("user" | "moderator" | "admin")[]) => Promise<boolean>;
+  updateUserRoles: (
+    userId: string,
+    roles: ("user" | "moderator" | "admin")[],
+  ) => Promise<boolean>;
 }
 
 export const useAdminStore = create<AdminState>()((set, get) => ({
@@ -22,10 +25,13 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const result = await window.electronAPI.admin.getUsers(search);
-      if (result.success && result.data) {
-        set({ users: result.data as ApiUser[], isLoading: false });
+      if (result.success && result.data.data) {
+        set({ users: result.data.data as ApiUser[], isLoading: false });
       } else {
-        set({ error: result.error || "Failed to fetch users", isLoading: false });
+        set({
+          error: result.error || "Failed to fetch users",
+          isLoading: false,
+        });
       }
     } catch (err) {
       set({ error: "Failed to fetch users", isLoading: false });
@@ -40,7 +46,7 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
         // Optimistic update
         set((state) => ({
           users: state.users.map((u) =>
-            u.id === userId ? { ...u, isBanned: true, banReason: reason } : u
+            u.id === userId ? { ...u, isBanned: true, banReason: reason } : u,
           ),
           actionLoading: null,
         }));
@@ -62,7 +68,9 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
         // Optimistic update
         set((state) => ({
           users: state.users.map((u) =>
-            u.id === userId ? { ...u, isBanned: false, banReason: undefined } : u
+            u.id === userId
+              ? { ...u, isBanned: false, banReason: undefined }
+              : u,
           ),
           actionLoading: null,
         }));
@@ -84,7 +92,7 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
         // Optimistic update
         set((state) => ({
           users: state.users.map((u) =>
-            u.id === userId ? { ...u, roles: roles } : u
+            u.id === userId ? { ...u, roles: roles } : u,
           ),
           actionLoading: null,
         }));

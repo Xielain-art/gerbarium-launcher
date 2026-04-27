@@ -38,71 +38,100 @@ async function getValidAccessToken(app: App): Promise<string | null> {
 }
 
 export default function adminHandler(app: App) {
-  ipcMain.handle(IPC_CHANNELS.ADMIN.GET_USERS, async (_event, search?: string) => {
-    try {
-      const token = await getValidAccessToken(app);
-      if (!token) {
-        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED || "Unauthorized" };
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.GET_USERS,
+    async (_event, search?: string) => {
+      try {
+        const token = await getValidAccessToken(app);
+        if (!token) {
+          return {
+            success: false,
+            error: ERROR_CODES.AUTH_UNAUTHORIZED || "Unauthorized",
+          };
+        }
+        const result = await getUsersRequest(token, search);
+        if (!result.success) {
+          return { success: false, error: result.errorMessage };
+        }
+        console.log(result.data);
+        return { success: true, data: result.data };
+      } catch (error) {
+        log.error("GET_USERS failed", error);
+        return { success: false, error: "Internal error" };
       }
-      const result = await getUsersRequest(token, search);
-      if (!result.success) {
-        return { success: false, error: result.errorMessage };
-      }
-      return { success: true, data: result.data };
-    } catch (error) {
-      log.error("GET_USERS failed", error);
-      return { success: false, error: "Internal error" };
-    }
-  });
+    },
+  );
 
-  ipcMain.handle(IPC_CHANNELS.ADMIN.BAN_USER, async (_event, userId: string, reason: string) => {
-    try {
-      const token = await getValidAccessToken(app);
-      if (!token) {
-        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED || "Unauthorized" };
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.BAN_USER,
+    async (_event, userId: string, reason: string) => {
+      try {
+        const token = await getValidAccessToken(app);
+        if (!token) {
+          return {
+            success: false,
+            error: ERROR_CODES.AUTH_UNAUTHORIZED || "Unauthorized",
+          };
+        }
+        const result = await banUserRequest(token, userId, reason);
+        if (!result.success) {
+          return { success: false, error: result.errorMessage };
+        }
+        return { success: true, data: result.data };
+      } catch (error) {
+        log.error("BAN_USER failed", error);
+        return { success: false, error: "Internal error" };
       }
-      const result = await banUserRequest(token, userId, reason);
-      if (!result.success) {
-        return { success: false, error: result.errorMessage };
-      }
-      return { success: true, data: result.data };
-    } catch (error) {
-      log.error("BAN_USER failed", error);
-      return { success: false, error: "Internal error" };
-    }
-  });
+    },
+  );
 
-  ipcMain.handle(IPC_CHANNELS.ADMIN.UNBAN_USER, async (_event, userId: string) => {
-    try {
-      const token = await getValidAccessToken(app);
-      if (!token) {
-        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED || "Unauthorized" };
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.UNBAN_USER,
+    async (_event, userId: string) => {
+      try {
+        const token = await getValidAccessToken(app);
+        if (!token) {
+          return {
+            success: false,
+            error: ERROR_CODES.AUTH_UNAUTHORIZED || "Unauthorized",
+          };
+        }
+        const result = await unbanUserRequest(token, userId);
+        if (!result.success) {
+          return { success: false, error: result.errorMessage };
+        }
+        return { success: true, data: result.data };
+      } catch (error) {
+        log.error("UNBAN_USER failed", error);
+        return { success: false, error: "Internal error" };
       }
-      const result = await unbanUserRequest(token, userId);
-      if (!result.success) {
-        return { success: false, error: result.errorMessage };
-      }
-      return { success: true, data: result.data };
-    } catch (error) {
-      log.error("UNBAN_USER failed", error);
-      return { success: false, error: "Internal error" };
-    }
-  });
+    },
+  );
 
-  ipcMain.handle(IPC_CHANNELS.ADMIN.UPDATE_ROLES, async (_event, userId: string, roles: ("user" | "moderator" | "admin")[]) => {
-    try {
-      const token = await getValidAccessToken(app);
-      if (!token) {
-        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED || "Unauthorized" };
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.UPDATE_ROLES,
+    async (
+      _event,
+      userId: string,
+      roles: ("user" | "moderator" | "admin")[],
+    ) => {
+      try {
+        const token = await getValidAccessToken(app);
+        if (!token) {
+          return {
+            success: false,
+            error: ERROR_CODES.AUTH_UNAUTHORIZED || "Unauthorized",
+          };
+        }
+        const result = await updateUserRolesRequest(token, userId, roles);
+        if (!result.success) {
+          return { success: false, error: result.errorMessage };
+        }
+        return { success: true, data: result.data };
+      } catch (error) {
+        log.error("UPDATE_ROLES failed", error);
+        return { success: false, error: "Internal error" };
       }
-      const result = await updateUserRolesRequest(token, userId, roles);
-      if (!result.success) {
-        return { success: false, error: result.errorMessage };
-      }
-      return { success: true, data: result.data };
-    } catch (error) {
-      log.error("UPDATE_ROLES failed", error);
-      return { success: false, error: "Internal error" };
-    }
-  });
+    },
+  );
 }

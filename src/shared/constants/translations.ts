@@ -10,17 +10,25 @@ const RU = {
     ROLES_LABEL: "Роли:",
     REASON_LABEL: "Причина:",
     NO_USERS: "Пользователи не найдены.",
+    SEARCH_PLACEHOLDER: "Поиск пользователей...",
     BUTTONS: {
       EDIT_ROLES: "Изменить роли",
       UNBAN: "Разбанить",
       BAN: "Забанить",
     },
+    ROLES: {
+      USER: "USER",
+      MODERATOR: "MODERATOR",
+      ADMIN: "ADMIN",
+    },
     PROMPTS: {
-      BAN_REASON_TITLE: "Укажите причину блокировки:",
+      BAN_REASON_TITLE: (username: string) =>
+        `Укажите причину блокировки для ${username}:`,
       BAN_REASON_PLACEHOLDER: "Например: Нарушение правил",
-      UNBAN_CONFIRM_TITLE:
-        "Вы уверены, что хотите разбанить этого пользователя?",
-      EDIT_ROLES_TITLE: "Укажите роли через запятую (user, moderator, admin):",
+      UNBAN_CONFIRM_TITLE: (username: string) =>
+        `Вы уверены, что хотите разбанить пользователя ${username}?`,
+      EDIT_ROLES_TITLE: (username: string) =>
+        `Изменение ролей для ${username}:`,
     },
     ERRORS: {
       FETCH_USERS: "Не удалось загрузить пользователей",
@@ -246,17 +254,25 @@ const EN = {
     ROLES_LABEL: "Роли:",
     REASON_LABEL: "Причина:",
     NO_USERS: "Пользователи не найдены.",
+    SEARCH_PLACEHOLDER: "Поиск пользователей...",
     BUTTONS: {
       EDIT_ROLES: "Изменить роли",
       UNBAN: "Разбанить",
       BAN: "Забанить",
     },
+    ROLES: {
+      USER: "USER",
+      MODERATOR: "MODERATOR",
+      ADMIN: "ADMIN",
+    },
     PROMPTS: {
-      BAN_REASON_TITLE: "Укажите причину блокировки:",
+      BAN_REASON_TITLE: (username: string) =>
+        `Укажите причину блокировки для ${username}:`,
       BAN_REASON_PLACEHOLDER: "Например: Нарушение правил",
-      UNBAN_CONFIRM_TITLE:
-        "Вы уверены, что хотите разбанить этого пользователя?",
-      EDIT_ROLES_TITLE: "Укажите роли через запятую (user, moderator, admin):",
+      UNBAN_CONFIRM_TITLE: (username: string) =>
+        `Вы уверены, что хотите разбанить пользователя ${username}?`,
+      EDIT_ROLES_TITLE: (username: string) =>
+        `Изменение ролей для ${username}:`,
     },
     ERRORS: {
       FETCH_USERS: "Не удалось загрузить пользователей",

@@ -44,7 +44,7 @@ function buildNetworkErrorResult<T>(error: unknown): ApiResult<T> {
 
 export async function getUsersRequest(
   accessToken: string,
-  search?: string
+  search?: string,
 ): Promise<ApiResult<ApiUser[]>> {
   try {
     const { data, error, response } = await apiClient.GET("/api/admin/users", {
