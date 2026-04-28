@@ -10,10 +10,28 @@ function extractErrorMessage(error: unknown): string | undefined {
   if (typeof message === "string" && message.trim()) {
     return message.trim();
   }
+  if (Array.isArray(message)) {
+    const firstString = message.find(
+      (item): item is string => typeof item === "string" && item.trim().length > 0,
+    );
+    if (firstString) {
+      return firstString.trim();
+    }
+  }
 
   const errorText = maybeRecord.error;
   if (typeof errorText === "string" && errorText.trim()) {
     return errorText.trim();
+  }
+
+  const errors = maybeRecord.errors;
+  if (Array.isArray(errors)) {
+    const firstString = errors.find(
+      (item): item is string => typeof item === "string" && item.trim().length > 0,
+    );
+    if (firstString) {
+      return firstString.trim();
+    }
   }
 
   return undefined;

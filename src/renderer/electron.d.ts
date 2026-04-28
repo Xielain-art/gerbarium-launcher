@@ -2,6 +2,8 @@ import {
   WindowState,
   AdminUsersResponse,
   AdminUserMutationResponse,
+  AdminRolesResponse,
+  AdminRoleMutationResponse,
   AdminNewsListResponse,
   AdminNewsMutationResponse,
   AdminNewsDeleteResponse,
@@ -113,6 +115,8 @@ export interface IElectronAPI {
       userId: string,
       roleIds: string[],
     ) => Promise<AdminUserMutationResponse>;
+    getRoles: () => Promise<AdminRolesResponse>;
+    createRole: (payload: { name: string; description?: string }) => Promise<AdminRoleMutationResponse>;
     getNews: (
       search?: string,
       page?: number,

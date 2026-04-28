@@ -17,10 +17,13 @@ export function useAdminScreen() {
     banned,
     setFilters,
     fetchUsers,
+    fetchRoles,
     fetchMoreUsers,
     banUser,
     unbanUser,
     updateUserRoles,
+    createRole,
+    roles,
   } = useAdminStore();
 
   const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
@@ -33,7 +36,8 @@ export function useAdminScreen() {
 
   useEffect(() => {
     void fetchUsers();
-  }, [fetchUsers]);
+    void fetchRoles();
+  }, [fetchUsers, fetchRoles]);
 
   const openBanModal = useCallback((user: ApiUser) => {
     setSelectedUser(user);
@@ -93,13 +97,20 @@ export function useAdminScreen() {
     }
   }, [selectedUser, selectedRoles, updateUserRoles]);
 
-  const availableRoles = Array.from(
-    new Map(
-      users
-        .flatMap((user) => user.roles ?? [])
-        .map((role) => [role.id, role] as const),
-    ).values(),
-  );
+  const availableRoles =
+    roles.length > 0
+      ? roles.map((role) => ({
+          id: role.id,
+          name: role.name,
+          description: role.description,
+        }))
+      : Array.from(
+          new Map(
+            users
+              .flatMap((user) => user.roles ?? [])
+              .map((role) => [role.id, { id: role.id, name: role.name, description: undefined }] as const),
+          ).values(),
+        );
 
   return {
     users,
@@ -133,6 +144,7 @@ export function useAdminScreen() {
     toggleRole,
     executeRolesUpdate,
     availableRoles,
+    createRole,
     t,
   };
 }

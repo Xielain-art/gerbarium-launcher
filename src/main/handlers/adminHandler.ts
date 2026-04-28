@@ -9,6 +9,8 @@ import {
   banUserRequest,
   unbanUserRequest,
   updateUserRolesRequest,
+  getRolesRequest,
+  createRoleRequest,
 } from "../../lib/api/admin";
 import {
   listNewsRequest,
@@ -226,6 +228,49 @@ export default function adminHandler(app: App) {
         }
         const result = await updateUserRolesRequest(token, userId, roleIds);
         if (!result.success) {
+          return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
+        }
+        return { success: true, data: result.data };
+      } catch (error) {
+        log.error(LOG_MESSAGES.ADMIN_UPDATE_ROLES_FAILED, error);
+        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+      }
+    },
+  );
+
+  ipcMain.handle(IPC_CHANNELS.ADMIN.GET_ROLES, async () => {
+    try {
+      const token = await getValidAccessToken(app);
+      if (!token) {
+        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+      }
+      const result = await getRolesRequest(token);
+      if (!result.success) {
+        return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
+      }
+      return { success: true, data: result.data };
+    } catch (error) {
+      log.error(LOG_MESSAGES.ADMIN_GET_USERS_FAILED, error);
+      return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+    }
+  });
+
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.CREATE_ROLE,
+    async (_event, payload: { name: string; description?: string }) => {
+      try {
+        const token = await getValidAccessToken(app);
+        if (!token) {
+          return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+        }
+        const result = await createRoleRequest(token, payload);
+        if (!result.success) {
+          log.error(
+            LOG_MESSAGES.ADMIN_UPDATE_ROLES_FAILED,
+            "create-role",
+            result.status,
+            result.errorMessage,
+          );
           return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
         }
         return { success: true, data: result.data };

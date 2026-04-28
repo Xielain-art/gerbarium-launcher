@@ -1,8 +1,9 @@
 import { create } from "zustand";
-import type { ApiUser } from "../../../lib/api/admin";
+import type { ApiRole, ApiUser } from "../../../lib/api/admin";
 
 interface AdminState {
   users: ApiUser[];
+  roles: ApiRole[];
   allUsers: ApiUser[];
   isLoading: boolean;
   isLoadingMore: boolean;
@@ -18,10 +19,14 @@ interface AdminState {
   
   setFilters: (filters: { search?: string; role?: string; banned?: boolean }) => void;
   fetchUsers: () => Promise<void>;
+  fetchRoles: () => Promise<void>;
   fetchMoreUsers: () => Promise<void>;
   banUser: (userId: string, reason: string) => Promise<boolean>;
   unbanUser: (userId: string) => Promise<boolean>;
   updateUserRoles: (userId: string, roleIds: string[]) => Promise<boolean>;
+  createRole: (
+    payload: { name: string; description?: string },
+  ) => Promise<{ success: boolean; error?: string }>;
 }
 
 const PAGE_LIMIT = 20;
@@ -37,6 +42,7 @@ function normalizeApiUserPayload(payload: unknown): ApiUser[] {
 
 export const useAdminStore = create<AdminState>()((set, get) => ({
   users: [],
+  roles: [],
   allUsers: [],
   isLoading: false,
   isLoadingMore: false,
@@ -99,6 +105,17 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
     }
   },
 
+  fetchRoles: async () => {
+    try {
+      const result = await window.electronAPI.admin.getRoles();
+      if (result.success && result.data) {
+        set({ roles: result.data });
+      }
+    } catch {
+      // Ignore and keep user-derived roles as fallback in UI.
+    }
+  },
+
   banUser: async (userId, reason) => {
     set({ actionLoading: userId });
     try {
@@ -154,20 +171,10 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
       if (result.success) {
         set((state) => ({
           users: state.users.map((u) =>
-            u.id === userId
-              ? {
-                  ...u,
-                  roles: (u.roles ?? []).filter((role) => roleIds.includes(role.id)),
-                }
-              : u
+            u.id === userId && result.data ? result.data : u
           ),
           allUsers: state.allUsers.map((u) =>
-            u.id === userId
-              ? {
-                  ...u,
-                  roles: (u.roles ?? []).filter((role) => roleIds.includes(role.id)),
-                }
-              : u
+            u.id === userId && result.data ? result.data : u
           ),
           actionLoading: null,
         }));
@@ -178,6 +185,33 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
     } catch (err) {
       set({ actionLoading: null });
       return false;
+    }
+  },
+
+  createRole: async (payload) => {
+    set({ actionLoading: "create-role", error: null });
+    try {
+      const result = await window.electronAPI.admin.createRole(payload);
+      if (result.success && result.data) {
+        set((state) => ({
+          roles: [...state.roles, result.data!],
+          actionLoading: null,
+        }));
+        return { success: true };
+      }
+      const message = result.error || "Failed to create role";
+      set({
+        actionLoading: null,
+        error: message,
+      });
+      return { success: false, error: message };
+    } catch {
+      const message = "Failed to create role";
+      set({
+        actionLoading: null,
+        error: message,
+      });
+      return { success: false, error: message };
     }
   },
 }));

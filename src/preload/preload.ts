@@ -147,6 +147,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     banUser: (userId: string, reason: string) => typedInvoke(IPC_CHANNELS.ADMIN.BAN_USER, userId, reason),
     unbanUser: (userId: string) => typedInvoke(IPC_CHANNELS.ADMIN.UNBAN_USER, userId),
     updateRoles: (userId: string, roleIds: string[]) => typedInvoke(IPC_CHANNELS.ADMIN.UPDATE_ROLES, userId, roleIds),
+    getRoles: () => typedInvoke(IPC_CHANNELS.ADMIN.GET_ROLES),
+    createRole: (payload: { name: string; description?: string }) =>
+      typedInvoke(IPC_CHANNELS.ADMIN.CREATE_ROLE, payload),
     getNews: (
       search?: string,
       page?: number,

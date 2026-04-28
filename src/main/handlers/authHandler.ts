@@ -258,6 +258,17 @@ export async function resolveOnlineSession(
         refreshed.accessToken ?? "",
       );
       if (!refreshedProfile.success || !refreshedProfile.data) {
+        if (
+          typeof refreshedProfile.status === "number" &&
+          refreshedProfile.status >= 500
+        ) {
+          log.warn(
+            LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
+            refreshedProfile.status,
+            "Server 5xx while refreshing profile; keeping active session",
+          );
+          return refreshed;
+        }
         log.error(
           LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
           refreshedProfile.status,
@@ -270,6 +281,18 @@ export async function resolveOnlineSession(
         ...refreshed,
         user: mapApiUserToSessionUser(refreshedProfile.data),
       };
+    }
+
+    if (
+      typeof profileResult.status === "number" &&
+      profileResult.status >= 500
+    ) {
+      log.warn(
+        LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
+        profileResult.status,
+        "Server 5xx on profile endpoint; using cached session user",
+      );
+      return activeSession;
     }
 
     log.error(

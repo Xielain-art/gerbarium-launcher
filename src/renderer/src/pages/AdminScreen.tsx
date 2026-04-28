@@ -34,10 +34,8 @@ type ChangelogSortBy = "releaseDate" | "version" | "createdAt";
 type ChangelogMandatoryFilter = "all" | "mandatory" | "optional";
 
 function toUserRoleFilter(value: string): UserRoleFilter | undefined {
-  if (value === "user" || value === "moderator" || value === "admin") {
-    return value;
-  }
-  return undefined;
+  if (value === "all") return undefined;
+  return value;
 }
 
 function toNewsSortBy(value: string): NewsSortBy {
@@ -180,6 +178,7 @@ export function AdminScreen() {
     toggleRole,
     executeRolesUpdate,
     availableRoles,
+    createRole,
     t,
   } = vm;
 
@@ -220,6 +219,10 @@ export function AdminScreen() {
   const [changelogOrderDraft, setChangelogOrderDraft] = useState<NewsOrder>("DESC");
   const [changelogMandatoryDraft, setChangelogMandatoryDraft] =
     useState<ChangelogMandatoryFilter>("all");
+  const [newRoleName, setNewRoleName] = useState("");
+  const [newRoleDescription, setNewRoleDescription] = useState("");
+  const [roleFormError, setRoleFormError] = useState<string | null>(null);
+  const [roleSearchQuery, setRoleSearchQuery] = useState("");
 
   const {
     news,
@@ -335,6 +338,12 @@ export function AdminScreen() {
   useEffect(() => {
     setUserBanFilter(userBanned === undefined ? "all" : userBanned ? "banned" : "active");
   }, [userBanned]);
+
+  useEffect(() => {
+    if (!rolesModalOpen) {
+      setRoleSearchQuery("");
+    }
+  }, [rolesModalOpen]);
 
   // Debounced users search input keeps filtering responsive and stable.
   useEffect(() => {
@@ -498,7 +507,36 @@ export function AdminScreen() {
     }
   };
 
+  const handleCreateRole = async () => {
+    setRoleFormError(null);
+    const name = newRoleName.trim();
+    if (!name) {
+      setRoleFormError("Role name is required");
+      return;
+    }
+    const result = await createRole({
+      name,
+      description: newRoleDescription.trim() || undefined,
+    });
+    if (!result.success) {
+      setRoleFormError(result.error || "Failed to create role");
+      return;
+    }
+    setNewRoleName("");
+    setNewRoleDescription("");
+  };
+
   const newsRows = useMemo(() => news, [news]);
+  const filteredAvailableRoles = useMemo(() => {
+    const query = roleSearchQuery.trim().toLowerCase();
+    if (!query) return availableRoles;
+    return availableRoles.filter((role) => {
+      const name = role.name.toLowerCase();
+      const description =
+        typeof role.description === "string" ? role.description.toLowerCase() : "";
+      return name.includes(query) || description.includes(query);
+    });
+  }, [availableRoles, roleSearchQuery]);
   const isApplyingUserFilters = activeTab === "users" && isLoading;
   const isApplyingNewsFilters = activeTab === "news" && newsTab === "all" && isLoadingNews;
   const isAdminApiBusy = Boolean(
@@ -612,13 +650,14 @@ export function AdminScreen() {
                     onChange={(e) => {
                       const val = typeof e === "string" ? e : e.target.value;
                       setUserRoleFilter(val as UserRoleFilter | "all");
-                      setUserFilters({ role: val === "all" ? undefined : toUserRoleFilter(val) });
+                      setUserFilters({ role: toUserRoleFilter(val) });
                     }}
                     options={[
                       { label: "Все роли", value: "all" },
-                      { label: "User", value: "user" },
-                      { label: "Moderator", value: "moderator" },
-                      { label: "Admin", value: "admin" },
+                      ...availableRoles.map((role) => ({
+                        label: role.name,
+                        value: role.id,
+                      })),
                     ]}
                   />
                 </div>
@@ -645,6 +684,34 @@ export function AdminScreen() {
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="mb-6 rounded-lg border border-white/10 bg-black/10 p-4">
+              <div className="mb-3 font-minecraft text-xs uppercase text-theme-muted">
+                Создание роли
+              </div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <Input
+                  placeholder="role-name"
+                  value={newRoleName}
+                  onChange={(e) => setNewRoleName(e.target.value)}
+                />
+                <Input
+                  placeholder="Описание (опционально)"
+                  value={newRoleDescription}
+                  onChange={(e) => setNewRoleDescription(e.target.value)}
+                />
+                <Button
+                  variant="minecraft"
+                  onClick={() => void handleCreateRole()}
+                  disabled={isAdminApiBusy}
+                >
+                  Создать роль
+                </Button>
+              </div>
+              {roleFormError && (
+                <div className="mt-2 font-minecraft text-xs text-red-500">{roleFormError}</div>
+              )}
             </div>
 
           {error && <div className="mb-4 text-red-500 font-minecraft">{error}</div>}
@@ -1292,15 +1359,51 @@ export function AdminScreen() {
         title={`Manage Roles: ${selectedUser?.username}`}
       >
         <div className="space-y-4">
-          <div className="grid gap-2">
-            {availableRoles.map((role) => (
-                <Checkbox
+          <div className="rounded border border-white/10 bg-black/10 p-3">
+            <Input
+              placeholder="Поиск роли по имени или описанию..."
+              value={roleSearchQuery}
+              onChange={(e) => setRoleSearchQuery(e.target.value)}
+            />
+            <div className="mt-2 font-minecraft text-[10px] uppercase text-theme-muted">
+              Выбрано ролей: {selectedRoles.length}
+            </div>
+          </div>
+          <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+            {filteredAvailableRoles.map((role) => {
+              const isSelected = selectedRoles.includes(role.id);
+              return (
+                <button
+                  type="button"
                   key={role.id}
-                  label={role.name.toUpperCase()}
-                  checked={selectedRoles.includes(role.id)}
-                  onChange={() => toggleRole(role.id)}
-                />
-            ))}
+                  onClick={() => toggleRole(role.id)}
+                  className={`w-full rounded border p-3 text-left transition-colors ${
+                    isSelected
+                      ? "border-theme bg-theme/10"
+                      : "border-white/10 bg-black/20 hover:bg-black/30"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="font-minecraft text-xs uppercase text-theme">{role.name}</div>
+                    <div
+                      className={`font-minecraft text-[10px] uppercase ${
+                        isSelected ? "text-theme" : "text-theme-muted"
+                      }`}
+                    >
+                      {isSelected ? "selected" : "not selected"}
+                    </div>
+                  </div>
+                  <div className="mt-1 text-xs text-theme-muted">
+                    {role.description?.trim() || "Описание роли не задано"}
+                  </div>
+                </button>
+              );
+            })}
+            {filteredAvailableRoles.length === 0 && (
+              <div className="rounded border border-white/10 bg-black/20 px-3 py-4 text-center font-minecraft text-xs text-theme-muted">
+                Роли не найдены
+              </div>
+            )}
           </div>
           {actionError && <div className="text-red-500 text-sm">{actionError}</div>}
         </div>
