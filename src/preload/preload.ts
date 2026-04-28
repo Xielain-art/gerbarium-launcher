@@ -173,6 +173,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
       ),
     createNews: (payload: ApiCreateNewsDto) =>
       typedInvoke(IPC_CHANNELS.ADMIN.CREATE_NEWS, payload),
+    getNewsTags: () => typedInvoke(IPC_CHANNELS.ADMIN.GET_NEWS_TAGS),
+    createNewsTag: (payload: { name: string }) =>
+      typedInvoke(IPC_CHANNELS.ADMIN.CREATE_NEWS_TAG, payload),
     updateNews: (newsId: string, payload: ApiUpdateNewsDto) =>
       typedInvoke(IPC_CHANNELS.ADMIN.UPDATE_NEWS, newsId, payload),
     deleteNews: (newsId: string) => typedInvoke(IPC_CHANNELS.ADMIN.DELETE_NEWS, newsId),

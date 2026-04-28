@@ -1,7 +1,7 @@
 import createClient from "openapi-fetch";
 import { paths } from "./v1";
 
-const DEFAULT_API_BASE_URL = "";
+const DEFAULT_API_BASE_URL = "https://gerbarium-api.vercel.app";
 
 function normalizeBaseUrl(value: string): string {
   return value.trim().replace(/\/+$/, "");

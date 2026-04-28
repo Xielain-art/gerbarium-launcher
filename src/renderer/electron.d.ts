@@ -6,6 +6,8 @@ import {
   AdminRoleMutationResponse,
   AdminNewsListResponse,
   AdminNewsMutationResponse,
+  AdminNewsTagsResponse,
+  AdminNewsTagMutationResponse,
   AdminNewsDeleteResponse,
   AdminChangelogListResponse,
   AdminChangelogMutationResponse,
@@ -128,6 +130,8 @@ export interface IElectronAPI {
       toDate?: string,
     ) => Promise<AdminNewsListResponse>;
     createNews: (payload: ApiCreateNewsDto) => Promise<AdminNewsMutationResponse>;
+    getNewsTags: () => Promise<AdminNewsTagsResponse>;
+    createNewsTag: (payload: { name: string }) => Promise<AdminNewsTagMutationResponse>;
     updateNews: (newsId: string, payload: ApiUpdateNewsDto) => Promise<AdminNewsMutationResponse>;
     deleteNews: (newsId: string) => Promise<AdminNewsDeleteResponse>;
     getChangelog: (

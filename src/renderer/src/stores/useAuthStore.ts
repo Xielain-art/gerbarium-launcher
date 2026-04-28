@@ -74,18 +74,34 @@ const defaultState = {
   error: null,
 };
 
-export const useAuthStore = create<AuthState>()((set) => ({
+let sessionLoadInFlight: Promise<void> | null = null;
+
+export const useAuthStore = create<AuthState>()((set, get) => ({
   ...defaultState,
 
   clearError: () => set({ error: null }),
 
   loadToken: async () => {
+    if (sessionLoadInFlight) {
+      await sessionLoadInFlight;
+      return;
+    }
+    if (get().hasCheckedSession && !get().isSessionLoading) {
+      return;
+    }
+
+    sessionLoadInFlight = (async () => {
     set({ isSessionLoading: true });
     try {
       const result = await window.electronAPI.auth.getSession();
       if (result.success && result.isAuthenticated && result.user) {
+        const prev = get();
+        const nextToken = result.accessToken ?? null;
+        const shouldLogTokenLoaded =
+          prev.user?.id !== result.user.id || prev.token !== nextToken || !prev.hasCheckedSession;
+
         set({
-          token: result.accessToken ?? null,
+          token: nextToken,
           isAuthenticated: true,
           user: {
             id: result.user.id,
@@ -103,7 +119,9 @@ export const useAuthStore = create<AuthState>()((set) => ({
           isSessionLoading: false,
           hasCheckedSession: true,
         });
-        logAction(LOG_ACTIONS.TOKEN_LOADED, `User: ${result.user.username}`);
+        if (shouldLogTokenLoaded) {
+          logAction(LOG_ACTIONS.TOKEN_LOADED, `User: ${result.user.username}`);
+        }
         return;
       }
 
@@ -124,6 +142,13 @@ export const useAuthStore = create<AuthState>()((set) => ({
         isSessionLoading: false,
         hasCheckedSession: true,
       });
+    }
+    })();
+
+    try {
+      await sessionLoadInFlight;
+    } finally {
+      sessionLoadInFlight = null;
     }
   },
 

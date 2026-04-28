@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type {
   ApiCreateNewsDto,
   ApiNews,
+  ApiNewsTag,
   ApiNewsListPayload,
   ApiUpdateNewsDto,
 } from "../../../lib/api/news";
@@ -14,6 +15,8 @@ interface AdminNewsState {
   page: number;
   actionLoadingId: string | "create" | null;
   error: string | null;
+  newsTags: ApiNewsTag[];
+  isLoadingTags: boolean;
 
   // Filters
   search: string;
@@ -36,6 +39,8 @@ interface AdminNewsState {
   createNews: (payload: ApiCreateNewsDto) => Promise<boolean>;
   updateNews: (newsId: string, payload: ApiUpdateNewsDto) => Promise<boolean>;
   deleteNews: (newsId: string) => Promise<boolean>;
+  fetchNewsTags: () => Promise<void>;
+  createNewsTag: (name: string) => Promise<{ success: boolean; tag?: ApiNewsTag; error?: string }>;
 }
 
 const PAGE_LIMIT = 10;
@@ -100,6 +105,8 @@ export const useAdminNewsStore = create<AdminNewsState>()((set, get) => ({
   page: 1,
   actionLoadingId: null,
   error: null,
+  newsTags: [],
+  isLoadingTags: false,
   search: "",
   tagId: "",
   fromDate: "",
@@ -231,6 +238,38 @@ export const useAdminNewsStore = create<AdminNewsState>()((set, get) => ({
     } catch {
       set({ actionLoadingId: null, error: "Failed to delete news" });
       return false;
+    }
+  },
+
+  fetchNewsTags: async () => {
+    set({ isLoadingTags: true });
+    try {
+      const result = await window.electronAPI.admin.getNewsTags();
+      if (!result.success || !result.data) {
+        set({ isLoadingTags: false, error: result.error || "Failed to fetch news tags" });
+        return;
+      }
+      set({ newsTags: result.data, isLoadingTags: false });
+    } catch {
+      set({ isLoadingTags: false, error: "Failed to fetch news tags" });
+    }
+  },
+
+  createNewsTag: async (name) => {
+    try {
+      const result = await window.electronAPI.admin.createNewsTag({ name });
+      if (!result.success || !result.data) {
+        return { success: false, error: result.error || "Failed to create tag" };
+      }
+      const created = result.data;
+      set((state) => ({
+        newsTags: state.newsTags.some((tag) => tag.id === created.id)
+          ? state.newsTags
+          : [...state.newsTags, created],
+      }));
+      return { success: true, tag: created };
+    } catch {
+      return { success: false, error: "Failed to create tag" };
     }
   },
 }));

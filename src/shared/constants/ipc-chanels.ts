@@ -4,6 +4,8 @@ import type {
   ApiCreateNewsDto,
   ApiUpdateNewsDto,
   ApiNewsListPayload,
+  ApiNewsTag,
+  ApiCreateNewsTagDto,
 } from "../../lib/api/news";
 import type {
   ApiChangelog,
@@ -50,6 +52,8 @@ export const IPC_CHANNELS = {
     CREATE_ROLE: "admin:create-role",
     GET_NEWS: "admin:get-news",
     CREATE_NEWS: "admin:create-news",
+    GET_NEWS_TAGS: "admin:get-news-tags",
+    CREATE_NEWS_TAG: "admin:create-news-tag",
     UPDATE_NEWS: "admin:update-news",
     DELETE_NEWS: "admin:delete-news",
     GET_CHANGELOG: "admin:get-changelog",
@@ -150,6 +154,18 @@ export interface AdminNewsListResponse {
 export interface AdminNewsMutationResponse {
   success: boolean;
   data?: ApiNews;
+  error?: string;
+}
+
+export interface AdminNewsTagsResponse {
+  success: boolean;
+  data?: ApiNewsTag[];
+  error?: string;
+}
+
+export interface AdminNewsTagMutationResponse {
+  success: boolean;
+  data?: ApiNewsTag;
   error?: string;
 }
 
@@ -374,6 +390,14 @@ export interface IpcChannelMap {
   [IPC_CHANNELS.ADMIN.CREATE_NEWS]: {
     args: [payload: ApiCreateNewsDto];
     return: AdminNewsMutationResponse;
+  };
+  [IPC_CHANNELS.ADMIN.GET_NEWS_TAGS]: {
+    args: [];
+    return: AdminNewsTagsResponse;
+  };
+  [IPC_CHANNELS.ADMIN.CREATE_NEWS_TAG]: {
+    args: [payload: ApiCreateNewsTagDto];
+    return: AdminNewsTagMutationResponse;
   };
   [IPC_CHANNELS.ADMIN.UPDATE_NEWS]: {
     args: [newsId: string, payload: ApiUpdateNewsDto];

@@ -1,8 +1,22 @@
 import { apiClient } from "./client";
 import { buildApiResult, buildNetworkErrorResult } from "./result";
-import type { ApiCreateNewsDto, ApiNews, ApiResult, ApiUpdateNewsDto } from "./types";
+import type {
+  ApiCreateNewsDto,
+  ApiCreateNewsTagDto,
+  ApiNews,
+  ApiNewsTag,
+  ApiResult,
+  ApiUpdateNewsDto,
+} from "./types";
 
-export type { ApiNews, ApiCreateNewsDto, ApiUpdateNewsDto, ApiResult } from "./types";
+export type {
+  ApiNews,
+  ApiNewsTag,
+  ApiCreateNewsDto,
+  ApiCreateNewsTagDto,
+  ApiUpdateNewsDto,
+  ApiResult,
+} from "./types";
 
 export interface ApiPaginationMeta {
   page: number;
@@ -196,5 +210,37 @@ export async function deleteNewsRequest(
     };
   } catch (error) {
     return buildNetworkErrorResult<{ success: true }>(error);
+  }
+}
+
+export async function listNewsTagsRequest(
+  accessToken: string,
+): Promise<ApiResult<ApiNewsTag[]>> {
+  try {
+    const { data, error, response } = await apiClient.GET("/api/news/tags", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return buildApiResult<ApiNewsTag[]>({ response, data, error });
+  } catch (error) {
+    return buildNetworkErrorResult<ApiNewsTag[]>(error);
+  }
+}
+
+export async function createNewsTagRequest(
+  accessToken: string,
+  payload: ApiCreateNewsTagDto,
+): Promise<ApiResult<ApiNewsTag>> {
+  try {
+    const { data, error, response } = await apiClient.POST("/api/news/tags", {
+      body: payload,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return buildApiResult<ApiNewsTag>({ response, data, error });
+  } catch (error) {
+    return buildNetworkErrorResult<ApiNewsTag>(error);
   }
 }

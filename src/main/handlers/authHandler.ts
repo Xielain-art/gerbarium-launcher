@@ -33,6 +33,36 @@ export type AuthSessionPayload = {
   refreshCookie?: string;
 };
 
+function logApiFailure(
+  context: string,
+  result: {
+    status?: number;
+    errorMessage?: string;
+    errorDetails?: string;
+  },
+): void {
+  log.error(
+    context,
+    "status:",
+    result.status ?? "n/a",
+    "message:",
+    result.errorMessage ?? "n/a",
+    "details:",
+    result.errorDetails ?? "n/a",
+  );
+}
+
+function readErrorDetails(result: unknown): string | undefined {
+  if (typeof result !== "object" || result === null) {
+    return undefined;
+  }
+  if (!("errorDetails" in result)) {
+    return undefined;
+  }
+  const value = (result as { errorDetails?: unknown }).errorDetails;
+  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+}
+
 async function readSecureData(secureDataPath: string): Promise<SecureData> {
   try {
     const raw = await fs.readFile(secureDataPath, "utf-8");
@@ -202,11 +232,7 @@ async function refreshOnlineSession(
   log.info(LOG_MESSAGES.AUTH_TOKEN_REFRESH_ATTEMPT);
   const refreshResult = await refreshTokenRequest(session.refreshCookie);
   if (!refreshResult.success || !refreshResult.data) {
-    log.error(
-      LOG_MESSAGES.AUTH_TOKEN_REFRESH_FAILED,
-      refreshResult.status,
-      refreshResult.errorMessage,
-    );
+    logApiFailure(LOG_MESSAGES.AUTH_TOKEN_REFRESH_FAILED, refreshResult);
     return null;
   }
 
@@ -246,11 +272,7 @@ export async function resolveOnlineSession(
     if (profileResult.status === 401 || profileResult.status === 403) {
       const refreshed = await refreshOnlineSession(activeSession);
       if (!refreshed) {
-        log.error(
-          LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
-          profileResult.status,
-          profileResult.errorMessage,
-        );
+        logApiFailure(LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED, profileResult);
         return null;
       }
 
@@ -271,8 +293,12 @@ export async function resolveOnlineSession(
         }
         log.error(
           LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
-          refreshedProfile.status,
-          refreshedProfile.errorMessage,
+          "status:",
+          refreshedProfile.status ?? "n/a",
+          "message:",
+          refreshedProfile.errorMessage ?? "n/a",
+          "details:",
+          readErrorDetails(refreshedProfile) ?? "n/a",
         );
         return null;
       }
@@ -297,8 +323,12 @@ export async function resolveOnlineSession(
 
     log.error(
       LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
-      profileResult.status,
-      profileResult.errorMessage,
+      "status:",
+      profileResult.status ?? "n/a",
+      "message:",
+      profileResult.errorMessage ?? "n/a",
+      "details:",
+      readErrorDetails(profileResult) ?? "n/a",
     );
     return activeSession;
   }
@@ -335,11 +365,7 @@ export default function authHandler(app: App) {
         });
 
         if (!authResult.success || !authResult.data) {
-          log.error(
-            LOG_MESSAGES.AUTH_API_ERROR,
-            authResult.status,
-            authResult.errorMessage,
-          );
+          logApiFailure(LOG_MESSAGES.AUTH_API_ERROR, authResult);
           return {
             success: false,
             error: mapAuthFailureCode(authResult.status),
@@ -397,11 +423,7 @@ export default function authHandler(app: App) {
         });
 
         if (!registerResult.success || !registerResult.data) {
-          log.error(
-            LOG_MESSAGES.AUTH_API_ERROR,
-            registerResult.status,
-            registerResult.errorMessage,
-          );
+          logApiFailure(LOG_MESSAGES.AUTH_API_ERROR, registerResult);
           return {
             success: false,
             error: mapAuthFailureCode(registerResult.status),
@@ -513,11 +535,7 @@ export default function authHandler(app: App) {
         )
           .then((logoutResult) => {
             if (!logoutResult.success) {
-              log.error(
-                LOG_MESSAGES.AUTH_API_ERROR,
-                logoutResult.status,
-                logoutResult.errorMessage,
-              );
+              logApiFailure(LOG_MESSAGES.AUTH_API_ERROR, logoutResult);
             }
           })
           .catch((error) => {

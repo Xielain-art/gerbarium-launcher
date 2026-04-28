@@ -15,6 +15,8 @@ import {
 import {
   listNewsRequest,
   createNewsRequest,
+  listNewsTagsRequest,
+  createNewsTagRequest,
   updateNewsRequest,
   deleteNewsRequest,
 } from "../../lib/api/news";
@@ -35,6 +37,25 @@ import {
 type NewsSortBy = "createdAt" | "updatedAt" | "title";
 type NewsOrder = "ASC" | "DESC";
 type ChangelogSortBy = "releaseDate" | "version" | "createdAt";
+
+function logApiFailure(
+  context: string,
+  result: {
+    status?: number;
+    errorMessage?: string;
+    errorDetails?: string;
+  },
+): void {
+  log.error(
+    context,
+    "status:",
+    result.status ?? "n/a",
+    "message:",
+    result.errorMessage ?? "n/a",
+    "details:",
+    result.errorDetails ?? "n/a",
+  );
+}
 
 async function getValidAccessToken(app: App): Promise<string | null> {
   const secureDataPath = path.join(
@@ -80,6 +101,7 @@ export default function adminHandler(app: App) {
         }
         const result = await getUsersRequest(token, search, role, banned);
         if (!result.success) {
+          logApiFailure(LOG_MESSAGES.ADMIN_GET_USERS_FAILED, result);
           return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
         }
         return { success: true, data: result.data };
@@ -109,6 +131,7 @@ export default function adminHandler(app: App) {
           order: order || "DESC",
         });
         if (!result.success) {
+          logApiFailure(LOG_MESSAGES.ADMIN_GET_CHANGELOG_FAILED, result);
           return {
             success: false,
             error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
@@ -135,6 +158,7 @@ export default function adminHandler(app: App) {
         }
         const result = await banUserRequest(token, userId, reason);
         if (!result.success) {
+          logApiFailure(LOG_MESSAGES.ADMIN_BAN_USER_FAILED, result);
           return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
         }
         return { success: true, data: result.data };
@@ -153,6 +177,7 @@ export default function adminHandler(app: App) {
       }
       const result = await createChangelogRequest(token, payload);
       if (!result.success) {
+        logApiFailure(LOG_MESSAGES.ADMIN_CREATE_CHANGELOG_FAILED, result);
         return {
           success: false,
           error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
@@ -178,6 +203,7 @@ export default function adminHandler(app: App) {
         }
         const result = await unbanUserRequest(token, userId);
         if (!result.success) {
+          logApiFailure(LOG_MESSAGES.ADMIN_UNBAN_USER_FAILED, result);
           return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
         }
         return { success: true, data: result.data };
@@ -198,6 +224,7 @@ export default function adminHandler(app: App) {
         }
         const result = await updateChangelogRequest(token, changelogId, payload);
         if (!result.success) {
+          logApiFailure(LOG_MESSAGES.ADMIN_UPDATE_CHANGELOG_FAILED, result);
           return {
             success: false,
             error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
@@ -228,6 +255,7 @@ export default function adminHandler(app: App) {
         }
         const result = await updateUserRolesRequest(token, userId, roleIds);
         if (!result.success) {
+          logApiFailure(LOG_MESSAGES.ADMIN_UPDATE_ROLES_FAILED, result);
           return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
         }
         return { success: true, data: result.data };
@@ -246,6 +274,7 @@ export default function adminHandler(app: App) {
       }
       const result = await getRolesRequest(token);
       if (!result.success) {
+        logApiFailure(LOG_MESSAGES.ADMIN_GET_USERS_FAILED, result);
         return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
       }
       return { success: true, data: result.data };
@@ -265,12 +294,7 @@ export default function adminHandler(app: App) {
         }
         const result = await createRoleRequest(token, payload);
         if (!result.success) {
-          log.error(
-            LOG_MESSAGES.ADMIN_UPDATE_ROLES_FAILED,
-            "create-role",
-            result.status,
-            result.errorMessage,
-          );
+          logApiFailure(LOG_MESSAGES.ADMIN_UPDATE_ROLES_FAILED, result);
           return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
         }
         return { success: true, data: result.data };
@@ -306,6 +330,7 @@ export default function adminHandler(app: App) {
           limit,
         });
         if (!result.success) {
+          logApiFailure(LOG_MESSAGES.ADMIN_GET_NEWS_FAILED, result);
           return {
             success: false,
             error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
@@ -327,6 +352,49 @@ export default function adminHandler(app: App) {
       }
       const result = await createNewsRequest(token, payload);
       if (!result.success) {
+        logApiFailure(LOG_MESSAGES.ADMIN_CREATE_NEWS_FAILED, result);
+        return {
+          success: false,
+          error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
+        };
+      }
+      return { success: true, data: result.data };
+    } catch (error) {
+      log.error(LOG_MESSAGES.ADMIN_CREATE_NEWS_FAILED, error);
+      return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+    }
+  });
+
+  ipcMain.handle(IPC_CHANNELS.ADMIN.GET_NEWS_TAGS, async () => {
+    try {
+      const token = await getValidAccessToken(app);
+      if (!token) {
+        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+      }
+      const result = await listNewsTagsRequest(token);
+      if (!result.success) {
+        logApiFailure(LOG_MESSAGES.ADMIN_GET_NEWS_FAILED, result);
+        return {
+          success: false,
+          error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
+        };
+      }
+      return { success: true, data: result.data };
+    } catch (error) {
+      log.error(LOG_MESSAGES.ADMIN_GET_NEWS_FAILED, error);
+      return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+    }
+  });
+
+  ipcMain.handle(IPC_CHANNELS.ADMIN.CREATE_NEWS_TAG, async (_event, payload) => {
+    try {
+      const token = await getValidAccessToken(app);
+      if (!token) {
+        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+      }
+      const result = await createNewsTagRequest(token, payload);
+      if (!result.success) {
+        logApiFailure(LOG_MESSAGES.ADMIN_CREATE_NEWS_FAILED, result);
         return {
           success: false,
           error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
@@ -349,6 +417,7 @@ export default function adminHandler(app: App) {
         }
         const result = await updateNewsRequest(token, newsId, payload);
         if (!result.success) {
+          logApiFailure(LOG_MESSAGES.ADMIN_UPDATE_NEWS_FAILED, result);
           return {
             success: false,
             error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
@@ -372,6 +441,7 @@ export default function adminHandler(app: App) {
         }
         const result = await deleteNewsRequest(token, newsId);
         if (!result.success) {
+          logApiFailure(LOG_MESSAGES.ADMIN_DELETE_NEWS_FAILED, result);
           return {
             success: false,
             error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
@@ -395,6 +465,7 @@ export default function adminHandler(app: App) {
         }
         const result = await deleteChangelogRequest(token, changelogId);
         if (!result.success) {
+          logApiFailure(LOG_MESSAGES.ADMIN_DELETE_CHANGELOG_FAILED, result);
           return {
             success: false,
             error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,

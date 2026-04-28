@@ -1,4 +1,4 @@
-import { useAdminPage } from "../hooks/useAdminPage";
+﻿import { useAdminPage } from "../hooks/useAdminPage";
 import { WindowControls } from "../components";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Editor, {
@@ -56,22 +56,9 @@ function toChangelogSortBy(value: string): ChangelogSortBy {
   return "releaseDate";
 }
 
-function parseTagsInput(input: string): string[] | undefined {
-  const tags = input
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean);
-  return tags.length > 0 ? tags : undefined;
-}
-
-function stringifyNewsTags(tags: unknown): string {
-  if (!Array.isArray(tags)) return "";
-  const flat = tags.flatMap((tag) => {
-    if (typeof tag === "string") return [tag];
-    if (Array.isArray(tag)) return tag.filter((v): v is string => typeof v === "string");
-    return [];
-  });
-  return flat.join(", ");
+function normalizeTagIdsForApi(tagIds: string[]): unknown[][] | undefined {
+  if (tagIds.length === 0) return undefined;
+  return tagIds.map((tagId) => [tagId]);
 }
 
 function toApiCreateNewsPayload(payload: {
@@ -79,11 +66,11 @@ function toApiCreateNewsPayload(payload: {
   slug: string;
   content: string;
   image?: string;
-  tags?: string[];
+  tagIds?: string[];
 }): ApiCreateNewsDto {
   return {
     ...payload,
-    tagIds: payload.tags,
+    tagIds: normalizeTagIdsForApi(payload.tagIds ?? []),
   } as unknown as ApiCreateNewsDto;
 }
 
@@ -92,11 +79,11 @@ function toApiUpdateNewsPayload(payload: {
   slug?: string;
   content?: string;
   image?: string;
-  tags?: string[];
+  tagIds?: string[];
 }): ApiUpdateNewsDto {
   return {
     ...payload,
-    tagIds: payload.tags,
+    tagIds: normalizeTagIdsForApi(payload.tagIds ?? []),
   } as unknown as ApiUpdateNewsDto;
 }
 
@@ -203,9 +190,11 @@ export function AdminScreen() {
   const [newsTitle, setNewsTitle] = useState("");
   const [newsSlug, setNewsSlug] = useState("");
   const [newsImage, setNewsImage] = useState("");
-  const [newsTagsInput, setNewsTagsInput] = useState("");
+  const [selectedNewsTagIds, setSelectedNewsTagIds] = useState<string[]>([]);
+  const [newNewsTagName, setNewNewsTagName] = useState("");
   const [newsContentHtml, setNewsContentHtml] = useState("");
   const [newsFormError, setNewsFormError] = useState<string | null>(null);
+  const [newsTagFormError, setNewsTagFormError] = useState<string | null>(null);
   const [editingChangelog, setEditingChangelog] = useState<ApiChangelog | null>(null);
   const [changelogVersion, setChangelogVersion] = useState("");
   const [changelogReleaseDate, setChangelogReleaseDate] = useState("");
@@ -231,6 +220,8 @@ export function AdminScreen() {
     hasMore: hasMoreNews,
     actionLoadingId: newsActionLoadingId,
     error: newsError,
+    newsTags,
+    isLoadingTags: isLoadingNewsTags,
     sortBy: newsSortBy,
     order: newsOrder,
     setFilters: setNewsFilters,
@@ -239,6 +230,8 @@ export function AdminScreen() {
     createNews,
     updateNews,
     deleteNews,
+    fetchNewsTags,
+    createNewsTag,
   } = useAdminNewsStore();
   const {
     changelog,
@@ -294,6 +287,10 @@ export function AdminScreen() {
   useEffect(() => {
     void fetchNews();
   }, [fetchNews]);
+
+  useEffect(() => {
+    void fetchNewsTags();
+  }, [fetchNewsTags]);
 
   useEffect(() => {
     void fetchChangelog();
@@ -413,7 +410,7 @@ export function AdminScreen() {
         slug: newsSlug,
         content: newsContentHtml,
         image: newsImage || undefined,
-        tags: parseTagsInput(newsTagsInput),
+        tagIds: selectedNewsTagIds,
       }),
     );
     if (success) {
@@ -432,7 +429,7 @@ export function AdminScreen() {
         slug: newsSlug,
         content: newsContentHtml,
         image: newsImage || undefined,
-        tags: parseTagsInput(newsTagsInput),
+        tagIds: selectedNewsTagIds,
       }),
     );
     if (success) {
@@ -446,9 +443,30 @@ export function AdminScreen() {
     setNewsTitle("");
     setNewsSlug("");
     setNewsImage("");
-    setNewsTagsInput("");
+    setSelectedNewsTagIds([]);
+    setNewNewsTagName("");
+    setNewsTagFormError(null);
     setNewsContentHtml("");
     setNewsFormError(null);
+  };
+
+  const handleCreateNewsTag = async () => {
+    setNewsTagFormError(null);
+    const name = newNewsTagName.trim();
+    if (!name) {
+      setNewsTagFormError("Tag name is required");
+      return;
+    }
+    const result = await createNewsTag(name);
+    if (!result.success || !result.tag) {
+      setNewsTagFormError(result.error || "Failed to create tag");
+      return;
+    }
+    const createdTag = result.tag;
+    setSelectedNewsTagIds((prev) =>
+      prev.includes(createdTag.id) ? prev : [...prev, createdTag.id],
+    );
+    setNewNewsTagName("");
   };
 
   const resetChangelogForm = () => {
@@ -856,14 +874,17 @@ export function AdminScreen() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="block font-minecraft text-[10px] uppercase text-theme-muted">
-                    Тег
-                  </label>
-                  <Input
-                    placeholder="survival..."
+                  <Select
+                    label="Тег"
                     value={newsTag}
-                    onChange={(e) => setNewsTag(e.target.value)}
-                    className="h-10 w-full"
+                    onChange={(e) => {
+                      const val = typeof e === "string" ? e : e.target.value;
+                      setNewsTag(val);
+                    }}
+                    options={[
+                      { label: "Все теги", value: "" },
+                      ...newsTags.map((tag) => ({ label: tag.name, value: tag.id })),
+                    ]}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -952,7 +973,20 @@ export function AdminScreen() {
                         setNewsTitle(item.title);
                         setNewsSlug(item.slug);
                         setNewsImage(item.image || "");
-                        setNewsTagsInput(stringifyNewsTags(item.tags));
+                        setSelectedNewsTagIds(
+                          Array.isArray(item.tags)
+                            ? item.tags
+                                .map((tag) =>
+                                  typeof tag === "object" &&
+                                  tag !== null &&
+                                  "id" in tag &&
+                                  typeof (tag as { id?: unknown }).id === "string"
+                                    ? (tag as { id: string }).id
+                                    : null,
+                                )
+                                .filter((id): id is string => Boolean(id))
+                            : [],
+                        );
                         setNewsContentHtml(item.content);
                         setNewsTab("create");
                       }}
@@ -1004,10 +1038,52 @@ export function AdminScreen() {
                 <Input value={newsImage} onChange={(e) => setNewsImage(e.target.value)} placeholder="https://..." />
               </div>
               <div className="space-y-2">
-                <label className="font-minecraft text-xs uppercase text-theme-muted">Теги (через запятую)</label>
-                <Input value={newsTagsInput} onChange={(e) => setNewsTagsInput(e.target.value)} placeholder="update, fabric, event" />
+                <label className="font-minecraft text-xs uppercase text-theme-muted">Теги</label>
+                <div className="max-h-36 space-y-2 overflow-y-auto rounded border border-white/10 bg-black/20 p-2">
+                  {isLoadingNewsTags && (
+                    <div className="font-minecraft text-[10px] uppercase text-theme-muted">Загрузка тегов...</div>
+                  )}
+                  {!isLoadingNewsTags && newsTags.length === 0 && (
+                    <div className="font-minecraft text-[10px] uppercase text-theme-muted">Теги пока не созданы</div>
+                  )}
+                  {newsTags.map((tag) => (
+                    <label key={tag.id} className="flex items-start gap-2 rounded border border-white/10 bg-black/20 p-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedNewsTagIds.includes(tag.id)}
+                        onChange={() =>
+                          setSelectedNewsTagIds((prev) =>
+                            prev.includes(tag.id)
+                              ? prev.filter((id) => id !== tag.id)
+                              : [...prev, tag.id],
+                          )
+                        }
+                      />
+                      <div className="min-w-0">
+                        <div className="font-minecraft text-[11px] uppercase text-theme">{tag.name}</div>
+                        <div className="font-minecraft text-[10px] text-theme-muted">{tag.id}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto]">
+              <div className="space-y-2">
+                <label className="font-minecraft text-xs uppercase text-theme-muted">Создать тег</label>
+                <Input
+                  value={newNewsTagName}
+                  onChange={(e) => setNewNewsTagName(e.target.value)}
+                  placeholder="season"
+                />
+              </div>
+              <div className="flex items-end">
+                <ButtonShadcn variant="outline" onClick={handleCreateNewsTag} disabled={isAdminApiBusy}>
+                  Добавить тег
+                </ButtonShadcn>
+              </div>
+            </div>
+            {newsTagFormError && <div className="text-red-500 font-minecraft text-sm">{newsTagFormError}</div>}
             <div className="space-y-2">
               <label className="font-minecraft text-xs uppercase text-theme-muted">Контент (HTML)</label>
               <div className="min-h-[300px] rounded border border-white/10 bg-black/20 p-2">
@@ -1415,3 +1491,4 @@ export function AdminScreen() {
     </div>
   );
 }
+

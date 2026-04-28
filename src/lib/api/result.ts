@@ -1,5 +1,21 @@
 import type { ApiResult, ApiWrappedData } from "./types";
 
+function serializeErrorDetails(error: unknown): string | undefined {
+  if (typeof error === "undefined") {
+    return undefined;
+  }
+  if (typeof error === "string") {
+    const trimmed = error.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  }
+  try {
+    const serialized = JSON.stringify(error);
+    return serialized && serialized !== "{}" ? serialized : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function extractErrorMessage(error: unknown): string | undefined {
   if (!error || typeof error !== "object") {
     return undefined;
@@ -37,6 +53,21 @@ function extractErrorMessage(error: unknown): string | undefined {
   return undefined;
 }
 
+function normalizeTransportErrorMessage(message: string | undefined): string | undefined {
+  if (!message) return undefined;
+  const normalized = message.trim();
+  if (!normalized) return undefined;
+  const lower = normalized.toLowerCase();
+  if (
+    lower.includes("unexpected token '<'") ||
+    lower.includes("<!doctype") ||
+    lower.includes("is not valid json")
+  ) {
+    return "Server returned non-JSON response. Check API base URL or backend proxy configuration.";
+  }
+  return normalized;
+}
+
 function unwrapData<T>(payload: ApiWrappedData<T> | undefined): T | undefined {
   if (!payload) {
     return undefined;
@@ -48,9 +79,11 @@ function unwrapData<T>(payload: ApiWrappedData<T> | undefined): T | undefined {
 }
 
 export function buildNetworkErrorResult<T>(error: unknown): ApiResult<T> {
+  const extracted = extractErrorMessage(error);
   return {
     success: false,
-    errorMessage: extractErrorMessage(error) ?? "Network request failed",
+    errorMessage: normalizeTransportErrorMessage(extracted) ?? "Network request failed",
+    errorDetails: serializeErrorDetails(error),
   };
 }
 
@@ -69,10 +102,16 @@ export function buildApiResult<T>(params: {
 
   const unwrapped = unwrapData<T>(data);
   if (!response.ok || typeof unwrapped === "undefined") {
+    const fallbackStatusText =
+      response.statusText && response.statusText.trim().length > 0
+        ? response.statusText.trim()
+        : undefined;
+    const extractedError = extractErrorMessage(error);
     return {
       success: false,
       status: response.status,
-      errorMessage: extractErrorMessage(error),
+      errorMessage: normalizeTransportErrorMessage(extractedError) ?? fallbackStatusText,
+      errorDetails: serializeErrorDetails(error),
       setCookie,
     };
   }

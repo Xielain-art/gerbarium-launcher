@@ -67,8 +67,10 @@ export function useLoginScreen() {
   const [validationError, setValidationError] = useState<string | null>(null);
 
   useEffect(() => {
-    void loadToken();
-  }, [loadToken]);
+    if (!hasCheckedSession) {
+      void loadToken();
+    }
+  }, [loadToken, hasCheckedSession]);
 
   useEffect(() => {
     if (isAuthenticated) {
