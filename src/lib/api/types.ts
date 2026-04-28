@@ -12,6 +12,11 @@ export type ApiUpdateChangelogDto = components["schemas"]["UpdateChangelogDto"];
 export type ApiAuthResponse = components["schemas"]["AuthResponseDto"];
 export type ApiLoginDto = components["schemas"]["LoginDto"];
 export type ApiRegisterDto = components["schemas"]["RegisterDto"];
+export type ApiVerifyEmailDto = components["schemas"]["VerifyEmailDto"];
+export type ApiEmailVerificationStatus =
+  components["schemas"]["EmailVerificationStatusDto"];
+export type ApiEmailVerifiedResponse =
+  components["schemas"]["EmailVerifiedResponseDto"];
 export type ApiRole = components["schemas"]["RoleResponseDto"];
 export type ApiCreateRoleDto = components["schemas"]["CreateRoleDto"];
 

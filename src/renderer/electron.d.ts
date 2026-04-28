@@ -18,6 +18,7 @@ import {
   UpdateInfoPayload,
   IntegrityCheckResult,
   AuthSessionUser,
+  AuthEmailVerificationStatus,
   CrashReportPayload,
   LauncherSettings,
 } from "../shared/constants/ipc-chanels";
@@ -71,6 +72,7 @@ export interface IElectronAPI {
       success: boolean;
       user?: AuthSessionUser;
       accessToken?: string;
+      emailVerification?: AuthEmailVerificationStatus;
       error?: string;
     }>;
     register: (payload: {
@@ -81,6 +83,25 @@ export interface IElectronAPI {
       success: boolean;
       user?: AuthSessionUser;
       accessToken?: string;
+      emailVerification?: AuthEmailVerificationStatus;
+      error?: string;
+    }>;
+    verifyEmail: (payload: {
+      code: string;
+    }) => Promise<{
+      success: boolean;
+      user?: AuthSessionUser;
+      emailVerification?: AuthEmailVerificationStatus;
+      error?: string;
+    }>;
+    getEmailVerificationStatus: () => Promise<{
+      success: boolean;
+      emailVerification?: AuthEmailVerificationStatus;
+      error?: string;
+    }>;
+    resendEmailVerification: () => Promise<{
+      success: boolean;
+      emailVerification?: AuthEmailVerificationStatus;
       error?: string;
     }>;
     loginOffline: (payload: {

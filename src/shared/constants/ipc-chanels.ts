@@ -39,6 +39,9 @@ export const IPC_CHANNELS = {
   AUTH: {
     LOGIN: "auth:login",
     REGISTER: "auth:register",
+    VERIFY_EMAIL: "auth:verify-email",
+    GET_EMAIL_VERIFICATION_STATUS: "auth:get-email-verification-status",
+    RESEND_EMAIL_VERIFICATION: "auth:resend-email-verification",
     LOGIN_OFFLINE: "auth:login-offline",
     GET_SESSION: "auth:get-session",
     LOGOUT: "auth:logout",
@@ -121,6 +124,13 @@ export interface AuthSessionUser {
   emailVerificationResendAvailableInSeconds?: number;
   isBanned: boolean;
   banReason?: string;
+}
+
+export interface AuthEmailVerificationStatus {
+  emailVerified: boolean;
+  resendAvailableInSeconds: number;
+  emailSent: boolean;
+  developmentCode?: string;
 }
 
 export interface AdminUsersResponse {
@@ -312,6 +322,7 @@ export interface IpcChannelMap {
       success: boolean;
       user?: AuthSessionUser;
       accessToken?: string;
+      emailVerification?: AuthEmailVerificationStatus;
       error?: string;
     };
   };
@@ -321,6 +332,32 @@ export interface IpcChannelMap {
       success: boolean;
       user?: AuthSessionUser;
       accessToken?: string;
+      emailVerification?: AuthEmailVerificationStatus;
+      error?: string;
+    };
+  };
+  [IPC_CHANNELS.AUTH.VERIFY_EMAIL]: {
+    args: [payload: { code: string }];
+    return: {
+      success: boolean;
+      user?: AuthSessionUser;
+      emailVerification?: AuthEmailVerificationStatus;
+      error?: string;
+    };
+  };
+  [IPC_CHANNELS.AUTH.GET_EMAIL_VERIFICATION_STATUS]: {
+    args: [];
+    return: {
+      success: boolean;
+      emailVerification?: AuthEmailVerificationStatus;
+      error?: string;
+    };
+  };
+  [IPC_CHANNELS.AUTH.RESEND_EMAIL_VERIFICATION]: {
+    args: [];
+    return: {
+      success: boolean;
+      emailVerification?: AuthEmailVerificationStatus;
       error?: string;
     };
   };

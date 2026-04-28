@@ -1,6 +1,5 @@
 import { WindowControls } from "../components";
 import { useLoginScreen } from "../hooks/useLoginScreen";
-import logoImage from "../assets/photo_2026-04-23_10-34-22.jpg";
 import { LoginFormCard } from "../components/login";
 
 export function LoginScreen() {
@@ -24,47 +23,49 @@ export function LoginScreen() {
   }
 
   return (
-    <div className="bg-theme-main-gradient relative flex h-screen w-full items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-pattern opacity-30" />
+    <div className="bg-theme-main-gradient relative flex h-screen w-full items-center justify-center overflow-hidden px-4 py-5">
+      <div className="absolute inset-0 bg-pattern opacity-25" />
+      <div className="auth-bg-orb auth-bg-orb--gold" />
+      <div className="auth-bg-orb auth-bg-orb--blue" />
+      <div className="auth-grid-overlay" />
 
       <div className="absolute right-4 top-4 z-50">
         <WindowControls />
       </div>
 
-      <div className="relative z-10 flex w-full max-w-[440px] flex-col items-center py-4 px-4">
-        <div className="mb-4 text-center">
-          <img
-            src={logoImage}
-            alt={vm.t.LOGIN.LOGO_ALT}
-            className="h-32 w-auto object-contain drop-shadow-2xl"
-            style={{ imageRendering: "pixelated" }}
-          />
-        </div>
-
+      <div className="relative z-10 flex w-full max-w-[470px] flex-col items-center gap-3">
         <LoginFormCard
           t={vm.t}
+          language={vm.language}
           isLoading={vm.isLoading}
           error={vm.localizedError}
           mode={vm.mode}
+          registerStep={vm.registerStep}
           username={vm.localUsername}
           email={vm.localEmail}
           password={vm.localPassword}
           confirmPassword={vm.localPasswordConfirm}
-          showPassword={vm.showPassword}
-          showConfirmPassword={vm.showConfirmPassword}
-          offlineMode={vm.offlineMode}
+          verificationCode={vm.verificationCode}
+          verificationRequired={vm.verificationRequired}
+          verificationEmail={vm.verificationEmail}
+          resendCountdown={vm.resendCountdown}
+          developmentCode={vm.developmentCode}
+          emailWasSent={vm.emailWasSent}
           onUsernameChange={vm.onUsernameChange}
           onEmailChange={vm.onEmailChange}
           onPasswordChange={vm.onPasswordChange}
           onConfirmPasswordChange={vm.onConfirmPasswordChange}
-          onTogglePassword={vm.onTogglePassword}
-          onToggleConfirmPassword={vm.onToggleConfirmPassword}
-          onToggleOfflineMode={vm.onToggleOfflineMode}
+          onVerificationCodeChange={vm.onVerificationCodeChange}
           onSwitchMode={vm.onSwitchMode}
+          languageOptions={vm.t.SETTINGS.GENERAL.LANGUAGE_OPTIONS}
+          onLanguageChange={vm.onLanguageChange}
+          onUseAnotherAccount={vm.onUseAnotherAccount}
+          onResendCode={vm.onResendCode}
+          onRegisterStepBack={vm.onRegisterStepBack}
           onSubmit={vm.onSubmit}
         />
 
-        <div className="mt-4 text-center font-minecraft text-xs text-theme-muted">
+        <div className="text-center font-minecraft text-[11px] uppercase tracking-[0.16em] text-theme-muted/90">
           {vm.t.LOGIN.FOOTER_TEXT}
         </div>
       </div>

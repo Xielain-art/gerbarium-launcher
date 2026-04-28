@@ -15,6 +15,13 @@ export interface AuthUser {
   token?: string;
 }
 
+export interface AuthEmailVerificationState {
+  emailVerified: boolean;
+  resendAvailableInSeconds: number;
+  emailSent: boolean;
+  developmentCode?: string;
+}
+
 export interface AuthCredentials {
   login: string;
   password: string;
@@ -31,6 +38,7 @@ export interface AuthState {
   user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
+  emailVerification: AuthEmailVerificationState | null;
   isLoading: boolean;
   isSessionLoading: boolean;
   hasCheckedSession: boolean;

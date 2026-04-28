@@ -1,24 +1,27 @@
 import { create } from "zustand";
 import type {
-  AuthUser,
   AuthCredentials,
+  AuthEmailVerificationState,
   AuthRegisterCredentials,
+  AuthUser,
 } from "../types";
+import type {
+  AuthEmailVerificationStatus as IpcAuthEmailVerificationStatus,
+  AuthSessionUser,
+} from "../../../shared/constants/ipc-chanels";
 import { LOG_ACTIONS } from "../../../shared/constants/system";
 import { UI_STRINGS } from "../../../shared/constants/ui-strings";
 import { ERROR_CODES } from "../../../shared/constants/errors";
 
-// Auto-log helper
 const logAction = (action: string, details?: string) => {
   window.electronAPI.system.logAction(action, details);
 };
 
-function toRoleItems(
-  roles: unknown,
-): Array<{ id: string; name: string }> {
+function toRoleItems(roles: unknown): Array<{ id: string; name: string }> {
   if (!Array.isArray(roles)) {
     return [{ id: "fallback-user", name: "user" }];
   }
+
   const mapped = roles.flatMap((item) => {
     if (
       typeof item === "object" &&
@@ -28,37 +31,104 @@ function toRoleItems(
       typeof (item as { id: unknown }).id === "string" &&
       typeof (item as { name: unknown }).name === "string"
     ) {
-      return [{ id: (item as { id: string }).id, name: (item as { name: string }).name }];
+      return [
+        {
+          id: (item as { id: string }).id,
+          name: (item as { name: string }).name,
+        },
+      ];
     }
     return [];
   });
-  return mapped.length > 0 ? mapped : [{ id: "fallback-user", name: "user" }];
+
+  return mapped.length > 0
+    ? mapped
+    : [{ id: "fallback-user", name: "user" }];
 }
 
-interface AuthState {
-  // State
+function buildAuthUser(user: AuthSessionUser): AuthUser {
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email ?? "",
+    roles: toRoleItems(user.roles),
+    isBanned: user.isBanned ?? false,
+    banReason: user.banReason,
+    permissions: user.permissions,
+    emailVerified: user.emailVerified,
+    emailVerifiedAt: user.emailVerifiedAt,
+    emailVerificationResendAvailableInSeconds:
+      user.emailVerificationResendAvailableInSeconds,
+  };
+}
+
+function buildEmailVerificationState(
+  status?: IpcAuthEmailVerificationStatus,
+  user?: AuthSessionUser | AuthUser | null,
+): AuthEmailVerificationState | null {
+  if (status) {
+    return {
+      emailVerified: status.emailVerified,
+      resendAvailableInSeconds: status.resendAvailableInSeconds,
+      emailSent: status.emailSent,
+      developmentCode: status.developmentCode,
+    };
+  }
+
+  if (!user || typeof user.emailVerified !== "boolean") {
+    return null;
+  }
+
+  return {
+    emailVerified: user.emailVerified,
+    resendAvailableInSeconds:
+      user.emailVerificationResendAvailableInSeconds ?? 0,
+    emailSent: false,
+  };
+}
+
+function mergeUserVerification(
+  user: AuthUser | null,
+  verification: AuthEmailVerificationState | null,
+): AuthUser | null {
+  if (!user || !verification) {
+    return user;
+  }
+
+  return {
+    ...user,
+    emailVerified: verification.emailVerified,
+    emailVerificationResendAvailableInSeconds:
+      verification.resendAvailableInSeconds,
+  };
+}
+
+interface AuthStoreState {
   user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
-
-  // UI State
+  emailVerification: AuthEmailVerificationState | null;
   isLoading: boolean;
   isSessionLoading: boolean;
   hasCheckedSession: boolean;
   error: string | null;
-
-  // Actions
   login: (
     credentials: AuthCredentials,
   ) => Promise<{ success: boolean; error?: string }>;
   register: (
     payload: AuthRegisterCredentials,
   ) => Promise<{ success: boolean; error?: string }>;
+  verifyEmail: (
+    code: string,
+  ) => Promise<{ success: boolean; error?: string }>;
+  refreshEmailVerificationStatus: () => Promise<{
+    success: boolean;
+    error?: string;
+  }>;
+  resendEmailVerification: () => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   clearError: () => void;
   loadToken: () => Promise<void>;
-
-  // Offline mode
   loginOffline: (
     username: string,
   ) => Promise<{ success: boolean; error?: string }>;
@@ -68,6 +138,7 @@ const defaultState = {
   user: null,
   token: null,
   isAuthenticated: false,
+  emailVerification: null,
   isLoading: false,
   isSessionLoading: false,
   hasCheckedSession: false,
@@ -76,7 +147,7 @@ const defaultState = {
 
 let sessionLoadInFlight: Promise<void> | null = null;
 
-export const useAuthStore = create<AuthState>()((set, get) => ({
+export const useAuthStore = create<AuthStoreState>()((set, get) => ({
   ...defaultState,
 
   clearError: () => set({ error: null }),
@@ -91,58 +162,53 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     }
 
     sessionLoadInFlight = (async () => {
-    set({ isSessionLoading: true });
-    try {
-      const result = await window.electronAPI.auth.getSession();
-      if (result.success && result.isAuthenticated && result.user) {
-        const prev = get();
-        const nextToken = result.accessToken ?? null;
-        const shouldLogTokenLoaded =
-          prev.user?.id !== result.user.id || prev.token !== nextToken || !prev.hasCheckedSession;
+      set({ isSessionLoading: true });
+      try {
+        const result = await window.electronAPI.auth.getSession();
+        if (result.success && result.isAuthenticated && result.user) {
+          const user = buildAuthUser(result.user);
+          const nextToken = result.accessToken ?? null;
+          const prev = get();
+          const shouldLogTokenLoaded =
+            prev.user?.id !== user.id ||
+            prev.token !== nextToken ||
+            !prev.hasCheckedSession;
+
+          set({
+            token: nextToken,
+            isAuthenticated: true,
+            user,
+            emailVerification: buildEmailVerificationState(undefined, result.user),
+            isSessionLoading: false,
+            hasCheckedSession: true,
+          });
+
+          if (shouldLogTokenLoaded) {
+            logAction(LOG_ACTIONS.TOKEN_LOADED, `User: ${user.username}`);
+          }
+          return;
+        }
 
         set({
-          token: nextToken,
-          isAuthenticated: true,
-          user: {
-            id: result.user.id,
-            username: result.user.username,
-            email: result.user.email ?? "",
-            roles: toRoleItems(result.user.roles),
-            isBanned: result.user.isBanned ?? false,
-            banReason: result.user.banReason,
-            permissions: result.user.permissions,
-            emailVerified: result.user.emailVerified,
-            emailVerifiedAt: result.user.emailVerifiedAt,
-            emailVerificationResendAvailableInSeconds:
-              result.user.emailVerificationResendAvailableInSeconds,
-          },
+          token: null,
+          isAuthenticated: false,
+          user: null,
+          emailVerification: null,
           isSessionLoading: false,
           hasCheckedSession: true,
         });
-        if (shouldLogTokenLoaded) {
-          logAction(LOG_ACTIONS.TOKEN_LOADED, `User: ${result.user.username}`);
-        }
-        return;
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : "Unknown error";
+        logAction(LOG_ACTIONS.TOKEN_LOAD_ERROR, errorMsg);
+        set({
+          token: null,
+          isAuthenticated: false,
+          user: null,
+          emailVerification: null,
+          isSessionLoading: false,
+          hasCheckedSession: true,
+        });
       }
-
-      set({
-        token: null,
-        isAuthenticated: false,
-        user: null,
-        isSessionLoading: false,
-        hasCheckedSession: true,
-      });
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : "Unknown error";
-      logAction(LOG_ACTIONS.TOKEN_LOAD_ERROR, errorMsg);
-      set({
-        token: null,
-        isAuthenticated: false,
-        user: null,
-        isSessionLoading: false,
-        hasCheckedSession: true,
-      });
-    }
     })();
 
     try {
@@ -185,24 +251,15 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         return { success: false, error: errorMsg };
       }
 
-      const user: AuthUser = {
-        id: authResult.user.id,
-        username: authResult.user.username,
-        email: authResult.user.email ?? "",
-        roles: toRoleItems(authResult.user.roles),
-        isBanned: authResult.user.isBanned ?? false,
-        banReason: authResult.user.banReason,
-        permissions: authResult.user.permissions,
-        emailVerified: authResult.user.emailVerified,
-        emailVerifiedAt: authResult.user.emailVerifiedAt,
-        emailVerificationResendAvailableInSeconds:
-          authResult.user.emailVerificationResendAvailableInSeconds,
-      };
-
+      const user = buildAuthUser(authResult.user);
       set({
         user,
         token: authResult.accessToken ?? null,
         isAuthenticated: true,
+        emailVerification: buildEmailVerificationState(
+          authResult.emailVerification,
+          authResult.user,
+        ),
         isLoading: false,
       });
 
@@ -242,24 +299,15 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         return { success: false, error: errorMsg };
       }
 
-      const user: AuthUser = {
-        id: authResult.user.id,
-        username: authResult.user.username,
-        email: authResult.user.email ?? "",
-        roles: toRoleItems(authResult.user.roles),
-        isBanned: authResult.user.isBanned ?? false,
-        banReason: authResult.user.banReason,
-        permissions: authResult.user.permissions,
-        emailVerified: authResult.user.emailVerified,
-        emailVerifiedAt: authResult.user.emailVerifiedAt,
-        emailVerificationResendAvailableInSeconds:
-          authResult.user.emailVerificationResendAvailableInSeconds,
-      };
-
+      const user = buildAuthUser(authResult.user);
       set({
         user,
         token: authResult.accessToken ?? null,
         isAuthenticated: true,
+        emailVerification: buildEmailVerificationState(
+          authResult.emailVerification,
+          authResult.user,
+        ),
         isLoading: false,
       });
 
@@ -272,6 +320,107 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const errorMessage = ERROR_CODES.AUTH_API_REQUEST_FAILED;
       set({ isLoading: false, error: errorMessage });
       logAction(LOG_ACTIONS.REGISTER_ERROR, errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  verifyEmail: async (code: string) => {
+    set({ isLoading: true, error: null });
+
+    try {
+      if (!code.trim()) {
+        const errorMsg = ERROR_CODES.AUTH_VALIDATION_FAILED;
+        set({ isLoading: false, error: errorMsg });
+        return { success: false, error: errorMsg };
+      }
+
+      const result = await window.electronAPI.auth.verifyEmail({ code });
+      if (!result.success) {
+        const errorMsg = result.error || ERROR_CODES.AUTH_VERIFY_EMAIL_FAILED;
+        set({ isLoading: false, error: errorMsg });
+        logAction(LOG_ACTIONS.VERIFY_EMAIL_ERROR, errorMsg);
+        return { success: false, error: errorMsg };
+      }
+
+      const verification = buildEmailVerificationState(
+        result.emailVerification,
+        result.user ?? get().user,
+      );
+      const nextUser = result.user
+        ? buildAuthUser(result.user)
+        : mergeUserVerification(get().user, verification);
+
+      set({
+        user: nextUser,
+        emailVerification: verification,
+        isLoading: false,
+      });
+
+      logAction(LOG_ACTIONS.VERIFY_EMAIL_SUCCESS, "Email verified");
+      return { success: true };
+    } catch {
+      const errorMessage = ERROR_CODES.AUTH_VERIFY_EMAIL_FAILED;
+      set({ isLoading: false, error: errorMessage });
+      logAction(LOG_ACTIONS.VERIFY_EMAIL_ERROR, errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  refreshEmailVerificationStatus: async () => {
+    try {
+      const result = await window.electronAPI.auth.getEmailVerificationStatus();
+      if (!result.success) {
+        const errorMsg = result.error || ERROR_CODES.AUTH_EMAIL_STATUS_FAILED;
+        set({ error: errorMsg });
+        return { success: false, error: errorMsg };
+      }
+
+      const verification = buildEmailVerificationState(
+        result.emailVerification,
+        get().user,
+      );
+      set((state) => ({
+        emailVerification: verification,
+        user: mergeUserVerification(state.user, verification),
+        error: null,
+      }));
+
+      return { success: true };
+    } catch {
+      const errorMessage = ERROR_CODES.AUTH_EMAIL_STATUS_FAILED;
+      set({ error: errorMessage });
+      return { success: false, error: errorMessage };
+    }
+  },
+
+  resendEmailVerification: async () => {
+    set({ isLoading: true, error: null });
+
+    try {
+      const result = await window.electronAPI.auth.resendEmailVerification();
+      if (!result.success) {
+        const errorMsg = result.error || ERROR_CODES.AUTH_RESEND_EMAIL_FAILED;
+        set({ isLoading: false, error: errorMsg });
+        logAction(LOG_ACTIONS.RESEND_EMAIL_ERROR, errorMsg);
+        return { success: false, error: errorMsg };
+      }
+
+      const verification = buildEmailVerificationState(
+        result.emailVerification,
+        get().user,
+      );
+      set((state) => ({
+        emailVerification: verification,
+        user: mergeUserVerification(state.user, verification),
+        isLoading: false,
+      }));
+
+      logAction(LOG_ACTIONS.RESEND_EMAIL_SUCCESS, "Verification email resent");
+      return { success: true };
+    } catch {
+      const errorMessage = ERROR_CODES.AUTH_RESEND_EMAIL_FAILED;
+      set({ isLoading: false, error: errorMessage });
+      logAction(LOG_ACTIONS.RESEND_EMAIL_ERROR, errorMessage);
       return { success: false, error: errorMessage };
     }
   },
@@ -296,24 +445,12 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
         return { success: false, error: errorMsg };
       }
 
-      const user: AuthUser = {
-        id: authResult.user.id,
-        username: authResult.user.username,
-        email: authResult.user.email ?? "",
-        roles: toRoleItems(authResult.user.roles),
-        isBanned: authResult.user.isBanned ?? false,
-        banReason: authResult.user.banReason,
-        permissions: authResult.user.permissions,
-        emailVerified: authResult.user.emailVerified,
-        emailVerifiedAt: authResult.user.emailVerifiedAt,
-        emailVerificationResendAvailableInSeconds:
-          authResult.user.emailVerificationResendAvailableInSeconds,
-      };
-
+      const user = buildAuthUser(authResult.user);
       set({
         user,
         token: null,
         isAuthenticated: true,
+        emailVerification: null,
         isLoading: false,
       });
 

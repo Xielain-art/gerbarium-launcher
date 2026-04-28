@@ -21,7 +21,8 @@ import { CrashNoticeBanner } from "./components/layout/CrashNoticeBanner";
 
 // Helper function to check authentication using Zustand store state
 const checkAuth = () => {
-  return useAuthStore.getState().isAuthenticated;
+  const authState = useAuthStore.getState();
+  return authState.isAuthenticated && authState.user?.emailVerified !== false;
 };
 
 const checkIsAdmin = () => {
