@@ -41,6 +41,8 @@ interface AdminNewsState {
   deleteNews: (newsId: string) => Promise<boolean>;
   fetchNewsTags: () => Promise<void>;
   createNewsTag: (name: string) => Promise<{ success: boolean; tag?: ApiNewsTag; error?: string }>;
+  updateNewsTag: (tagId: string, name: string) => Promise<{ success: boolean; tag?: ApiNewsTag; error?: string }>;
+  deleteNewsTag: (tagId: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 const PAGE_LIMIT = 10;
@@ -270,6 +272,35 @@ export const useAdminNewsStore = create<AdminNewsState>()((set, get) => ({
       return { success: true, tag: created };
     } catch {
       return { success: false, error: "Failed to create tag" };
+    }
+  },
+  updateNewsTag: async (tagId, name) => {
+    try {
+      const result = await window.electronAPI.admin.updateNewsTag(tagId, { name });
+      if (!result.success || !result.data) {
+        return { success: false, error: result.error || "Failed to update tag" };
+      }
+      const updated = result.data;
+      set((state) => ({
+        newsTags: state.newsTags.map((tag) => (tag.id === tagId ? updated : tag)),
+      }));
+      return { success: true, tag: updated };
+    } catch {
+      return { success: false, error: "Failed to update tag" };
+    }
+  },
+  deleteNewsTag: async (tagId) => {
+    try {
+      const result = await window.electronAPI.admin.deleteNewsTag(tagId);
+      if (!result.success) {
+        return { success: false, error: result.error || "Failed to delete tag" };
+      }
+      set((state) => ({
+        newsTags: state.newsTags.filter((tag) => tag.id !== tagId),
+      }));
+      return { success: true };
+    } catch {
+      return { success: false, error: "Failed to delete tag" };
     }
   },
 }));

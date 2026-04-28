@@ -17,6 +17,8 @@ import {
   createNewsRequest,
   listNewsTagsRequest,
   createNewsTagRequest,
+  updateNewsTagRequest,
+  deleteNewsTagRequest,
   updateNewsRequest,
   deleteNewsRequest,
 } from "../../lib/api/news";
@@ -403,6 +405,51 @@ export default function adminHandler(app: App) {
       return { success: true, data: result.data };
     } catch (error) {
       log.error(LOG_MESSAGES.ADMIN_CREATE_NEWS_FAILED, error);
+      return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+    }
+  });
+
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.UPDATE_NEWS_TAG,
+    async (_event, tagId: string, payload) => {
+      try {
+        const token = await getValidAccessToken(app);
+        if (!token) {
+          return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+        }
+        const result = await updateNewsTagRequest(token, tagId, payload);
+        if (!result.success) {
+          logApiFailure(LOG_MESSAGES.ADMIN_UPDATE_NEWS_FAILED, result);
+          return {
+            success: false,
+            error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
+          };
+        }
+        return { success: true, data: result.data };
+      } catch (error) {
+        log.error(LOG_MESSAGES.ADMIN_UPDATE_NEWS_FAILED, error);
+        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+      }
+    },
+  );
+
+  ipcMain.handle(IPC_CHANNELS.ADMIN.DELETE_NEWS_TAG, async (_event, tagId: string) => {
+    try {
+      const token = await getValidAccessToken(app);
+      if (!token) {
+        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+      }
+      const result = await deleteNewsTagRequest(token, tagId);
+      if (!result.success) {
+        logApiFailure(LOG_MESSAGES.ADMIN_DELETE_NEWS_FAILED, result);
+        return {
+          success: false,
+          error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
+        };
+      }
+      return { success: true };
+    } catch (error) {
+      log.error(LOG_MESSAGES.ADMIN_DELETE_NEWS_FAILED, error);
       return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
     }
   });

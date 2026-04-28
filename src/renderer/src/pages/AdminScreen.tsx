@@ -12,8 +12,19 @@ import Editor, {
   BtnBulletList,
   Separator,
 } from "react-simple-wysiwyg";
-import { Button as ButtonShadcn } from "@/components/shadcn/ui";
-import { Input, Select, Checkbox, Card, Button, Modal, ModalActions } from "../components";
+import {
+  Badge,
+  Button as ButtonShadcn,
+  Card as ShadcnCard,
+  CardContent as ShadcnCardContent,
+  CardHeader as ShadcnCardHeader,
+  CardTitle as ShadcnCardTitle,
+  Checkbox as ShadcnCheckbox,
+  Dialog as ShadcnDialog,
+  Input as ShadcnInput,
+  Label as ShadcnLabel,
+  Select as ShadcnSelect,
+} from "@/components/shadcn/ui";
 import { useAdminNewsStore } from "../stores/useAdminNewsStore";
 import type { ApiCreateNewsDto, ApiNews, ApiUpdateNewsDto } from "../../../lib/api/news";
 import { useAdminChangelogStore } from "../stores/useAdminChangelogStore";
@@ -170,7 +181,7 @@ export function AdminScreen() {
   } = vm;
 
   const [activeTab, setActiveTab] = useState<"users" | "news" | "changelog">("users");
-  const [newsTab, setNewsTab] = useState<"all" | "create">("all");
+  const [newsTab, setNewsTab] = useState<"all" | "create" | "tags">("all");
   const [changelogTab, setChangelogTab] = useState<"all" | "create">("all");
   const [userSearchInput, setUserSearchInput] = useState(userSearch);
   const [userRoleFilter, setUserRoleFilter] = useState<UserRoleFilter | "all">(
@@ -195,6 +206,10 @@ export function AdminScreen() {
   const [newsContentHtml, setNewsContentHtml] = useState("");
   const [newsFormError, setNewsFormError] = useState<string | null>(null);
   const [newsTagFormError, setNewsTagFormError] = useState<string | null>(null);
+  const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false);
+  const [tagSearchQuery, setTagSearchQuery] = useState("");
+  const [editingTagId, setEditingTagId] = useState<string | null>(null);
+  const [editingTagName, setEditingTagName] = useState("");
   const [editingChangelog, setEditingChangelog] = useState<ApiChangelog | null>(null);
   const [changelogVersion, setChangelogVersion] = useState("");
   const [changelogReleaseDate, setChangelogReleaseDate] = useState("");
@@ -232,6 +247,8 @@ export function AdminScreen() {
     deleteNews,
     fetchNewsTags,
     createNewsTag,
+    updateNewsTag,
+    deleteNewsTag,
   } = useAdminNewsStore();
   const {
     changelog,
@@ -469,6 +486,36 @@ export function AdminScreen() {
     setNewNewsTagName("");
   };
 
+  const handleUpdateNewsTag = async () => {
+    if (!editingTagId) return;
+    setNewsTagFormError(null);
+    const name = editingTagName.trim();
+    if (!name) {
+      setNewsTagFormError("Tag name is required");
+      return;
+    }
+    const result = await updateNewsTag(editingTagId, name);
+    if (!result.success) {
+      setNewsTagFormError(result.error || "Failed to update tag");
+      return;
+    }
+    setEditingTagId(null);
+    setEditingTagName("");
+  };
+
+  const handleDeleteNewsTag = async (tagId: string) => {
+    setNewsTagFormError(null);
+    const result = await deleteNewsTag(tagId);
+    if (!result.success) {
+      setNewsTagFormError(result.error || "Failed to delete tag");
+      return;
+    }
+    setSelectedNewsTagIds((prev) => prev.filter((id) => id !== tagId));
+    if (newsTag === tagId) {
+      setNewsTag("");
+    }
+  };
+
   const resetChangelogForm = () => {
     setEditingChangelog(null);
     setChangelogVersion("");
@@ -545,6 +592,11 @@ export function AdminScreen() {
   };
 
   const newsRows = useMemo(() => news, [news]);
+  const filteredNewsTags = useMemo(() => {
+    const query = tagSearchQuery.trim().toLowerCase();
+    if (!query) return newsTags;
+    return newsTags.filter((tag) => tag.name.toLowerCase().includes(query));
+  }, [newsTags, tagSearchQuery]);
   const filteredAvailableRoles = useMemo(() => {
     const query = roleSearchQuery.trim().toLowerCase();
     if (!query) return availableRoles;
@@ -626,7 +678,7 @@ export function AdminScreen() {
         </div>
 
         {activeTab === "users" && (
-        <Card className="p-6">
+        <ShadcnCard className="p-6">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="font-minecraft text-xl font-bold">
                 {t.ADMIN.USERS_TITLE}
@@ -638,13 +690,13 @@ export function AdminScreen() {
                     <span className="font-minecraft text-[10px] uppercase">Фильтрация...</span>
                   </div>
                 )}
-                <Button
-                  variant="minecraft"
+                <ButtonShadcn
+                  variant="default"
                   onClick={() => fetchUsers()}
                   disabled={isLoading}
                 >
                   {isLoading ? t.ADMIN.LOADING : t.ADMIN.REFRESH}
-                </Button>
+                </ButtonShadcn>
               </div>
             </div>
 
@@ -654,7 +706,7 @@ export function AdminScreen() {
                   <label className="block font-minecraft text-[10px] uppercase text-theme-muted">
                     Поиск пользователей
                   </label>
-                  <Input
+                  <ShadcnInput
                     placeholder="Логин или Email..."
                     value={userSearchInput}
                     onChange={(e) => setUserSearchInput(e.target.value)}
@@ -662,7 +714,7 @@ export function AdminScreen() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Select
+                  <ShadcnSelect
                     label="Роль"
                     value={userRoleFilter}
                     onChange={(e) => {
@@ -680,7 +732,7 @@ export function AdminScreen() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Select
+                  <ShadcnSelect
                     label="Статус"
                     value={userBanFilter}
                     onChange={(e) => {
@@ -709,23 +761,23 @@ export function AdminScreen() {
                 Создание роли
               </div>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <Input
+                <ShadcnInput
                   placeholder="role-name"
                   value={newRoleName}
                   onChange={(e) => setNewRoleName(e.target.value)}
                 />
-                <Input
+                <ShadcnInput
                   placeholder="Описание (опционально)"
                   value={newRoleDescription}
                   onChange={(e) => setNewRoleDescription(e.target.value)}
                 />
-                <Button
-                  variant="minecraft"
+                <ButtonShadcn
+                  variant="default"
                   onClick={() => void handleCreateRole()}
                   disabled={isAdminApiBusy}
                 >
                   Создать роль
-                </Button>
+                </ButtonShadcn>
               </div>
               {roleFormError && (
                 <div className="mt-2 font-minecraft text-xs text-red-500">{roleFormError}</div>
@@ -816,11 +868,11 @@ export function AdminScreen() {
               </div>
             )}
           </div>
-        </Card>
+        </ShadcnCard>
         )}
 
         {activeTab === "news" && (
-        <Card className="p-6">
+        <ShadcnCard className="p-6">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="font-minecraft text-xl font-bold">Управление новостями</h2>
             <div className="flex items-center gap-3">
@@ -837,6 +889,13 @@ export function AdminScreen() {
                 className="font-minecraft uppercase text-xs"
               >
                 Все новости
+              </ButtonShadcn>
+              <ButtonShadcn
+                variant={newsTab === "tags" ? "default" : "secondary"}
+                onClick={() => setNewsTab("tags")}
+                className="font-minecraft uppercase text-xs"
+              >
+                Теги
               </ButtonShadcn>
               {!editingNews ? (
                 <ButtonShadcn
@@ -866,7 +925,7 @@ export function AdminScreen() {
                   <label className="block font-minecraft text-[10px] uppercase text-theme-muted">
                     Поиск по контенту
                   </label>
-                  <Input
+                  <ShadcnInput
                     placeholder="Название или часть текста..."
                     value={newsSearch}
                     onChange={(e) => setNewsSearch(e.target.value)}
@@ -874,7 +933,7 @@ export function AdminScreen() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Select
+                  <ShadcnSelect
                     label="Тег"
                     value={newsTag}
                     onChange={(e) => {
@@ -888,7 +947,7 @@ export function AdminScreen() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Select
+                  <ShadcnSelect
                     label="Сортировка"
                     value={newsSortDraft}
                     onChange={(e) => {
@@ -906,7 +965,7 @@ export function AdminScreen() {
                   <label className="block font-minecraft text-[10px] uppercase text-theme-muted">
                     От даты
                   </label>
-                  <Input
+                  <ShadcnInput
                     type="datetime-local"
                     value={newsFromDate}
                     onChange={(e) => setNewsFromDate(e.target.value)}
@@ -917,7 +976,7 @@ export function AdminScreen() {
                   <label className="block font-minecraft text-[10px] uppercase text-theme-muted">
                     До даты
                   </label>
-                  <Input
+                  <ShadcnInput
                     type="datetime-local"
                     value={newsToDate}
                     onChange={(e) => setNewsToDate(e.target.value)}
@@ -925,7 +984,7 @@ export function AdminScreen() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Select
+                  <ShadcnSelect
                     label="Порядок"
                     value={newsOrderDraft}
                     onChange={(e) => {
@@ -1021,112 +1080,215 @@ export function AdminScreen() {
           )}
 
           {newsTab === "create" && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="font-minecraft text-xs uppercase text-theme-muted">Заголовок</label>
-                <Input value={newsTitle} onChange={(e) => setNewsTitle(e.target.value)} placeholder="Моё обновление" />
-              </div>
-              <div className="space-y-2">
-                <label className="font-minecraft text-xs uppercase text-theme-muted">Слаг (URL)</label>
-                <Input value={newsSlug} onChange={(e) => setNewsSlug(e.target.value)} placeholder="my-update" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="font-minecraft text-xs uppercase text-theme-muted">Изображение (URL)</label>
-                <Input value={newsImage} onChange={(e) => setNewsImage(e.target.value)} placeholder="https://..." />
-              </div>
-              <div className="space-y-2">
-                <label className="font-minecraft text-xs uppercase text-theme-muted">Теги</label>
-                <div className="max-h-36 space-y-2 overflow-y-auto rounded border border-white/10 bg-black/20 p-2">
-                  {isLoadingNewsTags && (
-                    <div className="font-minecraft text-[10px] uppercase text-theme-muted">Загрузка тегов...</div>
-                  )}
-                  {!isLoadingNewsTags && newsTags.length === 0 && (
-                    <div className="font-minecraft text-[10px] uppercase text-theme-muted">Теги пока не созданы</div>
-                  )}
-                  {newsTags.map((tag) => (
-                    <label key={tag.id} className="flex items-start gap-2 rounded border border-white/10 bg-black/20 p-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedNewsTagIds.includes(tag.id)}
-                        onChange={() =>
-                          setSelectedNewsTagIds((prev) =>
-                            prev.includes(tag.id)
-                              ? prev.filter((id) => id !== tag.id)
-                              : [...prev, tag.id],
-                          )
-                        }
-                      />
-                      <div className="min-w-0">
-                        <div className="font-minecraft text-[11px] uppercase text-theme">{tag.name}</div>
-                        <div className="font-minecraft text-[10px] text-theme-muted">{tag.id}</div>
-                      </div>
-                    </label>
-                  ))}
+          <ShadcnCard className="border-white/10 bg-black/10">
+            <ShadcnCardHeader>
+              <ShadcnCardTitle className="font-minecraft text-sm uppercase tracking-wider text-theme">
+                {editingNews ? "Редактирование новости" : "Создание новости"}
+              </ShadcnCardTitle>
+            </ShadcnCardHeader>
+            <ShadcnCardContent className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <ShadcnLabel className="font-minecraft text-xs uppercase text-theme-muted">Заголовок</ShadcnLabel>
+                  <ShadcnInput value={newsTitle} onChange={(e) => setNewsTitle(e.target.value)} placeholder="Моё обновление" />
+                </div>
+                <div className="space-y-2">
+                  <ShadcnLabel className="font-minecraft text-xs uppercase text-theme-muted">Слаг (URL)</ShadcnLabel>
+                  <ShadcnInput value={newsSlug} onChange={(e) => setNewsSlug(e.target.value)} placeholder="my-update" />
                 </div>
               </div>
-            </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto]">
-              <div className="space-y-2">
-                <label className="font-minecraft text-xs uppercase text-theme-muted">Создать тег</label>
-                <Input
-                  value={newNewsTagName}
-                  onChange={(e) => setNewNewsTagName(e.target.value)}
-                  placeholder="season"
-                />
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <ShadcnLabel className="font-minecraft text-xs uppercase text-theme-muted">Изображение (URL)</ShadcnLabel>
+                  <ShadcnInput value={newsImage} onChange={(e) => setNewsImage(e.target.value)} placeholder="https://..." />
+                </div>
+                <div className="space-y-2">
+                  <ShadcnLabel className="font-minecraft text-xs uppercase text-theme-muted">Теги</ShadcnLabel>
+                  <div className="relative">
+                    <ButtonShadcn
+                      type="button"
+                      variant="outline"
+                      className="w-full justify-between"
+                      onClick={() => setIsTagDropdownOpen((prev) => !prev)}
+                    >
+                      <span>{selectedNewsTagIds.length > 0 ? `Выбрано: ${selectedNewsTagIds.length}` : "Выбрать теги"}</span>
+                      <span className="text-xs">{isTagDropdownOpen ? "▲" : "▼"}</span>
+                    </ButtonShadcn>
+                    {isTagDropdownOpen && (
+                      <div className="absolute z-20 mt-2 w-full rounded-md border border-white/10 bg-black/95 p-2 shadow-xl">
+                        <ShadcnInput
+                          placeholder="Поиск тега..."
+                          value={tagSearchQuery}
+                          onChange={(e) => setTagSearchQuery(e.target.value)}
+                          className="mb-2 h-8"
+                        />
+                        <div className="max-h-44 space-y-1 overflow-y-auto">
+                          {newsTags
+                            .filter((tag) =>
+                              tag.name.toLowerCase().includes(tagSearchQuery.trim().toLowerCase()),
+                            )
+                            .map((tag) => {
+                              const selected = selectedNewsTagIds.includes(tag.id);
+                              return (
+                                <button
+                                  key={tag.id}
+                                  type="button"
+                                  onClick={() =>
+                                    setSelectedNewsTagIds((prev) =>
+                                      prev.includes(tag.id)
+                                        ? prev.filter((id) => id !== tag.id)
+                                        : [...prev, tag.id],
+                                    )
+                                  }
+                                  className={`flex w-full items-center justify-between rounded px-2 py-1 text-left text-xs ${
+                                    selected ? "bg-theme/20 text-theme" : "text-theme-muted hover:bg-white/10"
+                                  }`}
+                                >
+                                  <span>{tag.name}</span>
+                                  {selected && <span>✓</span>}
+                                </button>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedNewsTagIds.map((id) => {
+                      const tagName = newsTags.find((tag) => tag.id === id)?.name ?? id;
+                      return (
+                        <Badge key={id} variant="secondary">
+                          {tagName}
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
-              <div className="flex items-end">
-                <ButtonShadcn variant="outline" onClick={handleCreateNewsTag} disabled={isAdminApiBusy}>
-                  Добавить тег
+              <div className="space-y-2">
+                <ShadcnLabel className="font-minecraft text-xs uppercase text-theme-muted">Контент (HTML)</ShadcnLabel>
+                <div className="min-h-[300px] rounded-md border border-white/10 bg-black/20 p-2">
+                  <Editor
+                    value={newsContentHtml}
+                    onChange={(e: { target: { value: string } }) =>
+                      setNewsContentHtml(e.target.value)
+                    }
+                  >
+                    <Toolbar>
+                      <BtnBold />
+                      <BtnItalic />
+                      <BtnUnderline />
+                      <BtnStrikeThrough />
+                      <Separator />
+                      <BtnNumberedList />
+                      <BtnBulletList />
+                      <Separator />
+                      <BtnLink />
+                    </Toolbar>
+                  </Editor>
+                </div>
+              </div>
+
+              {newsFormError && <div className="text-red-500 font-minecraft text-sm">{newsFormError}</div>}
+
+              <div className="flex justify-end gap-2">
+                <ButtonShadcn variant="secondary" onClick={() => setNewsTab("all")}>Отмена</ButtonShadcn>
+                <ButtonShadcn
+                  variant="default"
+                  onClick={editingNews ? handleUpdateNews : handleCreateNews}
+                  disabled={!!newsActionLoadingId}
+                >
+                  {newsActionLoadingId ? "Сохранение..." : editingNews ? "Обновить" : "Создать"}
                 </ButtonShadcn>
               </div>
-            </div>
-            {newsTagFormError && <div className="text-red-500 font-minecraft text-sm">{newsTagFormError}</div>}
-            <div className="space-y-2">
-              <label className="font-minecraft text-xs uppercase text-theme-muted">Контент (HTML)</label>
-              <div className="min-h-[300px] rounded border border-white/10 bg-black/20 p-2">
-                <Editor
-                  value={newsContentHtml}
-                  onChange={(e: { target: { value: string } }) =>
-                    setNewsContentHtml(e.target.value)
-                  }
-                >
-                  <Toolbar>
-                    <BtnBold />
-                    <BtnItalic />
-                    <BtnUnderline />
-                    <BtnStrikeThrough />
-                    <Separator />
-                    <BtnNumberedList />
-                    <BtnBulletList />
-                    <Separator />
-                    <BtnLink />
-                  </Toolbar>
-                </Editor>
-              </div>
-            </div>
-
-            {newsFormError && <div className="text-red-500 font-minecraft text-sm">{newsFormError}</div>}
-
-            <div className="flex justify-end gap-2">
-              <ButtonShadcn variant="secondary" onClick={() => setNewsTab("all")}>Отмена</ButtonShadcn>
-              <ButtonShadcn
-                variant="default"
-                onClick={editingNews ? handleUpdateNews : handleCreateNews}
-                disabled={!!newsActionLoadingId}
-              >
-                {newsActionLoadingId ? "Сохранение..." : editingNews ? "Обновить" : "Создать"}
-              </ButtonShadcn>
-            </div>
-          </div>
+            </ShadcnCardContent>
+          </ShadcnCard>
           )}
-        </Card>
+          {newsTab === "tags" && (
+            <ShadcnCard className="border-white/10 bg-black/10">
+              <ShadcnCardHeader>
+                <ShadcnCardTitle className="font-minecraft text-sm uppercase tracking-wider text-theme">
+                  Управление тегами новостей
+                </ShadcnCardTitle>
+              </ShadcnCardHeader>
+              <ShadcnCardContent className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto]">
+                  <ShadcnInput
+                    value={newNewsTagName}
+                    onChange={(e) => setNewNewsTagName(e.target.value)}
+                    placeholder="Новый тег (например: season)"
+                  />
+                  <ButtonShadcn variant="default" onClick={handleCreateNewsTag} disabled={isAdminApiBusy}>
+                    Добавить тег
+                  </ButtonShadcn>
+                </div>
+                {newsTagFormError && <div className="text-red-500 font-minecraft text-sm">{newsTagFormError}</div>}
+                <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+                  {isLoadingNewsTags && (
+                    <div className="font-minecraft text-xs text-theme-muted">Загрузка тегов...</div>
+                  )}
+                  {!isLoadingNewsTags && filteredNewsTags.length === 0 && (
+                    <div className="font-minecraft text-xs text-theme-muted">Теги не найдены.</div>
+                  )}
+                  {filteredNewsTags.map((tag) => (
+                    <div key={tag.id} className="rounded-md border border-white/10 bg-black/20 p-3">
+                      {editingTagId === tag.id ? (
+                        <div className="flex items-center gap-2">
+                          <ShadcnInput
+                            value={editingTagName}
+                            onChange={(e) => setEditingTagName(e.target.value)}
+                            className="h-8"
+                          />
+                          <ButtonShadcn size="sm" onClick={handleUpdateNewsTag}>Сохранить</ButtonShadcn>
+                          <ButtonShadcn
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => {
+                              setEditingTagId(null);
+                              setEditingTagName("");
+                            }}
+                          >
+                            Отмена
+                          </ButtonShadcn>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <Badge variant="outline">{tag.name}</Badge>
+                            <span className="truncate text-[10px] text-theme-muted">{tag.id}</span>
+                          </div>
+                          <div className="flex gap-2">
+                            <ButtonShadcn
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingTagId(tag.id);
+                                setEditingTagName(tag.name);
+                              }}
+                            >
+                              Редактировать
+                            </ButtonShadcn>
+                            <ButtonShadcn
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => void handleDeleteNewsTag(tag.id)}
+                            >
+                              Удалить
+                            </ButtonShadcn>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </ShadcnCardContent>
+            </ShadcnCard>
+          )}
+        </ShadcnCard>
         )}
 
         {activeTab === "changelog" && (
-          <Card className="p-6">
+          <ShadcnCard className="p-6">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="font-minecraft text-xl font-bold">Управление changelog</h2>
               <div className="flex items-center gap-3">
@@ -1174,7 +1336,7 @@ export function AdminScreen() {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 <div className="flex flex-col gap-1.5">
                   <label className="block font-minecraft text-[10px] uppercase text-theme-muted">От даты</label>
-                  <Input
+                  <ShadcnInput
                     type="datetime-local"
                     value={changelogFromDate}
                     onChange={(e) => setChangelogFromDate(e.target.value)}
@@ -1183,7 +1345,7 @@ export function AdminScreen() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="block font-minecraft text-[10px] uppercase text-theme-muted">До даты</label>
-                  <Input
+                  <ShadcnInput
                     type="datetime-local"
                     value={changelogToDate}
                     onChange={(e) => setChangelogToDate(e.target.value)}
@@ -1191,7 +1353,7 @@ export function AdminScreen() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Select
+                  <ShadcnSelect
                     label="Тип"
                     value={changelogMandatoryDraft}
                     onChange={(e) => {
@@ -1206,7 +1368,7 @@ export function AdminScreen() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Select
+                  <ShadcnSelect
                     label="Сортировка"
                     value={changelogSortDraft}
                     onChange={(e) => {
@@ -1221,7 +1383,7 @@ export function AdminScreen() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Select
+                  <ShadcnSelect
                     label="Порядок"
                     value={changelogOrderDraft}
                     onChange={(e) => {
@@ -1322,7 +1484,7 @@ export function AdminScreen() {
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <label className="font-minecraft text-xs uppercase text-theme-muted">Версия</label>
-                    <Input
+                    <ShadcnInput
                       value={changelogVersion}
                       onChange={(e) => setChangelogVersion(e.target.value)}
                       placeholder="1.4.2"
@@ -1330,7 +1492,7 @@ export function AdminScreen() {
                   </div>
                   <div className="space-y-2">
                     <label className="font-minecraft text-xs uppercase text-theme-muted">Release date</label>
-                    <Input
+                    <ShadcnInput
                       type="date"
                       value={changelogReleaseDate}
                       onChange={(e) => setChangelogReleaseDate(e.target.value)}
@@ -1338,14 +1500,14 @@ export function AdminScreen() {
                   </div>
                   <div className="space-y-2">
                     <label className="font-minecraft text-xs uppercase text-theme-muted">Download URL</label>
-                    <Input
+                    <ShadcnInput
                       value={changelogDownloadUrl}
                       onChange={(e) => setChangelogDownloadUrl(e.target.value)}
                       placeholder="https://downloads.example.com/release.zip"
                     />
                   </div>
                   <div className="flex items-end">
-                    <Checkbox
+                    <ShadcnCheckbox
                       label="Mandatory update"
                       checked={changelogMandatory}
                       onChange={() => setChangelogMandatory((prev) => !prev)}
@@ -1390,53 +1552,63 @@ export function AdminScreen() {
                 </div>
               </div>
             )}
-          </Card>
+          </ShadcnCard>
         )}
       </div>
 
-      <Modal
-        isOpen={banModalOpen}
-        onClose={() => setBanModalOpen(false)}
+      <ShadcnDialog
+        open={banModalOpen}
+        onOpenChange={setBanModalOpen}
         title={`Ban User: ${selectedUser?.username}`}
+        footer={
+          <>
+            <ButtonShadcn variant="secondary" onClick={() => setBanModalOpen(false)} disabled={isAdminApiBusy}>Cancel</ButtonShadcn>
+            <ButtonShadcn variant="destructive" onClick={executeBan} disabled={isAdminApiBusy}>Confirm Ban</ButtonShadcn>
+          </>
+        }
       >
         <div className="space-y-4">
           <p className="text-sm text-theme-muted">Provide a reason for banning this user.</p>
-          <Input
+          <ShadcnInput
             placeholder="Reason..."
             value={banReason}
             onChange={(e) => setBanReason(e.target.value)}
           />
           {actionError && <div className="text-red-500 text-sm">{actionError}</div>}
         </div>
-        <ModalActions>
-          <Button variant="secondary" onClick={() => setBanModalOpen(false)} disabled={isAdminApiBusy}>Cancel</Button>
-          <Button variant="minecraft" onClick={executeBan} disabled={isAdminApiBusy}>Confirm Ban</Button>
-        </ModalActions>
-      </Modal>
+      </ShadcnDialog>
 
-      <Modal
-        isOpen={unbanModalOpen}
-        onClose={() => setUnbanModalOpen(false)}
+      <ShadcnDialog
+        open={unbanModalOpen}
+        onOpenChange={setUnbanModalOpen}
         title={`Unban User: ${selectedUser?.username}`}
+        footer={
+          <>
+            <ButtonShadcn variant="secondary" onClick={() => setUnbanModalOpen(false)} disabled={isAdminApiBusy}>Cancel</ButtonShadcn>
+            <ButtonShadcn variant="default" onClick={executeUnban} disabled={isAdminApiBusy}>Confirm Unban</ButtonShadcn>
+          </>
+        }
       >
         <div className="space-y-4">
           <p className="text-sm text-theme-muted">Are you sure you want to unban this user?</p>
           {actionError && <div className="text-red-500 text-sm">{actionError}</div>}
         </div>
-        <ModalActions>
-          <Button variant="secondary" onClick={() => setUnbanModalOpen(false)} disabled={isAdminApiBusy}>Cancel</Button>
-          <Button variant="minecraft" onClick={executeUnban} disabled={isAdminApiBusy}>Confirm Unban</Button>
-        </ModalActions>
-      </Modal>
+      </ShadcnDialog>
 
-      <Modal
-        isOpen={rolesModalOpen}
-        onClose={() => setRolesModalOpen(false)}
+      <ShadcnDialog
+        open={rolesModalOpen}
+        onOpenChange={setRolesModalOpen}
         title={`Manage Roles: ${selectedUser?.username}`}
+        footer={
+          <>
+            <ButtonShadcn variant="secondary" onClick={() => setRolesModalOpen(false)} disabled={isAdminApiBusy}>Cancel</ButtonShadcn>
+            <ButtonShadcn variant="default" onClick={executeRolesUpdate} disabled={isAdminApiBusy}>Save Roles</ButtonShadcn>
+          </>
+        }
       >
         <div className="space-y-4">
           <div className="rounded border border-white/10 bg-black/10 p-3">
-            <Input
+            <ShadcnInput
               placeholder="Поиск роли по имени или описанию..."
               value={roleSearchQuery}
               onChange={(e) => setRoleSearchQuery(e.target.value)}
@@ -1483,12 +1655,9 @@ export function AdminScreen() {
           </div>
           {actionError && <div className="text-red-500 text-sm">{actionError}</div>}
         </div>
-        <ModalActions>
-          <Button variant="secondary" onClick={() => setRolesModalOpen(false)} disabled={isAdminApiBusy}>Cancel</Button>
-          <Button variant="minecraft" onClick={executeRolesUpdate} disabled={isAdminApiBusy}>Save Roles</Button>
-        </ModalActions>
-      </Modal>
+      </ShadcnDialog>
     </div>
   );
 }
+
 

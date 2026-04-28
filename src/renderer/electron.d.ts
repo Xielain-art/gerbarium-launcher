@@ -132,6 +132,8 @@ export interface IElectronAPI {
     createNews: (payload: ApiCreateNewsDto) => Promise<AdminNewsMutationResponse>;
     getNewsTags: () => Promise<AdminNewsTagsResponse>;
     createNewsTag: (payload: { name: string }) => Promise<AdminNewsTagMutationResponse>;
+    updateNewsTag: (tagId: string, payload: { name: string }) => Promise<AdminNewsTagMutationResponse>;
+    deleteNewsTag: (tagId: string) => Promise<AdminNewsDeleteResponse>;
     updateNews: (newsId: string, payload: ApiUpdateNewsDto) => Promise<AdminNewsMutationResponse>;
     deleteNews: (newsId: string) => Promise<AdminNewsDeleteResponse>;
     getChangelog: (

@@ -244,3 +244,53 @@ export async function createNewsTagRequest(
     return buildNetworkErrorResult<ApiNewsTag>(error);
   }
 }
+
+export async function updateNewsTagRequest(
+  accessToken: string,
+  tagId: string,
+  payload: ApiCreateNewsTagDto,
+): Promise<ApiResult<ApiNewsTag>> {
+  try {
+    const { data, error, response } = await apiClient.PATCH("/api/news/tags/{id}", {
+      params: { path: { id: tagId } },
+      body: payload,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return buildApiResult<ApiNewsTag>({ response, data, error });
+  } catch (error) {
+    return buildNetworkErrorResult<ApiNewsTag>(error);
+  }
+}
+
+export async function deleteNewsTagRequest(
+  accessToken: string,
+  tagId: string,
+): Promise<ApiResult<{ success: true }>> {
+  try {
+    const { error, response } = await apiClient.DELETE("/api/news/tags/{id}", {
+      params: { path: { id: tagId } },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response) {
+      return { success: false, errorMessage: "Network request failed" };
+    }
+    if (!response.ok) {
+      return {
+        success: false,
+        status: response.status,
+        errorMessage:
+          typeof error === "object" && error !== null && "message" in error
+            ? String((error as { message?: string }).message)
+            : undefined,
+      };
+    }
+    return { success: true, status: response.status, data: { success: true } };
+  } catch (error) {
+    return buildNetworkErrorResult<{ success: true }>(error);
+  }
+}

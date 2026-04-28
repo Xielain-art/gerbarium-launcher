@@ -54,6 +54,8 @@ export const IPC_CHANNELS = {
     CREATE_NEWS: "admin:create-news",
     GET_NEWS_TAGS: "admin:get-news-tags",
     CREATE_NEWS_TAG: "admin:create-news-tag",
+    UPDATE_NEWS_TAG: "admin:update-news-tag",
+    DELETE_NEWS_TAG: "admin:delete-news-tag",
     UPDATE_NEWS: "admin:update-news",
     DELETE_NEWS: "admin:delete-news",
     GET_CHANGELOG: "admin:get-changelog",
@@ -398,6 +400,14 @@ export interface IpcChannelMap {
   [IPC_CHANNELS.ADMIN.CREATE_NEWS_TAG]: {
     args: [payload: ApiCreateNewsTagDto];
     return: AdminNewsTagMutationResponse;
+  };
+  [IPC_CHANNELS.ADMIN.UPDATE_NEWS_TAG]: {
+    args: [tagId: string, payload: ApiCreateNewsTagDto];
+    return: AdminNewsTagMutationResponse;
+  };
+  [IPC_CHANNELS.ADMIN.DELETE_NEWS_TAG]: {
+    args: [tagId: string];
+    return: AdminNewsDeleteResponse;
   };
   [IPC_CHANNELS.ADMIN.UPDATE_NEWS]: {
     args: [newsId: string, payload: ApiUpdateNewsDto];
