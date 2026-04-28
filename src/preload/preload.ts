@@ -8,6 +8,7 @@ import {
   UpdateInfoPayload,
   IntegrityCheckResult,
   AuthSessionUser,
+  AuthEmailVerificationStatus,
   LauncherSettings,
   JavaDownloadProgressPayload,
 } from "../shared/constants/ipc-chanels";
@@ -125,6 +126,18 @@ contextBridge.exposeInMainWorld("electronAPI", {
       typedInvoke(IPC_CHANNELS.AUTH.LOGIN, credentials),
     register: (payload: { email: string; username: string; password: string }) =>
       typedInvoke(IPC_CHANNELS.AUTH.REGISTER, payload),
+    verifyEmail: (payload: { code: string }) =>
+      typedInvoke(IPC_CHANNELS.AUTH.VERIFY_EMAIL, payload),
+    getEmailVerificationStatus: (): Promise<{
+      success: boolean;
+      emailVerification?: AuthEmailVerificationStatus;
+      error?: string;
+    }> => typedInvoke(IPC_CHANNELS.AUTH.GET_EMAIL_VERIFICATION_STATUS),
+    resendEmailVerification: (): Promise<{
+      success: boolean;
+      emailVerification?: AuthEmailVerificationStatus;
+      error?: string;
+    }> => typedInvoke(IPC_CHANNELS.AUTH.RESEND_EMAIL_VERIFICATION),
     loginOffline: (payload: { username: string }) =>
       typedInvoke(IPC_CHANNELS.AUTH.LOGIN_OFFLINE, payload),
     getSession: () => typedInvoke(IPC_CHANNELS.AUTH.GET_SESSION),

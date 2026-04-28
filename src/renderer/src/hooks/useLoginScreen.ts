@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "../stores/useAuthStore";
+import { useSettingsStore } from "../stores/useSettingsStore";
 import { useTranslation } from "./useTranslation";
 import { ROUTES } from "../../../shared/constants/system";
 
 const USERNAME_REGEX = /^[A-Za-z0-9_]+$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_CODE_REGEX = /^\d{6}$/;
 
 function isValidUsername(value: string): boolean {
   return value.length >= 3 && value.length <= 32 && USERNAME_REGEX.test(value);
@@ -35,25 +37,50 @@ function localizeAuthError(
     ERR_AUTH_API_REQUEST_FAILED: t.STORE_ERRORS.AUTH_SERVICE_UNAVAILABLE,
     ERR_AUTH_LOGIN_FAILED: t.STORE_ERRORS.AUTH_LOGIN,
     ERR_AUTH_REGISTER_FAILED: t.STORE_ERRORS.AUTH_REGISTER,
+    ERR_AUTH_EMAIL_CODE_INVALID: t.STORE_ERRORS.AUTH_EMAIL_CODE_INVALID,
+    ERR_AUTH_EMAIL_ALREADY_VERIFIED:
+      t.STORE_ERRORS.AUTH_EMAIL_ALREADY_VERIFIED,
+    ERR_AUTH_VERIFY_EMAIL_FAILED: t.STORE_ERRORS.AUTH_VERIFY_EMAIL,
+    ERR_AUTH_RESEND_EMAIL_FAILED: t.STORE_ERRORS.AUTH_RESEND_EMAIL,
+    ERR_AUTH_EMAIL_STATUS_FAILED: t.STORE_ERRORS.AUTH_EMAIL_STATUS,
+    ERR_AUTH_UNAUTHORIZED: t.STORE_ERRORS.AUTH_UNAUTHORIZED,
   };
 
   return byCode[error] || error;
 }
 
+function clearAuthDrafts(
+  setters: Array<(value: string) => void>,
+  setOfflineMode: (value: boolean) => void,
+): void {
+  for (const setter of setters) {
+    setter("");
+  }
+  setOfflineMode(false);
+}
+
 export function useLoginScreen() {
   const t = useTranslation();
   const navigate = useNavigate();
+  const language = useSettingsStore((state) => state.general.language);
+  const updateGeneral = useSettingsStore((state) => state.updateGeneral);
   const {
     isLoading,
     isSessionLoading,
     hasCheckedSession,
     error,
     isAuthenticated,
+    user,
+    emailVerification,
     login,
     register,
+    verifyEmail,
+    resendEmailVerification,
+    refreshEmailVerificationStatus,
     loginOffline,
     loadToken,
     clearError,
+    logout,
   } = useAuthStore();
 
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -61,10 +88,13 @@ export function useLoginScreen() {
   const [localEmail, setLocalEmail] = useState("");
   const [localPassword, setLocalPassword] = useState("");
   const [localPasswordConfirm, setLocalPasswordConfirm] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
   const [offlineMode, setOfflineMode] = useState(false);
+  const [registerStep, setRegisterStep] = useState<1 | 2>(1);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [resendCountdown, setResendCountdown] = useState(0);
+
+  const verificationRequired = isAuthenticated && user?.emailVerified === false;
 
   useEffect(() => {
     if (!hasCheckedSession) {
@@ -73,10 +103,47 @@ export function useLoginScreen() {
   }, [loadToken, hasCheckedSession]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user?.emailVerified !== false) {
       navigate({ to: ROUTES.DASHBOARD });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, user?.emailVerified]);
+
+  useEffect(() => {
+    if (verificationRequired) {
+      void refreshEmailVerificationStatus();
+    }
+  }, [refreshEmailVerificationStatus, verificationRequired]);
+
+  useEffect(() => {
+    if (!verificationRequired) {
+      setResendCountdown(0);
+      return;
+    }
+
+    setResendCountdown(
+      emailVerification?.resendAvailableInSeconds ??
+        user?.emailVerificationResendAvailableInSeconds ??
+        0,
+    );
+  }, [
+    emailVerification?.resendAvailableInSeconds,
+    user?.emailVerificationResendAvailableInSeconds,
+    verificationRequired,
+  ]);
+
+  useEffect(() => {
+    if (resendCountdown <= 0) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setResendCountdown((current) => (current > 0 ? current - 1 : 0));
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [resendCountdown]);
 
   const onUsernameChange = (value: string) => {
     setValidationError(null);
@@ -98,16 +165,53 @@ export function useLoginScreen() {
     setLocalPasswordConfirm(value);
   };
 
+  const onVerificationCodeChange = (value: string) => {
+    setValidationError(null);
+    setVerificationCode(value.replace(/\D/g, "").slice(0, 6));
+  };
+
   const onToggleOfflineMode = (enabled: boolean) => {
     setValidationError(null);
     setMode("login");
+    setRegisterStep(1);
     setOfflineMode(enabled);
   };
 
   const onSwitchMode = (nextMode: "login" | "register") => {
     setValidationError(null);
+    clearError();
     setMode(nextMode);
+    setRegisterStep(1);
     setOfflineMode(false);
+  };
+
+  const onUseAnotherAccount = async () => {
+    setValidationError(null);
+    clearError();
+    await logout();
+    clearAuthDrafts(
+      [
+        setLocalUsername,
+        setLocalEmail,
+        setLocalPassword,
+        setLocalPasswordConfirm,
+        setVerificationCode,
+      ],
+      setOfflineMode,
+    );
+    setMode("login");
+    setRegisterStep(1);
+  };
+
+  const onResendCode = async () => {
+    setValidationError(null);
+    clearError();
+
+    if (resendCountdown > 0) {
+      return;
+    }
+
+    await resendEmailVerification();
   };
 
   const onSubmit = async (e: FormEvent) => {
@@ -115,21 +219,42 @@ export function useLoginScreen() {
     setValidationError(null);
     clearError();
 
+    if (verificationRequired) {
+      const code = verificationCode.trim();
+      if (!EMAIL_CODE_REGEX.test(code)) {
+        setValidationError(t.STORE_ERRORS.AUTH_EMAIL_CODE_INVALID);
+        return;
+      }
+
+      await verifyEmail(code);
+      return;
+    }
+
     if (mode === "register") {
       const email = localEmail.trim();
       const username = localUsername.trim();
       const password = localPassword.trim();
 
-      if (!email || !username || !password) {
+      if (registerStep === 1) {
+        if (!email || !username) {
+          setValidationError(t.STORE_ERRORS.AUTH_EMPTY_FIELDS);
+          return;
+        }
+        if (!isValidEmail(email)) {
+          setValidationError(t.STORE_ERRORS.AUTH_EMAIL_INVALID);
+          return;
+        }
+        if (!isValidUsername(username)) {
+          setValidationError(t.STORE_ERRORS.AUTH_USERNAME_INVALID);
+          return;
+        }
+
+        setRegisterStep(2);
+        return;
+      }
+
+      if (!password) {
         setValidationError(t.STORE_ERRORS.AUTH_EMPTY_FIELDS);
-        return;
-      }
-      if (!isValidEmail(email)) {
-        setValidationError(t.STORE_ERRORS.AUTH_EMAIL_INVALID);
-        return;
-      }
-      if (!isValidUsername(username)) {
-        setValidationError(t.STORE_ERRORS.AUTH_USERNAME_INVALID);
         return;
       }
       if (!isValidPassword(password)) {
@@ -187,25 +312,38 @@ export function useLoginScreen() {
 
   return {
     t,
+    language,
     isLoading,
     showSessionSpinner: isSessionLoading || !hasCheckedSession,
     mode,
+    registerStep,
     localUsername,
     localEmail,
     localPassword,
     localPasswordConfirm,
-    showPassword,
-    showConfirmPassword,
+    verificationCode,
     offlineMode,
+    verificationRequired,
+    verificationEmail: user?.email ?? localEmail.trim(),
+    resendCountdown,
+    developmentCode: emailVerification?.developmentCode,
+    emailWasSent: emailVerification?.emailSent ?? false,
     localizedError,
+    onLanguageChange: (nextLanguage: string) =>
+      updateGeneral({ language: nextLanguage }),
+    onRegisterStepBack: () => {
+      setValidationError(null);
+      setRegisterStep(1);
+    },
     onUsernameChange,
     onEmailChange,
     onPasswordChange,
     onConfirmPasswordChange,
-    onTogglePassword: () => setShowPassword((prev) => !prev),
-    onToggleConfirmPassword: () => setShowConfirmPassword((prev) => !prev),
+    onVerificationCodeChange,
     onToggleOfflineMode,
     onSwitchMode,
+    onUseAnotherAccount,
+    onResendCode,
     onSubmit,
   };
 }

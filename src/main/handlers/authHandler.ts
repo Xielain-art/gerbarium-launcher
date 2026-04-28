@@ -4,16 +4,21 @@ import crypto from "node:crypto";
 import { App, ipcMain, safeStorage } from "electron";
 import log from "electron-log";
 import {
+  getEmailVerificationStatusRequest,
   loginRequest,
   registerRequest,
+  resendEmailVerificationRequest,
   logoutRequest,
   profileRequest,
   refreshTokenRequest,
   type ApiAuthResponse,
+  type ApiEmailVerificationStatus,
   type ApiUser,
+  verifyEmailRequest,
 } from "../../lib/api/auth";
 import {
   IPC_CHANNELS,
+  type AuthEmailVerificationStatus,
   type AuthSessionUser,
 } from "../../shared/constants/ipc-chanels";
 import { ERROR_CODES } from "../../shared/constants/errors";
@@ -172,6 +177,33 @@ function buildOnlineSession(
   };
 }
 
+function mapEmailVerification(
+  status?: ApiEmailVerificationStatus,
+): AuthEmailVerificationStatus | undefined {
+  if (!status) {
+    return undefined;
+  }
+
+  return {
+    emailVerified: status.emailVerified,
+    resendAvailableInSeconds: status.resendAvailableInSeconds,
+    emailSent: status.emailSent,
+    developmentCode: status.developmentCode,
+  };
+}
+
+function applyEmailVerificationToUser(
+  user: AuthSessionUser,
+  status: ApiEmailVerificationStatus,
+): AuthSessionUser {
+  return {
+    ...user,
+    emailVerified: status.emailVerified,
+    emailVerificationResendAvailableInSeconds:
+      status.resendAvailableInSeconds,
+  };
+}
+
 function mapAuthFailureCode(status?: number): string {
   if (status === 401 || status === 403) {
     return ERROR_CODES.AUTH_INVALID_CREDENTIALS;
@@ -186,6 +218,35 @@ function mapAuthFailureCode(status?: number): string {
     return ERROR_CODES.AUTH_VALIDATION_FAILED;
   }
   return ERROR_CODES.AUTH_API_REQUEST_FAILED;
+}
+
+function mapVerifyEmailFailureCode(status?: number): string {
+  if (status === 400) {
+    return ERROR_CODES.AUTH_EMAIL_CODE_INVALID;
+  }
+  if (status === 401 || status === 403) {
+    return ERROR_CODES.AUTH_UNAUTHORIZED;
+  }
+  if (status === 409) {
+    return ERROR_CODES.AUTH_EMAIL_ALREADY_VERIFIED;
+  }
+  if (status === 429) {
+    return ERROR_CODES.AUTH_RATE_LIMIT;
+  }
+  return ERROR_CODES.AUTH_VERIFY_EMAIL_FAILED;
+}
+
+function mapEmailVerificationFailureCode(status?: number): string {
+  if (status === 401 || status === 403) {
+    return ERROR_CODES.AUTH_UNAUTHORIZED;
+  }
+  if (status === 409) {
+    return ERROR_CODES.AUTH_EMAIL_ALREADY_VERIFIED;
+  }
+  if (status === 429) {
+    return ERROR_CODES.AUTH_RATE_LIMIT;
+  }
+  return ERROR_CODES.AUTH_EMAIL_STATUS_FAILED;
 }
 
 export async function readStoredSession(
@@ -220,6 +281,24 @@ export async function clearStoredSession(secureDataPath: string): Promise<void> 
       await writeSecureData(secureDataPath, secureData);
     }
   });
+}
+
+async function readResolvedOnlineSession(
+  secureDataPath: string,
+): Promise<AuthSessionPayload | null> {
+  const storedSession = await readStoredSession(secureDataPath);
+  if (!storedSession || storedSession.mode !== "online") {
+    return null;
+  }
+
+  const resolvedSession = await resolveOnlineSession(storedSession);
+  if (!resolvedSession) {
+    await clearStoredSession(secureDataPath);
+    return null;
+  }
+
+  await writeStoredSession(secureDataPath, resolvedSession);
+  return resolvedSession;
 }
 
 async function refreshOnlineSession(
@@ -383,6 +462,9 @@ export default function authHandler(app: App) {
           success: true,
           user: session.user,
           accessToken: session.accessToken,
+          emailVerification: mapEmailVerification(
+            authResult.data.emailVerification,
+          ),
         };
       } catch (error) {
         log.error(LOG_MESSAGES.AUTH_LOGIN_FAILED, error);
@@ -441,6 +523,9 @@ export default function authHandler(app: App) {
           success: true,
           user: session.user,
           accessToken: session.accessToken,
+          emailVerification: mapEmailVerification(
+            registerResult.data.emailVerification,
+          ),
         };
       } catch (error) {
         log.error(LOG_MESSAGES.AUTH_REGISTER_FAILED, error);
@@ -451,6 +536,155 @@ export default function authHandler(app: App) {
       }
     },
   );
+
+  ipcMain.handle(
+    IPC_CHANNELS.AUTH.VERIFY_EMAIL,
+    async (_event, payload: { code: string }) => {
+      log.info(LOG_MESSAGES.AUTH_VERIFY_EMAIL_ATTEMPT);
+      try {
+        const code = payload?.code?.trim() ?? "";
+        if (!code) {
+          return {
+            success: false,
+            error: ERROR_CODES.AUTH_VALIDATION_FAILED,
+          };
+        }
+
+        const session = await readResolvedOnlineSession(secureDataPath);
+        if (!session?.accessToken) {
+          return {
+            success: false,
+            error: ERROR_CODES.AUTH_UNAUTHORIZED,
+          };
+        }
+
+        const verifyResult = await verifyEmailRequest(session.accessToken, {
+          code,
+        });
+        if (!verifyResult.success || !verifyResult.data?.success) {
+          logApiFailure(LOG_MESSAGES.AUTH_API_ERROR, verifyResult);
+          return {
+            success: false,
+            error: mapVerifyEmailFailureCode(verifyResult.status),
+          };
+        }
+
+        const profileResult = await profileRequest(session.accessToken);
+        const updatedUser =
+          profileResult.success && profileResult.data
+            ? mapApiUserToSessionUser(profileResult.data)
+            : {
+                ...session.user,
+                emailVerified: true,
+                emailVerificationResendAvailableInSeconds: 0,
+              };
+
+        const updatedSession: AuthSessionPayload = {
+          ...session,
+          user: updatedUser,
+        };
+        await writeStoredSession(secureDataPath, updatedSession);
+
+        return {
+          success: true,
+          user: updatedUser,
+          emailVerification: {
+            emailVerified: true,
+            resendAvailableInSeconds: 0,
+            emailSent: false,
+          },
+        };
+      } catch (error) {
+        log.error(LOG_MESSAGES.AUTH_VERIFY_EMAIL_FAILED, error);
+        return {
+          success: false,
+          error: ERROR_CODES.AUTH_VERIFY_EMAIL_FAILED,
+        };
+      }
+    },
+  );
+
+  ipcMain.handle(IPC_CHANNELS.AUTH.GET_EMAIL_VERIFICATION_STATUS, async () => {
+    log.info(LOG_MESSAGES.AUTH_EMAIL_STATUS_REQUESTED);
+    try {
+      const session = await readResolvedOnlineSession(secureDataPath);
+      if (!session?.accessToken) {
+        return {
+          success: false,
+          error: ERROR_CODES.AUTH_UNAUTHORIZED,
+        };
+      }
+
+      const statusResult = await getEmailVerificationStatusRequest(
+        session.accessToken,
+      );
+      if (!statusResult.success || !statusResult.data) {
+        logApiFailure(LOG_MESSAGES.AUTH_API_ERROR, statusResult);
+        return {
+          success: false,
+          error: mapEmailVerificationFailureCode(statusResult.status),
+        };
+      }
+
+      const updatedSession: AuthSessionPayload = {
+        ...session,
+        user: applyEmailVerificationToUser(session.user, statusResult.data),
+      };
+      await writeStoredSession(secureDataPath, updatedSession);
+
+      return {
+        success: true,
+        emailVerification: mapEmailVerification(statusResult.data),
+      };
+    } catch (error) {
+      log.error(LOG_MESSAGES.AUTH_EMAIL_STATUS_FAILED, error);
+      return {
+        success: false,
+        error: ERROR_CODES.AUTH_EMAIL_STATUS_FAILED,
+      };
+    }
+  });
+
+  ipcMain.handle(IPC_CHANNELS.AUTH.RESEND_EMAIL_VERIFICATION, async () => {
+    log.info(LOG_MESSAGES.AUTH_RESEND_EMAIL_REQUESTED);
+    try {
+      const session = await readResolvedOnlineSession(secureDataPath);
+      if (!session?.accessToken) {
+        return {
+          success: false,
+          error: ERROR_CODES.AUTH_UNAUTHORIZED,
+        };
+      }
+
+      const resendResult = await resendEmailVerificationRequest(
+        session.accessToken,
+      );
+      if (!resendResult.success || !resendResult.data) {
+        logApiFailure(LOG_MESSAGES.AUTH_API_ERROR, resendResult);
+        return {
+          success: false,
+          error: mapEmailVerificationFailureCode(resendResult.status),
+        };
+      }
+
+      const updatedSession: AuthSessionPayload = {
+        ...session,
+        user: applyEmailVerificationToUser(session.user, resendResult.data),
+      };
+      await writeStoredSession(secureDataPath, updatedSession);
+
+      return {
+        success: true,
+        emailVerification: mapEmailVerification(resendResult.data),
+      };
+    } catch (error) {
+      log.error(LOG_MESSAGES.AUTH_RESEND_EMAIL_FAILED, error);
+      return {
+        success: false,
+        error: ERROR_CODES.AUTH_RESEND_EMAIL_FAILED,
+      };
+    }
+  });
 
   ipcMain.handle(
     IPC_CHANNELS.AUTH.LOGIN_OFFLINE,
