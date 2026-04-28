@@ -25,7 +25,7 @@ const checkAuth = () => {
 };
 
 const checkIsAdmin = () => {
-  return useAuthStore.getState().user?.roles.includes("admin");
+  return useAuthStore.getState().user?.roles.some((role) => role.name === "admin");
 };
 
 const checkUpdateGate = () => {

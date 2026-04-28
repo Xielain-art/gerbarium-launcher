@@ -16,21 +16,15 @@ function getVersionIcon(type: string) {
   return icons[type] || "PK";
 }
 
-function formatRole(role: "user" | "moderator" | "admin"): string {
-  if (role === "admin") return "ADMIN";
-  if (role === "moderator") return "MODERATOR";
-  return "USER";
+function formatRole(role: string): string {
+  return role.toUpperCase();
 }
 
 function getRoleLabels(user: AuthUser | null): string[] {
-  const roles = user?.roles ?? ["user"];
+  const roles = user?.roles?.map((role) => role.name) ?? ["user"];
   const unique = Array.from(new Set(roles));
-  const order: Record<"user" | "moderator" | "admin", number> = {
-    admin: 0,
-    moderator: 1,
-    user: 2,
-  };
-  unique.sort((a, b) => order[a] - order[b]);
+  const order: Record<string, number> = { admin: 0, moderator: 1, user: 2 };
+  unique.sort((a, b) => (order[a] ?? 999) - (order[b] ?? 999));
   return unique.map(formatRole);
 }
 
@@ -66,10 +60,7 @@ export function DashboardSidebar({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Avatar
-              username={
-                user?.playerProfile?.minecraftUsername || user?.username
-              }
-              skinUrl={user?.playerProfile?.skinUrl}
+              username={user?.username}
               size="lg"
             />
             <div className="min-w-0">

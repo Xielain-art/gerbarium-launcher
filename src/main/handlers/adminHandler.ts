@@ -30,7 +30,6 @@ import {
   SECURE_STORAGE_FILE_NAME,
 } from "./authHandler";
 
-type AdminUserRole = "user" | "moderator" | "admin";
 type NewsSortBy = "createdAt" | "updatedAt" | "title";
 type NewsOrder = "ASC" | "DESC";
 type ChangelogSortBy = "releaseDate" | "version" | "createdAt";
@@ -66,7 +65,7 @@ export default function adminHandler(app: App) {
       search?: string,
       _page?: number,
       _limit?: number,
-      role?: AdminUserRole,
+      role?: string,
       banned?: boolean,
     ) => {
       try {
@@ -215,7 +214,7 @@ export default function adminHandler(app: App) {
     async (
       _event,
       userId: string,
-      roles: ("user" | "moderator" | "admin")[],
+      roleIds: string[],
     ) => {
       try {
         const token = await getValidAccessToken(app);
@@ -225,7 +224,7 @@ export default function adminHandler(app: App) {
             error: ERROR_CODES.AUTH_UNAUTHORIZED,
           };
         }
-        const result = await updateUserRolesRequest(token, userId, roles);
+        const result = await updateUserRolesRequest(token, userId, roleIds);
         if (!result.success) {
           return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
         }
@@ -246,14 +245,14 @@ export default function adminHandler(app: App) {
       limit?: number,
       sortBy?: NewsSortBy,
       order?: NewsOrder,
-      tag?: string,
+      tagId?: string,
       fromDate?: string,
       toDate?: string,
     ) => {
       try {
         const result = await listNewsRequest({
           search: search?.trim() || undefined,
-          tag: tag?.trim() || undefined,
+          tagId: tagId?.trim() || undefined,
           fromDate: fromDate || undefined,
           toDate: toDate || undefined,
           sortBy: sortBy || "createdAt",

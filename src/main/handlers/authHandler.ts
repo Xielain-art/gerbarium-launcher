@@ -100,11 +100,8 @@ function createOfflineUser(login: string): AuthSessionUser {
     id: uuid,
     username: login,
     email: login.includes("@") ? login : `${login}@offline.local`,
-    roles: ["user"],
+    roles: [{ id: "offline-user", name: "user" }],
     isBanned: false,
-    playerProfile: {
-      verificationStatus: "unlinked",
-    },
   };
 }
 
@@ -113,10 +110,14 @@ function mapApiUserToSessionUser(user: ApiUser): AuthSessionUser {
     id: user.id,
     username: user.username,
     email: user.email,
-    roles: user.roles,
+    roles: user.roles ?? [],
     isBanned: user.isBanned,
     banReason: user.banReason,
-    playerProfile: user.playerProfile,
+    permissions: user.permissions ?? [],
+    emailVerified: user.emailVerified,
+    emailVerifiedAt: user.emailVerifiedAt,
+    emailVerificationResendAvailableInSeconds:
+      user.emailVerificationResendAvailableInSeconds,
   };
 }
 

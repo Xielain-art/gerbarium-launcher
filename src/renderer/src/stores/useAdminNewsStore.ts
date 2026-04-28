@@ -17,7 +17,7 @@ interface AdminNewsState {
 
   // Filters
   search: string;
-  tag: string;
+  tagId: string;
   fromDate: string;
   toDate: string;
   sortBy: "createdAt" | "updatedAt" | "title";
@@ -25,7 +25,7 @@ interface AdminNewsState {
 
   setFilters: (filters: { 
     search?: string; 
-    tag?: string; 
+    tagId?: string; 
     fromDate?: string; 
     toDate?: string; 
     sortBy?: "createdAt" | "updatedAt" | "title"; 
@@ -101,7 +101,7 @@ export const useAdminNewsStore = create<AdminNewsState>()((set, get) => ({
   actionLoadingId: null,
   error: null,
   search: "",
-  tag: "",
+  tagId: "",
   fromDate: "",
   toDate: "",
   sortBy: "createdAt",
@@ -113,12 +113,12 @@ export const useAdminNewsStore = create<AdminNewsState>()((set, get) => ({
   },
 
   fetchNews: async () => {
-    const { search, tag, fromDate, toDate, sortBy, order } = get();
+    const { search, tagId, fromDate, toDate, sortBy, order } = get();
     set({ isLoading: true, error: null, page: 1, hasMore: false });
     try {
       const result = await window.electronAPI.admin.getNews(
         search, 1, PAGE_LIMIT, sortBy, order, 
-        tag || undefined, 
+        tagId || undefined, 
         fromDate || undefined, 
         toDate || undefined
       );
@@ -142,7 +142,7 @@ export const useAdminNewsStore = create<AdminNewsState>()((set, get) => ({
   },
 
   fetchMoreNews: async () => {
-    const { page, hasMore, isLoading, isLoadingMore, news, search, tag, fromDate, toDate, sortBy, order } = get();
+    const { page, hasMore, isLoading, isLoadingMore, news, search, tagId, fromDate, toDate, sortBy, order } = get();
     if (!hasMore || isLoading || isLoadingMore) return;
 
     set({ isLoadingMore: true });
@@ -150,7 +150,7 @@ export const useAdminNewsStore = create<AdminNewsState>()((set, get) => ({
       const nextPage = page + 1;
       const result = await window.electronAPI.admin.getNews(
         search, nextPage, PAGE_LIMIT, sortBy, order,
-        tag || undefined,
+        tagId || undefined,
         fromDate || undefined,
         toDate || undefined
       );

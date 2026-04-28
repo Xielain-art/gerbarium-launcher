@@ -106,17 +106,13 @@ export interface AuthSessionUser {
   id: string;
   username: string;
   email: string;
-  roles: ("user" | "moderator" | "admin")[];
+  roles: Array<{ id: string; name: string }>;
+  permissions?: Array<{ id: string; name: string }>;
+  emailVerified?: boolean;
+  emailVerifiedAt?: string;
+  emailVerificationResendAvailableInSeconds?: number;
   isBanned: boolean;
   banReason?: string;
-  playerProfile?: {
-    minecraftUuid?: string;
-    minecraftUsername?: string;
-    skinUrl?: string;
-    capeUrl?: string;
-    verificationStatus: "unlinked" | "pending" | "verified";
-    verifiedAt?: string;
-  };
 }
 
 export interface AdminUsersResponse {
@@ -323,7 +319,7 @@ export interface IpcChannelMap {
       search?: string,
       page?: number,
       limit?: number,
-      role?: "user" | "moderator" | "admin",
+      role?: string,
       banned?: boolean,
     ];
     return: AdminUsersResponse;
@@ -337,7 +333,7 @@ export interface IpcChannelMap {
     return: AdminUserMutationResponse;
   };
   [IPC_CHANNELS.ADMIN.UPDATE_ROLES]: {
-    args: [userId: string, roles: ("user" | "moderator" | "admin")[]];
+    args: [userId: string, roleIds: string[]];
     return: AdminUserMutationResponse;
   };
   [IPC_CHANNELS.ADMIN.GET_NEWS]: {
@@ -347,7 +343,7 @@ export interface IpcChannelMap {
       limit?: number,
       sortBy?: "createdAt" | "updatedAt" | "title",
       order?: "ASC" | "DESC",
-      tag?: string,
+      tagId?: string,
       fromDate?: string,
       toDate?: string,
     ];

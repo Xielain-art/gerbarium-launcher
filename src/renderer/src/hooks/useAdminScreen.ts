@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAdminStore } from "../stores/useAdminStore";
 import { useTranslation } from "../hooks/useTranslation";
+import type { ApiUser } from "../../../lib/api/admin";
 
 export function useAdminScreen() {
   const t = useTranslation();
@@ -22,7 +23,7 @@ export function useAdminScreen() {
     updateUserRoles,
   } = useAdminStore();
 
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
   const [banModalOpen, setBanModalOpen] = useState(false);
   const [banReason, setBanReason] = useState("");
   const [unbanModalOpen, setUnbanModalOpen] = useState(false);
@@ -34,7 +35,7 @@ export function useAdminScreen() {
     void fetchUsers();
   }, [fetchUsers]);
 
-  const openBanModal = useCallback((user: any) => {
+  const openBanModal = useCallback((user: ApiUser) => {
     setSelectedUser(user);
     setBanReason("");
     setActionError(null);
@@ -51,7 +52,7 @@ export function useAdminScreen() {
     }
   }, [selectedUser, banReason, banUser]);
 
-  const openUnbanModal = useCallback((user: any) => {
+  const openUnbanModal = useCallback((user: ApiUser) => {
     setSelectedUser(user);
     setActionError(null);
     setUnbanModalOpen(true);
@@ -67,22 +68,24 @@ export function useAdminScreen() {
     }
   }, [selectedUser, unbanUser]);
 
-  const openRolesModal = useCallback((user: any) => {
+  const openRolesModal = useCallback((user: ApiUser) => {
     setSelectedUser(user);
-    setSelectedRoles(user.roles);
+    setSelectedRoles((user.roles ?? []).map((role) => role.id));
     setActionError(null);
     setRolesModalOpen(true);
   }, []);
 
-  const toggleRole = useCallback((role: string) => {
+  const toggleRole = useCallback((roleId: string) => {
     setSelectedRoles((prev) =>
-      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
+      prev.includes(roleId)
+        ? prev.filter((id) => id !== roleId)
+        : [...prev, roleId]
     );
   }, []);
 
   const executeRolesUpdate = useCallback(async () => {
     if (!selectedUser) return;
-    const success = await updateUserRoles(selectedUser.id, selectedRoles as any);
+    const success = await updateUserRoles(selectedUser.id, selectedRoles);
     if (success) {
       setRolesModalOpen(false);
     } else {
@@ -90,7 +93,13 @@ export function useAdminScreen() {
     }
   }, [selectedUser, selectedRoles, updateUserRoles]);
 
-  const availableRoles = ["user", "moderator", "admin"];
+  const availableRoles = Array.from(
+    new Map(
+      users
+        .flatMap((user) => user.roles ?? [])
+        .map((role) => [role.id, role] as const),
+    ).values(),
+  );
 
   return {
     users,

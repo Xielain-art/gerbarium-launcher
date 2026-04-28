@@ -14,11 +14,11 @@ interface NewsState {
 
   // Filters
   searchQuery: string;
-  tag?: string;
+  tagId?: string;
   sortBy: "createdAt" | "updatedAt" | "title";
   order: "ASC" | "DESC";
   
-  setFilters: (filters: { searchQuery?: string; tag?: string; sortBy?: "createdAt" | "updatedAt" | "title"; order?: "ASC" | "DESC" }) => void;
+  setFilters: (filters: { searchQuery?: string; tagId?: string; sortBy?: "createdAt" | "updatedAt" | "title"; order?: "ASC" | "DESC" }) => void;
   fetchNews: () => Promise<void>;
   fetchMoreNews: () => Promise<void>;
   clearError: () => void;
@@ -35,7 +35,19 @@ const VALID_CATEGORIES: NewsItem["category"][] = [
 function normalizeTags(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   const tags = raw
-    .map((tag) => (typeof tag === "string" ? tag : Array.isArray(tag) ? tag[0] : ""))
+    .map((tag) => {
+      if (typeof tag === "string") return tag;
+      if (Array.isArray(tag)) return typeof tag[0] === "string" ? tag[0] : "";
+      if (
+        typeof tag === "object" &&
+        tag !== null &&
+        "name" in tag &&
+        typeof (tag as { name: unknown }).name === "string"
+      ) {
+        return (tag as { name: string }).name;
+      }
+      return "";
+    })
     .filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0)
     .map((tag) => tag.trim());
   return [...new Set(tags)];
@@ -92,12 +104,12 @@ export const useNewsStore = create<NewsState>((set, get) => ({
   },
 
   fetchNews: async () => {
-    const { searchQuery, tag, sortBy, order } = get();
+    const { searchQuery, tagId, sortBy, order } = get();
     set({ isLoading: true, error: null, page: 1, hasMore: false });
     try {
       const result = await listNewsRequest({
         search: searchQuery || undefined,
-        tag,
+        tagId,
         sortBy,
         order,
         page: 1,
@@ -130,7 +142,7 @@ export const useNewsStore = create<NewsState>((set, get) => ({
   },
 
   fetchMoreNews: async () => {
-    const { page, hasMore, isLoading, isLoadingMore, isInitialLoaded, searchQuery, tag, sortBy, order } = get();
+    const { page, hasMore, isLoading, isLoadingMore, isInitialLoaded, searchQuery, tagId, sortBy, order } = get();
     if (!isInitialLoaded || !hasMore || isLoading || isLoadingMore) {
       return;
     }
@@ -140,7 +152,7 @@ export const useNewsStore = create<NewsState>((set, get) => ({
       const nextPage = page + 1;
       const result = await listNewsRequest({
         search: searchQuery || undefined,
-        tag,
+        tagId,
         sortBy,
         order,
         page: nextPage,

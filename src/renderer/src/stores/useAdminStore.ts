@@ -13,15 +13,15 @@ interface AdminState {
   
   // Filters
   search: string;
-  role?: "user" | "moderator" | "admin";
+  role?: string;
   banned?: boolean;
   
-  setFilters: (filters: { search?: string; role?: "user" | "moderator" | "admin"; banned?: boolean }) => void;
+  setFilters: (filters: { search?: string; role?: string; banned?: boolean }) => void;
   fetchUsers: () => Promise<void>;
   fetchMoreUsers: () => Promise<void>;
   banUser: (userId: string, reason: string) => Promise<boolean>;
   unbanUser: (userId: string) => Promise<boolean>;
-  updateUserRoles: (userId: string, roles: ("user" | "moderator" | "admin")[]) => Promise<boolean>;
+  updateUserRoles: (userId: string, roleIds: string[]) => Promise<boolean>;
 }
 
 const PAGE_LIMIT = 20;
@@ -147,17 +147,27 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
     }
   },
 
-  updateUserRoles: async (userId, roles) => {
+  updateUserRoles: async (userId, roleIds) => {
     set({ actionLoading: userId });
     try {
-      const result = await window.electronAPI.admin.updateRoles(userId, roles);
+      const result = await window.electronAPI.admin.updateRoles(userId, roleIds);
       if (result.success) {
         set((state) => ({
           users: state.users.map((u) =>
-            u.id === userId ? { ...u, roles: roles } : u
+            u.id === userId
+              ? {
+                  ...u,
+                  roles: (u.roles ?? []).filter((role) => roleIds.includes(role.id)),
+                }
+              : u
           ),
           allUsers: state.allUsers.map((u) =>
-            u.id === userId ? { ...u, roles: roles } : u
+            u.id === userId
+              ? {
+                  ...u,
+                  roles: (u.roles ?? []).filter((role) => roleIds.includes(role.id)),
+                }
+              : u
           ),
           actionLoading: null,
         }));

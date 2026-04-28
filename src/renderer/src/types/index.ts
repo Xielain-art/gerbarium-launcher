@@ -3,17 +3,13 @@ export interface AuthUser {
   id: string;
   username: string;
   email: string;
-  roles: ("user" | "moderator" | "admin")[];
+  roles: Array<{ id: string; name: string }>;
+  permissions?: Array<{ id: string; name: string }>;
+  emailVerified?: boolean;
+  emailVerifiedAt?: string;
+  emailVerificationResendAvailableInSeconds?: number;
   isBanned: boolean;
   banReason?: string;
-  playerProfile?: {
-    minecraftUuid?: string;
-    minecraftUsername?: string;
-    skinUrl?: string;
-    capeUrl?: string;
-    verificationStatus: "unlinked" | "pending" | "verified";
-    verifiedAt?: string;
-  };
   avatar?: string;
   xuid?: string;
   token?: string;

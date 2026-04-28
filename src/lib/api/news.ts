@@ -16,7 +16,7 @@ export interface ApiNewsListPayload {
   meta: ApiPaginationMeta;
 }
 
-function normalizeTagsForApi(tags: unknown): string[] | undefined {
+function normalizeTagIdsForApi(tags: unknown): string[] | undefined {
   if (!Array.isArray(tags)) return undefined;
   const normalized = tags.flatMap((tag) => {
     if (typeof tag === "string") return [tag];
@@ -28,17 +28,17 @@ function normalizeTagsForApi(tags: unknown): string[] | undefined {
   return normalized.length > 0 ? normalized : undefined;
 }
 
-function normalizeNewsPayloadForApi<T extends { tags?: unknown }>(payload: T): T {
-  const tags = normalizeTagsForApi(payload.tags);
+function normalizeNewsPayloadForApi<T extends { tags?: unknown; tagIds?: unknown }>(payload: T): T {
+  const tagIds = normalizeTagIdsForApi(payload.tags ?? payload.tagIds);
   return {
     ...payload,
-    tags,
+    tagIds,
   };
 }
 
 export async function listNewsRequest(params?: {
   search?: string;
-  tag?: string;
+  tagId?: string;
   fromDate?: string;
   toDate?: string;
   sortBy?: "createdAt" | "updatedAt" | "title";
@@ -49,7 +49,7 @@ export async function listNewsRequest(params?: {
   try {
     const query: {
       search?: string;
-      tag?: string;
+      tagId?: string;
       fromDate?: string;
       toDate?: string;
       sortBy?: "createdAt" | "updatedAt" | "title";
@@ -58,7 +58,7 @@ export async function listNewsRequest(params?: {
       limit?: number;
     } = {};
     if (params?.search) query.search = params.search;
-    if (params?.tag) query.tag = params.tag;
+    if (params?.tagId) query.tagId = params.tagId;
     if (params?.fromDate) query.fromDate = params.fromDate;
     if (params?.toDate) query.toDate = params.toDate;
     if (params?.sortBy) query.sortBy = params.sortBy;

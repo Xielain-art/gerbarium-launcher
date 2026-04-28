@@ -99,7 +99,7 @@ export interface IElectronAPI {
       search?: string,
       page?: number,
       limit?: number,
-      role?: "user" | "moderator" | "admin",
+      role?: string,
       banned?: boolean,
     ) => Promise<AdminUsersResponse>;
     banUser: (
@@ -111,7 +111,7 @@ export interface IElectronAPI {
     ) => Promise<AdminUserMutationResponse>;
     updateRoles: (
       userId: string,
-      roles: ("user" | "moderator" | "admin")[],
+      roleIds: string[],
     ) => Promise<AdminUserMutationResponse>;
     getNews: (
       search?: string,
@@ -119,7 +119,7 @@ export interface IElectronAPI {
       limit?: number,
       sortBy?: "createdAt" | "updatedAt" | "title",
       order?: "ASC" | "DESC",
-      tag?: string,
+      tagId?: string,
       fromDate?: string,
       toDate?: string,
     ) => Promise<AdminNewsListResponse>;

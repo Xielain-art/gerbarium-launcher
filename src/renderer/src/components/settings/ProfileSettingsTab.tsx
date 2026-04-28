@@ -26,11 +26,10 @@ export function ProfileSettingsTab({
     ? t.SETTINGS.PROFILE.URL_VALIDATION_ERROR
     : undefined;
 
-  const playerProfile = user?.playerProfile;
   const displayUsername = user?.username || profile.username;
-  const displayMinecraftUsername = playerProfile?.minecraftUsername || displayUsername;
-  const displaySkinUrl = playerProfile?.skinUrl || profile.skinUrl;
-  const rolesText = user?.roles?.join(", ") || "user";
+  const displayMinecraftUsername = displayUsername;
+  const displaySkinUrl = profile.skinUrl;
+  const rolesText = user?.roles?.map((role) => role.name).join(", ") || "user";
   const bannedText = user?.isBanned ? "Yes" : "No";
 
   return (
@@ -53,7 +52,6 @@ export function ProfileSettingsTab({
             {user?.isBanned && (
               <div><span className="text-theme-muted">Ban reason:</span> {user?.banReason || "-"}</div>
             )}
-            <div><span className="text-theme-muted">Minecraft UUID:</span> {playerProfile?.minecraftUuid || "-"}</div>
             <div><span className="text-theme-muted">Minecraft username:</span> {displayMinecraftUsername || "-"}</div>
           </div>
         </div>

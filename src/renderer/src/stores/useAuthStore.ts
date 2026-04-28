@@ -13,6 +13,28 @@ const logAction = (action: string, details?: string) => {
   window.electronAPI.system.logAction(action, details);
 };
 
+function toRoleItems(
+  roles: unknown,
+): Array<{ id: string; name: string }> {
+  if (!Array.isArray(roles)) {
+    return [{ id: "fallback-user", name: "user" }];
+  }
+  const mapped = roles.flatMap((item) => {
+    if (
+      typeof item === "object" &&
+      item !== null &&
+      "id" in item &&
+      "name" in item &&
+      typeof (item as { id: unknown }).id === "string" &&
+      typeof (item as { name: unknown }).name === "string"
+    ) {
+      return [{ id: (item as { id: string }).id, name: (item as { name: string }).name }];
+    }
+    return [];
+  });
+  return mapped.length > 0 ? mapped : [{ id: "fallback-user", name: "user" }];
+}
+
 interface AuthState {
   // State
   user: AuthUser | null;
@@ -69,10 +91,14 @@ export const useAuthStore = create<AuthState>()((set) => ({
             id: result.user.id,
             username: result.user.username,
             email: result.user.email ?? "",
-            roles: result.user.roles ?? ["user"],
+            roles: toRoleItems(result.user.roles),
             isBanned: result.user.isBanned ?? false,
             banReason: result.user.banReason,
-            playerProfile: result.user.playerProfile,
+            permissions: result.user.permissions,
+            emailVerified: result.user.emailVerified,
+            emailVerifiedAt: result.user.emailVerifiedAt,
+            emailVerificationResendAvailableInSeconds:
+              result.user.emailVerificationResendAvailableInSeconds,
           },
           isSessionLoading: false,
           hasCheckedSession: true,
@@ -138,10 +164,14 @@ export const useAuthStore = create<AuthState>()((set) => ({
         id: authResult.user.id,
         username: authResult.user.username,
         email: authResult.user.email ?? "",
-        roles: authResult.user.roles ?? ["user"],
+        roles: toRoleItems(authResult.user.roles),
         isBanned: authResult.user.isBanned ?? false,
         banReason: authResult.user.banReason,
-        playerProfile: authResult.user.playerProfile,
+        permissions: authResult.user.permissions,
+        emailVerified: authResult.user.emailVerified,
+        emailVerifiedAt: authResult.user.emailVerifiedAt,
+        emailVerificationResendAvailableInSeconds:
+          authResult.user.emailVerificationResendAvailableInSeconds,
       };
 
       set({
@@ -191,10 +221,14 @@ export const useAuthStore = create<AuthState>()((set) => ({
         id: authResult.user.id,
         username: authResult.user.username,
         email: authResult.user.email ?? "",
-        roles: authResult.user.roles ?? ["user"],
+        roles: toRoleItems(authResult.user.roles),
         isBanned: authResult.user.isBanned ?? false,
         banReason: authResult.user.banReason,
-        playerProfile: authResult.user.playerProfile,
+        permissions: authResult.user.permissions,
+        emailVerified: authResult.user.emailVerified,
+        emailVerifiedAt: authResult.user.emailVerifiedAt,
+        emailVerificationResendAvailableInSeconds:
+          authResult.user.emailVerificationResendAvailableInSeconds,
       };
 
       set({
@@ -241,10 +275,14 @@ export const useAuthStore = create<AuthState>()((set) => ({
         id: authResult.user.id,
         username: authResult.user.username,
         email: authResult.user.email ?? "",
-        roles: authResult.user.roles ?? ["user"],
+        roles: toRoleItems(authResult.user.roles),
         isBanned: authResult.user.isBanned ?? false,
         banReason: authResult.user.banReason,
-        playerProfile: authResult.user.playerProfile,
+        permissions: authResult.user.permissions,
+        emailVerified: authResult.user.emailVerified,
+        emailVerifiedAt: authResult.user.emailVerifiedAt,
+        emailVerificationResendAvailableInSeconds:
+          authResult.user.emailVerificationResendAvailableInSeconds,
       };
 
       set({

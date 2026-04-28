@@ -26,7 +26,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { ROUTES } from "../../../shared/constants/system";
 
-type UserRoleFilter = "user" | "moderator" | "admin";
+type UserRoleFilter = string;
 type NewsSortBy = "createdAt" | "updatedAt" | "title";
 type NewsOrder = "ASC" | "DESC";
 type UserBanFilter = "all" | "banned" | "active";
@@ -83,7 +83,10 @@ function toApiCreateNewsPayload(payload: {
   image?: string;
   tags?: string[];
 }): ApiCreateNewsDto {
-  return payload as unknown as ApiCreateNewsDto;
+  return {
+    ...payload,
+    tagIds: payload.tags,
+  } as unknown as ApiCreateNewsDto;
 }
 
 function toApiUpdateNewsPayload(payload: {
@@ -93,7 +96,10 @@ function toApiUpdateNewsPayload(payload: {
   image?: string;
   tags?: string[];
 }): ApiUpdateNewsDto {
-  return payload as unknown as ApiUpdateNewsDto;
+  return {
+    ...payload,
+    tagIds: payload.tags,
+  } as unknown as ApiUpdateNewsDto;
 }
 
 function parseChangesInput(input: string): string[] | undefined {
@@ -345,7 +351,7 @@ export function AdminScreen() {
     const timer = setTimeout(() => {
       setNewsFilters({ 
         search: newsSearch, 
-        tag: newsTag,
+        tagId: newsTag,
         fromDate: newsFromDate ? new Date(newsFromDate).toISOString() : undefined,
         toDate: newsToDate ? new Date(newsToDate).toISOString() : undefined,
         sortBy: newsSortDraft,
@@ -666,12 +672,12 @@ export function AdminScreen() {
                         </span>
                       )}
                       <div className="flex gap-1">
-                        {user.roles.map((r) => (
+                        {(user.roles ?? []).map((r) => (
                           <span
-                            key={r}
+                            key={r.id}
                             className="rounded bg-theme/10 px-1.5 py-0.5 font-minecraft text-[10px] font-bold text-theme-muted uppercase"
                           >
-                            {r}
+                            {r.name}
                           </span>
                         ))}
                       </div>
@@ -938,7 +944,12 @@ export function AdminScreen() {
             <div className="space-y-2">
               <label className="font-minecraft text-xs uppercase text-theme-muted">Контент (HTML)</label>
               <div className="min-h-[300px] rounded border border-white/10 bg-black/20 p-2">
-                <Editor value={newsContentHtml} onChange={(e) => setNewsContentHtml(e.target.value)}>
+                <Editor
+                  value={newsContentHtml}
+                  onChange={(e: { target: { value: string } }) =>
+                    setNewsContentHtml(e.target.value)
+                  }
+                >
                   <Toolbar>
                     <BtnBold />
                     <BtnItalic />
@@ -1284,10 +1295,10 @@ export function AdminScreen() {
           <div className="grid gap-2">
             {availableRoles.map((role) => (
                 <Checkbox
-                  key={role}
-                  label={role.toUpperCase()}
-                  checked={selectedRoles.includes(role)}
-                  onChange={() => toggleRole(role)}
+                  key={role.id}
+                  label={role.name.toUpperCase()}
+                  checked={selectedRoles.includes(role.id)}
+                  onChange={() => toggleRole(role.id)}
                 />
             ))}
           </div>

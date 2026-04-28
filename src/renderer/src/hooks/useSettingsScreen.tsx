@@ -67,10 +67,10 @@ export function useSettingsScreen() {
     if (!user) return;
     updateProfile({
       username: user.username,
-      skinUrl: user.playerProfile?.skinUrl,
-      capeUrl: user.playerProfile?.capeUrl,
+      skinUrl: profile.skinUrl,
+      capeUrl: profile.capeUrl,
     });
-  }, [user, updateProfile]);
+  }, [user, updateProfile, profile.skinUrl, profile.capeUrl]);
 
   useEffect(() => {
     if (activeTab !== "java") {

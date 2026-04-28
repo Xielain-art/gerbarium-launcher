@@ -6,13 +6,13 @@ export type { ApiResult, ApiUser } from "./types";
 export async function getUsersRequest(
   accessToken: string,
   search?: string,
-  role?: "user" | "moderator" | "admin",
+  role?: string,
   banned?: boolean,
 ): Promise<ApiResult<ApiUser[]>> {
   try {
     const query: {
       search?: string;
-      role?: "user" | "moderator" | "admin";
+      role?: string;
       banned?: boolean;
     } = {};
     if (search) query.search = search;
@@ -79,14 +79,15 @@ export async function unbanUserRequest(
 export async function updateUserRolesRequest(
   accessToken: string,
   userId: string,
-  roles: ("user" | "moderator" | "admin")[],
+  roleIds: string[],
 ): Promise<ApiResult<ApiUser>> {
   try {
+    const normalizedRoleIds = roleIds.map((roleId) => [roleId]);
     const { data, error, response } = await apiClient.PUT(
       "/api/admin/users/{id}/roles",
       {
         params: { path: { id: userId } },
-        body: { roles },
+        body: { roleIds: normalizedRoleIds },
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
