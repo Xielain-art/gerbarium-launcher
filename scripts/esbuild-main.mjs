@@ -1,7 +1,10 @@
 import * as esbuild from "esbuild";
+import { existsSync } from "node:fs";
 
 const isWatch = process.argv.includes("--watch");
-process.loadEnvFile?.(".env");
+if (existsSync(".env")) {
+  process.loadEnvFile?.(".env");
+}
 
 const mainConfig = {
   bundle: true,
