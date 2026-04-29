@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+﻿import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   listNewsRequest,
   type ApiNews,
@@ -58,16 +58,6 @@ function normalizeNewsTags(raw: unknown): NormalizedNewsTag[] {
   return Array.from(byId.values());
 }
 
-function stripHtml(html: string): string {
-  if (typeof document === "undefined") {
-    return html.replace(/<[^>]*>/g, " ");
-  }
-
-  const temp = document.createElement("div");
-  temp.innerHTML = html;
-  return temp.textContent || temp.innerText || "";
-}
-
 function resolveCategoryFromTags(tags: string[]): NewsItem["category"] {
   const lowerTags = tags.map((tag) => tag.toLowerCase());
   const category = VALID_CATEGORIES.find((candidate) =>
@@ -79,14 +69,12 @@ function resolveCategoryFromTags(tags: string[]): NewsItem["category"] {
 
 function mapApiNews(item: ApiNews): NewsItem {
   const tags = normalizeNewsTags(item.tags);
-  const plain = stripHtml(item.content).trim();
 
   return {
     id: item.id,
     slug: item.slug,
     title: item.title,
-    content: plain || item.content,
-    htmlContent: item.content,
+    content: item.content,
     date: item.createdAt,
     imageUrl: item.image,
     category: resolveCategoryFromTags(tags.map((tag) => tag.name)),

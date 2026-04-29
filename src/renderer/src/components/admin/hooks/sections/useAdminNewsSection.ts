@@ -11,11 +11,8 @@ type NewsOrder = "ASC" | "DESC";
 const toNewsSortBy = (v: string): NewsSortBy => (v === "updatedAt" || v === "title" ? v : "createdAt");
 const toNewsOrder = (v: string): NewsOrder => (v === "ASC" ? "ASC" : "DESC");
 
-function normalizeTagIdsForApi(tagIds: string[]): unknown[][] | undefined {
-  return tagIds.length ? tagIds.map((tagId) => [tagId]) : undefined;
-}
-const toApiCreateNewsPayload = (payload: { title: string; slug: string; content: string; image?: string; tagIds?: string[] }): ApiCreateNewsDto => ({ ...payload, tagIds: normalizeTagIdsForApi(payload.tagIds ?? []) } as unknown as ApiCreateNewsDto);
-const toApiUpdateNewsPayload = (payload: { title?: string; slug?: string; content?: string; image?: string; tagIds?: string[] }): ApiUpdateNewsDto => ({ ...payload, tagIds: normalizeTagIdsForApi(payload.tagIds ?? []) } as unknown as ApiUpdateNewsDto);
+const toApiCreateNewsPayload = (payload: { title: string; slug: string; content: string; image?: string; tagIds?: string[] }): ApiCreateNewsDto => ({ ...payload, tagIds: payload.tagIds });
+const toApiUpdateNewsPayload = (payload: { title?: string; slug?: string; content?: string; image?: string; tagIds?: string[] }): ApiUpdateNewsDto => ({ ...payload, tagIds: payload.tagIds });
 
 export function useAdminNewsSection(activeTab: string, scrollRef: React.RefObject<HTMLDivElement | null>, newsEndRef: React.RefObject<HTMLDivElement | null>) {
   const [newsTab, setNewsTab] = useState<"all" | "create" | "tags">("all");

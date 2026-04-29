@@ -46,6 +46,7 @@ export function DashboardScreen() {
             <LaunchConsole logs={vm.logs} logsEndRef={vm.logsEndRef} />
           ) : vm.contentTab === "changelog" ? (
             <ChangelogFeed
+              t={vm.t}
               changelog={vm.changelog}
               isLoading={vm.isLoadingChangelog}
               isLoadingMore={vm.isLoadingMoreChangelog}

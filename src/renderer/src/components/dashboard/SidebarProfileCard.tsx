@@ -1,5 +1,6 @@
-import { Avatar } from "../game/Avatar";
+﻿import { Avatar } from "../game/Avatar";
 import { Badge as ShadcnBadge, Card as ShadcnCard } from "@/components/shadcn/ui";
+import { Settings, LogOut } from "lucide-react";
 import type { AuthUser } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
 
@@ -37,8 +38,8 @@ export function SidebarProfileCard({ t, user, onOpenSettings, onLogout }: Props)
           </div>
         </div>
         <div className="ml-auto flex shrink-0 flex-col items-stretch gap-2">
-          <button onClick={onOpenSettings} className="mc-btn mc-btn-sm h-8 w-8 justify-center p-0" title={t.DASHBOARD.SETTINGS_BUTTON}>?</button>
-          <button onClick={onLogout} className="mc-btn mc-btn-sm h-8 w-8 justify-center p-0" title={t.DASHBOARD.LOGOUT_TOOLTIP}>?</button>
+          <button onClick={onOpenSettings} className="mc-btn mc-btn-sm h-8 w-8 justify-center p-0" title={t.DASHBOARD.SETTINGS_BUTTON}><Settings className="h-4 w-4" /></button>
+          <button onClick={onLogout} className="mc-btn mc-btn-sm h-8 w-8 justify-center p-0" title={t.DASHBOARD.LOGOUT_TOOLTIP}><LogOut className="h-4 w-4" /></button>
         </div>
       </div>
     </ShadcnCard>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { ApiChangelog, ApiCreateChangelogDto, ApiUpdateChangelogDto } from "../../../../../../lib/api/changelog";
 import { useAdminChangelogMutations, useAdminChangelogQuery } from "../../../../hooks/queries/useAdminQueries";
@@ -9,7 +9,13 @@ type ChangelogSortBy = "releaseDate" | "version" | "createdAt";
 type NewsOrder = "ASC" | "DESC";
 const toChangelogSortBy = (v: string): ChangelogSortBy => (v === "version" || v === "createdAt" ? v : "releaseDate");
 const toNewsOrder = (v: string): NewsOrder => (v === "ASC" ? "ASC" : "DESC");
-const parseChangesInput = (input: string): string[] | undefined => { const markdown = input.trim(); return markdown ? [markdown] : undefined; };
+
+const parseChangesInput = (input: string): string[] | undefined => {
+  const markdown = input.trim();
+  if (!markdown) return undefined;
+  return markdown.split("\n").map(line => line.trim()).filter(line => line.length > 0);
+};
+
 export const stringifyChangelogChanges = (changes: unknown): string => !Array.isArray(changes) ? "" : changes.flatMap((entry) => (typeof entry === "string" ? [entry] : Array.isArray(entry) ? entry.filter((value): value is string => typeof value === "string") : [])).join("\n");
 const toApiCreateChangelogPayload = (payload: { version: string; releaseDate: string; changes: string[]; downloadUrl: string; mandatory: boolean }): ApiCreateChangelogDto => payload as unknown as ApiCreateChangelogDto;
 const toApiUpdateChangelogPayload = (payload: { version?: string; releaseDate?: string; changes?: string[]; downloadUrl?: string; mandatory?: boolean }): ApiUpdateChangelogDto => payload as unknown as ApiUpdateChangelogDto;

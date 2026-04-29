@@ -45,27 +45,23 @@ export function AdminUsersTab(props: AdminUsersTabProps) {
       <div className="mb-6 flex items-center justify-between">
         <h2 className="font-minecraft text-xl font-bold">{t.ADMIN.USERS_TITLE}</h2>
         <div className="flex items-center gap-3">
-          {isApplyingUserFilters && <div className="font-minecraft text-[10px] uppercase text-theme-muted">РольРоль??...</div>}
+          {isApplyingUserFilters && <div className="font-minecraft text-[10px] uppercase text-theme-muted">Фильтрация...</div>}
           <ShadcnButton variant="default" onClick={onRefresh} disabled={isLoading}>{isLoading ? t.ADMIN.LOADING : t.ADMIN.REFRESH}</ShadcnButton>
         </div>
       </div>
 
-      <div className="mb-6 rounded-lg border border-white/10 bg-black/10 p-4">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <ShadcnInput placeholder="Логин или Email..." value={userSearchInput} onChange={(e) => setUserSearchInput(e.target.value)} />
-          <ShadcnSelect label="Роль" value={userRoleFilter} onChange={(e) => { const val = typeof e === "string" ? e : e.target.value; setUserRoleFilter(val); onSetUserFilters({ role: val === "all" ? undefined : val }); }} options={[{ label: "Все роли", value: "all" }, ...availableRoles.map((r) => ({ label: r.name, value: r.id }))]} />
-          <ShadcnSelect label="Статус" value={userBanFilter} onChange={(e) => { const val = (typeof e === "string" ? e : e.target.value) as "all" | "banned" | "active"; setUserBanFilter(val); onSetUserFilters({ banned: val === "all" ? undefined : val === "banned" }); }} options={[{ label: "Все", value: "all" }, { label: "Забаненные", value: "banned" }, { label: "Активные", value: "active" }]} />
-        </div>
+      <div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+        <ShadcnInput label="Поиск" placeholder="Логин или Email..." value={userSearchInput} onChange={(e) => setUserSearchInput(e.target.value)} />
+        <ShadcnSelect label="Роль" value={userRoleFilter} onChange={(e) => { const val = typeof e === "string" ? e : e.target.value; setUserRoleFilter(val); onSetUserFilters({ role: val === "all" ? undefined : val }); }} options={[{ label: "Все роли", value: "all" }, ...availableRoles.map((r) => ({ label: r.name, value: r.id }))]} />
+        <ShadcnSelect label="Статус" value={userBanFilter} onChange={(e) => { const val = (typeof e === "string" ? e : e.target.value) as "all" | "banned" | "active"; setUserBanFilter(val); onSetUserFilters({ banned: val === "all" ? undefined : val === "banned" }); }} options={[{ label: "Все", value: "all" }, { label: "Забаненные", value: "banned" }, { label: "Активные", value: "active" }]} />
       </div>
 
-      <div className="mb-6 rounded-lg border border-white/10 bg-black/10 p-4">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-          <ShadcnInput placeholder="role-name" value={newRoleName} onChange={(e) => setNewRoleName(e.target.value)} />
-          <ShadcnInput placeholder="Описание (опционально)" value={newRoleDescription} onChange={(e) => setNewRoleDescription(e.target.value)} />
-          <ShadcnButton variant="default" onClick={onCreateRole} disabled={isAdminApiBusy}>Создать роль</ShadcnButton>
-        </div>
-        {roleFormError && <div className="mt-2 font-minecraft text-xs text-red-500">{roleFormError}</div>}
+      <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+        <ShadcnInput label="Имя роли" placeholder="role-name" value={newRoleName} onChange={(e) => setNewRoleName(e.target.value)} />
+        <ShadcnInput label="Описание" placeholder="Описание (опционально)" value={newRoleDescription} onChange={(e) => setNewRoleDescription(e.target.value)} />
+        <ShadcnButton variant="default" onClick={onCreateRole} disabled={isAdminApiBusy} className="self-end">Создать роль</ShadcnButton>
       </div>
+      {roleFormError && <div className="mb-4 font-minecraft text-xs text-red-500">{roleFormError}</div>}
 
       {error && <div className="mb-4 font-minecraft text-sm text-red-500">{error}</div>}
 
@@ -86,7 +82,7 @@ export function AdminUsersTab(props: AdminUsersTabProps) {
 
       {users.length === 0 && !isLoading && <div className="py-8 text-center font-minecraft text-theme-muted">{t.ADMIN.NO_USERS}</div>}
       <div ref={usersEndRef} className="h-4 w-full" />
-      {isLoadingMore && <div className="py-4 text-center font-minecraft text-xs text-theme-muted">РольРоль РольРольРоль?...</div>}
+      {isLoadingMore && <div className="py-4 text-center font-minecraft text-xs text-theme-muted">Загрузка пользователей...</div>}
       {!hasMore && users.length > 0 && <div className="py-2 text-center font-minecraft text-xs text-theme-muted">Это все пользователи.</div>}
     </ShadcnCard>
   );
