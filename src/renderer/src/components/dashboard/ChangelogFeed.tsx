@@ -46,7 +46,7 @@ export function ChangelogFeed({
   }, [hasMore, isInitialLoaded, isLoadingMore, onLoadMore]);
 
   return (
-    <div className="px-6">
+    <div className="overflow-x-hidden px-6">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="font-minecraft text-lg font-bold uppercase tracking-wider text-theme">
           Changelog
@@ -69,7 +69,7 @@ export function ChangelogFeed({
         <div className="grid gap-4">
           {changelog.map((item) => (
             <Card key={item.id} className="p-4">
-              <div className="mb-2 flex items-center justify-between">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <h3 className="font-minecraft text-base font-bold text-theme">
                   v{item.version}
                 </h3>
@@ -84,12 +84,21 @@ export function ChangelogFeed({
                   </span>
                 </div>
               </div>
-              <ul className="mb-3 list-disc space-y-1 pl-5 font-minecraft text-xs text-theme-muted">
+              <ul
+                className="mb-3 min-w-0 max-w-full list-disc space-y-1 pl-5 font-minecraft text-xs text-theme-muted"
+                style={{ whiteSpace: "normal" }}
+              >
                 {item.changes.slice(0, 3).map((change, idx) => (
-                  <li key={`${item.id}-${idx}`}>{change}</li>
+                  <li
+                    key={`${item.id}-${idx}`}
+                    className="max-w-full whitespace-normal"
+                    style={{ overflowWrap: "anywhere", wordBreak: "break-word", whiteSpace: "normal" }}
+                  >
+                    {change}
+                  </li>
                 ))}
               </ul>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <button
                   type="button"
                   className="mc-btn mc-btn-sm mc-btn-primary"

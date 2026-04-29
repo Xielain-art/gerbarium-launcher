@@ -47,7 +47,7 @@ export function DashboardScreen() {
           <WindowControls />
         </div>
 
-        <div className="flex-1 overflow-y-auto pt-20 pb-4 flex flex-col">
+        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden pt-20 pb-4">
           {!vm.isLaunching && (
             <div className="mb-4 flex items-center gap-2 px-6">
               <button
@@ -117,7 +117,7 @@ export function DashboardScreen() {
 
       {vm.selectedNews && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-6 backdrop-blur-md">
-          <div className="mc-card max-h-[85vh] w-full max-w-4xl overflow-y-auto p-0">
+          <div className="mc-card max-h-[85vh] w-full max-w-4xl overflow-y-auto overflow-x-hidden p-0">
             <div className="flex items-center justify-between border-b-[3px] border-theme p-4">
               <h3 className="font-minecraft text-lg text-theme">{vm.selectedNews.title}</h3>
               <button
@@ -146,7 +146,7 @@ export function DashboardScreen() {
       )}
       {vm.selectedChangelog && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-6 backdrop-blur-md">
-          <div className="mc-card max-h-[85vh] w-full max-w-3xl overflow-y-auto p-0">
+          <div className="mc-card max-h-[85vh] w-full max-w-3xl overflow-y-auto overflow-x-hidden p-0">
             <div className="flex items-center justify-between border-b-[3px] border-theme p-4">
               <h3 className="font-minecraft text-lg text-theme">
                 Changelog v{vm.selectedChangelog.version}
@@ -170,9 +170,18 @@ export function DashboardScreen() {
                   {new Date(vm.selectedChangelog.releaseDate).toLocaleDateString("ru-RU")}
                 </span>
               </div>
-              <ul className="list-disc space-y-2 pl-5 font-minecraft text-sm leading-relaxed text-theme-muted">
+              <ul
+                className="max-w-full list-disc space-y-2 pl-5 font-minecraft text-sm leading-relaxed text-theme-muted"
+                style={{ whiteSpace: "normal" }}
+              >
                 {vm.selectedChangelog.changes.map((change, idx) => (
-                  <li key={`${vm.selectedChangelog?.id}-${idx}`}>{change}</li>
+                  <li
+                    key={`${vm.selectedChangelog?.id}-${idx}`}
+                    className="max-w-full whitespace-normal"
+                    style={{ overflowWrap: "anywhere", wordBreak: "break-word", whiteSpace: "normal" }}
+                  >
+                    {change}
+                  </li>
                 ))}
               </ul>
               <button
