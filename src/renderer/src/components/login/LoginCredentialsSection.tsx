@@ -23,7 +23,7 @@ export function LoginCredentialsSection(p: Props) {
     <>
       {p.isRegisterAccountStep && (
         <>
-          <div className="space-y-1.5"><Label htmlFor="register-email" className="text-[11px] font-semibold uppercase tracking-[0.22em] text-theme-muted">Email</Label><Input id="register-email" type="email" value={p.email} onChange={(e) => p.onEmailChange(e.target.value)} placeholder={p.t.LOGIN.EMAIL_PLACEHOLDER} disabled={p.isLoading} autoComplete="email" className="auth-input h-10 rounded-2xl border-white/12 bg-white/6" /></div>
+          <div className="space-y-1.5"><Label htmlFor="register-email" className="text-[11px] font-semibold uppercase tracking-[0.22em] text-theme-muted">Email</Label><Input id="register-email" type="text" value={p.email} onChange={(e) => p.onEmailChange(e.target.value)} placeholder={p.t.LOGIN.EMAIL_PLACEHOLDER} disabled={p.isLoading} autoComplete="email" className="auth-input h-10 rounded-2xl border-white/12 bg-white/6" /></div>
           <div className="space-y-1.5"><Label htmlFor="auth-username" className="text-[11px] font-semibold uppercase tracking-[0.22em] text-theme-muted">Username</Label><Input id="auth-username" type="text" value={p.username} onChange={(e) => p.onUsernameChange(e.target.value)} placeholder={p.t.LOGIN.REGISTER_USERNAME_PLACEHOLDER} disabled={p.isLoading} autoComplete="username" className="auth-input h-10 rounded-2xl border-white/12 bg-white/6" /></div>
         </>
       )}

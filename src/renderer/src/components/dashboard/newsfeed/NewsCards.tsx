@@ -45,8 +45,8 @@ export function NewsCards({ t, news, placeholderImage, onSelectNews }: Props) {
               {(item.tags?.length ?? 0) > 0 ? <div className="flex flex-wrap items-center gap-2">{item.tags!.map((tag) => <span key={`${item.id}-${tag}`} className="bg-[#3b3b3b] px-3 py-1 font-minecraft text-xs font-bold text-white">{tag}</span>)}</div> : <span className={`px-3 py-1 font-minecraft text-xs font-bold text-white ${getCategoryColor(item.category)}`}>{t.NEWS.CATEGORIES[item.category as keyof typeof t.NEWS.CATEGORIES] || item.category}</span>}
               <span className="font-minecraft text-xs text-theme-muted">{new Date(item.date).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}</span>
             </div>
-            <h3 className="mb-3 font-minecraft text-lg font-bold text-theme">{item.title}</h3>
-            <p className="font-minecraft text-sm leading-relaxed text-theme-muted">{preview}</p>
+            <h3 className="mb-3 break-words font-minecraft text-lg font-bold text-theme">{item.title}</h3>
+            <p className="break-words font-minecraft text-sm leading-relaxed text-theme-muted" style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}>{preview}</p>
             <div className="mt-4"><button type="button" className="mc-btn mc-btn-sm mc-btn-primary" onClick={() => onSelectNews(item)}>{t.DASHBOARD.READ_MORE}</button></div>
           </Card>
         );

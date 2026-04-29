@@ -1,4 +1,5 @@
-﻿import { Button as ShadcnButton, Dialog as ShadcnDialog, Input as ShadcnInput } from "@/components/shadcn/ui";
+import { Button as ShadcnButton, Input as ShadcnInput } from "@/components/shadcn/ui";
+import { AdminDialogShell } from "./AdminDialogShell";
 
 type RoleItem = { id: string; name: string; description?: string };
 
@@ -24,10 +25,11 @@ export function RolesDialog({ open, setOpen, username, actionError, isBusy, role
     : availableRoles;
 
   return (
-    <ShadcnDialog
+    <AdminDialogShell
       open={open}
-      onOpenChange={setOpen}
+      setOpen={setOpen}
       title={`Manage Roles: ${username}`}
+      size="md"
       footer={<><ShadcnButton variant="secondary" onClick={() => setOpen(false)} disabled={isBusy}>Cancel</ShadcnButton><ShadcnButton variant="default" onClick={onSave} disabled={isBusy}>Save Roles</ShadcnButton></>}
     >
       <div className="space-y-4">
@@ -52,6 +54,6 @@ export function RolesDialog({ open, setOpen, username, actionError, isBusy, role
         </div>
         {actionError && <div className="text-sm text-red-500">{actionError}</div>}
       </div>
-    </ShadcnDialog>
+    </AdminDialogShell>
   );
 }

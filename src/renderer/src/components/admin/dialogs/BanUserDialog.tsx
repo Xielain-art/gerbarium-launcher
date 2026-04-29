@@ -1,4 +1,5 @@
-import { Button as ShadcnButton, Dialog as ShadcnDialog, Input as ShadcnInput } from "@/components/shadcn/ui";
+import { Button as ShadcnButton, Input as ShadcnInput } from "@/components/shadcn/ui";
+import { AdminDialogShell } from "./AdminDialogShell";
 
 interface Props {
   open: boolean;
@@ -13,9 +14,9 @@ interface Props {
 
 export function BanUserDialog({ open, setOpen, username, banReason, setBanReason, actionError, isBusy, onConfirm }: Props) {
   return (
-    <ShadcnDialog
+    <AdminDialogShell
       open={open}
-      onOpenChange={setOpen}
+      setOpen={setOpen}
       title={`Ban User: ${username}`}
       footer={<><ShadcnButton variant="secondary" onClick={() => setOpen(false)} disabled={isBusy}>Cancel</ShadcnButton><ShadcnButton variant="destructive" onClick={onConfirm} disabled={isBusy}>Confirm Ban</ShadcnButton></>}
     >
@@ -24,6 +25,6 @@ export function BanUserDialog({ open, setOpen, username, banReason, setBanReason
         <ShadcnInput placeholder="Reason..." value={banReason} onChange={(e) => setBanReason(e.target.value)} />
         {actionError && <div className="text-sm text-red-500">{actionError}</div>}
       </div>
-    </ShadcnDialog>
+    </AdminDialogShell>
   );
 }

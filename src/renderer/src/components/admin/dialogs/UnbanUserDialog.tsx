@@ -1,4 +1,5 @@
-import { Button as ShadcnButton, Dialog as ShadcnDialog } from "@/components/shadcn/ui";
+import { Button as ShadcnButton } from "@/components/shadcn/ui";
+import { AdminDialogShell } from "./AdminDialogShell";
 
 interface Props {
   open: boolean;
@@ -11,9 +12,9 @@ interface Props {
 
 export function UnbanUserDialog({ open, setOpen, username, actionError, isBusy, onConfirm }: Props) {
   return (
-    <ShadcnDialog
+    <AdminDialogShell
       open={open}
-      onOpenChange={setOpen}
+      setOpen={setOpen}
       title={`Unban User: ${username}`}
       footer={<><ShadcnButton variant="secondary" onClick={() => setOpen(false)} disabled={isBusy}>Cancel</ShadcnButton><ShadcnButton variant="default" onClick={onConfirm} disabled={isBusy}>Confirm Unban</ShadcnButton></>}
     >
@@ -21,6 +22,6 @@ export function UnbanUserDialog({ open, setOpen, username, actionError, isBusy, 
         <p className="text-sm text-theme-muted">Are you sure you want to unban this user?</p>
         {actionError && <div className="text-sm text-red-500">{actionError}</div>}
       </div>
-    </ShadcnDialog>
+    </AdminDialogShell>
   );
 }

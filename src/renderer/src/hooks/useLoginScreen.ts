@@ -4,22 +4,15 @@ import { useAuthStore } from "../stores/useAuthStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
 import { useTranslation } from "./useTranslation";
 import { ROUTES } from "../../../shared/constants/system";
-
-const USERNAME_REGEX = /^[A-Za-z0-9_]+$/;
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const EMAIL_CODE_REGEX = /^\d{6}$/;
-
-function isValidUsername(value: string): boolean {
-  return value.length >= 3 && value.length <= 32 && USERNAME_REGEX.test(value);
-}
-
-function isValidPassword(value: string): boolean {
-  return value.length >= 10 && value.length <= 128;
-}
-
-function isValidEmail(value: string): boolean {
-  return value.length <= 320 && EMAIL_REGEX.test(value);
-}
+import {
+  emailCodeSchema,
+  emailSchema,
+  loginIdentifierSchema,
+  passwordSchema,
+  PASSWORD_MAX_LENGTH,
+  usernameSchema,
+  EMAIL_MAX_LENGTH,
+} from "../lib/validation/authValidation";
 
 function localizeAuthError(
   error: string | null,
@@ -152,17 +145,17 @@ export function useLoginScreen() {
 
   const onEmailChange = (value: string) => {
     setValidationError(null);
-    setLocalEmail(value);
+    setLocalEmail(value.slice(0, EMAIL_MAX_LENGTH));
   };
 
   const onPasswordChange = (value: string) => {
     setValidationError(null);
-    setLocalPassword(value);
+    setLocalPassword(value.slice(0, PASSWORD_MAX_LENGTH));
   };
 
   const onConfirmPasswordChange = (value: string) => {
     setValidationError(null);
-    setLocalPasswordConfirm(value);
+    setLocalPasswordConfirm(value.slice(0, PASSWORD_MAX_LENGTH));
   };
 
   const onVerificationCodeChange = (value: string) => {
@@ -221,7 +214,7 @@ export function useLoginScreen() {
 
     if (verificationRequired) {
       const code = verificationCode.trim();
-      if (!EMAIL_CODE_REGEX.test(code)) {
+      if (!emailCodeSchema.safeParse(code).success) {
         setValidationError(t.STORE_ERRORS.AUTH_EMAIL_CODE_INVALID);
         return;
       }
@@ -240,11 +233,11 @@ export function useLoginScreen() {
           setValidationError(t.STORE_ERRORS.AUTH_EMPTY_FIELDS);
           return;
         }
-        if (!isValidEmail(email)) {
+        if (!emailSchema.safeParse(email).success) {
           setValidationError(t.STORE_ERRORS.AUTH_EMAIL_INVALID);
           return;
         }
-        if (!isValidUsername(username)) {
+        if (!usernameSchema.safeParse(username).success) {
           setValidationError(t.STORE_ERRORS.AUTH_USERNAME_INVALID);
           return;
         }
@@ -257,7 +250,7 @@ export function useLoginScreen() {
         setValidationError(t.STORE_ERRORS.AUTH_EMPTY_FIELDS);
         return;
       }
-      if (!isValidPassword(password)) {
+      if (!passwordSchema.safeParse(password).success) {
         setValidationError(t.STORE_ERRORS.AUTH_PASSWORD_INVALID);
         return;
       }
@@ -272,7 +265,7 @@ export function useLoginScreen() {
 
     if (offlineMode) {
       const username = localUsername.trim();
-      if (!isValidUsername(username)) {
+      if (!usernameSchema.safeParse(username).success) {
         setValidationError(t.STORE_ERRORS.AUTH_USERNAME_INVALID);
         return;
       }
@@ -287,17 +280,12 @@ export function useLoginScreen() {
       return;
     }
 
-    if (identifier.includes("@")) {
-      if (!isValidEmail(identifier)) {
-        setValidationError(t.STORE_ERRORS.AUTH_LOGIN_INVALID);
-        return;
-      }
-    } else if (!isValidUsername(identifier)) {
+    if (!loginIdentifierSchema.safeParse(identifier).success) {
       setValidationError(t.STORE_ERRORS.AUTH_LOGIN_INVALID);
       return;
     }
 
-    if (!isValidPassword(password)) {
+    if (!passwordSchema.safeParse(password).success) {
       setValidationError(t.STORE_ERRORS.AUTH_PASSWORD_INVALID);
       return;
     }

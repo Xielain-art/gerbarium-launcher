@@ -95,7 +95,7 @@ export function LoginFormCard(props: LoginFormCardProps) {
       </CardHeader>
 
       <CardContent className="p-3 pt-0 sm:p-3 sm:pt-0">
-        <form onSubmit={(event) => void props.onSubmit(event)} className="space-y-2.5">
+        <form onSubmit={(event) => void props.onSubmit(event)} noValidate className="space-y-2.5">
           {props.verificationRequired ? (
             <LoginVerificationSection t={props.t} isLoading={props.isLoading} verificationCode={props.verificationCode} verificationEmail={props.verificationEmail} resendCountdown={props.resendCountdown} developmentCode={props.developmentCode} onVerificationCodeChange={props.onVerificationCodeChange} onResendCode={props.onResendCode} onUseAnotherAccount={props.onUseAnotherAccount} />
           ) : (
