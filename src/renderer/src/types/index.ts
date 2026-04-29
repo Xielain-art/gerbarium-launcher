@@ -133,6 +133,7 @@ export interface NewsItem {
   category: NewsCategory;
   author?: string;
   tags?: string[];
+  tagIds?: string[];
 }
 
 export interface NewsState {

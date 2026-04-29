@@ -13,6 +13,7 @@ import {
   usePublicNewsQuery,
   useServerStatusQuery,
 } from "./queries/useContentQueries";
+import { useAppVersionQuery, useInstalledVersionsQuery } from "./queries/useSystemQueries";
 import { UI_STRINGS } from "../../../shared/constants/ui-strings";
 
 const INITIAL_VERSIONS: GameVersion[] = [
@@ -73,12 +74,12 @@ export function useDashboardScreen() {
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuthStore();
   const { isDownloading, progress, cancelDownload } = useDownloadStore();
-  const [newsSearchQuery, setNewsSearchQuery] = useState("");
+  const [newsOrder, setNewsOrder] = useState<"newest" | "oldest">("newest");
+  const [newsTagFilter, setNewsTagFilter] = useState("all");
   const [versions, setVersions] = useState<GameVersion[]>(INITIAL_VERSIONS);
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(
     INITIAL_VERSIONS[0]?.id ?? null,
   );
-  const [appVersion, setAppVersion] = useState("");
   const [logs, setLogs] = useState<string[]>([]);
   const [isLaunching, setIsLaunching] = useState(false);
   const [launchProgress, setLaunchProgress] = useState<number | null>(null);
@@ -100,14 +101,33 @@ export function useDashboardScreen() {
     : null;
 
   const newsQuery = usePublicNewsQuery({
-    searchQuery: newsSearchQuery,
+    tagId: newsTagFilter === "all" ? undefined : newsTagFilter,
     sortBy: "createdAt",
-    order: "DESC",
+    order: newsOrder === "newest" ? "DESC" : "ASC",
   });
   const changelogQuery = usePublicChangelogQuery();
   const serverStatusQuery = useServerStatusQuery();
+  const appVersionQuery = useAppVersionQuery();
+  const installedVersionsQuery = useInstalledVersionsQuery();
 
   const news = useMemo(() => newsQuery.data?.items ?? [], [newsQuery.data]);
+  const newsTags = useMemo(() => {
+    const tags = new Map<string, string>();
+    for (const item of news) {
+      const names = item.tags ?? [];
+      const ids = item.tagIds ?? [];
+      for (let i = 0; i < names.length; i += 1) {
+        const id = ids[i]?.trim();
+        const name = names[i]?.trim();
+        if (id && name) {
+          tags.set(id, name);
+        }
+      }
+    }
+    return Array.from(tags.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name, "ru"));
+  }, [news]);
   const changelogItems = useMemo(
     () => changelogQuery.data ?? [],
     [changelogQuery.data],
@@ -125,24 +145,14 @@ export function useDashboardScreen() {
     : null;
 
   useEffect(() => {
-    if (!window.electronAPI?.game) return;
-
-    void window.electronAPI.game
-      .getInstalledVersions()
-      .then((installedVersions) => {
-        setVersions((prev) =>
-          prev.map((version) => ({
-            ...version,
-            isInstalled: installedVersions.includes(
-              version.version || version.id,
-            ),
-          })),
-        );
-      })
-      .catch(() =>
-        setLaunchError("Failed to fetch installed game versions."),
-      );
-  }, []);
+    if (!installedVersionsQuery.data) return;
+    setVersions((prev) =>
+      prev.map((version) => ({
+        ...version,
+        isInstalled: installedVersionsQuery.data.includes(version.version || version.id),
+      })),
+    );
+  }, [installedVersionsQuery.data]);
 
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -215,8 +225,6 @@ export function useDashboardScreen() {
 
   useEffect(() => {
     if (!window.electronAPI) return;
-
-    void window.electronAPI.getAppVersion().then(setAppVersion);
     const currentSettings = useSettingsStore.getState().general;
     window.electronAPI.system?.sendSettingsUpdate?.(
       toLauncherSettingsPatch(currentSettings),
@@ -320,10 +328,13 @@ export function useDashboardScreen() {
     selectedVersionId,
     setSelectedVersionId,
     selectedVersion,
-    appVersion,
+    appVersion: appVersionQuery.data ?? "",
     news,
-    newsSearchQuery,
-    setNewsSearchQuery,
+    newsOrder,
+    setNewsOrder,
+    newsTagFilter,
+    setNewsTagFilter,
+    newsTags,
     changelog,
     contentTab,
     setContentTab,
@@ -335,7 +346,9 @@ export function useDashboardScreen() {
     isLoadingMoreNews: newsQuery.isFetchingNextPage,
     hasMoreNews: Boolean(newsQuery.hasNextPage),
     isNewsInitialLoaded: newsQuery.isFetched,
-    onLoadMoreNews: newsQuery.fetchNextPage,
+    onLoadMoreNews: async () => {
+      await newsQuery.fetchNextPage();
+    },
     newsError,
     changelogError,
     onLoadMoreChangelog: async () => {

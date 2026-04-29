@@ -1,4 +1,5 @@
 import type { ApiRole, ApiUser } from "../../lib/api/admin";
+import type { ApiAdminStats } from "../../lib/api/types";
 import type {
   ApiNews,
   ApiCreateNewsDto,
@@ -53,6 +54,7 @@ export const IPC_CHANNELS = {
     UPDATE_ROLES: "admin:update-roles",
     GET_ROLES: "admin:get-roles",
     CREATE_ROLE: "admin:create-role",
+    GET_STATS: "admin:get-stats",
     GET_NEWS: "admin:get-news",
     CREATE_NEWS: "admin:create-news",
     GET_NEWS_TAGS: "admin:get-news-tags",
@@ -154,6 +156,12 @@ export interface AdminRolesResponse {
 export interface AdminRoleMutationResponse {
   success: boolean;
   data?: ApiRole;
+  error?: string;
+}
+
+export interface AdminStatsResponse {
+  success: boolean;
+  data?: ApiAdminStats;
   error?: string;
 }
 
@@ -412,6 +420,10 @@ export interface IpcChannelMap {
   [IPC_CHANNELS.ADMIN.CREATE_ROLE]: {
     args: [payload: { name: string; description?: string }];
     return: AdminRoleMutationResponse;
+  };
+  [IPC_CHANNELS.ADMIN.GET_STATS]: {
+    args: [];
+    return: AdminStatsResponse;
   };
   [IPC_CHANNELS.ADMIN.GET_NEWS]: {
     args: [

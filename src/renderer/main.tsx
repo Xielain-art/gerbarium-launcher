@@ -6,6 +6,7 @@ import { router } from "./src/router";
 import "./index.css";
 import { ThemeWrapper } from "./src/components/ThemeWrapper";
 import { queryClient } from "./src/lib/queryClient";
+import { Toaster } from "./src/components/shadcn/ui";
 
 // 1. Глобальный перехват необработанных ошибок (синхронных)
 window.addEventListener("error", (event) => {
@@ -33,6 +34,7 @@ createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <ThemeWrapper>
         <RouterProvider router={router} />
+        <Toaster position="top-right" />
       </ThemeWrapper>
     </QueryClientProvider>
   </StrictMode>,

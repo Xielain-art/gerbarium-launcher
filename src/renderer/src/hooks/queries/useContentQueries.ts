@@ -9,11 +9,7 @@ import {
   type ApiChangelog,
 } from "../../../../lib/api/changelog";
 import { UI_STRINGS } from "../../../../shared/constants/ui-strings";
-import type {
-  ChangelogItem,
-  NewsItem,
-  ServerStatusData,
-} from "../../types";
+import type { ChangelogItem, NewsItem, ServerStatusData } from "../../types";
 import { getErrorMessage } from "../../lib/queryHelpers";
 import { queryKeys } from "../../lib/queryKeys";
 
@@ -31,31 +27,35 @@ const VALID_CATEGORIES: NewsItem["category"][] = [
   "community",
   "announcement",
 ];
-const PUBLIC_NEWS_PAGE_LIMIT = 10;
+const PUBLIC_NEWS_PAGE_LIMIT = 2;
 const CHANGELOG_PAGE_LIMIT = 8;
 
-function normalizeTags(raw: unknown): string[] {
+type NormalizedNewsTag = { id: string; name: string };
+
+function normalizeNewsTags(raw: unknown): NormalizedNewsTag[] {
   if (!Array.isArray(raw)) return [];
 
   const tags = raw
-    .map((tag) => {
-      if (typeof tag === "string") return tag;
-      if (Array.isArray(tag)) return typeof tag[0] === "string" ? tag[0] : "";
-      if (
-        typeof tag === "object" &&
-        tag !== null &&
-        "name" in tag &&
-        typeof (tag as { name: unknown }).name === "string"
-      ) {
-        return (tag as { name: string }).name;
+    .map((tag): NormalizedNewsTag | null => {
+      if (typeof tag === "object" && tag !== null) {
+        const maybeId = "id" in tag ? (tag as { id?: unknown }).id : undefined;
+        const maybeName =
+          "name" in tag ? (tag as { name?: unknown }).name : undefined;
+        if (typeof maybeId === "string" && typeof maybeName === "string") {
+          const id = maybeId.trim();
+          const name = maybeName.trim();
+          if (id && name) return { id, name };
+        }
       }
-
-      return "";
+      return null;
     })
-    .filter((tag): tag is string => Boolean(tag.trim()))
-    .map((tag) => tag.trim());
+    .filter((tag): tag is NormalizedNewsTag => tag !== null);
 
-  return [...new Set(tags)];
+  const byId = new Map<string, NormalizedNewsTag>();
+  for (const tag of tags) {
+    byId.set(tag.id, tag);
+  }
+  return Array.from(byId.values());
 }
 
 function stripHtml(html: string): string {
@@ -78,7 +78,7 @@ function resolveCategoryFromTags(tags: string[]): NewsItem["category"] {
 }
 
 function mapApiNews(item: ApiNews): NewsItem {
-  const tags = normalizeTags(item.tags);
+  const tags = normalizeNewsTags(item.tags);
   const plain = stripHtml(item.content).trim();
 
   return {
@@ -89,9 +89,10 @@ function mapApiNews(item: ApiNews): NewsItem {
     htmlContent: item.content,
     date: item.createdAt,
     imageUrl: item.image,
-    category: resolveCategoryFromTags(tags),
+    category: resolveCategoryFromTags(tags.map((tag) => tag.name)),
     author: item.authorUsername,
-    tags,
+    tags: tags.map((tag) => tag.name),
+    tagIds: tags.map((tag) => tag.id),
   };
 }
 
@@ -101,7 +102,9 @@ function normalizeChanges(raw: unknown): string[] {
   return raw.flatMap((entry) => {
     if (typeof entry === "string") return [entry];
     if (Array.isArray(entry)) {
-      return entry.filter((value): value is string => typeof value === "string");
+      return entry.filter(
+        (value): value is string => typeof value === "string",
+      );
     }
 
     return [];

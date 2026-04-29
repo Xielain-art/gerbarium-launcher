@@ -5,6 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import type {
+  ApiAdminStats,
   ApiCreateRoleDto,
   ApiRole,
   ApiUser,
@@ -16,6 +17,8 @@ import type {
 } from "../../../../lib/api/changelog";
 import type {
   ApiCreateNewsDto,
+  ApiNews,
+  ApiNewsListPayload,
   ApiNewsTag,
   ApiUpdateNewsDto,
 } from "../../../../lib/api/news";
@@ -48,6 +51,62 @@ type AdminChangelogFilters = {
 const ADMIN_USERS_PAGE_SIZE = 20;
 const ADMIN_NEWS_PAGE_SIZE = 10;
 
+function normalizeUsersPayload(payload: unknown): ApiUser[] {
+  if (Array.isArray(payload)) {
+    return payload as ApiUser[];
+  }
+
+  if (
+    typeof payload === "object" &&
+    payload !== null &&
+    "data" in payload &&
+    Array.isArray((payload as { data?: unknown }).data)
+  ) {
+    return (payload as { data: ApiUser[] }).data;
+  }
+
+  return [];
+}
+
+function normalizeNewsListPayload(
+  payload: unknown,
+  page: number,
+  limit: number,
+): ApiNewsListPayload {
+  if (
+    typeof payload === "object" &&
+    payload !== null &&
+    "items" in payload &&
+    Array.isArray((payload as { items?: unknown }).items) &&
+    "meta" in payload
+  ) {
+    return payload as ApiNewsListPayload;
+  }
+
+  if (Array.isArray(payload)) {
+    const items = payload as ApiNews[];
+    return {
+      items,
+      meta: {
+        page,
+        limit,
+        total: items.length,
+        totalPages: 1,
+      },
+    };
+  }
+
+  return {
+    items: [],
+    meta: {
+      page,
+      limit,
+      total: 0,
+      totalPages: 0,
+    },
+  };
+}
+
 async function getUsers(filters: UserFilters): Promise<ApiUser[]> {
   const result = await window.electronAPI.admin.getUsers(
     filters.search,
@@ -57,12 +116,27 @@ async function getUsers(filters: UserFilters): Promise<ApiUser[]> {
     filters.banned,
   );
 
-  return ensureSuccess(result, "Failed to fetch users").data ?? [];
+  return normalizeUsersPayload(
+    ensureSuccess(result, "Failed to fetch users").data,
+  );
 }
 
 async function getRoles(): Promise<ApiRole[]> {
   const result = await window.electronAPI.admin.getRoles();
   return ensureSuccess(result, "Failed to fetch roles").data ?? [];
+}
+
+async function getStats(): Promise<ApiAdminStats> {
+  const result = await window.electronAPI.admin.getStats();
+  return (
+    ensureSuccess(result, "Failed to fetch admin stats").data ?? {
+      userCount: 0,
+      bannedUserCount: 0,
+      activeServers: 0,
+      newsCount: 0,
+      changelogCount: 0,
+    }
+  );
 }
 
 async function getNewsTags(): Promise<ApiNewsTag[]> {
@@ -98,6 +172,14 @@ export function useAdminRolesQuery() {
   });
 }
 
+export function useAdminStatsQuery() {
+  return useQuery({
+    queryKey: queryKeys.adminStats(),
+    queryFn: getStats,
+    refetchInterval: 30_000,
+  });
+}
+
 export function useAdminNewsTagsQuery() {
   return useQuery({
     queryKey: queryKeys.adminNewsTags(),
@@ -121,7 +203,11 @@ export function useAdminNewsQuery(filters: AdminNewsFilters) {
         filters.toDate,
       );
 
-      return ensureSuccess(result, "Failed to fetch news").data;
+      return normalizeNewsListPayload(
+        ensureSuccess(result, "Failed to fetch news").data,
+        pageParam,
+        ADMIN_NEWS_PAGE_SIZE,
+      );
     },
     getNextPageParam: (lastPage) => {
       if (!lastPage?.meta) {

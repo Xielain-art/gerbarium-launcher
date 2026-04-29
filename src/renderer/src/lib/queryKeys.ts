@@ -13,6 +13,7 @@ export const queryKeys = {
     banned?: boolean;
   }) => ["admin-users", filters] as const,
   adminRoles: () => ["admin-roles"] as const,
+  adminStats: () => ["admin-stats"] as const,
   adminNews: (filters: {
     search?: string;
     tagId?: string;
@@ -29,4 +30,8 @@ export const queryKeys = {
     sortBy?: "releaseDate" | "version" | "createdAt";
     order?: "ASC" | "DESC";
   }) => ["admin-changelog", filters] as const,
+  appVersion: () => ["app-version"] as const,
+  installedVersions: () => ["installed-versions"] as const,
+  systemMemory: () => ["system-memory"] as const,
+  crashReport: () => ["crash-report"] as const,
 };

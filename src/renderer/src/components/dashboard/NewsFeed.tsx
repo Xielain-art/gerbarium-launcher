@@ -1,27 +1,9 @@
-import { Card } from "../ui/Card";
-import { Input } from "../ui/Input";
+﻿import { useEffect, useRef } from "react";
 import type { NewsItem } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
-import { useEffect, useRef, useState } from "react";
-
-function getCategoryColor(category: string) {
-  const colors: Record<string, string> = {
-    update: "bg-[#3a753a]",
-    event: "bg-[#8b5a2a]",
-    community: "bg-[#5a5a8b]",
-    announcement: "bg-[#8b2a2a]",
-  };
-  return colors[category] || "bg-[#5a5a5a]";
-}
-
-function stripHtml(html: string): string {
-  if (typeof document === "undefined") {
-    return html.replace(/<[^>]*>/g, " ");
-  }
-  const temp = document.createElement("div");
-  temp.innerHTML = html;
-  return temp.textContent || temp.innerText || "";
-}
+import { NewsCards } from "./newsfeed/NewsCards";
+import { NewsFeedFilters } from "./newsfeed/NewsFeedFilters";
+import { NewsFeedState } from "./newsfeed/NewsFeedState";
 
 interface NewsFeedProps {
   t: TranslationType;
@@ -34,157 +16,42 @@ interface NewsFeedProps {
   placeholderImage: string;
   newsError?: string | null;
   onSelectNews: (news: NewsItem) => void;
-  searchQuery: string;
-  onSearchQueryChange: (value: string) => void;
+  order: "newest" | "oldest";
+  onOrderChange: (value: "newest" | "oldest") => void;
+  selectedTag: string;
+  onTagChange: (value: string) => void;
+  availableTags: Array<{ id: string; name: string }>;
 }
 
-export function NewsFeed({
-  t,
-  news,
-  isLoadingNews,
-  isLoadingMoreNews,
-  hasMoreNews,
-  isNewsInitialLoaded,
-  onLoadMoreNews,
-  placeholderImage,
-  newsError,
-  onSelectNews,
-  searchQuery,
-  onSearchQueryChange,
-}: NewsFeedProps) {
-  const [localSearch, setLocalSearch] = useState(searchQuery);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onSearchQueryChange(localSearch);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [localSearch, onSearchQueryChange]);
-
-  useEffect(() => {
-    setLocalSearch(searchQuery);
-  }, [searchQuery]);
-
-
+export function NewsFeed(props: NewsFeedProps) {
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-
   useEffect(() => {
-    if (!isNewsInitialLoaded) return;
+    if (!props.isNewsInitialLoaded) return;
     const target = loadMoreRef.current;
     if (!target) return;
     const observer = new IntersectionObserver(
       (entries) => {
         const first = entries[0];
-        if (first?.isIntersecting && hasMoreNews && !isLoadingMoreNews) {
-          void onLoadMoreNews();
+        if (first?.isIntersecting && props.hasMoreNews && !props.isLoadingMoreNews) {
+          void props.onLoadMoreNews();
         }
       },
-      { 
-        root: target.closest(".overflow-y-auto"),
-        rootMargin: "0px 0px 400px 0px" 
-      },
+      { root: target.closest(".overflow-y-auto"), rootMargin: "0px 0px 400px 0px" },
     );
     observer.observe(target);
     return () => observer.disconnect();
-  }, [hasMoreNews, isLoadingMoreNews, isNewsInitialLoaded, onLoadMoreNews]);
+  }, [props.hasMoreNews, props.isLoadingMoreNews, props.isNewsInitialLoaded, props.onLoadMoreNews]);
 
   return (
     <div className="px-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="font-minecraft text-lg font-bold uppercase tracking-wider text-theme">
-          {t.DASHBOARD.NEWS_TITLE}
-        </h2>
-        <div className="w-full max-w-sm">
-          <Input
-            value={localSearch}
-            onChange={(e) => setLocalSearch(e.target.value)}
-            placeholder="Поиск новостей..."
-          />
-        </div>
-      </div>
-
-      {isLoadingNews ? (
-        <div className="flex min-h-[50vh] items-center justify-center">
-          <div className="flex flex-col items-center gap-3">
-            <div className="mc-spinner border-2 border-[var(--mc-accent)] border-t-transparent rounded-full h-10 w-10" />
-            <span className="font-minecraft text-xs text-theme-muted">Загрузка</span>
-          </div>
-        </div>
-      ) : newsError ? (
-        <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 text-center">
-          <div className="text-red-500 font-minecraft text-lg">⚠️ Ошибка загрузки</div>
-          <div className="text-theme-muted font-minecraft text-sm max-w-md">{newsError}</div>
-          <button
-            onClick={() => window.location.reload()}
-            className="mc-btn mc-btn-primary mt-2"
-          >
-            Попробовать снова
-          </button>
-        </div>
-      ) : (
-      <div className="grid gap-5">
-        {news.map((item) => (
-              <Card
-                key={item.id}
-                className="overflow-hidden p-0"
-              >
-                <div className="mb-4 h-48 w-full overflow-hidden rounded-none border-b-[3px] border-theme">
-                  <img
-                    src={item.imageUrl || placeholderImage}
-                    alt={item.title}
-                    className="h-full w-full object-cover transition-transform hover:scale-105"
-                    style={{ imageRendering: "pixelated" }}
-                  />
-                </div>
-                <div className="mb-3 flex items-center gap-3">
-                  <span
-                    className={`px-3 py-1 font-minecraft text-xs font-bold text-white ${getCategoryColor(item.category)}`}
-                  >
-                    {t.NEWS.CATEGORIES[item.category as keyof typeof t.NEWS.CATEGORIES] || item.category}
-                  </span>
-                  <span className="font-minecraft text-xs text-theme-muted">
-                    {new Date(item.date).toLocaleDateString("ru-RU", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </span>
-                </div>
-                <h3 className="mb-3 font-minecraft text-lg font-bold text-theme">
-                  {item.title}
-                </h3>
-                <p className="font-minecraft text-sm leading-relaxed text-theme-muted">
-                  {(item.htmlContent ? stripHtml(item.htmlContent) : item.content).slice(0, 260)}
-                  {(item.htmlContent ? stripHtml(item.htmlContent) : item.content).length > 260 ? "..." : ""}
-                </p>
-                <div className="mt-4">
-                  <button
-                    type="button"
-                    className="mc-btn mc-btn-sm mc-btn-primary"
-                    onClick={() => onSelectNews(item)}
-                  >
-                    Читать полностью
-                  </button>
-                </div>
-              </Card>
-            ))}
-      </div>
-      )}
-
+      <NewsFeedFilters t={props.t} order={props.order} onOrderChange={props.onOrderChange} selectedTag={props.selectedTag} onTagChange={props.onTagChange} availableTags={props.availableTags} />
+      <NewsFeedState isLoadingNews={props.isLoadingNews} newsError={props.newsError} loadingText={props.t.COMMON.LOADING} failedText={props.t.DASHBOARD.FAILED_TO_LOAD_NEWS} tryAgainText={props.t.DASHBOARD.TRY_AGAIN}>
+        <NewsCards t={props.t} news={props.news} placeholderImage={props.placeholderImage} onSelectNews={props.onSelectNews} />
+      </NewsFeedState>
       <div ref={loadMoreRef} className="h-6 w-full" />
-      {isLoadingMoreNews && (
-        <div className="py-3 text-center font-minecraft text-xs text-theme-muted">
-          Загрузка еще новостей...
-        </div>
-      )}
-      {!hasMoreNews && news.length > 0 && (
-        <div className="py-3 text-center font-minecraft text-xs text-theme-muted">
-          Это все новости.
-        </div>
-      )}
-
-
+      {props.isLoadingMoreNews && <div className="py-3 text-center font-minecraft text-xs text-theme-muted">{props.t.DASHBOARD.LOADING_MORE_NEWS}</div>}
+      {!props.hasMoreNews && props.news.length > 0 && <div className="py-3 text-center font-minecraft text-xs text-theme-muted">{props.t.DASHBOARD.NO_MORE_NEWS}</div>}
     </div>
   );
 }

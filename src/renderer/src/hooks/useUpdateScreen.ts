@@ -4,17 +4,14 @@ import { UI_STRINGS } from "../../../shared/constants/ui-strings";
 import { ROUTES } from "../../../shared/constants/system";
 import type { UpdateInfoPayload } from "../../../shared/constants/ipc-chanels";
 import { useStartupGateStore } from "../stores/useStartupGateStore";
+import { useAppVersionQuery } from "./queries/useSystemQueries";
 
 export function useUpdateScreen() {
   const navigate = useNavigate();
   const isDevMode = import.meta.env.DEV;
-  const setUpdateGatePassed = useStartupGateStore(
-    (state) => state.setUpdateGatePassed,
-  );
-  const [appVersion, setAppVersion] = useState<string>("");
-  const [updateMessage, setUpdateMessage] = useState<string>(
-    UI_STRINGS.UPDATE_SCREEN.SEARCHING,
-  );
+  const setUpdateGatePassed = useStartupGateStore((state) => state.setUpdateGatePassed);
+  const appVersionQuery = useAppVersionQuery();
+  const [updateMessage, setUpdateMessage] = useState<string>(UI_STRINGS.UPDATE_SCREEN.SEARCHING);
   const [updateProgress, setUpdateProgress] = useState<number>(0);
   const [updateInfo, setUpdateInfo] = useState<UpdateInfoPayload | null>(null);
   const [downloadStarted, setDownloadStarted] = useState(false);
@@ -33,7 +30,6 @@ export function useUpdateScreen() {
       return;
     }
 
-    void window.electronAPI.getAppVersion().then(setAppVersion);
     window.electronAPI.initUpdate();
 
     const unsubMessage = window.electronAPI.onUpdateMessage((message) => {
@@ -46,8 +42,7 @@ export function useUpdateScreen() {
     });
 
     const unsubInfo = window.electronAPI.onUpdateInfo((info) => {
-      const payload =
-        typeof info === "object" && info !== null ? (info as UpdateInfoPayload) : null;
+      const payload = typeof info === "object" && info !== null ? (info as UpdateInfoPayload) : null;
       setUpdateInfo(payload);
     });
 
@@ -72,7 +67,7 @@ export function useUpdateScreen() {
   }, [updateInfo, downloadStarted]);
 
   return {
-    appVersion,
+    appVersion: appVersionQuery.data ?? "",
     updateMessage,
     updateProgress,
   };

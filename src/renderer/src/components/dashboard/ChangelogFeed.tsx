@@ -1,6 +1,7 @@
 import { Card } from "../ui/Card";
 import type { ChangelogItem } from "../../types";
 import { useEffect, useRef } from "react";
+import { renderMarkdownToSafeHtml } from "../../lib/markdown";
 
 interface ChangelogFeedProps {
   changelog: ChangelogItem[];
@@ -23,6 +24,7 @@ export function ChangelogFeed({
   onSelectChangelog,
   error,
 }: ChangelogFeedProps) {
+  const getMarkdown = (item: ChangelogItem): string => item.changes.join("\n").trim();
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -84,20 +86,13 @@ export function ChangelogFeed({
                   </span>
                 </div>
               </div>
-              <ul
-                className="mb-3 min-w-0 max-w-full list-disc space-y-1 pl-5 font-minecraft text-xs text-theme-muted"
-                style={{ whiteSpace: "normal" }}
-              >
-                {item.changes.slice(0, 3).map((change, idx) => (
-                  <li
-                    key={`${item.id}-${idx}`}
-                    className="max-w-full whitespace-normal"
-                    style={{ overflowWrap: "anywhere", wordBreak: "break-word", whiteSpace: "normal" }}
-                  >
-                    {change}
-                  </li>
-                ))}
-              </ul>
+              <div
+                className="mb-3 min-w-0 max-w-full font-minecraft text-xs leading-relaxed text-theme-muted [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-[var(--mc-accent)] [&_a]:underline"
+                style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
+                dangerouslySetInnerHTML={{
+                  __html: renderMarkdownToSafeHtml(getMarkdown(item)),
+                }}
+              />
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <button
                   type="button"

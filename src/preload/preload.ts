@@ -162,6 +162,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getRoles: () => typedInvoke(IPC_CHANNELS.ADMIN.GET_ROLES),
     createRole: (payload: { name: string; description?: string }) =>
       typedInvoke(IPC_CHANNELS.ADMIN.CREATE_ROLE, payload),
+    getStats: () => typedInvoke(IPC_CHANNELS.ADMIN.GET_STATS),
     getNews: (
       search?: string,
       page?: number,

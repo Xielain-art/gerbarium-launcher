@@ -11,6 +11,7 @@ import {
   updateUserRolesRequest,
   getRolesRequest,
   createRoleRequest,
+  getAdminStatsRequest,
 } from "../../lib/api/admin";
 import {
   listNewsRequest,
@@ -306,6 +307,27 @@ export default function adminHandler(app: App) {
       }
     },
   );
+
+  ipcMain.handle(IPC_CHANNELS.ADMIN.GET_STATS, async () => {
+    try {
+      const token = await getValidAccessToken(app);
+      if (!token) {
+        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+      }
+      const result = await getAdminStatsRequest(token);
+      if (!result.success) {
+        logApiFailure(LOG_MESSAGES.ADMIN_GET_USERS_FAILED, result);
+        return {
+          success: false,
+          error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
+        };
+      }
+      return { success: true, data: result.data };
+    } catch (error) {
+      log.error(LOG_MESSAGES.ADMIN_GET_USERS_FAILED, error);
+      return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+    }
+  });
 
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.GET_NEWS,

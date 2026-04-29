@@ -220,7 +220,16 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
 
   logout: async () => {
     logAction(LOG_ACTIONS.LOGOUT, "User logged out");
-    set(defaultState);
+    set({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      emailVerification: null,
+      isLoading: false,
+      isSessionLoading: false,
+      hasCheckedSession: true,
+      error: null,
+    });
     try {
       await window.electronAPI.auth.logout();
     } catch (err) {

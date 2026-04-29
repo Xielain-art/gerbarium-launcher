@@ -8,3 +8,4 @@ export { Select } from "./select";
 export { Checkbox } from "./checkbox";
 export { Dialog } from "./dialog";
 export { TabsList } from "./tabs";
+export { Toaster } from "./sonner";
