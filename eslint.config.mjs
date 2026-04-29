@@ -2,12 +2,23 @@ import js from "@eslint/js";
 import { defineConfig } from "eslint/config";
 import stylistic from "@stylistic/eslint-plugin";
 import globals from "globals";
+import tseslint from "typescript-eslint";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
 
 export default defineConfig(
   {
-    ignores: ["**/dist/**", "node_modules", "eslint.config.mjs"],
+    ignores: [
+      "**/dist/**",
+      "**/dist-electron/**",
+      "**/build/**",
+      "**/release/**",
+      "**/_legacy_app/**",
+      "index.js",
+      "node_modules",
+      "eslint.config.mjs",
+    ],
   },
-  globalIgnores(["dist"]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
@@ -19,6 +30,18 @@ export default defineConfig(
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+    rules: {
+      "no-undef": "off",
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
     },
   },
   js.configs.recommended,
@@ -70,6 +93,20 @@ export default defineConfig(
     rules: {
       "no-unused-vars": "off",
       "no-undef": "off",
+    },
+  },
+  {
+    files: ["**/*.{ts,tsx}"],
+    rules: {
+      "no-undef": "off",
+      "no-unused-vars": "off",
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
+  {
+    files: ["src/renderer/src/components/shadcn/ui/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": "off",
     },
   },
 );

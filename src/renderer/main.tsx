@@ -1,8 +1,14 @@
-import { StrictMode } from "react";
+﻿import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
 import { router } from "./src/router";
 import "./index.css";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
+import { ThemeWrapper } from "./src/components/ThemeWrapper";
+import { queryClient } from "./src/lib/queryClient";
+import { Toaster } from "./src/components/shadcn/ui";
 
 // 1. Глобальный перехват необработанных ошибок (синхронных)
 window.addEventListener("error", (event) => {
@@ -21,14 +27,17 @@ window.addEventListener("unhandledrejection", (event) => {
 });
 
 // Отмечаем запуск фронтенда
-window.electronAPI?.system.logAction("APP_START", "React Renderer Initialized").catch(() => {});
-
-import { ThemeWrapper } from "./src/components/ThemeWrapper";
+window.electronAPI?.system
+  .logAction("APP_START", "React Renderer Initialized")
+  .catch(() => {});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeWrapper>
-      <RouterProvider router={router} />
-    </ThemeWrapper>
+    <QueryClientProvider client={queryClient}>
+      <ThemeWrapper>
+        <RouterProvider router={router} />
+        <Toaster position="top-right" />
+      </ThemeWrapper>
+    </QueryClientProvider>
   </StrictMode>,
 );

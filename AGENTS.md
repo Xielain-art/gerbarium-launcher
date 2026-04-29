@@ -9,7 +9,9 @@ Strict adherence to architectural boundaries, type safety, and project-specific 
 - `src/main/` — Electron Main Process code. Handles OS-level operations, file system, and heavy tasks.
   - `src/main/handlers/` — Main IPC handlers (compiles to `dist/main/handlers/`).
 - `src/preload/` — Preload scripts. Secure bridge between Main and Renderer via `contextBridge`.
-- `src/renderer/` — Frontend application (React, Vite, Zustand). STRICTLY NO direct Node.js access!
+- `src/renderer/` — Frontend application (React, Vite, Zustand, TanStack Query). STRICTLY NO direct Node.js access!
+- `src/lib/api/` — Core API layer. Contains all API interaction logic, service functions, and fetchers.
+  - `v1.d.ts` — **The Full API Structure.** This is the primary source of truth for all API-related types and schemas.
 - `src/shared/` — Shared files, types, and constants (IPC channels, error codes).
 - `dist/` — Build artifacts. **Do not edit directly.**
 - `_legacy_app/` — DEPRECATED. Use only as a reference; do not modify or extract patterns from here.
@@ -37,13 +39,23 @@ Strict adherence to architectural boundaries, type safety, and project-specific 
 - **User Prompts:** Never save files to user directories (like Desktop) silently. Always use `dialog.showSaveDialog` or `dialog.showOpenDialog`.
 
 ### 3. Frontend Process (React Renderer)
-- **State Management:** Use `Zustand` (located in `src/renderer/src/stores/`). Do not use Redux or default to React Context API for global state.
-- **Component Architecture:** Use React functional components and hooks. Maintain separation between UI (`src/renderer/src/components/ui/`) and business logic (`src/renderer/src/components/game/`, `src/renderer/src/pages/`).
+- **State Management (Client vs. Server):** - **Client State:** Use `Zustand` (located in `src/renderer/src/stores/`) strictly for local UI state (e.g., toggles, modals, current view). Do not use Redux or default to React Context API for global state.
+  - **Server State:** For fetching external data, caching, and background synchronization, ALWAYS use `TanStack Query` when it is safe to do so. Never store API responses inside Zustand.
+- **TanStack Query Architecture (Best Practices):**
+  - **Query Options Factory:** Utilize `queryOptions` from TanStack v5 to centralize query keys (`queryKey`) and fetching logic (`queryFn`). This ensures type safety and reusable prefetch logic.
+  - **Query Key Factories:** Query keys must be generated via factory objects, never hardcoded as strings directly in components.
+  - **Isolation of API:** Data fetching functions must be strictly isolated within the `src/lib/api/` layer and remain independent of React Query hooks.
+  - **Mutations:** Always handle cache updates gracefully. Use `useMutation` and mandate the invalidation of related query keys inside `onSuccess` using `queryClient.invalidateQueries`.
+- **Component Architecture ("Thin" Components):** - **Keep Components less than 150 lines of code:** React components must be strictly focused on rendering UI. Components should not be "fat" with logic. 
+  - **Extract Logic:** All business logic, complex state management, data transformation, and side effects MUST be extracted into custom hooks.
+  - **Separation of Concerns:** Maintain a strict separation between dumb UI components (`src/renderer/src/components/ui/`) and business logic wrappers/pages (`src/renderer/src/components/game/`, `src/renderer/src/pages/`).
 - **Node Integration:** `nodeIntegration` is disabled, and `contextIsolation` is enabled. Never attempt to import `fs`, `path`, or `child_process` directly inside React components.
 
 ### 4. TypeScript Typing
-- Strict mode is enabled. The use of `any` is strictly prohibited (use `unknown` or define proper interfaces).
-- Data payloads passed between Main and Renderer must be explicitly typed in the `src/shared/` directory.
+- **Strict Typing:** Strict mode is enabled. The use of `any` is strictly prohibited (use `unknown` or define proper interfaces).
+- **API Types:** All API-related types and data structures must be derived from or defined in `src/lib/api/v1.d.ts`.
+- **Shared Payloads:** Data payloads passed between Main and Renderer must be explicitly typed in the `src/shared/` directory.
 
 ## 📦 Dependencies Notes
-- **Archiving:** For log exporting or zipping, rely on `archiver` + `@types/archiver` (ensure it is installed via `npm install` in `package.json` if missing). Do not use synchronous zipper libraries.
+- **Archiving:** For log exporting or zipping, rely on `archiver` + `@types/archiver`. Do not use synchronous zipper libraries.
+- **Server State:** For server state management, always use `@tanstack/react-query`. Strictly follow the `queryOptions` factory pattern and ensure all fetchers are located in `src/lib/api/`.

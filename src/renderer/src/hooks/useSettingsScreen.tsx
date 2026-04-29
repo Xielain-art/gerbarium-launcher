@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useSettingsStore } from "../stores/useSettingsStore";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useJava } from "./useJava";
+import { useSystemMemoryQuery } from "./queries/useSystemQueries";
 import { useDownloadStore } from "../stores/useDownloadStore";
 import { useTranslation } from "./useTranslation";
 import { ROUTES } from "../../../shared/constants/system";
@@ -56,6 +57,8 @@ export function useSettingsScreen() {
   const [downloadJavaVersion, setDownloadJavaVersion] = useState<8 | 17 | 21>(17);
   const [installedJava, setInstalledJava] = useState<JavaInstallation[]>([]);
   const [javaVersions, setJavaVersions] = useState<number[]>([]);
+  const [maxRamGb, setMaxRamGb] = useState(16);
+  const memoryQuery = useSystemMemoryQuery(activeTab === "java");
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -85,6 +88,21 @@ export function useSettingsScreen() {
         : Promise.resolve().then(() => setJavaVersion(null)),
     ]);
   }, [activeTab, general.javaPath, checkJava, getInstalledJava, getJavaVersions]);
+
+  useEffect(() => {
+    if (activeTab !== "java") return;
+    if (!memoryQuery.data) {
+      if (memoryQuery.isError) setMaxRamGb(16);
+      return;
+    }
+
+    const totalGb = Math.floor(memoryQuery.data.total / 1024);
+    const max = Math.max(2, totalGb - 1);
+    setMaxRamGb(max);
+    if (general.ramAllocation > max) {
+      updateGeneral({ ramAllocation: max });
+    }
+  }, [activeTab, memoryQuery.data, memoryQuery.isError, general.ramAllocation, updateGeneral]);
 
   const onSave = async () => {
     await saveSettings();
@@ -186,6 +204,7 @@ export function useSettingsScreen() {
         <JavaSettingsTab
           t={t}
           general={general}
+          maxRamGb={maxRamGb}
           javaLoading={javaLoading}
           javaError={javaError}
           javaVersion={javaVersion}

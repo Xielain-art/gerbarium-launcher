@@ -1,7 +1,19 @@
 import { apiClient } from "./client";
 import { buildApiResult, buildNetworkErrorResult } from "./result";
-import type { ApiCreateRoleDto, ApiResult, ApiRole, ApiUser } from "./types";
-export type { ApiCreateRoleDto, ApiResult, ApiRole, ApiUser } from "./types";
+import type {
+  ApiAdminStats,
+  ApiCreateRoleDto,
+  ApiResult,
+  ApiRole,
+  ApiUser,
+} from "./types";
+export type {
+  ApiAdminStats,
+  ApiCreateRoleDto,
+  ApiResult,
+  ApiRole,
+  ApiUser,
+} from "./types";
 
 export async function getUsersRequest(
   accessToken: string,
@@ -128,5 +140,20 @@ export async function createRoleRequest(
     return buildApiResult<ApiRole>({ response, data, error });
   } catch (error) {
     return buildNetworkErrorResult<ApiRole>(error);
+  }
+}
+
+export async function getAdminStatsRequest(
+  accessToken: string,
+): Promise<ApiResult<ApiAdminStats>> {
+  try {
+    const { data, error, response } = await apiClient.GET("/api/admin/stats", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return buildApiResult<ApiAdminStats>({ response, data, error });
+  } catch (error) {
+    return buildNetworkErrorResult<ApiAdminStats>(error);
   }
 }

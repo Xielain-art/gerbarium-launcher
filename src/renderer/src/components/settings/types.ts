@@ -30,6 +30,7 @@ export interface GeneralSettingsTabProps extends SettingsBaseProps {
 
 export interface JavaSettingsTabProps extends SettingsBaseProps {
   general: SettingsGeneral;
+  maxRamGb: number;
   javaLoading: boolean;
   javaError: string | null;
   javaVersion: string | null;

@@ -1,7 +1,7 @@
 import os from "node:os";
 import path from "node:path";
 import fs from "node:fs/promises";
-import { ipcMain, shell, dialog, app, type App } from "electron";
+import { ipcMain, shell, dialog, type App } from "electron";
 import log from "electron-log";
 import { IPC_CHANNELS } from "../../shared/constants/ipc-chanels";
 import { LOG_MESSAGES } from "../../shared/constants/log-messages";

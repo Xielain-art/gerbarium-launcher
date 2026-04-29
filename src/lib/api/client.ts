@@ -7,6 +7,15 @@ function normalizeBaseUrl(value: string): string {
   return value.trim().replace(/\/+$/, "");
 }
 
+function isSafeBaseUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
 function getProcessEnvBaseUrl(): string | undefined {
   if (typeof process === "undefined" || !process.env) {
     return undefined;
@@ -30,12 +39,18 @@ function getViteEnvBaseUrl(): string | undefined {
 function resolveApiBaseUrl(): string {
   const fromProcess = getProcessEnvBaseUrl();
   if (fromProcess && fromProcess.trim()) {
-    return normalizeBaseUrl(fromProcess);
+    const normalized = normalizeBaseUrl(fromProcess);
+    if (isSafeBaseUrl(normalized)) {
+      return normalized;
+    }
   }
 
   const fromVite = getViteEnvBaseUrl();
   if (fromVite && fromVite.trim()) {
-    return normalizeBaseUrl(fromVite);
+    const normalized = normalizeBaseUrl(fromVite);
+    if (isSafeBaseUrl(normalized)) {
+      return normalized;
+    }
   }
 
   return DEFAULT_API_BASE_URL;

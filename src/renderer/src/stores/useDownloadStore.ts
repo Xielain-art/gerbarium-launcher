@@ -29,7 +29,7 @@ export const useDownloadStore = create<DownloadState>((set, get) => ({
   javaProgress: 0,
   setJavaProgress: (progress) => set({ javaProgress: progress }),
   
-  startDownload: async (versionId: string) => {
+  startDownload: async (_versionId: string) => {
     set({ 
       isDownloading: true, 
       progress: { ...defaultProgress, status: 'checking' } 

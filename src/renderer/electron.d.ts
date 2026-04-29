@@ -23,6 +23,7 @@ import {
   LauncherSettings,
 } from "../shared/constants/ipc-chanels";
 import type { ApiCreateNewsDto, ApiUpdateNewsDto } from "../lib/api/news";
+import type { ApiAdminStats } from "../lib/api/types";
 import type {
   ApiCreateChangelogDto,
   ApiUpdateChangelogDto,
@@ -140,6 +141,7 @@ export interface IElectronAPI {
     ) => Promise<AdminUserMutationResponse>;
     getRoles: () => Promise<AdminRolesResponse>;
     createRole: (payload: { name: string; description?: string }) => Promise<AdminRoleMutationResponse>;
+    getStats: () => Promise<{ success: boolean; data?: ApiAdminStats; error?: string }>;
     getNews: (
       search?: string,
       page?: number,

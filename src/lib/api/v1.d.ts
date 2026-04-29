@@ -1012,7 +1012,7 @@ export interface components {
              *       "f5d490c7-0db8-49f9-9628-00313ed0e694"
              *     ]
              */
-            tagIds?: unknown[][];
+            tagIds?: string[];
         };
         UpdateNewsDto: {
             /** @example Season Two Starts Friday */
@@ -1030,7 +1030,7 @@ export interface components {
              *       "f5d490c7-0db8-49f9-9628-00313ed0e694"
              *     ]
              */
-            tagIds?: unknown[][];
+            tagIds?: string[];
         };
         ChangelogResponseDto: {
             /** @example 4d0ea760-e421-49f4-904c-dd44a4ad23dc */

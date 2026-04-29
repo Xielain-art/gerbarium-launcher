@@ -41,7 +41,7 @@ export async function checkJavaVersion(javaPath: string): Promise<string | null>
     const output = stdout + stderr;
     const match = output.match(REGEX.JAVA_VERSION);
     return match ? match[1] : null;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }
@@ -63,7 +63,7 @@ export async function findJavaInSystem(): Promise<string | null> {
     const { stdout } = await execPromise(cmd);
     const paths = stdout.split(/\r?\n/).filter((p) => p.trim() !== "");
     return paths.length > 0 ? paths[0] : null;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 }

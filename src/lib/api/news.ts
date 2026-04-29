@@ -32,13 +32,7 @@ export interface ApiNewsListPayload {
 
 function normalizeTagIdsForApi(tags: unknown): string[] | undefined {
   if (!Array.isArray(tags)) return undefined;
-  const normalized = tags.flatMap((tag) => {
-    if (typeof tag === "string") return [tag];
-    if (Array.isArray(tag)) {
-      return tag.filter((value): value is string => typeof value === "string");
-    }
-    return [];
-  });
+  const normalized = tags.filter((tag): tag is string => typeof tag === "string");
   return normalized.length > 0 ? normalized : undefined;
 }
 

@@ -19,6 +19,7 @@ export type ApiEmailVerifiedResponse =
   components["schemas"]["EmailVerifiedResponseDto"];
 export type ApiRole = components["schemas"]["RoleResponseDto"];
 export type ApiCreateRoleDto = components["schemas"]["CreateRoleDto"];
+export type ApiAdminStats = components["schemas"]["AdminStatsDto"];
 
 export type ApiWrappedData<T> = T | { data: T };
 
