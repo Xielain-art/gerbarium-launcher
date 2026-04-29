@@ -79,6 +79,14 @@ export const LOG_MESSAGES = {
   APP_CRASH_REPORT_WRITE_FAILED: '[APP] Failed to write crash report:',
   APP_CRASH_REPORT_READ_FAILED: '[APP] Failed to read crash report:',
   APP_CRASH_REPORT_CLEAR_FAILED: '[APP] Failed to clear crash report:',
+  DISCORD_RPC_CLIENT_ID_MISSING: '[DISCORD_RPC] DISCORD_RPC_CLIENT_ID is not set',
+  DISCORD_RPC_INIT_FAILED: '[DISCORD_RPC] Failed to initialize client',
+  DISCORD_RPC_READY: '[DISCORD_RPC] Connected',
+  DISCORD_RPC_LOGIN_FAILED: '[DISCORD_RPC] Login failed',
+  DISCORD_RPC_NO_CLIENT: '[DISCORD_RPC] Discord client is not running',
+  DISCORD_RPC_SET_ACTIVITY_FAILED: '[DISCORD_RPC] Failed to set activity',
+  DISCORD_RPC_STOPPED: '[DISCORD_RPC] Disconnected',
+  DISCORD_RPC_STOP_FAILED: '[DISCORD_RPC] Failed to disconnect cleanly',
 
   // Log Export
   LOG_EXPORT_STARTED: '[LOG] Export started',

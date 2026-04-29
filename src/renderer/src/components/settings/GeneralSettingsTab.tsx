@@ -1,5 +1,7 @@
 import { Checkbox, Select } from "../ui";
 import type { GeneralSettingsTabProps } from "./types";
+import { THEME_REGISTRY } from "../../lib/themes/themeRegistry";
+import type { ThemeId } from "../../lib/themes/themeRegistry";
 
 export function GeneralSettingsTab({
   t,
@@ -25,14 +27,11 @@ export function GeneralSettingsTab({
       <Select
         label={t.SETTINGS.GENERAL.THEME_LABEL}
         value={general.theme}
-        onChange={(e) =>
-          onUpdateGeneral({ theme: e.target.value as "dark" | "light" | "gerbarium" })
-        }
-        options={[
-          { value: "gerbarium", label: t.SETTINGS.GENERAL.THEMES.gerbarium },
-          { value: "dark", label: t.SETTINGS.GENERAL.THEMES.dark },
-          { value: "light", label: t.SETTINGS.GENERAL.THEMES.light },
-        ]}
+        onChange={(e) => onUpdateGeneral({ theme: e.target.value as ThemeId })}
+        options={THEME_REGISTRY.map((theme) => ({
+          value: theme.id,
+          label: t.SETTINGS.GENERAL.THEMES[theme.translationKey as keyof typeof t.SETTINGS.GENERAL.THEMES] ?? theme.fallbackLabel,
+        }))}
       />
 
       <div className="space-y-3">

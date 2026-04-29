@@ -1,8 +1,9 @@
-import { marked } from "marked";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { DashboardContentDialog } from "./DashboardContentDialog";
+import { renderMarkdownToSafeHtml } from "../../lib/markdown";
 import type { NewsItem } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
+import { Button } from "../shadcn/ui";
 
 interface Props {
   t: TranslationType;
@@ -12,30 +13,10 @@ interface Props {
 }
 
 export function NewsPreviewModal({ t, news, placeholderImage, onClose }: Props) {
-  const [renderedMarkdown, setRenderedMarkdown] = useState("");
-
-  useEffect(() => {
-    marked.setOptions({
-      breaks: true,
-      gfm: true,
-    });
-  }, []);
-
-  useEffect(() => {
-    const renderContent = async () => {
-      if (news?.content) {
-        try {
-          const html = await marked.parse(news.content);
-          setRenderedMarkdown(html);
-        } catch {
-          setRenderedMarkdown(news.content);
-        }
-      } else {
-        setRenderedMarkdown("");
-      }
-    };
-    void renderContent();
-  }, [news]);
+  const renderedMarkdown = useMemo(
+    () => (news?.content ? renderMarkdownToSafeHtml(news.content) : ""),
+    [news],
+  );
 
   if (!news) return null;
 
@@ -47,14 +28,14 @@ export function NewsPreviewModal({ t, news, placeholderImage, onClose }: Props) 
       maxWidthClassName="max-w-4xl"
       onClose={onClose}
       footer={
-        <button type="button" className="mc-btn mc-btn-sm" onClick={onClose}>
+        <Button type="button" variant="secondary" size="sm" onClick={onClose}>
           {t.DASHBOARD.CLOSE}
-        </button>
+        </Button>
       }
     >
       <div className="p-5 pt-4">
         <img src={news.imageUrl || placeholderImage} alt={news.title} className="mb-4 max-h-72 w-full rounded object-cover" />
-        <div className="prose prose-invert max-w-none break-words font-minecraft text-sm leading-relaxed text-theme-muted [&_a]:text-[var(--mc-accent)] [&_a]:underline [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-theme [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-theme [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-theme [&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4 [&_code]:bg-black/30 [&_code]:px-1 [&_code]:rounded [&_code]:text-theme [&_pre]:bg-black/30 [&_pre]:p-2 [&_pre]:rounded [&_pre]:overflow-x-auto [&_blockquote]:border-l-4 [&_blockquote]:border-theme/50 [&_blockquote]:pl-4 [&_blockquote]:italic [&_p]:mb-2" style={{ overflowWrap: "anywhere", wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html: renderedMarkdown }} />
+        <div className="max-w-none break-words text-sm leading-relaxed text-[var(--muted-foreground)] [&_a]:text-[var(--primary)] [&_a]:underline [&_h1]:mb-3 [&_h1]:text-xl [&_h1]:font-bold [&_h1]:text-[var(--foreground)] [&_h2]:mb-2 [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-[var(--foreground)] [&_h3]:mb-2 [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-[var(--foreground)] [&_ul]:ml-4 [&_ul]:list-disc [&_ol]:ml-4 [&_ol]:list-decimal [&_code]:rounded [&_code]:bg-[var(--muted)] [&_code]:px-1 [&_code]:text-[var(--foreground)] [&_pre]:overflow-x-auto [&_pre]:rounded [&_pre]:bg-[var(--muted)] [&_pre]:p-2 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--border)] [&_blockquote]:pl-4 [&_blockquote]:italic [&_p]:mb-3" style={{ overflowWrap: "anywhere", wordBreak: "break-word" }} dangerouslySetInnerHTML={{ __html: renderedMarkdown }} />
       </div>
     </DashboardContentDialog>
   );

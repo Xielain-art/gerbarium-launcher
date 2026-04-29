@@ -1,0 +1,60 @@
+:root {
+  /* Bridge: custom launcher tokens now derive from shadcn semantic tokens */
+  --theme-bg: var(--background);
+  --theme-bg-gradient-a: color-mix(in srgb, var(--background) 92%, var(--accent) 8%);
+  --theme-bg-gradient-b: color-mix(in srgb, var(--background) 84%, var(--muted) 16%);
+  --theme-surface: var(--card);
+  --theme-surface-soft: var(--muted);
+  --theme-sidebar: color-mix(in srgb, var(--card) 88%, var(--muted) 12%);
+  --theme-text: var(--foreground);
+  --theme-text-muted: var(--muted-foreground);
+  --theme-border: var(--border);
+  --theme-border-hi: color-mix(in srgb, var(--border) 65%, var(--foreground) 35%);
+
+  --btn-bg: var(--secondary);
+  --btn-bg-hover: color-mix(in srgb, var(--secondary) 85%, var(--foreground) 15%);
+  --btn-bg-active: color-mix(in srgb, var(--secondary) 70%, var(--foreground) 30%);
+  --btn-text: var(--secondary-foreground);
+  --btn-border-hi: color-mix(in srgb, var(--secondary) 80%, white 20%);
+  --btn-border-lo: color-mix(in srgb, var(--secondary) 65%, black 35%);
+
+  --btn-primary-bg-a: var(--primary);
+  --btn-primary-bg-b: color-mix(in srgb, var(--primary) 72%, black 28%);
+  --btn-primary-bg-hover-a: color-mix(in srgb, var(--primary) 80%, white 20%);
+  --btn-primary-bg-hover-b: color-mix(in srgb, var(--primary) 64%, black 36%);
+  --btn-primary-border-hi: color-mix(in srgb, var(--primary) 70%, white 30%);
+  --btn-primary-border-lo: color-mix(in srgb, var(--primary) 65%, black 35%);
+
+  --btn-secondary-bg: var(--secondary);
+  --btn-secondary-bg-hover: color-mix(in srgb, var(--secondary) 85%, var(--foreground) 15%);
+  --btn-secondary-border-hi: color-mix(in srgb, var(--secondary) 80%, white 20%);
+  --btn-secondary-border-lo: color-mix(in srgb, var(--secondary) 65%, black 35%);
+
+  --btn-danger-bg-a: var(--destructive);
+  --btn-danger-bg-b: color-mix(in srgb, var(--destructive) 72%, black 28%);
+  --btn-danger-bg-hover-a: color-mix(in srgb, var(--destructive) 82%, white 18%);
+  --btn-danger-bg-hover-b: color-mix(in srgb, var(--destructive) 64%, black 36%);
+  --btn-danger-border-hi: color-mix(in srgb, var(--destructive) 70%, white 30%);
+  --btn-danger-border-lo: color-mix(in srgb, var(--destructive) 65%, black 35%);
+
+  --mc-panel-bg: var(--card);
+  --mc-panel-border-hi: var(--theme-border-hi);
+  --mc-panel-border-lo: var(--theme-border);
+  --mc-panel-hover: color-mix(in srgb, var(--card) 82%, var(--foreground) 18%);
+  --mc-input-bg: var(--card);
+  --mc-input-text: var(--foreground);
+  --mc-input-placeholder: color-mix(in srgb, var(--muted-foreground) 70%, transparent);
+  --mc-input-focus: var(--ring);
+  --mc-error-border: color-mix(in srgb, var(--destructive) 45%, transparent);
+  --mc-error-bg: color-mix(in srgb, var(--destructive) 28%, transparent);
+  --mc-error-text: color-mix(in srgb, var(--destructive) 75%, var(--foreground) 25%);
+  --mc-skeleton-base: color-mix(in srgb, var(--card) 88%, var(--foreground) 12%);
+  --mc-skeleton-highlight: color-mix(in srgb, var(--card) 74%, var(--foreground) 26%);
+  --mc-accent: var(--primary);
+  --mc-accent-hi: color-mix(in srgb, var(--primary) 70%, white 30%);
+  --mc-progress-fill-a: var(--primary);
+  --mc-progress-fill-b: color-mix(in srgb, var(--primary) 75%, white 25%);
+  --mc-progress-fill-c: color-mix(in srgb, var(--primary) 65%, black 35%);
+  --mc-window-danger-hover: color-mix(in srgb, var(--destructive) 85%, white 15%);
+  --mc-window-danger-active: color-mix(in srgb, var(--destructive) 70%, black 30%);
+}

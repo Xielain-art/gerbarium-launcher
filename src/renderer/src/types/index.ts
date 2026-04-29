@@ -1,3 +1,6 @@
+import type { ThemeId } from "../lib/themes/themeRegistry";
+export type ThemeMode = "light" | "dark";
+
 // Auth Types
 export interface AuthUser {
   id: string;
@@ -12,7 +15,6 @@ export interface AuthUser {
   banReason?: string;
   avatar?: string;
   xuid?: string;
-  token?: string;
 }
 
 export interface AuthEmailVerificationState {
@@ -36,7 +38,6 @@ export interface AuthRegisterCredentials {
 
 export interface AuthState {
   user: AuthUser | null;
-  token: string | null;
   isAuthenticated: boolean;
   emailVerification: AuthEmailVerificationState | null;
   isLoading: boolean;
@@ -58,7 +59,8 @@ export interface SettingsGeneral {
   gamePath?: string;
   fullscreen: boolean;
   showLaunchConsole: boolean;
-  theme: 'dark' | 'light' | 'gerbarium';
+  theme: ThemeId;
+  themeMode: ThemeMode;
 }
 
 export interface SettingsMods {

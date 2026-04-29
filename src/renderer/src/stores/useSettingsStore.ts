@@ -13,6 +13,7 @@ function toLauncherSettingsPatch(settings: SettingsGeneral): Partial<LauncherSet
   return {
     minimizeToTray: settings.minimizeToTray,
     gamePath: settings.gamePath,
+    discordRPC: settings.discordRPC,
   };
 }
 
@@ -45,7 +46,8 @@ const defaultSettings: SettingsStateType = {
     gamePath: '',
     fullscreen: false,
     showLaunchConsole: true,
-    theme: 'gerbarium',
+    theme: 'violet-base',
+    themeMode: 'light',
   },
   mods: {
     enabledMods: [],

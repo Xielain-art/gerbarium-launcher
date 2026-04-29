@@ -228,6 +228,7 @@ export type GameProgressPayload =
 export interface LauncherSettings {
   minimizeToTray: boolean;
   gamePath?: string;
+  discordRPC?: boolean;
 }
 
 export interface UpdateInfoPayload {
@@ -252,6 +253,7 @@ export interface CrashReportPayload {
 }
 
 // Карта типов для всех наших IPC событий
+// Typed map for all IPC channels used by preload/main.
 export interface IpcChannelMap {
   [IPC_CHANNELS.WINDOW.MINIMIZE]: {
     args: [];
@@ -329,7 +331,6 @@ export interface IpcChannelMap {
     return: {
       success: boolean;
       user?: AuthSessionUser;
-      accessToken?: string;
       emailVerification?: AuthEmailVerificationStatus;
       error?: string;
     };
@@ -339,7 +340,6 @@ export interface IpcChannelMap {
     return: {
       success: boolean;
       user?: AuthSessionUser;
-      accessToken?: string;
       emailVerification?: AuthEmailVerificationStatus;
       error?: string;
     };
@@ -382,7 +382,6 @@ export interface IpcChannelMap {
     return: {
       success: boolean;
       user?: AuthSessionUser | null;
-      accessToken?: string;
       isAuthenticated?: boolean;
       error?: string;
     };

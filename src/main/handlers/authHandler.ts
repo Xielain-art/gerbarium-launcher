@@ -23,6 +23,12 @@ import {
 } from "../../shared/constants/ipc-chanels";
 import { ERROR_CODES } from "../../shared/constants/errors";
 import { LOG_MESSAGES } from "../../shared/constants/log-messages";
+import {
+  authLoginSchema,
+  authOfflineLoginSchema,
+  authRegisterSchema,
+  authVerifyEmailSchema,
+} from "../../shared/validation/authValidation";
 import { secureStorageLock } from "../utils/secureStorageLock";
 
 export const SECURE_STORAGE_FILE_NAME = "secure-storage.json";
@@ -249,6 +255,11 @@ function mapEmailVerificationFailureCode(status?: number): string {
   return ERROR_CODES.AUTH_EMAIL_STATUS_FAILED;
 }
 
+function parseOrNull<T>(schema: { safeParse: (value: unknown) => { success: true; data: T } | { success: false } }, value: unknown): T | null {
+  const parsed = schema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
 export async function readStoredSession(
   secureDataPath: string,
 ): Promise<AuthSessionPayload | null> {
@@ -429,9 +440,8 @@ export default function authHandler(app: App) {
     async (_event, credentials: { login: string; password: string }) => {
       log.info(LOG_MESSAGES.AUTH_LOGIN_ATTEMPT, credentials?.login);
       try {
-        const login = credentials?.login?.trim() ?? "";
-        const password = credentials?.password?.trim() ?? "";
-        if (!login || !password) {
+        const validatedCredentials = parseOrNull(authLoginSchema, credentials);
+        if (!validatedCredentials) {
           return {
             success: false,
             error: ERROR_CODES.AUTH_VALIDATION_FAILED,
@@ -439,8 +449,8 @@ export default function authHandler(app: App) {
         }
 
         const authResult = await loginRequest({
-          identifier: login,
-          password,
+          identifier: validatedCredentials.login,
+          password: validatedCredentials.password,
         });
 
         if (!authResult.success || !authResult.data) {
@@ -461,7 +471,6 @@ export default function authHandler(app: App) {
         return {
           success: true,
           user: session.user,
-          accessToken: session.accessToken,
           emailVerification: mapEmailVerification(
             authResult.data.emailVerification,
           ),
@@ -488,10 +497,8 @@ export default function authHandler(app: App) {
         payload?.username,
       );
       try {
-        const email = payload?.email?.trim() ?? "";
-        const username = payload?.username?.trim() ?? "";
-        const password = payload?.password?.trim() ?? "";
-        if (!email || !username || !password) {
+        const validatedPayload = parseOrNull(authRegisterSchema, payload);
+        if (!validatedPayload) {
           return {
             success: false,
             error: ERROR_CODES.AUTH_VALIDATION_FAILED,
@@ -499,9 +506,9 @@ export default function authHandler(app: App) {
         }
 
         const registerResult = await registerRequest({
-          email,
-          username,
-          password,
+          email: validatedPayload.email,
+          username: validatedPayload.username,
+          password: validatedPayload.password,
         });
 
         if (!registerResult.success || !registerResult.data) {
@@ -522,7 +529,6 @@ export default function authHandler(app: App) {
         return {
           success: true,
           user: session.user,
-          accessToken: session.accessToken,
           emailVerification: mapEmailVerification(
             registerResult.data.emailVerification,
           ),
@@ -542,8 +548,8 @@ export default function authHandler(app: App) {
     async (_event, payload: { code: string }) => {
       log.info(LOG_MESSAGES.AUTH_VERIFY_EMAIL_ATTEMPT);
       try {
-        const code = payload?.code?.trim() ?? "";
-        if (!code) {
+        const validatedPayload = parseOrNull(authVerifyEmailSchema, payload);
+        if (!validatedPayload) {
           return {
             success: false,
             error: ERROR_CODES.AUTH_VALIDATION_FAILED,
@@ -559,7 +565,7 @@ export default function authHandler(app: App) {
         }
 
         const verifyResult = await verifyEmailRequest(session.accessToken, {
-          code,
+          code: validatedPayload.code,
         });
         if (!verifyResult.success || !verifyResult.data?.success) {
           logApiFailure(LOG_MESSAGES.AUTH_API_ERROR, verifyResult);
@@ -691,15 +697,15 @@ export default function authHandler(app: App) {
     async (_event, payload: { username: string }) => {
       log.info(LOG_MESSAGES.AUTH_LOGIN_OFFLINE_ATTEMPT, payload?.username);
       try {
-        const username = payload?.username?.trim() ?? "";
-        if (!username) {
+        const validatedPayload = parseOrNull(authOfflineLoginSchema, payload);
+        if (!validatedPayload) {
           return {
             success: false,
             error: ERROR_CODES.AUTH_VALIDATION_FAILED,
           };
         }
 
-        const user = createOfflineUser(username);
+        const user = createOfflineUser(validatedPayload.username);
         await writeStoredSession(secureDataPath, {
           mode: "offline",
           user,
@@ -730,7 +736,6 @@ export default function authHandler(app: App) {
           success: true,
           isAuthenticated: true,
           user: storedSession.user,
-          accessToken: undefined,
         };
       }
 
@@ -745,7 +750,6 @@ export default function authHandler(app: App) {
         success: true,
         isAuthenticated: true,
         user: resolvedSession.user,
-        accessToken: resolvedSession.accessToken,
       };
     } catch (error) {
       log.error(LOG_MESSAGES.AUTH_SESSION_READ_FAILED, error);

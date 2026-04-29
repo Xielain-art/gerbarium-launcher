@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
 
 /* Minecraft font */
 @font-face {
@@ -67,131 +68,29 @@
   --mc-progress-fill-c: var(--btn-primary-bg-a);
   --mc-window-danger-hover: #e81123;
   --mc-window-danger-active: #c4101f;
-  /* shadcn semantic tokens (mapped to existing launcher theme vars) */
-  --background: var(--theme-bg);
-  --foreground: var(--theme-text);
-  --card: var(--theme-surface);
-  --card-foreground: var(--theme-text);
-  --popover: var(--theme-surface-soft);
-  --popover-foreground: var(--theme-text);
-  --primary: var(--btn-primary-bg-a);
+  /* shadcn semantic fallback tokens */
+  --background: oklch(0.96 0.01 271.34);
+  --foreground: oklch(0.21 0.03 263.61);
+  --card: oklch(0.98 0.01 271.41);
+  --card-foreground: oklch(0.21 0.03 263.61);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.21 0.03 263.61);
+  --primary: oklch(0.48 0.2 260.47);
   --primary-foreground: #ffffff;
-  --secondary: var(--btn-secondary-bg);
-  --secondary-foreground: var(--btn-text);
-  --muted: var(--theme-surface-soft);
-  --muted-foreground: var(--theme-text-muted);
-  --accent: var(--theme-surface-soft);
-  --accent-foreground: var(--theme-text);
-  --destructive: var(--btn-danger-bg-a);
+  --secondary: oklch(0.91 0.02 274.06);
+  --secondary-foreground: oklch(0.37 0.03 259.73);
+  --muted: oklch(0.94 0.02 274.86);
+  --muted-foreground: oklch(0.55 0.02 264.41);
+  --accent: oklch(0.95 0.02 260.18);
+  --accent-foreground: oklch(0.48 0.2 260.47);
+  --destructive: oklch(0.58 0.22 27.29);
   --destructive-foreground: #ffffff;
-  --border: var(--theme-border);
-  --input: var(--theme-border-hi);
-  --ring: var(--mc-input-focus);
+  --border: oklch(0.89 0.02 259.43);
+  --input: oklch(0.9 0.01 266.73);
+  --ring: oklch(0.48 0.2 260.47);
   --radius: 0.5rem;
 }
 
-
-body.theme-gerbarium {
-  --theme-bg: #15130f;
-  --theme-bg-gradient-a: #1c1a14;
-  --theme-bg-gradient-b: #2a2720;
-  --theme-surface: #2f2a24;
-  --theme-surface-soft: #25211d;
-  --theme-sidebar: #221e19;
-  --theme-text: #f3ebe0;
-  --theme-text-muted: #b8ab9a;
-  --theme-border: #0f0d0b;
-  --theme-border-hi: #5f5448;
-  --btn-bg: #40362c;
-  --btn-bg-hover: #4a4035;
-  --btn-bg-active: #322a22;
-  --btn-text: #f3ebe0;
-  --btn-border-hi: #6a5d4f;
-  --btn-border-lo: #1b1712;
-  --mc-panel-bg: #2f2a24;
-  --mc-panel-border-hi: #5f5448;
-  --mc-panel-border-lo: #0f0d0b;
-  --mc-input-bg: #2f2a24;
-  --mc-input-text: #f3ebe0;
-  --mc-input-placeholder: rgba(184, 171, 154, 0.7);
-  --mc-input-focus: #7f7365;
-  --mc-panel-hover: #3a342d;
-}
-
-body.theme-dark {
-  --theme-bg: #0d1117;
-  --theme-bg-gradient-a: #111827;
-  --theme-bg-gradient-b: #1f2937;
-  --theme-surface: #1f2937;
-  --theme-surface-soft: #111827;
-  --theme-sidebar: #0f172a;
-  --theme-text: #e5edf7;
-  --theme-text-muted: #94a3b8;
-  --theme-border: #020617;
-  --theme-border-hi: #334155;
-  --btn-bg: #243041;
-  --btn-bg-hover: #2d3a4d;
-  --btn-bg-active: #1a2535;
-  --btn-text: #e5edf7;
-  --btn-border-hi: #4b617b;
-  --btn-border-lo: #0b1220;
-  --mc-panel-bg: #1f2937;
-  --mc-panel-border-hi: #334155;
-  --mc-panel-border-lo: #020617;
-  --mc-input-bg: #1f2937;
-  --mc-input-text: #e5edf7;
-  --mc-input-placeholder: rgba(148, 163, 184, 0.7);
-  --mc-input-focus: #5b6f87;
-  --mc-panel-hover: #293547;
-}
-
-body.theme-light {
-  --theme-bg: #f5f7fb;
-  --theme-bg-gradient-a: #eef2ff;
-  --theme-bg-gradient-b: #e2e8f0;
-  --theme-surface: #ffffff;
-  --theme-surface-soft: #f8fafc;
-  --theme-sidebar: #eef2f7;
-  --theme-text: #0f172a;
-  --theme-text-muted: #475569;
-  --theme-border: #cbd5e1;
-  --theme-border-hi: #e2e8f0;
-  --btn-bg: #dbe3f0;
-  --btn-bg-hover: #cfd8e8;
-  --btn-bg-active: #c4cfdf;
-  --btn-text: #0f172a;
-  --btn-border-hi: #f8fafc;
-  --btn-border-lo: #94a3b8;
-  --btn-secondary-bg: #cfd8e8;
-  --btn-secondary-bg-hover: #c4cfdf;
-  --btn-secondary-border-hi: #f1f5f9;
-  --btn-secondary-border-lo: #94a3b8;
-  --btn-primary-bg-a: #4f8a4f;
-  --btn-primary-bg-b: #3c6e3c;
-  --btn-primary-bg-hover-a: #5b9b5b;
-  --btn-primary-bg-hover-b: #4a7f4a;
-  --btn-primary-border-hi: #78b578;
-  --btn-primary-border-lo: #356535;
-  --btn-danger-bg-a: #b84a4a;
-  --btn-danger-bg-b: #933737;
-  --btn-danger-bg-hover-a: #c45a5a;
-  --btn-danger-bg-hover-b: #a24646;
-  --btn-danger-border-hi: #d27171;
-  --btn-danger-border-lo: #8a3535;
-  --mc-panel-bg: #ffffff;
-  --mc-panel-border-hi: #e2e8f0;
-  --mc-panel-border-lo: #cbd5e1;
-  --mc-input-bg: #ffffff;
-  --mc-input-text: #0f172a;
-  --mc-input-placeholder: rgba(71, 85, 105, 0.7);
-  --mc-input-focus: #94a3b8;
-  --mc-panel-hover: #f1f5f9;
-  --mc-skeleton-base: #e2e8f0;
-  --mc-skeleton-highlight: #cbd5e1;
-  --mc-error-border: rgba(184, 74, 74, 0.4);
-  --mc-error-bg: rgba(184, 74, 74, 0.15);
-  --mc-error-text: #8a3535;
-}
 
 body {
   background-color: var(--theme-bg);

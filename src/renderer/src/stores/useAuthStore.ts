@@ -105,7 +105,6 @@ function mergeUserVerification(
 
 interface AuthStoreState {
   user: AuthUser | null;
-  token: string | null;
   isAuthenticated: boolean;
   emailVerification: AuthEmailVerificationState | null;
   isLoading: boolean;
@@ -136,7 +135,6 @@ interface AuthStoreState {
 
 const defaultState = {
   user: null,
-  token: null,
   isAuthenticated: false,
   emailVerification: null,
   isLoading: false,
@@ -167,15 +165,12 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
         const result = await window.electronAPI.auth.getSession();
         if (result.success && result.isAuthenticated && result.user) {
           const user = buildAuthUser(result.user);
-          const nextToken = result.accessToken ?? null;
           const prev = get();
           const shouldLogTokenLoaded =
             prev.user?.id !== user.id ||
-            prev.token !== nextToken ||
             !prev.hasCheckedSession;
 
           set({
-            token: nextToken,
             isAuthenticated: true,
             user,
             emailVerification: buildEmailVerificationState(undefined, result.user),
@@ -190,7 +185,6 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
         }
 
         set({
-          token: null,
           isAuthenticated: false,
           user: null,
           emailVerification: null,
@@ -201,7 +195,6 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
         const errorMsg = err instanceof Error ? err.message : "Unknown error";
         logAction(LOG_ACTIONS.TOKEN_LOAD_ERROR, errorMsg);
         set({
-          token: null,
           isAuthenticated: false,
           user: null,
           emailVerification: null,
@@ -222,7 +215,6 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
     logAction(LOG_ACTIONS.LOGOUT, "User logged out");
     set({
       user: null,
-      token: null,
       isAuthenticated: false,
       emailVerification: null,
       isLoading: false,
@@ -263,7 +255,6 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
       const user = buildAuthUser(authResult.user);
       set({
         user,
-        token: authResult.accessToken ?? null,
         isAuthenticated: true,
         emailVerification: buildEmailVerificationState(
           authResult.emailVerification,
@@ -311,7 +302,6 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
       const user = buildAuthUser(authResult.user);
       set({
         user,
-        token: authResult.accessToken ?? null,
         isAuthenticated: true,
         emailVerification: buildEmailVerificationState(
           authResult.emailVerification,
@@ -457,7 +447,6 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
       const user = buildAuthUser(authResult.user);
       set({
         user,
-        token: null,
         isAuthenticated: true,
         emailVerification: null,
         isLoading: false,

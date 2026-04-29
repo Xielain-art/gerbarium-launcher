@@ -41,6 +41,12 @@ export function useAdminNewsSection(activeTab: string, scrollRef: React.RefObjec
   const newsQuery = useAdminNewsQuery(appliedNewsFilters);
   const newsTagsQuery = useAdminNewsTagsQuery();
   const newsMutations = useAdminNewsMutations(appliedNewsFilters);
+  const {
+    hasNextPage,
+    isLoading: isNewsQueryLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = newsQuery;
 
   const news = useMemo(() => newsQuery.data?.items ?? [], [newsQuery.data]);
   const newsTags = useMemo<Array<{ id: string; name: string }>>(() => newsTagsQuery.data ?? [], [newsTagsQuery.data]);
@@ -57,15 +63,15 @@ export function useAdminNewsSection(activeTab: string, scrollRef: React.RefObjec
   }, [newsSearch, newsTag, newsFromDate, newsToDate, newsSortDraft, newsOrderDraft]);
 
   useEffect(() => {
-    if (activeTab !== "news" || newsTab !== "all" || !newsQuery.hasNextPage || newsQuery.isLoading || newsQuery.isFetchingNextPage) return;
+    if (activeTab !== "news" || newsTab !== "all" || !hasNextPage || isNewsQueryLoading || isFetchingNextPage) return;
     const target = newsEndRef.current;
     if (!target) return;
     const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) void newsQuery.fetchNextPage();
+      if (entries[0].isIntersecting) void fetchNextPage();
     }, { root: scrollRef.current, rootMargin: "0px 0px 400px 0px" });
     observer.observe(target);
     return () => observer.disconnect();
-  }, [activeTab, newsTab, newsQuery.hasNextPage, newsQuery.isLoading, newsQuery.isFetchingNextPage, newsQuery.fetchNextPage, newsEndRef, scrollRef]);
+  }, [activeTab, newsTab, hasNextPage, isNewsQueryLoading, isFetchingNextPage, fetchNextPage, newsEndRef, scrollRef]);
 
   const resetNewsForm = () => { setEditingNews(null); setNewsTitle(""); setNewsSlug(""); setNewsImage(""); setSelectedNewsTagIds([]); setNewNewsTagName(""); setNewsTagFormError(null); setNewsContentHtml(""); setNewsFormError(null); newsFormValidation.resetTouched(); newsTagValidation.resetTouched(); };
   const startEditNews = (item: ApiNews) => { setEditingNews(item); setNewsTitle(item.title); setNewsSlug(item.slug); setNewsImage(item.image || ""); setSelectedNewsTagIds(Array.isArray(item.tags) ? item.tags.map((tag: { id: string }) => tag.id).filter(Boolean) : []); setNewsContentHtml(item.content); setNewsTab("create"); };

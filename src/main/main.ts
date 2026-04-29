@@ -25,13 +25,13 @@ import { LOG_MESSAGES } from "../shared/constants/log-messages";
 import { getDateFolder } from "./utils/dateFolder";
 import setupLogHandler from "./handlers/logHandler";
 import windowControlsHandler from "./handlers/windowControlsHandler";
-import secureStorageHandler from "./handlers/secureStorageHandler";
 import authHandler from "./handlers/authHandler";
 import updateHandler from "./handlers/updateHandler";
 import adminHandler from "./handlers/adminHandler";
 import javaHandler from "./handlers/javaHandlerWrapper";
 import systemHandler from "./handlers/systemHandler";
 import gameHandler from "./handlers/gameHandler";
+import { createDiscordRpcService } from "./services/discordRpcService";
 
 type LegacyLangLoader = {
   setupLanguage: () => void;
@@ -54,6 +54,10 @@ function sanitizeSettingsPatch(
   if (typeof patch.gamePath === "string") {
     const trimmed = patch.gamePath.trim();
     safePatch.gamePath = trimmed;
+  }
+
+  if (typeof patch.discordRPC === "boolean") {
+    safePatch.discordRPC = patch.discordRPC;
   }
 
   return safePatch;
@@ -125,8 +129,9 @@ log.info(MAIN_CONSTANTS.LOG_MESSAGES.APP_STARTING, {
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
-let settings: LauncherSettings = { minimizeToTray: false };
+let settings: LauncherSettings = { minimizeToTray: false, discordRPC: true };
 let isQuiting = false;
+const discordRpcService = createDiscordRpcService();
 const LATEST_YML_URL =
   "https://github.com/Xielain-art/gerbarium-releases/releases/latest/download/latest.yml";
 const LAST_CRASH_REPORT_FILE = "last-crash-report.json";
@@ -475,6 +480,9 @@ ipcMain.on(
     const safePatch = sanitizeSettingsPatch(newSettings);
     settings = { ...settings, ...safePatch };
     syncTrayState();
+    if (typeof safePatch.discordRPC === "boolean") {
+      discordRpcService.setEnabled(safePatch.discordRPC);
+    }
   },
 );
 
@@ -504,6 +512,7 @@ ipcMain.handle(IPC_CHANNELS.APP.CLEAR_LAST_CRASH_REPORT, async () => {
 
 app.on("before-quit", () => {
   isQuiting = true;
+  discordRpcService.shutdown();
 });
 
 app.whenReady().then(() => {
@@ -512,7 +521,6 @@ app.whenReady().then(() => {
   createMenu();
 
   windowControlsHandler(app);
-  secureStorageHandler(app);
   authHandler(app);
   adminHandler(app);
   updateHandler(app);
@@ -520,6 +528,7 @@ app.whenReady().then(() => {
   systemHandler(app, () => settings);
   gameHandler(mainWindow);
   setupLogHandler(app);
+  discordRpcService.setEnabled(settings.discordRPC !== false);
 
   const currentWindow = mainWindow;
   if (!currentWindow) {

@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAdminPage } from "../../../../hooks/useAdminPage";
 import { ADMIN_TOASTS } from "./adminToasts";
 
 export function useAdminUsersSection(activeTab: string, scrollRef: React.RefObject<HTMLDivElement | null>, usersEndRef: React.RefObject<HTMLDivElement | null>) {
   const vm = useAdminPage();
+  const { search, setFilters, hasMore, isLoading, isLoadingMore, fetchMoreUsers } = vm;
   const [userSearchInput, setUserSearchInput] = useState(vm.search);
   const [userRoleFilter, setUserRoleFilter] = useState<string>(vm.role ?? "all");
   const [userBanFilter, setUserBanFilter] = useState<"all" | "banned" | "active">(vm.banned === undefined ? "all" : vm.banned ? "banned" : "active");
@@ -15,21 +16,21 @@ export function useAdminUsersSection(activeTab: string, scrollRef: React.RefObje
 
   useEffect(() => {
     const t = setTimeout(() => {
-      if (userSearchInput !== vm.search) vm.setFilters({ search: userSearchInput });
+      if (userSearchInput !== search) setFilters({ search: userSearchInput });
     }, 350);
     return () => clearTimeout(t);
-  }, [userSearchInput, vm.search, vm.setFilters]);
+  }, [userSearchInput, search, setFilters]);
 
   useEffect(() => {
-    if (activeTab !== "users" || !vm.hasMore || vm.isLoading || vm.isLoadingMore) return;
+    if (activeTab !== "users" || !hasMore || isLoading || isLoadingMore) return;
     const target = usersEndRef.current;
     if (!target) return;
     const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) void vm.fetchMoreUsers();
+      if (entries[0].isIntersecting) void fetchMoreUsers();
     }, { root: scrollRef.current, rootMargin: "0px 0px 400px 0px" });
     observer.observe(target);
     return () => observer.disconnect();
-  }, [activeTab, vm.hasMore, vm.isLoading, vm.isLoadingMore, vm.fetchMoreUsers, usersEndRef, scrollRef]);
+  }, [activeTab, hasMore, isLoading, isLoadingMore, fetchMoreUsers, usersEndRef, scrollRef]);
 
   const handleConfirmBan = async () => { await vm.executeBan(); if (!vm.actionError) toast.success(ADMIN_TOASTS.userBanned); else toast.error(vm.actionError); };
   const handleConfirmUnban = async () => { await vm.executeUnban(); if (!vm.actionError) toast.success(ADMIN_TOASTS.userUnbanned); else toast.error(vm.actionError); };

@@ -24,34 +24,51 @@ interface NewsFeedProps {
 }
 
 export function NewsFeed(props: NewsFeedProps) {
+  const {
+    t,
+    news,
+    isLoadingNews,
+    isLoadingMoreNews,
+    hasMoreNews,
+    isNewsInitialLoaded,
+    onLoadMoreNews,
+    placeholderImage,
+    newsError,
+    onSelectNews,
+    order,
+    onOrderChange,
+    selectedTag,
+    onTagChange,
+    availableTags,
+  } = props;
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!props.isNewsInitialLoaded) return;
+    if (!isNewsInitialLoaded) return;
     const target = loadMoreRef.current;
     if (!target) return;
     const observer = new IntersectionObserver(
       (entries) => {
         const first = entries[0];
-        if (first?.isIntersecting && props.hasMoreNews && !props.isLoadingMoreNews) {
-          void props.onLoadMoreNews();
+        if (first?.isIntersecting && hasMoreNews && !isLoadingMoreNews) {
+          void onLoadMoreNews();
         }
       },
       { root: target.closest(".overflow-y-auto"), rootMargin: "0px 0px 400px 0px" },
     );
     observer.observe(target);
     return () => observer.disconnect();
-  }, [props.hasMoreNews, props.isLoadingMoreNews, props.isNewsInitialLoaded, props.onLoadMoreNews]);
+  }, [hasMoreNews, isLoadingMoreNews, isNewsInitialLoaded, onLoadMoreNews]);
 
   return (
     <div className="px-6">
-      <NewsFeedFilters t={props.t} order={props.order} onOrderChange={props.onOrderChange} selectedTag={props.selectedTag} onTagChange={props.onTagChange} availableTags={props.availableTags} />
-      <NewsFeedState isLoadingNews={props.isLoadingNews} newsError={props.newsError} loadingText={props.t.COMMON.LOADING} failedText={props.t.DASHBOARD.FAILED_TO_LOAD_NEWS} tryAgainText={props.t.DASHBOARD.TRY_AGAIN}>
-        <NewsCards t={props.t} news={props.news} placeholderImage={props.placeholderImage} onSelectNews={props.onSelectNews} />
+      <NewsFeedFilters t={t} order={order} onOrderChange={onOrderChange} selectedTag={selectedTag} onTagChange={onTagChange} availableTags={availableTags} />
+      <NewsFeedState isLoadingNews={isLoadingNews} newsError={newsError} loadingText={t.COMMON.LOADING} failedText={t.DASHBOARD.FAILED_TO_LOAD_NEWS} tryAgainText={t.DASHBOARD.TRY_AGAIN}>
+        <NewsCards t={t} news={news} placeholderImage={placeholderImage} onSelectNews={onSelectNews} />
       </NewsFeedState>
       <div ref={loadMoreRef} className="h-6 w-full" />
-      {props.isLoadingMoreNews && <div className="py-3 text-center font-minecraft text-xs text-theme-muted">{props.t.DASHBOARD.LOADING_MORE_NEWS}</div>}
-      {!props.hasMoreNews && props.news.length > 0 && <div className="py-3 text-center font-minecraft text-xs text-theme-muted">{props.t.DASHBOARD.NO_MORE_NEWS}</div>}
+      {isLoadingMoreNews && <div className="py-3 text-center text-xs text-[var(--muted-foreground)]">{t.DASHBOARD.LOADING_MORE_NEWS}</div>}
+      {!hasMoreNews && news.length > 0 && <div className="py-3 text-center text-xs text-[var(--muted-foreground)]">{t.DASHBOARD.NO_MORE_NEWS}</div>}
     </div>
   );
 }

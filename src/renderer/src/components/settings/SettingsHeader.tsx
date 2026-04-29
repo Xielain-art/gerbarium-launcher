@@ -1,4 +1,4 @@
-import { WindowControls } from "../layout/WindowControls";
+import { ThemeToggleButton, WindowControls } from "../layout";
 import type { SettingsBaseProps } from "./types";
 
 interface SettingsHeaderProps extends SettingsBaseProps {
@@ -22,6 +22,7 @@ export function SettingsHeader({ t, onBack, onLogout }: SettingsHeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
+        <ThemeToggleButton />
         <button
           onClick={onLogout}
           className="font-minecraft text-xs text-theme-muted transition-colors hover:text-[var(--mc-error-text)]"

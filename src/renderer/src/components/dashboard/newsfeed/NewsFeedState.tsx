@@ -1,4 +1,6 @@
-﻿interface Props {
+import { Button } from "../../shadcn/ui";
+
+interface Props {
   isLoadingNews: boolean;
   newsError?: string | null;
   loadingText: string;
@@ -12,8 +14,8 @@ export function NewsFeedState({ isLoadingNews, newsError, loadingText, failedTex
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="mc-spinner h-10 w-10 rounded-full border-2 border-[var(--mc-accent)] border-t-transparent" />
-          <span className="font-minecraft text-xs text-theme-muted">{loadingText}</span>
+          <div className="mc-spinner h-10 w-10 rounded-full border-2 border-[var(--primary)] border-t-transparent" />
+          <span className="text-xs text-[var(--muted-foreground)]">{loadingText}</span>
         </div>
       </div>
     );
@@ -21,9 +23,9 @@ export function NewsFeedState({ isLoadingNews, newsError, loadingText, failedTex
   if (newsError) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 text-center">
-        <div className="font-minecraft text-lg text-red-500">{failedText}</div>
-        <div className="max-w-md font-minecraft text-sm text-theme-muted">{newsError}</div>
-        <button onClick={() => window.location.reload()} className="mc-btn mc-btn-primary mt-2">{tryAgainText}</button>
+        <div className="text-lg text-[var(--destructive)]">{failedText}</div>
+        <div className="max-w-md text-sm text-[var(--muted-foreground)]">{newsError}</div>
+        <Button onClick={() => window.location.reload()} className="mt-2">{tryAgainText}</Button>
       </div>
     );
   }

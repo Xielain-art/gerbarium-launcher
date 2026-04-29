@@ -109,8 +109,11 @@ const adminRoute = createRoute({
   path: ROUTES.ADMIN,
   component: AdminScreen,
   beforeLoad: async () => {
-    if (!checkAuth() || !checkIsAdmin()) {
+    if (!checkAuth()) {
       throw redirect({ to: ROUTES.LOGIN });
+    }
+    if (!checkIsAdmin()) {
+      throw redirect({ to: ROUTES.DASHBOARD });
     }
   },
 });

@@ -13,6 +13,9 @@ const mainConfig = {
   outfile: "dist/main/main.js",
   define: {
     "process.env.API_BASE_URL": JSON.stringify(process.env.API_BASE_URL ?? ""),
+    "process.env.DISCORD_RPC_CLIENT_ID": JSON.stringify(
+      process.env.DISCORD_RPC_CLIENT_ID ?? "",
+    ),
   },
 };
 

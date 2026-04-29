@@ -5,41 +5,55 @@ import { IPC_CHANNELS } from "../../shared/constants/ipc-chanels";
 import { ERROR_CODES } from "../../shared/constants/errors";
 import { LOG_MESSAGES } from "../../shared/constants/log-messages";
 import {
-  getUsersRequest,
   banUserRequest,
-  unbanUserRequest,
-  updateUserRolesRequest,
-  getRolesRequest,
   createRoleRequest,
   getAdminStatsRequest,
+  getRolesRequest,
+  getUsersRequest,
+  unbanUserRequest,
+  updateUserRolesRequest,
 } from "../../lib/api/admin";
 import {
-  listNewsRequest,
   createNewsRequest,
-  listNewsTagsRequest,
   createNewsTagRequest,
-  updateNewsTagRequest,
-  deleteNewsTagRequest,
-  updateNewsRequest,
   deleteNewsRequest,
+  deleteNewsTagRequest,
+  listNewsRequest,
+  listNewsTagsRequest,
+  updateNewsRequest,
+  updateNewsTagRequest,
 } from "../../lib/api/news";
 import {
-  listChangelogRequest,
   createChangelogRequest,
-  updateChangelogRequest,
   deleteChangelogRequest,
+  listChangelogRequest,
+  updateChangelogRequest,
 } from "../../lib/api/changelog";
 import {
+  clearStoredSession,
   readStoredSession,
   resolveOnlineSession,
-  writeStoredSession,
-  clearStoredSession,
   SECURE_STORAGE_FILE_NAME,
+  writeStoredSession,
 } from "./authHandler";
 
 type NewsSortBy = "createdAt" | "updatedAt" | "title";
 type NewsOrder = "ASC" | "DESC";
 type ChangelogSortBy = "releaseDate" | "version" | "createdAt";
+
+type ApiRequestResult<T> = {
+  success: boolean;
+  data?: T;
+  status?: number;
+  errorMessage?: string;
+  errorDetails?: string;
+};
+
+type HandlerResult<T> = {
+  success: boolean;
+  data?: T;
+  error?: string;
+};
 
 function logApiFailure(
   context: string,
@@ -58,6 +72,21 @@ function logApiFailure(
     "details:",
     result.errorDetails ?? "n/a",
   );
+}
+
+function toErrorResponse<T>(
+  context: string,
+  result: ApiRequestResult<T>,
+): HandlerResult<T> {
+  logApiFailure(context, result);
+  return {
+    success: false,
+    error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
+  };
+}
+
+function toSuccessResponse<T>(result: ApiRequestResult<T>): HandlerResult<T> {
+  return { success: true, data: result.data };
 }
 
 async function getValidAccessToken(app: App): Promise<string | null> {
@@ -83,267 +112,136 @@ async function getValidAccessToken(app: App): Promise<string | null> {
   }
 }
 
+async function withAdminAuth<T>(
+  app: App,
+  failureLogMessage: string,
+  operation: (token: string) => Promise<ApiRequestResult<T>>,
+): Promise<HandlerResult<T>> {
+  try {
+    const token = await getValidAccessToken(app);
+    if (!token) {
+      return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+    }
+
+    const result = await operation(token);
+    if (!result.success) {
+      return toErrorResponse(failureLogMessage, result);
+    }
+    return toSuccessResponse(result);
+  } catch (error) {
+    log.error(failureLogMessage, error);
+    return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+  }
+}
+
+async function withOpenAccess<T>(
+  failureLogMessage: string,
+  operation: () => Promise<ApiRequestResult<T>>,
+): Promise<HandlerResult<T>> {
+  try {
+    const result = await operation();
+    if (!result.success) {
+      return toErrorResponse(failureLogMessage, result);
+    }
+    return toSuccessResponse(result);
+  } catch (error) {
+    log.error(failureLogMessage, error);
+    return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
+  }
+}
+
 export default function adminHandler(app: App) {
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.GET_USERS,
-    async (
-      _event,
-      search?: string,
-      _page?: number,
-      _limit?: number,
-      role?: string,
-      banned?: boolean,
-    ) => {
-      try {
-        const token = await getValidAccessToken(app);
-        if (!token) {
-          return {
-            success: false,
-            error: ERROR_CODES.AUTH_UNAUTHORIZED,
-          };
-        }
-        const result = await getUsersRequest(token, search, role, banned);
-        if (!result.success) {
-          logApiFailure(LOG_MESSAGES.ADMIN_GET_USERS_FAILED, result);
-          return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
-        }
-        return { success: true, data: result.data };
-      } catch (error) {
-        log.error(LOG_MESSAGES.ADMIN_GET_USERS_FAILED, error);
-        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-      }
-    },
+    async (_event, search?: string, _page?: number, _limit?: number, role?: string, banned?: boolean) =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_GET_USERS_FAILED, (token) =>
+        getUsersRequest(token, search, role, banned),
+      ),
   );
 
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.GET_CHANGELOG,
-    async (
-      _event,
-      fromDate?: string,
-      toDate?: string,
-      mandatory?: boolean,
-      sortBy?: ChangelogSortBy,
-      order?: NewsOrder,
-    ) => {
-      try {
-        const result = await listChangelogRequest({
+    async (_event, fromDate?: string, toDate?: string, mandatory?: boolean, sortBy?: ChangelogSortBy, order?: NewsOrder) =>
+      withOpenAccess(LOG_MESSAGES.ADMIN_GET_CHANGELOG_FAILED, () =>
+        listChangelogRequest({
           fromDate: fromDate || undefined,
           toDate: toDate || undefined,
           mandatory,
           sortBy: sortBy || "releaseDate",
           order: order || "DESC",
-        });
-        if (!result.success) {
-          logApiFailure(LOG_MESSAGES.ADMIN_GET_CHANGELOG_FAILED, result);
-          return {
-            success: false,
-            error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
-          };
-        }
-        return { success: true, data: result.data };
-      } catch (error) {
-        log.error(LOG_MESSAGES.ADMIN_GET_CHANGELOG_FAILED, error);
-        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-      }
-    },
+        }),
+      ),
   );
 
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.BAN_USER,
-    async (_event, userId: string, reason: string) => {
-      try {
-        const token = await getValidAccessToken(app);
-        if (!token) {
-          return {
-            success: false,
-            error: ERROR_CODES.AUTH_UNAUTHORIZED,
-          };
-        }
-        const result = await banUserRequest(token, userId, reason);
-        if (!result.success) {
-          logApiFailure(LOG_MESSAGES.ADMIN_BAN_USER_FAILED, result);
-          return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
-        }
-        return { success: true, data: result.data };
-      } catch (error) {
-        log.error(LOG_MESSAGES.ADMIN_BAN_USER_FAILED, error);
-        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-      }
-    },
+    async (_event, userId: string, reason: string) =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_BAN_USER_FAILED, (token) =>
+        banUserRequest(token, userId, reason),
+      ),
   );
 
-  ipcMain.handle(IPC_CHANNELS.ADMIN.CREATE_CHANGELOG, async (_event, payload) => {
-    try {
-      const token = await getValidAccessToken(app);
-      if (!token) {
-        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
-      }
-      const result = await createChangelogRequest(token, payload);
-      if (!result.success) {
-        logApiFailure(LOG_MESSAGES.ADMIN_CREATE_CHANGELOG_FAILED, result);
-        return {
-          success: false,
-          error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
-        };
-      }
-      return { success: true, data: result.data };
-    } catch (error) {
-      log.error(LOG_MESSAGES.ADMIN_CREATE_CHANGELOG_FAILED, error);
-      return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-    }
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.CREATE_CHANGELOG,
+    async (_event, payload) =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_CREATE_CHANGELOG_FAILED, (token) =>
+        createChangelogRequest(token, payload),
+      ),
+  );
 
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.UNBAN_USER,
-    async (_event, userId: string) => {
-      try {
-        const token = await getValidAccessToken(app);
-        if (!token) {
-          return {
-            success: false,
-            error: ERROR_CODES.AUTH_UNAUTHORIZED,
-          };
-        }
-        const result = await unbanUserRequest(token, userId);
-        if (!result.success) {
-          logApiFailure(LOG_MESSAGES.ADMIN_UNBAN_USER_FAILED, result);
-          return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
-        }
-        return { success: true, data: result.data };
-      } catch (error) {
-        log.error(LOG_MESSAGES.ADMIN_UNBAN_USER_FAILED, error);
-        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-      }
-    },
+    async (_event, userId: string) =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_UNBAN_USER_FAILED, (token) =>
+        unbanUserRequest(token, userId),
+      ),
   );
 
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.UPDATE_CHANGELOG,
-    async (_event, changelogId: string, payload) => {
-      try {
-        const token = await getValidAccessToken(app);
-        if (!token) {
-          return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
-        }
-        const result = await updateChangelogRequest(token, changelogId, payload);
-        if (!result.success) {
-          logApiFailure(LOG_MESSAGES.ADMIN_UPDATE_CHANGELOG_FAILED, result);
-          return {
-            success: false,
-            error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
-          };
-        }
-        return { success: true, data: result.data };
-      } catch (error) {
-        log.error(LOG_MESSAGES.ADMIN_UPDATE_CHANGELOG_FAILED, error);
-        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-      }
-    },
+    async (_event, changelogId: string, payload) =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_UPDATE_CHANGELOG_FAILED, (token) =>
+        updateChangelogRequest(token, changelogId, payload),
+      ),
   );
 
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.UPDATE_ROLES,
-    async (
-      _event,
-      userId: string,
-      roleIds: string[],
-    ) => {
-      try {
-        const token = await getValidAccessToken(app);
-        if (!token) {
-          return {
-            success: false,
-            error: ERROR_CODES.AUTH_UNAUTHORIZED,
-          };
-        }
-        const result = await updateUserRolesRequest(token, userId, roleIds);
-        if (!result.success) {
-          logApiFailure(LOG_MESSAGES.ADMIN_UPDATE_ROLES_FAILED, result);
-          return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
-        }
-        return { success: true, data: result.data };
-      } catch (error) {
-        log.error(LOG_MESSAGES.ADMIN_UPDATE_ROLES_FAILED, error);
-        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-      }
-    },
+    async (_event, userId: string, roleIds: string[]) =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_UPDATE_ROLES_FAILED, (token) =>
+        updateUserRolesRequest(token, userId, roleIds),
+      ),
   );
 
-  ipcMain.handle(IPC_CHANNELS.ADMIN.GET_ROLES, async () => {
-    try {
-      const token = await getValidAccessToken(app);
-      if (!token) {
-        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
-      }
-      const result = await getRolesRequest(token);
-      if (!result.success) {
-        logApiFailure(LOG_MESSAGES.ADMIN_GET_USERS_FAILED, result);
-        return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
-      }
-      return { success: true, data: result.data };
-    } catch (error) {
-      log.error(LOG_MESSAGES.ADMIN_GET_USERS_FAILED, error);
-      return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-    }
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.GET_ROLES,
+    async () =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_GET_USERS_FAILED, (token) =>
+        getRolesRequest(token),
+      ),
+  );
 
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.CREATE_ROLE,
-    async (_event, payload: { name: string; description?: string }) => {
-      try {
-        const token = await getValidAccessToken(app);
-        if (!token) {
-          return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
-        }
-        const result = await createRoleRequest(token, payload);
-        if (!result.success) {
-          logApiFailure(LOG_MESSAGES.ADMIN_UPDATE_ROLES_FAILED, result);
-          return { success: false, error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED };
-        }
-        return { success: true, data: result.data };
-      } catch (error) {
-        log.error(LOG_MESSAGES.ADMIN_UPDATE_ROLES_FAILED, error);
-        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-      }
-    },
+    async (_event, payload: { name: string; description?: string }) =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_UPDATE_ROLES_FAILED, (token) =>
+        createRoleRequest(token, payload),
+      ),
   );
 
-  ipcMain.handle(IPC_CHANNELS.ADMIN.GET_STATS, async () => {
-    try {
-      const token = await getValidAccessToken(app);
-      if (!token) {
-        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
-      }
-      const result = await getAdminStatsRequest(token);
-      if (!result.success) {
-        logApiFailure(LOG_MESSAGES.ADMIN_GET_USERS_FAILED, result);
-        return {
-          success: false,
-          error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
-        };
-      }
-      return { success: true, data: result.data };
-    } catch (error) {
-      log.error(LOG_MESSAGES.ADMIN_GET_USERS_FAILED, error);
-      return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-    }
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.GET_STATS,
+    async () =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_GET_USERS_FAILED, (token) =>
+        getAdminStatsRequest(token),
+      ),
+  );
 
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.GET_NEWS,
-    async (
-      _event,
-      search?: string,
-      page?: number,
-      limit?: number,
-      sortBy?: NewsSortBy,
-      order?: NewsOrder,
-      tagId?: string,
-      fromDate?: string,
-      toDate?: string,
-    ) => {
-      try {
-        const result = await listNewsRequest({
+    async (_event, search?: string, page?: number, limit?: number, sortBy?: NewsSortBy, order?: NewsOrder, tagId?: string, fromDate?: string, toDate?: string) =>
+      withOpenAccess(LOG_MESSAGES.ADMIN_GET_NEWS_FAILED, () =>
+        listNewsRequest({
           search: search?.trim() || undefined,
           tagId: tagId?.trim() || undefined,
           fromDate: fromDate || undefined,
@@ -352,199 +250,83 @@ export default function adminHandler(app: App) {
           order: order || "DESC",
           page,
           limit,
-        });
-        if (!result.success) {
-          logApiFailure(LOG_MESSAGES.ADMIN_GET_NEWS_FAILED, result);
-          return {
-            success: false,
-            error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
-          };
-        }
-        return { success: true, data: result.data };
-      } catch (error) {
-        log.error(LOG_MESSAGES.ADMIN_GET_NEWS_FAILED, error);
-        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-      }
-    },
+        }),
+      ),
   );
 
-  ipcMain.handle(IPC_CHANNELS.ADMIN.CREATE_NEWS, async (_event, payload) => {
-    try {
-      const token = await getValidAccessToken(app);
-      if (!token) {
-        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
-      }
-      const result = await createNewsRequest(token, payload);
-      if (!result.success) {
-        logApiFailure(LOG_MESSAGES.ADMIN_CREATE_NEWS_FAILED, result);
-        return {
-          success: false,
-          error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
-        };
-      }
-      return { success: true, data: result.data };
-    } catch (error) {
-      log.error(LOG_MESSAGES.ADMIN_CREATE_NEWS_FAILED, error);
-      return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-    }
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.CREATE_NEWS,
+    async (_event, payload) =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_CREATE_NEWS_FAILED, (token) =>
+        createNewsRequest(token, payload),
+      ),
+  );
 
-  ipcMain.handle(IPC_CHANNELS.ADMIN.GET_NEWS_TAGS, async () => {
-    try {
-      const token = await getValidAccessToken(app);
-      if (!token) {
-        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
-      }
-      const result = await listNewsTagsRequest(token);
-      if (!result.success) {
-        logApiFailure(LOG_MESSAGES.ADMIN_GET_NEWS_FAILED, result);
-        return {
-          success: false,
-          error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
-        };
-      }
-      return { success: true, data: result.data };
-    } catch (error) {
-      log.error(LOG_MESSAGES.ADMIN_GET_NEWS_FAILED, error);
-      return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-    }
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.GET_NEWS_TAGS,
+    async () =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_GET_NEWS_FAILED, (token) =>
+        listNewsTagsRequest(token),
+      ),
+  );
 
-  ipcMain.handle(IPC_CHANNELS.ADMIN.CREATE_NEWS_TAG, async (_event, payload) => {
-    try {
-      const token = await getValidAccessToken(app);
-      if (!token) {
-        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
-      }
-      const result = await createNewsTagRequest(token, payload);
-      if (!result.success) {
-        logApiFailure(LOG_MESSAGES.ADMIN_CREATE_NEWS_FAILED, result);
-        return {
-          success: false,
-          error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
-        };
-      }
-      return { success: true, data: result.data };
-    } catch (error) {
-      log.error(LOG_MESSAGES.ADMIN_CREATE_NEWS_FAILED, error);
-      return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-    }
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.CREATE_NEWS_TAG,
+    async (_event, payload) =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_CREATE_NEWS_FAILED, (token) =>
+        createNewsTagRequest(token, payload),
+      ),
+  );
 
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.UPDATE_NEWS_TAG,
-    async (_event, tagId: string, payload) => {
-      try {
-        const token = await getValidAccessToken(app);
-        if (!token) {
-          return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
-        }
-        const result = await updateNewsTagRequest(token, tagId, payload);
-        if (!result.success) {
-          logApiFailure(LOG_MESSAGES.ADMIN_UPDATE_NEWS_FAILED, result);
-          return {
-            success: false,
-            error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
-          };
-        }
-        return { success: true, data: result.data };
-      } catch (error) {
-        log.error(LOG_MESSAGES.ADMIN_UPDATE_NEWS_FAILED, error);
-        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-      }
-    },
+    async (_event, tagId: string, payload) =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_UPDATE_NEWS_FAILED, (token) =>
+        updateNewsTagRequest(token, tagId, payload),
+      ),
   );
 
-  ipcMain.handle(IPC_CHANNELS.ADMIN.DELETE_NEWS_TAG, async (_event, tagId: string) => {
-    try {
-      const token = await getValidAccessToken(app);
-      if (!token) {
-        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
-      }
-      const result = await deleteNewsTagRequest(token, tagId);
-      if (!result.success) {
-        logApiFailure(LOG_MESSAGES.ADMIN_DELETE_NEWS_FAILED, result);
-        return {
-          success: false,
-          error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
-        };
-      }
-      return { success: true };
-    } catch (error) {
-      log.error(LOG_MESSAGES.ADMIN_DELETE_NEWS_FAILED, error);
-      return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-    }
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.DELETE_NEWS_TAG,
+    async (_event, tagId: string) =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_DELETE_NEWS_FAILED, async (token) => {
+        const result = await deleteNewsTagRequest(token, tagId);
+        if (!result.success) {
+          return result;
+        }
+        return { ...result, data: undefined };
+      }),
+  );
 
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.UPDATE_NEWS,
-    async (_event, newsId: string, payload) => {
-      try {
-        const token = await getValidAccessToken(app);
-        if (!token) {
-          return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
-        }
-        const result = await updateNewsRequest(token, newsId, payload);
-        if (!result.success) {
-          logApiFailure(LOG_MESSAGES.ADMIN_UPDATE_NEWS_FAILED, result);
-          return {
-            success: false,
-            error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
-          };
-        }
-        return { success: true, data: result.data };
-      } catch (error) {
-        log.error(LOG_MESSAGES.ADMIN_UPDATE_NEWS_FAILED, error);
-        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-      }
-    },
+    async (_event, newsId: string, payload) =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_UPDATE_NEWS_FAILED, (token) =>
+        updateNewsRequest(token, newsId, payload),
+      ),
   );
 
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.DELETE_NEWS,
-    async (_event, newsId: string) => {
-      try {
-        const token = await getValidAccessToken(app);
-        if (!token) {
-          return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
-        }
+    async (_event, newsId: string) =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_DELETE_NEWS_FAILED, async (token) => {
         const result = await deleteNewsRequest(token, newsId);
         if (!result.success) {
-          logApiFailure(LOG_MESSAGES.ADMIN_DELETE_NEWS_FAILED, result);
-          return {
-            success: false,
-            error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
-          };
+          return result;
         }
-        return { success: true };
-      } catch (error) {
-        log.error(LOG_MESSAGES.ADMIN_DELETE_NEWS_FAILED, error);
-        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-      }
-    },
+        return { ...result, data: undefined };
+      }),
   );
 
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.DELETE_CHANGELOG,
-    async (_event, changelogId: string) => {
-      try {
-        const token = await getValidAccessToken(app);
-        if (!token) {
-          return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
-        }
+    async (_event, changelogId: string) =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_DELETE_CHANGELOG_FAILED, async (token) => {
         const result = await deleteChangelogRequest(token, changelogId);
         if (!result.success) {
-          logApiFailure(LOG_MESSAGES.ADMIN_DELETE_CHANGELOG_FAILED, result);
-          return {
-            success: false,
-            error: result.errorMessage ?? ERROR_CODES.AUTH_API_REQUEST_FAILED,
-          };
+          return result;
         }
-        return { success: true };
-      } catch (error) {
-        log.error(LOG_MESSAGES.ADMIN_DELETE_CHANGELOG_FAILED, error);
-        return { success: false, error: ERROR_CODES.ADMIN_INTERNAL_ERROR };
-      }
-    },
+        return { ...result, data: undefined };
+      }),
   );
 }

@@ -1,22 +1,30 @@
 import { useEffect } from 'react';
 import { useSettingsStore } from '../stores/useSettingsStore';
+import { THEME_CLASSNAMES, THEME_REGISTRY } from '../lib/themes/themeRegistry';
 
 export function ThemeWrapper({ children }: { children: React.ReactNode }) {
   const theme = useSettingsStore((state) => state.general.theme);
+  const themeMode = useSettingsStore((state) => state.general.themeMode);
 
   useEffect(() => {
-    // Remove all theme classes
-    document.body.classList.remove('theme-dark', 'theme-light', 'theme-gerbarium');
-    document.documentElement.classList.remove('theme-dark', 'theme-light', 'theme-gerbarium');
-    // Add current theme class
-    document.body.classList.add(`theme-${theme}`);
-    document.documentElement.classList.add(`theme-${theme}`);
+    const fallbackTheme = THEME_REGISTRY[0]?.id ?? "oxide";
+    const themeExists = THEME_REGISTRY.some((entry) => entry.id === theme);
+    const appliedTheme = themeExists ? theme : fallbackTheme;
+
+    document.body.classList.remove(...THEME_CLASSNAMES);
+    document.documentElement.classList.remove(...THEME_CLASSNAMES);
+    document.body.classList.add(`theme-${appliedTheme}`);
+    document.documentElement.classList.add(`theme-${appliedTheme}`);
+    document.body.classList.toggle("dark", themeMode === "dark");
+    document.documentElement.classList.toggle("dark", themeMode === "dark");
 
     return () => {
-      document.body.classList.remove('theme-dark', 'theme-light', 'theme-gerbarium');
-      document.documentElement.classList.remove('theme-dark', 'theme-light', 'theme-gerbarium');
+      document.body.classList.remove(...THEME_CLASSNAMES);
+      document.documentElement.classList.remove(...THEME_CLASSNAMES);
+      document.body.classList.remove("dark");
+      document.documentElement.classList.remove("dark");
     };
-  }, [theme]);
+  }, [theme, themeMode]);
 
   return <>{children}</>;
 }

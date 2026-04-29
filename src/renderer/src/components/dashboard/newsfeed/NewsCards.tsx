@@ -1,10 +1,15 @@
-﻿import { Card } from "../../ui/Card";
+import { Button } from "../../shadcn/ui";
 import type { NewsItem } from "../../../types";
 import type { TranslationType } from "../../../../../shared/constants/translations";
 
 function getCategoryColor(category: string) {
-  const colors: Record<string, string> = { update: "bg-[#3a753a]", event: "bg-[#8b5a2a]", community: "bg-[#5a5a8b]", announcement: "bg-[#8b2a2a]" };
-  return colors[category] || "bg-[#5a5a5a]";
+  const colors: Record<string, string> = {
+    update: "bg-[var(--primary)] text-[var(--primary-foreground)]",
+    event: "bg-[var(--secondary)] text-[var(--secondary-foreground)]",
+    community: "bg-[var(--accent)] text-[var(--accent-foreground)]",
+    announcement: "bg-[var(--destructive)] text-[var(--destructive-foreground)]",
+  };
+  return colors[category] || "bg-[var(--muted)] text-[var(--muted-foreground)]";
 }
 
 function stripMarkdown(markdown: string): string {
@@ -37,18 +42,53 @@ export function NewsCards({ t, news, placeholderImage, onSelectNews }: Props) {
       {news.map((item) => {
         const plainText = stripMarkdown(item.content);
         const preview = plainText.slice(0, 260) + (plainText.length > 260 ? "..." : "");
-        
+
         return (
-          <Card key={item.id} className="overflow-hidden p-0">
-            <div className="mb-4 h-48 w-full overflow-hidden rounded-none border-b-[3px] border-theme"><img src={item.imageUrl || placeholderImage} alt={item.title} className="h-full w-full object-cover transition-transform hover:scale-105" style={{ imageRendering: "pixelated" }} /></div>
-            <div className="mb-3 flex items-center gap-3">
-              {(item.tags?.length ?? 0) > 0 ? <div className="flex flex-wrap items-center gap-2">{item.tags!.map((tag) => <span key={`${item.id}-${tag}`} className="bg-[#3b3b3b] px-3 py-1 font-minecraft text-xs font-bold text-white">{tag}</span>)}</div> : <span className={`px-3 py-1 font-minecraft text-xs font-bold text-white ${getCategoryColor(item.category)}`}>{t.NEWS.CATEGORIES[item.category as keyof typeof t.NEWS.CATEGORIES] || item.category}</span>}
-              <span className="font-minecraft text-xs text-theme-muted">{new Date(item.date).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}</span>
+          <article
+            key={item.id}
+            className="overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-0 text-[var(--card-foreground)] shadow-[var(--shadow-md)]"
+          >
+            <div className="mb-4 h-48 w-full overflow-hidden border-b border-[var(--border)]">
+              <img
+                src={item.imageUrl || placeholderImage}
+                alt={item.title}
+                className="h-full w-full object-cover transition-transform hover:scale-105"
+                style={{ imageRendering: "pixelated" }}
+              />
             </div>
-            <h3 className="mb-3 break-words font-minecraft text-lg font-bold text-theme">{item.title}</h3>
-            <p className="break-words font-minecraft text-sm leading-relaxed text-theme-muted" style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}>{preview}</p>
-            <div className="mt-4"><button type="button" className="mc-btn mc-btn-sm mc-btn-primary" onClick={() => onSelectNews(item)}>{t.DASHBOARD.READ_MORE}</button></div>
-          </Card>
+            <div className="px-4 pb-4">
+              <div className="mb-3 flex items-center gap-3">
+                {(item.tags?.length ?? 0) > 0 ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {item.tags!.map((tag) => (
+                      <span
+                        key={`${item.id}-${tag}`}
+                        className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] px-3 py-1 text-xs font-semibold text-[var(--muted-foreground)]"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className={`rounded-[var(--radius)] px-3 py-1 text-xs font-semibold ${getCategoryColor(item.category)}`}>
+                    {t.NEWS.CATEGORIES[item.category as keyof typeof t.NEWS.CATEGORIES] || item.category}
+                  </span>
+                )}
+                <span className="text-xs text-[var(--muted-foreground)]">
+                  {new Date(item.date).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}
+                </span>
+              </div>
+              <h3 className="mb-3 break-words text-lg font-semibold text-[var(--foreground)]">{item.title}</h3>
+              <p className="break-words text-sm leading-relaxed text-[var(--muted-foreground)]" style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}>
+                {preview}
+              </p>
+              <div className="mt-4">
+                <Button type="button" size="sm" onClick={() => onSelectNews(item)}>
+                  {t.DASHBOARD.READ_MORE}
+                </Button>
+              </div>
+            </div>
+          </article>
         );
       })}
     </div>

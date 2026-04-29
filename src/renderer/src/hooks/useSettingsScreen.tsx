@@ -29,7 +29,6 @@ export function useSettingsScreen() {
     profile,
     updateGeneral,
     updateProfile,
-    saveSettings,
     resetToDefaults,
     isLoading,
     error,
@@ -103,10 +102,6 @@ export function useSettingsScreen() {
       updateGeneral({ ramAllocation: max });
     }
   }, [activeTab, memoryQuery.data, memoryQuery.isError, general.ramAllocation, updateGeneral]);
-
-  const onSave = async () => {
-    await saveSettings();
-  };
 
   const onConfirmReset = () => {
     resetToDefaults();
@@ -260,7 +255,6 @@ export function useSettingsScreen() {
     setShowConfirmReset,
     isLoading,
     error,
-    onSave,
     onConfirmReset,
     onBack,
     onLogout,

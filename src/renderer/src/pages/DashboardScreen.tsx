@@ -1,4 +1,4 @@
-﻿import { WindowControls } from "../components";
+﻿import { ThemeToggleButton, WindowControls } from "../components";
 import { useDashboardScreen } from "../hooks/useDashboardScreen";
 import newsPlaceholder from "../assets/photo_2026-04-23_10-34-22.jpg";
 import { DashboardSidebar } from "../components/dashboard/DashboardSidebar";
@@ -31,6 +31,7 @@ export function DashboardScreen() {
       <main className="relative z-10 flex flex-1 flex-col overflow-hidden">
         <div className="absolute right-4 top-4 z-50 flex items-center gap-4">
           {vm.appVersion && <div className="text-theme-muted font-minecraft text-xs">{vm.t.DASHBOARD.VERSION_DISPLAY_LABEL} {vm.appVersion}</div>}
+          <ThemeToggleButton />
           <WindowControls />
         </div>
 
@@ -100,3 +101,5 @@ export function DashboardScreen() {
     </div>
   );
 }
+
+

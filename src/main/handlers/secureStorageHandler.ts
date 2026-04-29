@@ -8,6 +8,11 @@ import { LOG_MESSAGES } from "@shared/constants/log-messages";
 import { secureStorageLock } from "../utils/secureStorageLock";
 
 type SecureData = Record<string, string>;
+const ALLOWED_SECURE_STORAGE_KEYS = new Set(["auth:session"]);
+
+function isAllowedSecureStorageKey(key: string): boolean {
+  return typeof key === "string" && ALLOWED_SECURE_STORAGE_KEYS.has(key);
+}
 
 async function readSecureData(secureDataPath: string): Promise<SecureData> {
   try {
@@ -35,6 +40,10 @@ export default function secureStorageHandler(app: App) {
     IPC_CHANNELS.SECURE_STORAGE.SET,
     async (_event, key: string, value: string) => {
       log.info(LOG_MESSAGES.SECURE_STORAGE_SET, key);
+      if (!isAllowedSecureStorageKey(key)) {
+        log.warn(LOG_MESSAGES.SECURE_STORAGE_SET_FAILED, "Blocked key:", key);
+        return { success: false, error: ERROR_CODES.SECURE_STORAGE_SET_FAILED };
+      }
       try {
         await secureStorageLock.runExclusive(async () => {
           const encrypted = safeStorage.encryptString(value);
@@ -59,6 +68,10 @@ export default function secureStorageHandler(app: App) {
     IPC_CHANNELS.SECURE_STORAGE.GET,
     async (_event, key: string) => {
       log.debug(LOG_MESSAGES.SECURE_STORAGE_GET, key);
+      if (!isAllowedSecureStorageKey(key)) {
+        log.warn(LOG_MESSAGES.SECURE_STORAGE_GET_FAILED, "Blocked key:", key);
+        return { success: false, error: ERROR_CODES.SECURE_STORAGE_GET_FAILED };
+      }
       try {
         return await secureStorageLock.runExclusive(async () => {
           const secureData = await readSecureData(secureDataPath);
@@ -85,6 +98,10 @@ export default function secureStorageHandler(app: App) {
     IPC_CHANNELS.SECURE_STORAGE.DELETE,
     async (_event, key: string) => {
       log.info(LOG_MESSAGES.SECURE_STORAGE_DELETE, key);
+      if (!isAllowedSecureStorageKey(key)) {
+        log.warn(LOG_MESSAGES.SECURE_STORAGE_DELETE_FAILED, "Blocked key:", key);
+        return { success: false, error: ERROR_CODES.SECURE_STORAGE_DELETE_FAILED };
+      }
       try {
         await secureStorageLock.runExclusive(async () => {
           const secureData = await readSecureData(secureDataPath);

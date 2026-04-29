@@ -25,8 +25,6 @@ export function SettingsScreen() {
           <SettingsActionBar
             t={vm.t}
             activeTab={vm.activeTab}
-            isLoading={vm.isLoading}
-            onSave={vm.onSave}
             onReset={() => vm.setShowConfirmReset(true)}
           />
         </div>

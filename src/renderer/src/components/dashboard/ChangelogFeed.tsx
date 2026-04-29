@@ -1,8 +1,8 @@
-﻿import { Card } from "../ui/Card";
+import { useEffect, useRef } from "react";
 import type { ChangelogItem } from "../../types";
-import { useEffect, useRef, useState } from "react";
 import { renderMarkdownToSafeHtml } from "../../lib/markdown";
 import type { TranslationType } from "../../../../shared/constants/translations";
+import { Button } from "../shadcn/ui";
 
 interface ChangelogFeedProps {
   t: TranslationType;
@@ -35,12 +35,12 @@ export function ChangelogFeed({
   const getTruncatedMarkdown = (item: ChangelogItem): { html: string; isTruncated: boolean } => {
     const fullMarkdown = getMarkdown(item);
     const fullHtml = renderMarkdownToSafeHtml(fullMarkdown);
-    
+
     const tempDiv = typeof document !== "undefined" ? document.createElement("div") : null;
     if (tempDiv) {
       tempDiv.innerHTML = fullHtml;
       const plainText = tempDiv.textContent || tempDiv.innerText || "";
-      
+
       if (plainText.length > MAX_PREVIEW_LENGTH) {
         const truncatedText = plainText.slice(0, MAX_PREVIEW_LENGTH);
         const truncatedMarkdown = fullMarkdown.slice(0, fullMarkdown.indexOf(truncatedText.slice(-50)) + 50);
@@ -50,7 +50,7 @@ export function ChangelogFeed({
         };
       }
     }
-    
+
     return { html: fullHtml, isTruncated: false };
   };
 
@@ -77,63 +77,58 @@ export function ChangelogFeed({
   return (
     <div className="overflow-x-hidden px-6">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="font-minecraft text-lg font-bold uppercase tracking-wider text-theme">
-          Changelog
-        </h2>
+        <h2 className="text-lg font-semibold tracking-wide text-[var(--foreground)]">Changelog</h2>
       </div>
 
       {isLoading ? (
         <div className="flex min-h-[50vh] items-center justify-center">
           <div className="flex flex-col items-center gap-3">
-            <div className="mc-spinner h-10 w-10 rounded-full border-2 border-[var(--mc-accent)] border-t-transparent" />
-            <span className="font-minecraft text-xs text-theme-muted">{t.COMMON.LOADING}</span>
+            <div className="mc-spinner h-10 w-10 rounded-full border-2 border-[var(--primary)] border-t-transparent" />
+            <span className="text-xs text-[var(--muted-foreground)]">{t.COMMON.LOADING}</span>
           </div>
         </div>
       ) : error ? (
         <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 text-center">
-          <div className="font-minecraft text-lg text-red-500">⚠️ {t.DASHBOARD.FAILED_TO_LOAD_NEWS}</div>
-          <div className="max-w-md font-minecraft text-sm text-theme-muted">{error}</div>
+          <div className="text-lg text-[var(--destructive)]">⚠️ {t.DASHBOARD.FAILED_TO_LOAD_NEWS}</div>
+          <div className="max-w-md text-sm text-[var(--muted-foreground)]">{error}</div>
         </div>
       ) : (
         <div className="grid gap-4">
           {changelog.map((item) => {
             const { html, isTruncated } = getTruncatedMarkdown(item);
-            
+
             return (
-              <Card key={item.id} className="p-4">
+              <article
+                key={item.id}
+                className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4 text-[var(--card-foreground)] shadow-[var(--shadow-md)]"
+              >
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="font-minecraft text-base font-bold text-theme">
-                    v{item.version}
-                  </h3>
+                  <h3 className="text-base font-semibold text-[var(--foreground)]">v{item.version}</h3>
                   <div className="flex items-center gap-2">
                     {item.mandatory && (
-                      <span className="rounded bg-red-500/20 px-2 py-1 font-minecraft text-[10px] uppercase text-red-400">
+                      <span className="rounded bg-[color:var(--destructive)]/20 px-2 py-1 text-[10px] uppercase text-[var(--destructive)]">
                         Mandatory
                       </span>
                     )}
-                    <span className="font-minecraft text-xs text-theme-muted">
+                    <span className="text-xs text-[var(--muted-foreground)]">
                       {new Date(item.releaseDate).toLocaleDateString("ru-RU")}
                     </span>
                   </div>
                 </div>
                 <div
-                  className="mb-3 min-w-0 max-w-full font-minecraft text-xs leading-relaxed text-theme-muted [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-[var(--mc-accent)] [&_a]:underline"
+                  className="mb-3 min-w-0 max-w-full text-xs leading-relaxed text-[var(--muted-foreground)] [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-[var(--primary)] [&_a]:underline"
                   style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
                   dangerouslySetInnerHTML={{ __html: html }}
                 />
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   {isTruncated && (
-                    <button
-                      type="button"
-                      className="mc-btn mc-btn-sm mc-btn-primary"
-                      onClick={() => onSelectChangelog(item)}
-                    >
+                    <Button type="button" size="sm" onClick={() => onSelectChangelog(item)}>
                       {t.DASHBOARD.READ_MORE}
-                    </button>
+                    </Button>
                   )}
                   <a
                     href={item.downloadUrl}
-                    className="font-minecraft text-xs text-[var(--mc-accent)] underline"
+                    className="text-xs text-[var(--primary)] underline"
                     onClick={(e) => {
                       e.preventDefault();
                       void window.electronAPI.system.openExternal(item.downloadUrl);
@@ -142,27 +137,17 @@ export function ChangelogFeed({
                     {t.DASHBOARD.DOWNLOAD_RELEASE}
                   </a>
                 </div>
-              </Card>
+              </article>
             );
           })}
           {changelog.length === 0 && (
-            <div className="py-10 text-center font-minecraft text-theme-muted">
-              {t.DASHBOARD.NO_MORE_NEWS}
-            </div>
+            <div className="py-10 text-center text-[var(--muted-foreground)]">{t.DASHBOARD.NO_MORE_NEWS}</div>
           )}
         </div>
       )}
       <div ref={loadMoreRef} className="h-6 w-full" />
-      {isLoadingMore && (
-        <div className="py-3 text-center font-minecraft text-xs text-theme-muted">
-          {t.DASHBOARD.LOADING_MORE_NEWS}
-        </div>
-      )}
-      {!hasMore && changelog.length > 0 && (
-        <div className="py-3 text-center font-minecraft text-xs text-theme-muted">
-          {t.DASHBOARD.NO_MORE_NEWS}
-        </div>
-      )}
+      {isLoadingMore && <div className="py-3 text-center text-xs text-[var(--muted-foreground)]">{t.DASHBOARD.LOADING_MORE_NEWS}</div>}
+      {!hasMore && changelog.length > 0 && <div className="py-3 text-center text-xs text-[var(--muted-foreground)]">{t.DASHBOARD.NO_MORE_NEWS}</div>}
     </div>
   );
 }

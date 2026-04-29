@@ -72,7 +72,6 @@ export interface IElectronAPI {
     login: (credentials: { login: string; password: string }) => Promise<{
       success: boolean;
       user?: AuthSessionUser;
-      accessToken?: string;
       emailVerification?: AuthEmailVerificationStatus;
       error?: string;
     }>;
@@ -83,7 +82,6 @@ export interface IElectronAPI {
     }) => Promise<{
       success: boolean;
       user?: AuthSessionUser;
-      accessToken?: string;
       emailVerification?: AuthEmailVerificationStatus;
       error?: string;
     }>;
@@ -111,7 +109,6 @@ export interface IElectronAPI {
     getSession: () => Promise<{
       success: boolean;
       user?: AuthSessionUser | null;
-      accessToken?: string;
       isAuthenticated?: boolean;
       error?: string;
     }>;

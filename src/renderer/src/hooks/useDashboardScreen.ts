@@ -63,10 +63,11 @@ const logAction = (action: string, details?: string): void => {
 };
 
 const toLauncherSettingsPatch = (
-  settings: { minimizeToTray: boolean; gamePath?: string },
+  settings: { minimizeToTray: boolean; gamePath?: string; discordRPC: boolean },
 ): Partial<LauncherSettings> => ({
   minimizeToTray: settings.minimizeToTray,
   gamePath: settings.gamePath,
+  discordRPC: settings.discordRPC,
 });
 
 export function useDashboardScreen() {
@@ -95,6 +96,10 @@ export function useDashboardScreen() {
   const closeOnLaunchRequestedRef = useRef(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
   const selectedVersion = versions.find((version) => version.id === selectedVersionId);
+  const hasAdminAccess = Boolean(
+    user?.roles?.some((role) => role.name === "admin") ||
+      user?.permissions?.some((permission) => permission.name === "admin"),
+  );
   const banReason = user?.banReason?.trim();
   const playBlockReason = user?.isBanned
     ? `You are banned${banReason ? `: ${banReason}` : "."}`
@@ -304,7 +309,14 @@ export function useDashboardScreen() {
   };
 
   const onOpenSettings = () => navigate({ to: ROUTES.SETTINGS });
-  const onOpenAdminPanel = () => navigate({ to: ROUTES.ADMIN });
+  const onOpenAdminPanel = () => {
+    if (!hasAdminAccess) {
+      setLaunchError("Access denied.");
+      logAction("ADMIN_PANEL_ACCESS_DENIED", user?.username || "unknown");
+      return;
+    }
+    navigate({ to: ROUTES.ADMIN });
+  };
   const onLogout = async () => {
     await logout();
     navigate({ to: ROUTES.LOGIN });
@@ -364,6 +376,7 @@ export function useDashboardScreen() {
     logs,
     logsEndRef,
     playBlockReason,
+    hasAdminAccess,
     onPlay,
     onCancelDownload: cancelDownload,
     onToggleConsole,
