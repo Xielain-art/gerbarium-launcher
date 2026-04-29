@@ -62,7 +62,7 @@ const defaultSettings: SettingsStateType = {
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...defaultSettings,
       isDownloadingJava: false,
       javaError: null,

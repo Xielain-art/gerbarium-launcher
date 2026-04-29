@@ -7,7 +7,7 @@ import { LOG_MESSAGES, UI_MESSAGES } from '@shared/constants/log-messages';
 import { ENVIRONMENTS, FILENAMES, TIMEOUTS } from '@shared/constants/system';
 import path from 'path';
 
-export default function updateHandler(app: App) {
+export default function updateHandler(_app: App) {
   let mainWindow: BrowserWindow | null = null;
   let updateEventsBound = false;
 

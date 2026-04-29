@@ -1,25 +1,58 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useDownloadStore } from "../stores/useDownloadStore";
-import { useNewsStore } from "../stores/useNewsStore";
-import { useChangelogStore } from "../stores/useChangelogStore";
-import { useServerStatusStore } from "../stores/useServerStatusStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
 import { useTranslation } from "./useTranslation";
 import { ROUTES, LOG_ACTIONS } from "../../../shared/constants/system";
 import type { LauncherSettings } from "../../../shared/constants/ipc-chanels";
 import type { ChangelogItem, GameVersion, NewsItem } from "../types";
+import {
+  toQueryErrorMessage,
+  usePublicChangelogQuery,
+  usePublicNewsQuery,
+  useServerStatusQuery,
+} from "./queries/useContentQueries";
+import { UI_STRINGS } from "../../../shared/constants/ui-strings";
 
 const INITIAL_VERSIONS: GameVersion[] = [
-  { id: "gerbarium-1.2", name: "Gerbarium v1.2", type: "gerbarium", isInstalled: false, version: "1.20.4" },
-  { id: "fabric-1.21", name: "Fabric 1.21", type: "fabric", isInstalled: false, version: "1.21" },
-  { id: "forge-1.20.1", name: "Forge 1.20.1", type: "forge", isInstalled: false, version: "1.20.1" },
-  { id: "vanilla-1.21.4", name: "Vanilla 1.21.4", type: "vanilla", isInstalled: true, version: "1.21.4" },
+  {
+    id: "gerbarium-1.2",
+    name: "Gerbarium v1.2",
+    type: "gerbarium",
+    isInstalled: false,
+    version: "1.20.4",
+  },
+  {
+    id: "fabric-1.21",
+    name: "Fabric 1.21",
+    type: "fabric",
+    isInstalled: false,
+    version: "1.21",
+  },
+  {
+    id: "forge-1.20.1",
+    name: "Forge 1.20.1",
+    type: "forge",
+    isInstalled: false,
+    version: "1.20.1",
+  },
+  {
+    id: "vanilla-1.21.4",
+    name: "Vanilla 1.21.4",
+    type: "vanilla",
+    isInstalled: true,
+    version: "1.21.4",
+  },
 ];
 
+const CHANGELOG_PAGE_SIZE = 8;
+
 const parseJvmArgs = (jvmArgsText: string): string[] =>
-  jvmArgsText.split(/\s+/).map((arg) => arg.trim()).filter(Boolean);
+  jvmArgsText
+    .split(/\s+/)
+    .map((arg) => arg.trim())
+    .filter(Boolean);
 
 const toErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : "Unknown error";
@@ -40,34 +73,12 @@ export function useDashboardScreen() {
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuthStore();
   const { isDownloading, progress, cancelDownload } = useDownloadStore();
-  const {
-    items: news,
-    isLoading: isLoadingNews,
-    isLoadingMore: isLoadingMoreNews,
-    hasMore: hasMoreNews,
-    isInitialLoaded: isNewsInitialLoaded,
-    fetchNews,
-    fetchMoreNews,
-    error: newsError,
-  } = useNewsStore();
-  const { data: serverStatus } = useServerStatusStore();
-  const {
-    items: changelog,
-    isLoading: isLoadingChangelog,
-    isLoadingMore: isLoadingMoreChangelog,
-    hasMore: hasMoreChangelog,
-    isInitialLoaded: isChangelogInitialLoaded,
-    error: changelogError,
-    fetchChangelog,
-    fetchMoreChangelog,
-  } = useChangelogStore();
-
+  const [newsSearchQuery, setNewsSearchQuery] = useState("");
   const [versions, setVersions] = useState<GameVersion[]>(INITIAL_VERSIONS);
   const [selectedVersionId, setSelectedVersionId] = useState<string | null>(
     INITIAL_VERSIONS[0]?.id ?? null,
   );
-  const selectedVersion = versions.find((v) => v.id === selectedVersionId);
-  const [appVersion, setAppVersion] = useState<string>("");
+  const [appVersion, setAppVersion] = useState("");
   const [logs, setLogs] = useState<string[]>([]);
   const [isLaunching, setIsLaunching] = useState(false);
   const [launchProgress, setLaunchProgress] = useState<number | null>(null);
@@ -75,28 +86,62 @@ export function useDashboardScreen() {
   const [launchError, setLaunchError] = useState<string | null>(null);
   const [isConsoleVisible, setIsConsoleVisible] = useState(true);
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
-  const [selectedChangelog, setSelectedChangelog] = useState<ChangelogItem | null>(null);
-  const [contentTab, setContentTab] = useState<"news" | "changelog">("news");
+  const [selectedChangelog, setSelectedChangelog] =
+    useState<ChangelogItem | null>(null);
+  const [contentTab, setContentTab] =
+    useState<"news" | "changelog">("news");
+  const [changelogPage, setChangelogPage] = useState(1);
   const closeOnLaunchRequestedRef = useRef(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
+  const selectedVersion = versions.find((version) => version.id === selectedVersionId);
   const banReason = user?.banReason?.trim();
   const playBlockReason = user?.isBanned
     ? `You are banned${banReason ? `: ${banReason}` : "."}`
     : null;
 
+  const newsQuery = usePublicNewsQuery({
+    searchQuery: newsSearchQuery,
+    sortBy: "createdAt",
+    order: "DESC",
+  });
+  const changelogQuery = usePublicChangelogQuery();
+  const serverStatusQuery = useServerStatusQuery();
+
+  const news = useMemo(() => newsQuery.data?.items ?? [], [newsQuery.data]);
+  const changelogItems = useMemo(
+    () => changelogQuery.data ?? [],
+    [changelogQuery.data],
+  );
+  const changelog = changelogItems.slice(0, changelogPage * CHANGELOG_PAGE_SIZE);
+  const hasMoreChangelog = changelog.length < changelogItems.length;
+  const newsError = newsQuery.isError
+    ? toQueryErrorMessage(newsQuery.error, UI_STRINGS.STORE_ERRORS.NEWS_LOAD)
+    : null;
+  const changelogError = changelogQuery.isError
+    ? toQueryErrorMessage(
+        changelogQuery.error,
+        UI_STRINGS.STORE_ERRORS.NEWS_LOAD,
+      )
+    : null;
+
   useEffect(() => {
     if (!window.electronAPI?.game) return;
+
     void window.electronAPI.game
       .getInstalledVersions()
-      .then((installed) => {
+      .then((installedVersions) => {
         setVersions((prev) =>
           prev.map((version) => ({
             ...version,
-            isInstalled: installed.includes(version.version || version.id),
+            isInstalled: installedVersions.includes(
+              version.version || version.id,
+            ),
           })),
         );
       })
-      .catch(() => setLaunchError("Failed to fetch installed game versions."));
+      .catch(() =>
+        setLaunchError("Failed to fetch installed game versions."),
+      );
   }, []);
 
   useEffect(() => {
@@ -105,21 +150,27 @@ export function useDashboardScreen() {
 
   useEffect(() => {
     if (!window.electronAPI?.game) return;
+
     const unsubscribe = window.electronAPI.game.onProgress((data) => {
       if (data.type === "progress") {
         const percent = data.content.percent;
         if (typeof percent === "number" && Number.isFinite(percent)) {
           setLaunchProgress(Math.max(0, Math.min(100, percent)));
         }
-        if (typeof data.content.status === "string" && data.content.status.trim()) {
+        if (
+          typeof data.content.status === "string" &&
+          data.content.status.trim()
+        ) {
           setLaunchStatus(data.content.status.trim());
         }
         return;
       }
+
       if (data.type === "data") {
         setLogs((prev) => [...prev, data.content]);
         return;
       }
+
       if (data.type === "state" && data.content.phase === "spawned") {
         setLaunchProgress(100);
         setLaunchStatus("Running...");
@@ -133,6 +184,7 @@ export function useDashboardScreen() {
         }
         return;
       }
+
       if (data.type === "close") {
         setIsLaunching(false);
         setLaunchProgress(null);
@@ -141,6 +193,7 @@ export function useDashboardScreen() {
         logAction("GAME_PROCESS_CLOSED", "Game process exited");
         return;
       }
+
       if (data.type === "error") {
         setIsLaunching(false);
         setLaunchProgress(null);
@@ -150,28 +203,43 @@ export function useDashboardScreen() {
         logAction("GAME_LAUNCH_ERROR", data.content);
       }
     });
+
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) navigate({ to: ROUTES.LOGIN });
+    if (!isAuthenticated) {
+      navigate({ to: ROUTES.LOGIN });
+    }
   }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     if (!window.electronAPI) return;
+
     void window.electronAPI.getAppVersion().then(setAppVersion);
     const currentSettings = useSettingsStore.getState().general;
     window.electronAPI.system?.sendSettingsUpdate?.(
       toLauncherSettingsPatch(currentSettings),
     );
-    void fetchNews();
-    void fetchChangelog();
   }, []);
 
+  useEffect(() => {
+    setChangelogPage(1);
+  }, [changelogItems]);
+
   const onPlay = async () => {
-    if (playBlockReason) return setLaunchError(playBlockReason);
-    if (!selectedVersion) return setLaunchError(t.DASHBOARD.SELECT_VERSION_ALERT);
-    if (!user?.username) return setLaunchError("User is not logged in.");
+    if (playBlockReason) {
+      setLaunchError(playBlockReason);
+      return;
+    }
+    if (!selectedVersion) {
+      setLaunchError(t.DASHBOARD.SELECT_VERSION_ALERT);
+      return;
+    }
+    if (!user?.username) {
+      setLaunchError("User is not logged in.");
+      return;
+    }
 
     setLaunchError(null);
     setIsLaunching(true);
@@ -182,10 +250,16 @@ export function useDashboardScreen() {
 
     try {
       const installedJava = await window.electronAPI.java.getInstalledJava();
-      const bestJava = installedJava.find((j) => j.version >= 17) || installedJava[0];
+      const bestJava =
+        installedJava.find((javaItem) => javaItem.version >= 17) ??
+        installedJava[0];
       let javaPath: string | null | undefined = bestJava?.path;
-      if (!javaPath) javaPath = await window.electronAPI.java.findSystemJava();
-      if (!javaPath) throw new Error("Java not found. Install Java in settings.");
+      if (!javaPath) {
+        javaPath = await window.electronAPI.java.findSystemJava();
+      }
+      if (!javaPath) {
+        throw new Error("Java not found. Install Java in settings.");
+      }
 
       const settings = useSettingsStore.getState().general;
       closeOnLaunchRequestedRef.current = settings.closeOnLaunch;
@@ -203,7 +277,10 @@ export function useDashboardScreen() {
         fullscreen: settings.fullscreen,
         jvmArgs: parseJvmArgs(settings.jvmArgs),
       });
-      if (!result.success) throw new Error(result.error || "Game launch failed.");
+      if (!result.success) {
+        throw new Error(result.error || "Game launch failed.");
+      }
+
       setLaunchStatus("Starting game process...");
       setLaunchProgress(95);
       logAction("GAME_LAUNCH_REQUESTED", selectedVersion.name);
@@ -238,28 +315,32 @@ export function useDashboardScreen() {
   return {
     t,
     user,
-    serverStatus,
+    serverStatus: serverStatusQuery.data ?? null,
     versions,
     selectedVersionId,
     setSelectedVersionId,
     selectedVersion,
     appVersion,
     news,
+    newsSearchQuery,
+    setNewsSearchQuery,
     changelog,
     contentTab,
     setContentTab,
-    isLoadingNews,
-    isLoadingChangelog,
-    isLoadingMoreChangelog,
+    isLoadingNews: newsQuery.isLoading,
+    isLoadingChangelog: changelogQuery.isLoading,
+    isLoadingMoreChangelog: false,
     hasMoreChangelog,
-    isChangelogInitialLoaded,
-    isLoadingMoreNews,
-    hasMoreNews,
-    isNewsInitialLoaded,
-    onLoadMoreNews: fetchMoreNews,
+    isChangelogInitialLoaded: changelogQuery.isFetched,
+    isLoadingMoreNews: newsQuery.isFetchingNextPage,
+    hasMoreNews: Boolean(newsQuery.hasNextPage),
+    isNewsInitialLoaded: newsQuery.isFetched,
+    onLoadMoreNews: newsQuery.fetchNextPage,
     newsError,
     changelogError,
-    onLoadMoreChangelog: fetchMoreChangelog,
+    onLoadMoreChangelog: async () => {
+      setChangelogPage((prev) => prev + 1);
+    },
     isDownloading,
     progress,
     isLaunching,

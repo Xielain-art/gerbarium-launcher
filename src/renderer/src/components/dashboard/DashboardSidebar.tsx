@@ -3,8 +3,7 @@ import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
 import type { AuthUser, GameVersion, ServerStatusData } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
-import { Route, useRouteContext } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useRouteContext } from "@tanstack/react-router";
 
 function getVersionIcon(type: string) {
   const icons: Record<string, string> = {

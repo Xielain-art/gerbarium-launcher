@@ -81,7 +81,7 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
       } else {
         set({ error: result.error || "Failed to fetch users", isLoading: false });
       }
-    } catch (err) {
+    } catch (_err) {
       set({ error: "Failed to fetch users", isLoading: false });
     }
   },
@@ -134,7 +134,7 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
       }
       set({ actionLoading: null });
       return false;
-    } catch (err) {
+    } catch (_err) {
       set({ actionLoading: null });
       return false;
     }
@@ -158,7 +158,7 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
       }
       set({ actionLoading: null });
       return false;
-    } catch (err) {
+    } catch (_err) {
       set({ actionLoading: null });
       return false;
     }
@@ -182,7 +182,7 @@ export const useAdminStore = create<AdminState>()((set, get) => ({
       }
       set({ actionLoading: null });
       return false;
-    } catch (err) {
+    } catch (_err) {
       set({ actionLoading: null });
       return false;
     }

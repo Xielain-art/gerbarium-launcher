@@ -1,6 +1,6 @@
 ﻿import { useAdminPage } from "../hooks/useAdminPage";
 import { WindowControls } from "../components";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Editor, {
   Toolbar,
   BtnBold,
@@ -25,9 +25,7 @@ import {
   Label as ShadcnLabel,
   Select as ShadcnSelect,
 } from "@/components/shadcn/ui";
-import { useAdminNewsStore } from "../stores/useAdminNewsStore";
 import type { ApiCreateNewsDto, ApiNews, ApiUpdateNewsDto } from "../../../lib/api/news";
-import { useAdminChangelogStore } from "../stores/useAdminChangelogStore";
 import type {
   ApiChangelog,
   ApiCreateChangelogDto,
@@ -36,6 +34,14 @@ import type {
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { ROUTES } from "../../../shared/constants/system";
+import {
+  useAdminChangelogMutations,
+  useAdminChangelogQuery,
+  useAdminNewsMutations,
+  useAdminNewsQuery,
+  useAdminNewsTagsQuery,
+} from "../hooks/queries/useAdminQueries";
+import { getErrorMessage } from "../lib/queryHelpers";
 
 type UserRoleFilter = string;
 type NewsSortBy = "createdAt" | "updatedAt" | "title";
@@ -227,43 +233,165 @@ export function AdminScreen() {
   const [newRoleDescription, setNewRoleDescription] = useState("");
   const [roleFormError, setRoleFormError] = useState<string | null>(null);
   const [roleSearchQuery, setRoleSearchQuery] = useState("");
+  const [appliedNewsFilters, setAppliedNewsFilters] = useState<{
+    search?: string;
+    tagId?: string;
+    fromDate?: string;
+    toDate?: string;
+    sortBy?: NewsSortBy;
+    order?: NewsOrder;
+  }>({
+    sortBy: "createdAt",
+    order: "DESC",
+  });
+  const [appliedChangelogFilters, setAppliedChangelogFilters] = useState<{
+    fromDate?: string;
+    toDate?: string;
+    mandatory?: boolean;
+    sortBy?: ChangelogSortBy;
+    order?: NewsOrder;
+  }>({
+    sortBy: "releaseDate",
+    order: "DESC",
+  });
 
-  const {
-    news,
-    isLoading: isLoadingNews,
-    isLoadingMore: isLoadingMoreNews,
-    hasMore: hasMoreNews,
-    actionLoadingId: newsActionLoadingId,
-    error: newsError,
-    newsTags,
-    isLoadingTags: isLoadingNewsTags,
-    sortBy: newsSortBy,
-    order: newsOrder,
-    setFilters: setNewsFilters,
-    fetchNews,
-    fetchMoreNews,
-    createNews,
-    updateNews,
-    deleteNews,
-    fetchNewsTags,
-    createNewsTag,
-    updateNewsTag,
-    deleteNewsTag,
-  } = useAdminNewsStore();
-  const {
-    changelog,
-    isLoading: isLoadingChangelog,
-    actionLoadingId: changelogActionLoadingId,
-    error: changelogError,
-    sortBy: changelogSortBy,
-    order: changelogOrder,
-    mandatory: changelogMandatoryFilterValue,
-    setFilters: setChangelogFilters,
-    fetchChangelog,
-    createChangelog,
-    updateChangelog,
-    deleteChangelog,
-  } = useAdminChangelogStore();
+  const newsQuery = useAdminNewsQuery(appliedNewsFilters);
+  const newsTagsQuery = useAdminNewsTagsQuery();
+  const newsMutations = useAdminNewsMutations(appliedNewsFilters);
+  const changelogQuery = useAdminChangelogQuery(appliedChangelogFilters);
+  const changelogMutations = useAdminChangelogMutations(appliedChangelogFilters);
+  const news = useMemo(() => newsQuery.data?.items ?? [], [newsQuery.data]);
+  const isLoadingNews = newsQuery.isLoading;
+  const isLoadingMoreNews = newsQuery.isFetchingNextPage;
+  const hasMoreNews = Boolean(newsQuery.hasNextPage);
+  const newsActionLoadingId =
+    newsMutations.createNews.isPending ||
+    newsMutations.updateNews.isPending ||
+    newsMutations.deleteNews.isPending ||
+    newsMutations.createNewsTag.isPending ||
+    newsMutations.updateNewsTag.isPending ||
+    newsMutations.deleteNewsTag.isPending
+      ? "pending"
+      : null;
+  const newsTags = useMemo(
+    () => newsTagsQuery.data ?? [],
+    [newsTagsQuery.data],
+  );
+  const isLoadingNewsTags = newsTagsQuery.isLoading;
+  const setNewsFilters = useCallback(
+    (filters: Partial<typeof appliedNewsFilters>) => {
+      setAppliedNewsFilters((prev) => ({ ...prev, ...filters }));
+    },
+    [],
+  );
+  const fetchMoreNews = newsQuery.fetchNextPage;
+  const createNews = async (payload: ApiCreateNewsDto) => {
+    try {
+      await newsMutations.createNews.mutateAsync(payload);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  const updateNews = async (newsId: string, payload: ApiUpdateNewsDto) => {
+    try {
+      await newsMutations.updateNews.mutateAsync({ newsId, payload });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  const deleteNews = async (newsId: string) => {
+    try {
+      await newsMutations.deleteNews.mutateAsync(newsId);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  const createNewsTag = async (name: string) => {
+    try {
+      const result = await newsMutations.createNewsTag.mutateAsync({ name });
+      return { success: true as const, tag: result.data };
+    } catch (error) {
+      return {
+        success: false as const,
+        error: getErrorMessage(error, "Failed to create news tag"),
+      };
+    }
+  };
+  const updateNewsTag = async (tagId: string, name: string) => {
+    try {
+      const result = await newsMutations.updateNewsTag.mutateAsync({
+        tagId,
+        payload: { name },
+      });
+      return { success: true as const, tag: result.data };
+    } catch (error) {
+      return {
+        success: false as const,
+        error: getErrorMessage(error, "Failed to update news tag"),
+      };
+    }
+  };
+  const deleteNewsTag = async (tagId: string) => {
+    try {
+      await newsMutations.deleteNewsTag.mutateAsync(tagId);
+      return { success: true as const };
+    } catch (error) {
+      return {
+        success: false as const,
+        error: getErrorMessage(error, "Failed to delete news tag"),
+      };
+    }
+  };
+  const changelog = changelogQuery.data ?? [];
+  const isLoadingChangelog = changelogQuery.isLoading;
+  const changelogActionLoadingId =
+    changelogMutations.createChangelog.isPending ||
+    changelogMutations.updateChangelog.isPending ||
+    changelogMutations.deleteChangelog.isPending
+      ? "pending"
+      : null;
+  const changelogError = changelogQuery.isError
+    ? getErrorMessage(changelogQuery.error, "Failed to fetch changelog")
+    : null;
+  const setChangelogFilters = useCallback(
+    (filters: Partial<typeof appliedChangelogFilters>) => {
+      setAppliedChangelogFilters((prev) => ({ ...prev, ...filters }));
+    },
+    [],
+  );
+  const createChangelog = async (payload: ApiCreateChangelogDto) => {
+    try {
+      await changelogMutations.createChangelog.mutateAsync(payload);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  const updateChangelog = async (
+    changelogId: string,
+    payload: ApiUpdateChangelogDto,
+  ) => {
+    try {
+      await changelogMutations.updateChangelog.mutateAsync({
+        changelogId,
+        payload,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  const deleteChangelog = async (changelogId: string) => {
+    try {
+      await changelogMutations.deleteChangelog.mutateAsync(changelogId);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   // Infinite scroll for users
   useEffect(() => {
@@ -300,64 +428,6 @@ export function AdminScreen() {
     observer.observe(target);
     return () => observer.disconnect();
   }, [activeTab, newsTab, hasMoreNews, isLoadingNews, isLoadingMoreNews, fetchMoreNews]);
-
-  useEffect(() => {
-    void fetchNews();
-  }, [fetchNews]);
-
-  useEffect(() => {
-    void fetchNewsTags();
-  }, [fetchNewsTags]);
-
-  useEffect(() => {
-    void fetchChangelog();
-  }, [fetchChangelog]);
-
-  useEffect(() => {
-    setNewsSortDraft(newsSortBy);
-  }, [newsSortBy]);
-
-  useEffect(() => {
-    setNewsOrderDraft(newsOrder);
-  }, [newsOrder]);
-
-  useEffect(() => {
-    setChangelogSortDraft(changelogSortBy);
-  }, [changelogSortBy]);
-
-  useEffect(() => {
-    setChangelogOrderDraft(changelogOrder);
-  }, [changelogOrder]);
-
-  useEffect(() => {
-    if (changelogMandatoryFilterValue === true) {
-      setChangelogMandatoryDraft("mandatory");
-      return;
-    }
-    if (changelogMandatoryFilterValue === false) {
-      setChangelogMandatoryDraft("optional");
-      return;
-    }
-    setChangelogMandatoryDraft("all");
-  }, [changelogMandatoryFilterValue]);
-
-  useEffect(() => {
-    setUserSearchInput(userSearch);
-  }, [userSearch]);
-
-  useEffect(() => {
-    setUserRoleFilter(userRole ?? "all");
-  }, [userRole]);
-
-  useEffect(() => {
-    setUserBanFilter(userBanned === undefined ? "all" : userBanned ? "banned" : "active");
-  }, [userBanned]);
-
-  useEffect(() => {
-    if (!rolesModalOpen) {
-      setRoleSearchQuery("");
-    }
-  }, [rolesModalOpen]);
 
   // Debounced users search input keeps filtering responsive and stable.
   useEffect(() => {

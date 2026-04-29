@@ -1,11 +1,8 @@
 import { Card } from "../ui/Card";
 import { Input } from "../ui/Input";
-import { Select } from "../ui/Select";
 import type { NewsItem } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
-import DOMPurify from "dompurify";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useNewsStore } from "../../stores/useNewsStore";
+import { useEffect, useRef, useState } from "react";
 
 function getCategoryColor(category: string) {
   const colors: Record<string, string> = {
@@ -37,6 +34,8 @@ interface NewsFeedProps {
   placeholderImage: string;
   newsError?: string | null;
   onSelectNews: (news: NewsItem) => void;
+  searchQuery: string;
+  onSearchQueryChange: (value: string) => void;
 }
 
 export function NewsFeed({
@@ -50,18 +49,21 @@ export function NewsFeed({
   placeholderImage,
   newsError,
   onSelectNews,
+  searchQuery,
+  onSearchQueryChange,
 }: NewsFeedProps) {
-  const { searchQuery, setFilters } = useNewsStore();
   const [localSearch, setLocalSearch] = useState(searchQuery);
-  const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
 
-  // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
-      setFilters({ searchQuery: localSearch });
+      onSearchQueryChange(localSearch);
     }, 500);
     return () => clearTimeout(timer);
-  }, [localSearch, setFilters]);
+  }, [localSearch, onSearchQueryChange]);
+
+  useEffect(() => {
+    setLocalSearch(searchQuery);
+  }, [searchQuery]);
 
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -93,6 +95,13 @@ export function NewsFeed({
         <h2 className="font-minecraft text-lg font-bold uppercase tracking-wider text-theme">
           {t.DASHBOARD.NEWS_TITLE}
         </h2>
+        <div className="w-full max-w-sm">
+          <Input
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            placeholder="Поиск новостей..."
+          />
+        </div>
       </div>
 
       {isLoadingNews ? (

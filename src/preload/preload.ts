@@ -6,7 +6,6 @@ import {
   GameLaunchOptions,
   GameProgressPayload,
   UpdateInfoPayload,
-  IntegrityCheckResult,
   AuthSessionUser,
   AuthEmailVerificationStatus,
   LauncherSettings,

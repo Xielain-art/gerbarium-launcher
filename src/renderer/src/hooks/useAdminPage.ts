@@ -1,5 +1,4 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useTranslation } from "./useTranslation";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useAdminScreen } from "./useAdminScreen";
 import { ROUTES } from "../../../shared/constants/system";

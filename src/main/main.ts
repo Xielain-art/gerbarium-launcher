@@ -6,6 +6,7 @@ import {
   ipcMain,
   type MenuItemConstructorOptions,
 } from "electron";
+import { createRequire } from "node:module";
 import path from "node:path";
 import fs from "node:fs";
 import crypto from "node:crypto";
@@ -59,6 +60,7 @@ function sanitizeSettingsPatch(
 }
 
 const appRoot = path.resolve(__dirname, "..", "..");
+const require = createRequire(__filename);
 
 const isDev = !app.isPackaged;
 const LangLoader = require(

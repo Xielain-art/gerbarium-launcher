@@ -32,12 +32,25 @@ export function createUserActionsLogger(app: Electron.App) {
   return userActionsLog;
 }
 
+function sanitizeLogSegment(value: string, fallback = 'UNKNOWN') {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return fallback;
+  }
+
+  return trimmed.replace(/[\r\n\t]+/g, ' ').slice(0, 500);
+}
+
 export default function setupLogHandler(app: Electron.App) {
   const userActionsLog = createUserActionsLogger(app);
 
   // LOG_ACTION — renderer sends user actions here
   ipcMain.handle(IPC_CHANNELS.SYSTEM.LOG_ACTION, (_, action: string, details?: string) => {
-    userActionsLog.info(`${LOG_MESSAGES.SYSTEM_USER_ACTION} ${action}`, details || '');
+    const safeAction = sanitizeLogSegment(action);
+    const safeDetails =
+      typeof details === 'string' ? sanitizeLogSegment(details, '') : '';
+
+    userActionsLog.info(`${LOG_MESSAGES.SYSTEM_USER_ACTION} ${safeAction}`, safeDetails);
   });
 
   // EXPORT_AND_REPORT — zip logs folder and open GitHub issue

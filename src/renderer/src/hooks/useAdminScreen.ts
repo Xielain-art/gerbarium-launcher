@@ -1,31 +1,22 @@
-import { useState, useCallback, useEffect } from "react";
-import { useAdminStore } from "../stores/useAdminStore";
+import { useMemo, useState } from "react";
 import { useTranslation } from "../hooks/useTranslation";
 import type { ApiUser } from "../../../lib/api/admin";
+import {
+  getVisibleUsers,
+  useAdminRolesQuery,
+  useAdminUserMutations,
+  useAdminUsersQuery,
+} from "./queries/useAdminQueries";
+import { getErrorMessage } from "../lib/queryHelpers";
+
+const INITIAL_PAGE = 1;
 
 export function useAdminScreen() {
   const t = useTranslation();
-  const {
-    users,
-    isLoading,
-    isLoadingMore,
-    actionLoading,
-    error,
-    hasMore,
-    search,
-    role,
-    banned,
-    setFilters,
-    fetchUsers,
-    fetchRoles,
-    fetchMoreUsers,
-    banUser,
-    unbanUser,
-    updateUserRoles,
-    createRole,
-    roles,
-  } = useAdminStore();
-
+  const [search, setSearch] = useState("");
+  const [role, setRole] = useState<string | undefined>(undefined);
+  const [banned, setBanned] = useState<boolean | undefined>(undefined);
+  const [page, setPage] = useState(INITIAL_PAGE);
   const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
   const [banModalOpen, setBanModalOpen] = useState(false);
   const [banReason, setBanReason] = useState("");
@@ -34,90 +25,146 @@ export function useAdminScreen() {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  useEffect(() => {
-    void fetchUsers();
-    void fetchRoles();
-  }, [fetchUsers, fetchRoles]);
+  const filters = useMemo(
+    () => ({ search, role, banned }),
+    [banned, role, search],
+  );
+  const usersQuery = useAdminUsersQuery(filters);
+  const rolesQuery = useAdminRolesQuery();
+  const { banUser, unbanUser, updateRoles, createRole } =
+    useAdminUserMutations(filters);
 
-  const openBanModal = useCallback((user: ApiUser) => {
+  const users = getVisibleUsers(usersQuery.data ?? [], page);
+  const hasMore = users.length < (usersQuery.data?.length ?? 0);
+  const actionLoading =
+    banUser.isPending || unbanUser.isPending || updateRoles.isPending || createRole.isPending
+      ? "pending"
+      : null;
+
+  const setFilters = (nextFilters: {
+    search?: string;
+    role?: string;
+    banned?: boolean;
+  }) => {
+    if ("search" in nextFilters) {
+      setSearch(nextFilters.search ?? "");
+    }
+    if ("role" in nextFilters) {
+      setRole(nextFilters.role);
+    }
+    if ("banned" in nextFilters) {
+      setBanned(nextFilters.banned);
+    }
+    setPage(INITIAL_PAGE);
+  };
+
+  const fetchUsers = async () => {
+    await usersQuery.refetch();
+  };
+
+  const fetchRoles = async () => {
+    await rolesQuery.refetch();
+  };
+
+  const fetchMoreUsers = async () => {
+    if (!hasMore) return;
+    setPage((prev) => prev + 1);
+  };
+
+  const openBanModal = (user: ApiUser) => {
     setSelectedUser(user);
     setBanReason("");
     setActionError(null);
     setBanModalOpen(true);
-  }, []);
+  };
 
-  const executeBan = useCallback(async () => {
+  const executeBan = async () => {
     if (!selectedUser || !banReason.trim()) return;
-    const success = await banUser(selectedUser.id, banReason);
-    if (success) {
-      setBanModalOpen(false);
-    } else {
-      setActionError("Failed to ban user");
-    }
-  }, [selectedUser, banReason, banUser]);
 
-  const openUnbanModal = useCallback((user: ApiUser) => {
+    try {
+      await banUser.mutateAsync({ userId: selectedUser.id, reason: banReason });
+      setBanModalOpen(false);
+    } catch (error) {
+      setActionError(getErrorMessage(error, "Failed to ban user"));
+    }
+  };
+
+  const openUnbanModal = (user: ApiUser) => {
     setSelectedUser(user);
     setActionError(null);
     setUnbanModalOpen(true);
-  }, []);
+  };
 
-  const executeUnban = useCallback(async () => {
+  const executeUnban = async () => {
     if (!selectedUser) return;
-    const success = await unbanUser(selectedUser.id);
-    if (success) {
-      setUnbanModalOpen(false);
-    } else {
-      setActionError("Failed to unban user");
-    }
-  }, [selectedUser, unbanUser]);
 
-  const openRolesModal = useCallback((user: ApiUser) => {
+    try {
+      await unbanUser.mutateAsync(selectedUser.id);
+      setUnbanModalOpen(false);
+    } catch (error) {
+      setActionError(getErrorMessage(error, "Failed to unban user"));
+    }
+  };
+
+  const openRolesModal = (user: ApiUser) => {
     setSelectedUser(user);
-    setSelectedRoles((user.roles ?? []).map((role) => role.id));
+    setSelectedRoles((user.roles ?? []).map((roleItem) => roleItem.id));
     setActionError(null);
     setRolesModalOpen(true);
-  }, []);
+  };
 
-  const toggleRole = useCallback((roleId: string) => {
+  const toggleRole = (roleId: string) => {
     setSelectedRoles((prev) =>
       prev.includes(roleId)
         ? prev.filter((id) => id !== roleId)
-        : [...prev, roleId]
+        : [...prev, roleId],
     );
-  }, []);
+  };
 
-  const executeRolesUpdate = useCallback(async () => {
+  const executeRolesUpdate = async () => {
     if (!selectedUser) return;
-    const success = await updateUserRoles(selectedUser.id, selectedRoles);
-    if (success) {
+
+    try {
+      await updateRoles.mutateAsync({
+        userId: selectedUser.id,
+        roleIds: selectedRoles,
+      });
       setRolesModalOpen(false);
-    } else {
-      setActionError("Failed to update roles");
+    } catch (error) {
+      setActionError(getErrorMessage(error, "Failed to update roles"));
     }
-  }, [selectedUser, selectedRoles, updateUserRoles]);
+  };
 
   const availableRoles =
-    roles.length > 0
-      ? roles.map((role) => ({
-          id: role.id,
-          name: role.name,
-          description: role.description,
+    (rolesQuery.data?.length ?? 0) > 0
+      ? (rolesQuery.data ?? []).map((roleItem) => ({
+          id: roleItem.id,
+          name: roleItem.name,
+          description: roleItem.description,
         }))
       : Array.from(
           new Map(
-            users
+            (usersQuery.data ?? [])
               .flatMap((user) => user.roles ?? [])
-              .map((role) => [role.id, { id: role.id, name: role.name, description: undefined }] as const),
+              .map((roleItem) => [
+                roleItem.id,
+                {
+                  id: roleItem.id,
+                  name: roleItem.name,
+                  description: undefined,
+                },
+              ] as const),
           ).values(),
         );
 
   return {
     users,
-    isLoading,
-    isLoadingMore,
+    isLoading: usersQuery.isLoading,
+    isLoadingMore: false,
     actionLoading,
-    error,
+    error: usersQuery.isError
+      ? getErrorMessage(usersQuery.error, "Failed to fetch users")
+      : null,
     hasMore,
     search,
     role,
@@ -135,6 +182,7 @@ export function useAdminScreen() {
     selectedRoles,
     actionError,
     fetchUsers,
+    fetchRoles,
     fetchMoreUsers,
     openBanModal,
     executeBan,
@@ -144,7 +192,17 @@ export function useAdminScreen() {
     toggleRole,
     executeRolesUpdate,
     availableRoles,
-    createRole,
+    createRole: async (payload: { name: string; description?: string }) => {
+      try {
+        await createRole.mutateAsync(payload);
+        return { success: true as const };
+      } catch (error) {
+        return {
+          success: false as const,
+          error: getErrorMessage(error, "Failed to create role"),
+        };
+      }
+    },
     t,
   };
 }

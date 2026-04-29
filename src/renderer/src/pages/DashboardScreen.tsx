@@ -91,6 +91,8 @@ export function DashboardScreen() {
               placeholderImage={newsPlaceholder}
               newsError={vm.newsError}
               onSelectNews={vm.onSelectNews}
+              searchQuery={vm.newsSearchQuery}
+              onSearchQueryChange={vm.setNewsSearchQuery}
             />
           )}
         </div>
