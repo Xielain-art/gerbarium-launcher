@@ -10,14 +10,12 @@ const root = path.resolve(__dirname, "..");
  */
 function killProcess(child) {
   if (process.platform === "win32") {
-    exec(`taskkill /pid ${child.pid} /T /F`, (err) => {
-      if (err) {
-        // Fallback to standard kill if taskkill fails
-        child.kill();
-      }
+    exec(`taskkill /pid ${child.pid} /T /F`, () => {
+      child.kill();
     });
   } else {
-    child.kill();
+    // On Unix, try SIGKILL to ensure immediate termination
+    child.kill("SIGKILL");
   }
 }
 
@@ -29,15 +27,19 @@ async function runSmokeTest() {
   console.log("🚀 Starting Launcher Smoke Test...");
   console.log("   Waiting for errors in Main process...");
 
+  // Use the local electron binary directly to avoid npx overhead/zombie processes
+  const electronPath = process.platform === "win32" 
+    ? path.join(root, "node_modules", ".bin", "electron.cmd")
+    : path.join(root, "node_modules", ".bin", "electron");
+
   const args = ["."];
   if (process.platform === "linux") {
     args.push("--no-sandbox");
   }
 
-  const child = spawn("npx", ["electron", ...args], {
+  const child = spawn(electronPath, args, {
     cwd: root,
     stdio: "pipe",
-    shell: true,
     env: {
       ...process.env,
       NODE_ENV: "development",
@@ -103,7 +105,9 @@ async function runSmokeTest() {
   });
 }
 
-runSmokeTest().catch((err) => {
+runSmokeTest().then(() => {
+  process.exit(0);
+}).catch((err) => {
   console.error(err.message);
   process.exit(1);
 });
