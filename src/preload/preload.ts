@@ -254,8 +254,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
       typedInvoke(IPC_CHANNELS.SYSTEM.OPEN_EXTERNAL, url),
     openGitHubIssue: () =>
       typedInvoke(IPC_CHANNELS.SYSTEM.OPEN_GITHUB_ISSUE),
-    selectDirectory: () =>
-      typedInvoke(IPC_CHANNELS.SYSTEM.SELECT_DIRECTORY),
+    selectDirectory: () => typedInvoke(IPC_CHANNELS.SYSTEM.SELECT_DIRECTORY),
+    sendUiReady: () => ipcRenderer.send(IPC_CHANNELS.SYSTEM.UI_READY),
+    },
+
     openPath: (path: string) =>
       typedInvoke(IPC_CHANNELS.SYSTEM.OPEN_PATH, path),
     openDataFolder: () =>

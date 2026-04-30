@@ -1,4 +1,5 @@
-﻿import { StrictMode } from "react";
+﻿import { useEffect } from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
@@ -32,10 +33,18 @@ window.electronAPI?.system
   .logAction("APP_START", "React Renderer Initialized")
   .catch(() => {});
 
+function AppReadyNotifier() {
+  useEffect(() => {
+    window.electronAPI?.system.sendUiReady();
+  }, []);
+  return null;
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ThemeWrapper>
+        <AppReadyNotifier />
         <RouterProvider router={router} />
         <Toaster position="top-right" />
       </ThemeWrapper>

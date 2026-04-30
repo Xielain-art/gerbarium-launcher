@@ -371,6 +371,10 @@ function syncTrayState(): void {
   destroyTray();
 }
 
+ipcMain.on(IPC_CHANNELS.SYSTEM.UI_READY, () => {
+  log.info("RENDERER_READY");
+});
+
 ipcMain.on(
   IPC_CHANNELS.SYSTEM.SETTINGS_UPDATED,
   (_event, newSettings: unknown) => {

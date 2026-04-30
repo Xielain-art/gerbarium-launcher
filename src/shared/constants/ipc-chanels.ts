@@ -88,6 +88,7 @@ export const IPC_CHANNELS = {
     OPEN_PATH: "system:open-path",
     OPEN_DATA_FOLDER: "system:open-data-folder",
     SETTINGS_UPDATED: "system:settings-updated",
+    UI_READY: "system:ui-ready",
   },
   LOG: {
     EXPORT_AND_REPORT: "logs:export-and-report",
@@ -553,6 +554,10 @@ export interface IpcChannelMap {
   };
   [IPC_CHANNELS.SYSTEM.SETTINGS_UPDATED]: {
     args: [settings: Partial<LauncherSettings>];
+    return: void;
+  };
+  [IPC_CHANNELS.SYSTEM.UI_READY]: {
+    args: [];
     return: void;
   };
   [IPC_CHANNELS.LOG.EXPORT_AND_REPORT]: {
