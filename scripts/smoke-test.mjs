@@ -33,9 +33,9 @@ async function runSmokeTest() {
   }
 
   const timestamp = Date.now();
-  const testUsername = `smoke_user_${timestamp}`;
-  const testEmail = `smoke_${timestamp}@gerbarium.ru`;
-  const testPassword = "SmokeTestPassword123!";
+  const testUsername = process.env.TEST_USERNAME || `smoke_user_${timestamp}`;
+  const testEmail = process.env.TEST_EMAIL || `smoke_${timestamp}@gerbarium.ru`;
+  const testPassword = process.env.TEST_PASSWORD || "SmokeTestPassword123!";
 
   const child = spawn("npx", ["electron", ...args], {
     cwd: root,

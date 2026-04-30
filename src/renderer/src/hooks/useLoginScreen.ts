@@ -310,6 +310,8 @@ export function useLoginScreen() {
   useEffect(() => {
     const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
     if (smokeTestConfig?.isSmokeTest && error && mode === "login") {
+      // If we get an error during auto-login, it's likely 401 (user doesn't exist)
+      // Switch to registration flow
       setMode("register");
       setRegisterStep(1);
       clearError();
