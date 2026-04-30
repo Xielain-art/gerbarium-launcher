@@ -1,4 +1,4 @@
-appId: 'gerbariumlauncher'
+﻿appId: 'gerbariumlauncher'
 productName: 'Gerbarium'
 artifactName: '${productName}-setup-${version}.${ext}'
 
@@ -67,3 +67,4 @@ publish:
   provider: github
   owner: Xielain-art 
   repo: gerbarium-releases
+  releaseType: draft

@@ -1,9 +1,9 @@
-name: Linux Build
+﻿name: Linux Build
 
 on:
   push:
     branches:
-      - main
+      - master
     tags:
       - 'v*.*.*'
   pull_request:
