@@ -16,8 +16,8 @@
                     "build:ui":  "vite build",
                     "build:main":  "node scripts/esbuild-main.mjs",
                     "build:preload":  "node scripts/esbuild-preload.mjs",
-                    "build":  "npm run build:ui \u0026\u0026 npm run build:main \u0026\u0026 npm run build:preload",
-                    "dist":  "npm run build \u0026\u0026 electron-builder build",
+                    "build":  "npm run build:ui && npm run build:main && npm run build:preload",
+                    "dist":  "npm run build && electron-builder build",
                     "dist:win":  "npm run dist -- -w --publish never",
                     "dist:mac":  "npm run dist -- -m --publish never",
                     "dist:linux":  "npm run dist -- -l --publish never",
@@ -27,7 +27,7 @@
                     "dev:preload":  "node scripts/esbuild-preload.mjs --watch",
                     "dev:electron":  "electron .",
                     "dev":  "vite",
-                    "publish-app":  "npm run build \u0026\u0026 electron-builder build -p always",
+                    "publish-app":  "npm run build && electron-builder build -p always",
                     "gen-types":  "npx openapi-typescript https://gerbarium-api.vercel.app/api/docs-json -o ./src/lib/api/v1.d.ts"
                 },
     "engines":  {
