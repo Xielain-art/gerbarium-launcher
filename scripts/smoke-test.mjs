@@ -81,7 +81,6 @@ async function runSmokeTest() {
       "UnhandledRejection",
       "Error occurred in handler",
       "Attempted to register a second handler",
-      "is not defined",
     ];
 
     for (const err of criticalErrors) {
@@ -90,6 +89,12 @@ async function runSmokeTest() {
         killProcess(child);
         break;
       }
+    }
+
+    // Strict check for "is not defined" to avoid false positives from "APPIMAGE env is not defined"
+    if (output.includes("is not defined") && !output.includes("APPIMAGE env is not defined")) {
+      errorDetected = output;
+      killProcess(child);
     }
   };
 
