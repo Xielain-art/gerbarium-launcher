@@ -293,6 +293,8 @@ export function useLoginScreen() {
       const username = smokeTestConfig.testUsername || "smoke_user";
       const password = smokeTestConfig.testPassword || "SmokeTestPassword123!";
       
+      window.electronAPI.system.logAction("SMOKE_TEST_IDENTITY", `${username} (${email})`);
+
       setLocalEmail(email);
       setLocalUsername(username);
       setLocalPassword(password);
@@ -300,6 +302,7 @@ export function useLoginScreen() {
 
       // Trigger auto-login after state has a chance to settle
       const timer = setTimeout(() => {
+        window.electronAPI.system.logAction("SMOKE_TEST_AUTO_LOGIN_TRIGGER");
         setAutoSubmitMode("login");
       }, 1500);
       return () => clearTimeout(timer);
@@ -310,6 +313,8 @@ export function useLoginScreen() {
   useEffect(() => {
     const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
     if (smokeTestConfig?.isSmokeTest && error && mode === "login") {
+      window.electronAPI.system.logAction("SMOKE_TEST_LOGIN_FAILED_SWITCHING_TO_REGISTER", `Error: ${error}`);
+      
       // If we get an error during auto-login, it's likely 401 (user doesn't exist)
       // Switch to registration flow
       setMode("register");
@@ -317,6 +322,7 @@ export function useLoginScreen() {
       clearError();
       
       const timer = setTimeout(() => {
+        window.electronAPI.system.logAction("SMOKE_TEST_AUTO_REGISTER_STEP1_TRIGGER");
         setAutoSubmitMode("register_step1");
       }, 1000);
       return () => clearTimeout(timer);
@@ -328,6 +334,7 @@ export function useLoginScreen() {
     const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
     if (smokeTestConfig?.isSmokeTest && mode === "register" && registerStep === 2 && !isLoading && !error) {
       const timer = setTimeout(() => {
+        window.electronAPI.system.logAction("SMOKE_TEST_AUTO_REGISTER_STEP2_TRIGGER");
         setAutoSubmitMode("register_step2");
       }, 1000);
       return () => clearTimeout(timer);
@@ -344,6 +351,7 @@ export function useLoginScreen() {
       !verificationCode &&
       !isLoading
     ) {
+      window.electronAPI.system.logAction("SMOKE_TEST_AUTO_VERIFY_TRIGGER", `Code: ${emailVerification.developmentCode}`);
       setVerificationCode(emailVerification.developmentCode);
       const timer = setTimeout(() => {
         setAutoSubmitMode("verify");
