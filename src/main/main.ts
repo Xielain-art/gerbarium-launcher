@@ -32,6 +32,19 @@ import javaHandler from "./handlers/javaHandlerWrapper";
 import systemHandler from "./handlers/systemHandler";
 import gameHandler from "./handlers/gameHandler";
 import { createDiscordRpcService } from "./services/discordRpcService";
+import {
+  calculateFileSha256,
+  normalizeHexHash,
+  isHexHash,
+  isSimpleYamlComment,
+  parseSimpleYamlKeyValue,
+  extractAsarSha256FromLatestYml,
+} from "./utils/integrity";
+import {
+  writeCrashReport,
+  readCrashReport,
+  clearCrashReport,
+} from "./utils/crashReport";
 
 type LegacyLangLoader = {
   setupLanguage: () => void;
@@ -73,6 +86,36 @@ const LangLoader = require(
 
 const dateFolder = getDateFolder();
 let isHandlingFatalError = false;
+let mainWindow: BrowserWindow | null = null;
+let tray: Tray | null = null;
+let isQuiting = false;
+let settings: LauncherSettings = {
+  minimizeToTray: false,
+  discordRPC: true,
+};
+
+const discordRpcService = createDiscordRpcService();
+
+function getLatestYmlFilename(): string {
+  if (process.platform === MAIN_CONSTANTS.PLATFORMS.MACOS) {
+    return "latest-mac.yml";
+  }
+  if (process.platform === "linux") {
+    return "latest-linux.yml";
+  }
+  return "latest.yml";
+}
+
+const LATEST_YML_URL = `https://github.com/Xielain-art/gerbarium-releases/releases/latest/download/${getLatestYmlFilename()}`;
+
+async function triggerRecoveryUpdate(): Promise<void> {
+  log.info(LOG_MESSAGES.APP_RECOVERY_UPDATE_TRIGGERED);
+  try {
+    await autoUpdater.checkForUpdates();
+  } catch (error) {
+    log.error(LOG_MESSAGES.APP_RECOVERY_UPDATE_FAILED, error);
+  }
+}
 
 log.transports.file.level = "info";
 log.transports.console.level = "debug";
@@ -120,154 +163,6 @@ process.on("uncaughtException", (error) => {
 process.on("unhandledRejection", (reason) => {
   handleFatalError(MAIN_CONSTANTS.LOG_MESSAGES.APP_UNHANDLED_REJECTION, reason);
 });
-
-log.info(MAIN_CONSTANTS.LOG_MESSAGES.APP_STARTING, {
-  version: app.getVersion(),
-  platform: process.platform,
-  arch: process.arch,
-});
-
-let mainWindow: BrowserWindow | null = null;
-let tray: Tray | null = null;
-let settings: LauncherSettings = { minimizeToTray: false, discordRPC: true };
-let isQuiting = false;
-const discordRpcService = createDiscordRpcService();
-const LATEST_YML_URL =
-  "https://github.com/Xielain-art/gerbarium-releases/releases/latest/download/latest.yml";
-const LAST_CRASH_REPORT_FILE = "last-crash-report.json";
-
-function getCrashReportPath(): string {
-  return path.join(
-    app.getPath(MAIN_CONSTANTS.DIRECTORIES.USER_DATA),
-    LAST_CRASH_REPORT_FILE,
-  );
-}
-
-async function writeCrashReport(report: CrashReportPayload): Promise<void> {
-  const crashPath = getCrashReportPath();
-  await fs.promises.mkdir(path.dirname(crashPath), { recursive: true });
-  await fs.promises.writeFile(
-    crashPath,
-    JSON.stringify(report, null, 2),
-    "utf-8",
-  );
-}
-
-async function readCrashReport(): Promise<CrashReportPayload | null> {
-  try {
-    const raw = await fs.promises.readFile(getCrashReportPath(), "utf-8");
-    const parsed = JSON.parse(raw) as CrashReportPayload;
-    if (!parsed?.title || !parsed?.message || !parsed?.timestamp) {
-      return null;
-    }
-    return parsed;
-  } catch (error) {
-    const err = error as NodeJS.ErrnoException;
-    if (err.code === "ENOENT") {
-      return null;
-    }
-    throw error;
-  }
-}
-
-async function clearCrashReport(): Promise<void> {
-  try {
-    await fs.promises.unlink(getCrashReportPath());
-  } catch (error) {
-    const err = error as NodeJS.ErrnoException;
-    if (err.code === "ENOENT") {
-      return;
-    }
-    throw error;
-  }
-}
-
-function normalizeHexHash(value: string): string {
-  return value.trim().toLowerCase();
-}
-
-function isHexHash(value: string): boolean {
-  return /^[a-f0-9]{64}$/i.test(value);
-}
-
-function isSimpleYamlComment(value: string): boolean {
-  return value.startsWith("#");
-}
-
-function parseSimpleYamlKeyValue(
-  line: string,
-): { key: string; value: string } | null {
-  const separatorIndex = line.indexOf(":");
-  if (separatorIndex <= 0) {
-    return null;
-  }
-
-  const key = line.slice(0, separatorIndex).trim();
-  if (!key) {
-    return null;
-  }
-
-  let value = line.slice(separatorIndex + 1).trim();
-  if (!value || isSimpleYamlComment(value)) {
-    return null;
-  }
-
-  const hashCommentIndex = value.indexOf(" #");
-  if (hashCommentIndex >= 0) {
-    value = value.slice(0, hashCommentIndex).trim();
-  }
-
-  if (
-    (value.startsWith('"') && value.endsWith('"')) ||
-    (value.startsWith("'") && value.endsWith("'"))
-  ) {
-    value = value.slice(1, -1).trim();
-  }
-
-  return { key, value };
-}
-
-async function calculateFileSha256(filePath: string): Promise<string> {
-  return await new Promise((resolve, reject) => {
-    const hash = crypto.createHash("sha256");
-    const stream = fs.createReadStream(filePath);
-
-    stream.on("error", reject);
-    stream.on("data", (chunk) => hash.update(chunk));
-    stream.on("end", () => resolve(hash.digest("hex")));
-  });
-}
-
-async function triggerRecoveryUpdate(): Promise<void> {
-  try {
-    await autoUpdater.checkForUpdates();
-    await autoUpdater.downloadUpdate();
-  } catch (error) {
-    log.error(LOG_MESSAGES.APP_RECOVERY_UPDATE_FAILED, error);
-  }
-}
-
-function extractAsarSha256FromLatestYml(content: string): string | null {
-  const allowedKeys = new Set(["appAsarSha256", "asarSha256", "asar_sha256"]);
-
-  for (const rawLine of content.split(/\r?\n/)) {
-    const line = rawLine.trim();
-    if (!line || isSimpleYamlComment(line)) {
-      continue;
-    }
-
-    const keyValue = parseSimpleYamlKeyValue(line);
-    if (!keyValue || !allowedKeys.has(keyValue.key)) {
-      continue;
-    }
-
-    if (isHexHash(keyValue.value)) {
-      return keyValue.value;
-    }
-  }
-
-  return null;
-}
 
 async function fetchExpectedAsarSha256(): Promise<string | null> {
   try {
@@ -382,6 +277,8 @@ function createWindow(): BrowserWindow {
     },
     backgroundColor: MAIN_CONSTANTS.APP_CONFIG.BG_COLOR,
   });
+
+  log.info("MAIN_WINDOW_CREATED");
 
   if (isDev) {
     log.info(LOG_MESSAGES.APP_DEV_MODE);

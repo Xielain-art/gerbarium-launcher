@@ -1,0 +1,83 @@
+/**
+ * Utilities for verifying ASAR integrity and parsing release metadata.
+ */
+import crypto from "node:crypto";
+import fs from "node:fs";
+
+export function normalizeHexHash(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+export function isHexHash(value: string): boolean {
+  return /^[a-f0-9]{64}$/i.test(value);
+}
+
+export async function calculateFileSha256(filePath: string): Promise<string> {
+  return await new Promise((resolve, reject) => {
+    const hash = crypto.createHash("sha256");
+    const stream = fs.createReadStream(filePath);
+
+    stream.on("error", reject);
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.on("end", () => resolve(hash.digest("hex")));
+  });
+}
+
+export function isSimpleYamlComment(value: string): boolean {
+  return value.startsWith("#");
+}
+
+export function parseSimpleYamlKeyValue(
+  line: string,
+): { key: string; value: string } | null {
+  const separatorIndex = line.indexOf(":");
+  if (separatorIndex <= 0) {
+    return null;
+  }
+
+  const key = line.slice(0, separatorIndex).trim();
+  if (!key) {
+    return null;
+  }
+
+  let value = line.slice(separatorIndex + 1).trim();
+  if (!value || isSimpleYamlComment(value)) {
+    return null;
+  }
+
+  const hashCommentIndex = value.indexOf(" #");
+  if (hashCommentIndex >= 0) {
+    value = value.slice(0, hashCommentIndex).trim();
+  }
+
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    value = value.slice(1, -1).trim();
+  }
+
+  return { key, value };
+}
+
+export function extractAsarSha256FromLatestYml(content: string): string | null {
+  const allowedKeys = new Set(["appAsarSha256", "asarSha256", "asar_sha256"]);
+
+  for (const rawLine of content.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || isSimpleYamlComment(line)) {
+      continue;
+    }
+
+    const keyValue = parseSimpleYamlKeyValue(line);
+    if (!keyValue || !allowedKeys.has(keyValue.key)) {
+      continue;
+    }
+
+    if (isHexHash(keyValue.value)) {
+      return keyValue.value;
+    }
+  }
+
+  return null;
+}

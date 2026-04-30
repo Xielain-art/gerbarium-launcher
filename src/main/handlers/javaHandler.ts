@@ -25,6 +25,7 @@ import {
   DOWNLOAD_STATUS,
   FILE_EXTENSIONS
 } from "../../shared/constants/system";
+import { calculateFileSha256 } from "../utils/integrity";
 import log from "electron-log";
 
 const execPromise = util.promisify(exec);
@@ -239,15 +240,4 @@ async function fetchExpectedSha256(archiveUrl: string): Promise<string> {
   }
 
   return match[1];
-}
-
-async function calculateFileSha256(filePath: string): Promise<string> {
-  return await new Promise((resolve, reject) => {
-    const hash = crypto.createHash("sha256");
-    const stream = fs.createReadStream(filePath);
-
-    stream.on("error", reject);
-    stream.on("data", (chunk) => hash.update(chunk));
-    stream.on("end", () => resolve(hash.digest("hex")));
-  });
 }

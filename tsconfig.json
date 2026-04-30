@@ -20,8 +20,9 @@
     },
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "6.0",
+    "types": ["node", "jest"]
   },
-  "include": ["src/**/*", "vite.config.ts"],
+  "include": ["src/**/*", "tests/**/*", "vite.config.ts"],
   "exclude": ["node_modules", "dist", "build", "**/*.config.js"]
 }

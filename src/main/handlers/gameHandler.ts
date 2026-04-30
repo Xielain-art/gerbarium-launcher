@@ -168,13 +168,12 @@ function sendProgress(mainWindow: BrowserWindow, payload: GameProgressPayload): 
 
 function parseJavaMajor(version: string): number {
   const trimmed = version.trim();
-  if (trimmed.startsWith("1.")) {
-    const legacyMajor = Number.parseInt(trimmed.split(".")[1] ?? "", 10);
-    return Number.isNaN(legacyMajor) ? 0 : legacyMajor;
+  const match = trimmed.match(/^(?:1\.)?(\d+)(?:[._-].*)?$/);
+  if (match && match[1]) {
+    const major = Number.parseInt(match[1], 10);
+    return Number.isNaN(major) ? 0 : major;
   }
-
-  const major = Number.parseInt(trimmed.split(".")[0] ?? "", 10);
-  return Number.isNaN(major) ? 0 : major;
+  return 0;
 }
 
 async function validateJavaCompatibility(javaPath: string, minecraftVersion: string): Promise<void> {

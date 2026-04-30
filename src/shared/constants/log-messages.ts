@@ -16,6 +16,7 @@ export const LOG_MESSAGES = {
   APP_ASAR_INTEGRITY_OK: 'ASAR integrity check passed',
   APP_ASAR_INTEGRITY_MISMATCH: 'ASAR integrity mismatch detected',
   APP_ASAR_INTEGRITY_FAILED: 'ASAR integrity check failed',
+  APP_RECOVERY_UPDATE_TRIGGERED: 'ASAR integrity mismatch: recovery update triggered',
 
   // Java
   JAVA_DOWNLOAD_START: '[JAVA] Starting download Java',
