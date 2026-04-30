@@ -38,7 +38,7 @@ jobs:
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
           DISCORD_RPC_CLIENT_ID: ${{ vars.DISCORD_RPC_CLIENT_ID }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: npm run publish-app
 
       - name: Upload Linux artifacts
