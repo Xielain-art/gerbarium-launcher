@@ -41,7 +41,9 @@ export function createDiscordRpcService() {
   const disconnect = (): void => {
     if (!client) return;
     try {
-      client.clearActivity();
+      if (client.clearActivity) {
+        client.clearActivity();
+      }
       client.destroy();
       log.info(LOG_MESSAGES.DISCORD_RPC_STOPPED);
     } catch (error) {
@@ -77,11 +79,15 @@ export function createDiscordRpcService() {
         } else {
           log.warn(LOG_MESSAGES.DISCORD_RPC_LOGIN_FAILED, errorText);
         }
-        disconnect();
+        if (client) {
+          client = null;
+        }
       });
     } catch (error) {
       log.warn(LOG_MESSAGES.DISCORD_RPC_INIT_FAILED, error);
-      disconnect();
+      if (client) {
+        client = null;
+      }
     }
   };
 
