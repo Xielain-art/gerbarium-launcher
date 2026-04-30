@@ -1,4 +1,3 @@
-﻿import { useEffect } from "react";
 import { ThemeToggleButton, WindowControls } from "../components";
 import { useDashboardScreen } from "../hooks/useDashboardScreen";
 import newsPlaceholder from "../assets/photo_2026-04-23_10-34-22.jpg";
@@ -12,13 +11,6 @@ import { ChangelogPreviewModal } from "../components/dashboard/ChangelogPreviewM
 
 export function DashboardScreen() {
   const vm = useDashboardScreen();
-
-  useEffect(() => {
-    const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
-    if (smokeTestConfig?.isSmokeTest) {
-      window.electronAPI.system.sendSmokeTestPassed();
-    }
-  }, []);
 
   return (
     <div className="bg-theme-main-gradient flex h-screen w-full overflow-hidden">
@@ -109,5 +101,3 @@ export function DashboardScreen() {
     </div>
   );
 }
-
-

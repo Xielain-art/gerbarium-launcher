@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent, useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
@@ -107,155 +107,47 @@ export function useLoginScreen() {
     }
   }, [refreshEmailVerificationStatus, verificationRequired]);
 
-  const [autoSubmitMode, setAutoSubmitMode] = useState<"login" | "register_step1" | "register_step2" | "verify" | null>(null);
-
-  useEffect(() => {
-    const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
-    if (smokeTestConfig?.isSmokeTest) {
-      const email = smokeTestConfig.testEmail || "smoke@gerbarium.ru";
-      const username = smokeTestConfig.testUsername || "smoke_user";
-      const password = smokeTestConfig.testPassword || "SmokeTestPassword123!";
-      
-      setLocalEmail(email);
-      setLocalUsername(username);
-      setLocalPassword(password);
-      setLocalPasswordConfirm(password);
-
-      // Trigger auto-login after state has a chance to settle
-      const timer = setTimeout(() => {
-        setAutoSubmitMode("login");
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
-  // Handle auto-switching to registration if login fails in smoke test
-  useEffect(() => {
-    const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
-    if (smokeTestConfig?.isSmokeTest && error && mode === "login") {
-      setMode("register");
-      setRegisterStep(1);
-      clearError();
-      
-      const timer = setTimeout(() => {
-        setAutoSubmitMode("register_step1");
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [error, mode]);
-
-  // Handle auto-submitting registration step 2
-  useEffect(() => {
-    const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
-    if (smokeTestConfig?.isSmokeTest && mode === "register" && registerStep === 2 && !isLoading && !error) {
-      const timer = setTimeout(() => {
-        setAutoSubmitMode("register_step2");
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [mode, registerStep, isLoading, error]);
-
-  // Handle auto-submitting verification code
-  useEffect(() => {
-    const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
-    if (
-      smokeTestConfig?.isSmokeTest &&
-      verificationRequired &&
-      emailVerification?.developmentCode &&
-      !verificationCode &&
-      !isLoading
-    ) {
-      setVerificationCode(emailVerification.developmentCode);
-      const timer = setTimeout(() => {
-        setAutoSubmitMode("verify");
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [verificationRequired, emailVerification?.developmentCode, verificationCode, isLoading]);
-
-  // Centralized auto-submit executor
-  useEffect(() => {
-    if (autoSubmitMode && !isLoading) {
-      const modeToExecute = autoSubmitMode;
-      setAutoSubmitMode(null); // Reset
-      
-      const dummyEvent = { preventDefault: () => {} } as FormEvent;
-      void onSubmit(dummyEvent);
-    }
-  }, [autoSubmitMode, isLoading, onSubmit]);
-
-  useEffect(() => {
-    if (!verificationRequired) {
-      setResendCountdown(0);
-      return;
-    }
-
-    setResendCountdown(
-      emailVerification?.resendAvailableInSeconds ??
-        user?.emailVerificationResendAvailableInSeconds ??
-        0,
-    );
-  }, [
-    emailVerification?.resendAvailableInSeconds,
-    user?.emailVerificationResendAvailableInSeconds,
-    verificationRequired,
-  ]);
-
-  useEffect(() => {
-    if (resendCountdown <= 0) {
-      return;
-    }
-
-    const timer = window.setInterval(() => {
-      setResendCountdown((current) => (current > 0 ? current - 1 : 0));
-    }, 1000);
-
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, [resendCountdown]);
-
-  const onUsernameChange = (value: string) => {
+  const onUsernameChange = useCallback((value: string) => {
     setValidationError(null);
     setLocalUsername(value);
-  };
+  }, []);
 
-  const onEmailChange = (value: string) => {
+  const onEmailChange = useCallback((value: string) => {
     setValidationError(null);
     setLocalEmail(value.slice(0, EMAIL_MAX_LENGTH));
-  };
+  }, []);
 
-  const onPasswordChange = (value: string) => {
+  const onPasswordChange = useCallback((value: string) => {
     setValidationError(null);
     setLocalPassword(value.slice(0, PASSWORD_MAX_LENGTH));
-  };
+  }, []);
 
-  const onConfirmPasswordChange = (value: string) => {
+  const onConfirmPasswordChange = useCallback((value: string) => {
     setValidationError(null);
     setLocalPasswordConfirm(value.slice(0, PASSWORD_MAX_LENGTH));
-  };
+  }, []);
 
-  const onVerificationCodeChange = (value: string) => {
+  const onVerificationCodeChange = useCallback((value: string) => {
     setValidationError(null);
     setVerificationCode(value.replace(/\D/g, "").slice(0, 6));
-  };
+  }, []);
 
-  const onToggleOfflineMode = (enabled: boolean) => {
+  const onToggleOfflineMode = useCallback((enabled: boolean) => {
     setValidationError(null);
     setMode("login");
     setRegisterStep(1);
     setOfflineMode(enabled);
-  };
+  }, []);
 
-  const onSwitchMode = (nextMode: "login" | "register") => {
+  const onSwitchMode = useCallback((nextMode: "login" | "register") => {
     setValidationError(null);
     clearError();
     setMode(nextMode);
     setRegisterStep(1);
     setOfflineMode(false);
-  };
+  }, [clearError]);
 
-  const onUseAnotherAccount = async () => {
+  const onUseAnotherAccount = useCallback(async () => {
     setValidationError(null);
     clearError();
     await logout();
@@ -271,9 +163,9 @@ export function useLoginScreen() {
     );
     setMode("login");
     setRegisterStep(1);
-  };
+  }, [clearError, logout]);
 
-  const onResendCode = async () => {
+  const onResendCode = useCallback(async () => {
     setValidationError(null);
     clearError();
 
@@ -282,9 +174,9 @@ export function useLoginScreen() {
     }
 
     await resendEmailVerification();
-  };
+  }, [clearError, resendCountdown, resendEmailVerification]);
 
-  const onSubmit = async (e: FormEvent) => {
+  const onSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault();
     setValidationError(null);
     clearError();
@@ -368,7 +260,105 @@ export function useLoginScreen() {
     }
 
     await login({ login: identifier, password });
-  };
+  }, [
+    clearError,
+    verificationRequired,
+    verificationCode,
+    t.STORE_ERRORS.AUTH_EMAIL_CODE_INVALID,
+    t.STORE_ERRORS.AUTH_EMPTY_FIELDS,
+    t.STORE_ERRORS.AUTH_EMAIL_INVALID,
+    t.STORE_ERRORS.AUTH_USERNAME_INVALID,
+    t.STORE_ERRORS.AUTH_PASSWORD_INVALID,
+    t.STORE_ERRORS.AUTH_PASSWORDS_MISMATCH,
+    t.STORE_ERRORS.AUTH_LOGIN_INVALID,
+    verifyEmail,
+    mode,
+    localEmail,
+    localUsername,
+    localPassword,
+    registerStep,
+    localPasswordConfirm,
+    register,
+    offlineMode,
+    loginOffline,
+    login
+  ]);
+
+  const [autoSubmitMode, setAutoSubmitMode] = useState<"login" | "register_step1" | "register_step2" | "verify" | null>(null);
+
+  useEffect(() => {
+    const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
+    if (smokeTestConfig?.isSmokeTest) {
+      const email = smokeTestConfig.testEmail || "smoke@gerbarium.ru";
+      const username = smokeTestConfig.testUsername || "smoke_user";
+      const password = smokeTestConfig.testPassword || "SmokeTestPassword123!";
+      
+      setLocalEmail(email);
+      setLocalUsername(username);
+      setLocalPassword(password);
+      setLocalPasswordConfirm(password);
+
+      // Trigger auto-login after state has a chance to settle
+      const timer = setTimeout(() => {
+        setAutoSubmitMode("login");
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  // Handle auto-switching to registration if login fails in smoke test
+  useEffect(() => {
+    const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
+    if (smokeTestConfig?.isSmokeTest && error && mode === "login") {
+      setMode("register");
+      setRegisterStep(1);
+      clearError();
+      
+      const timer = setTimeout(() => {
+        setAutoSubmitMode("register_step1");
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, mode, clearError]);
+
+  // Handle auto-submitting registration step 2
+  useEffect(() => {
+    const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
+    if (smokeTestConfig?.isSmokeTest && mode === "register" && registerStep === 2 && !isLoading && !error) {
+      const timer = setTimeout(() => {
+        setAutoSubmitMode("register_step2");
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [mode, registerStep, isLoading, error]);
+
+  // Handle auto-submitting verification code
+  useEffect(() => {
+    const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
+    if (
+      smokeTestConfig?.isSmokeTest &&
+      verificationRequired &&
+      emailVerification?.developmentCode &&
+      !verificationCode &&
+      !isLoading
+    ) {
+      setVerificationCode(emailVerification.developmentCode);
+      const timer = setTimeout(() => {
+        setAutoSubmitMode("verify");
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [verificationRequired, emailVerification?.developmentCode, verificationCode, isLoading]);
+
+  // Centralized auto-submit executor
+  useEffect(() => {
+    if (autoSubmitMode && !isLoading) {
+      setAutoSubmitMode(null); // Reset
+      
+      const dummyEvent = { preventDefault: () => {} } as FormEvent;
+      void onSubmit(dummyEvent);
+    }
+  }, [autoSubmitMode, isLoading, onSubmit]);
 
   const localizedError = useMemo(
     () => validationError ?? localizeAuthError(error, t),
