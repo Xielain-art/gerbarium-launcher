@@ -29,7 +29,12 @@ async function runSmokeTest() {
   console.log("🚀 Starting Launcher Smoke Test...");
   console.log("   Waiting for errors in Main process...");
 
-  const child = spawn("npx", ["electron", "."], {
+  const args = ["."];
+  if (process.platform === "linux") {
+    args.push("--no-sandbox");
+  }
+
+  const child = spawn("npx", ["electron", ...args], {
     cwd: root,
     stdio: "pipe",
     shell: true,
