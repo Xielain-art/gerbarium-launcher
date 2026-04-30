@@ -123,16 +123,26 @@ export default function updateHandler(_app: App) {
 
   ipcMain.on(IPC_CHANNELS.UPDATE.START_CHECK, () => {
     log.info(LOG_MESSAGES.UPDATE_MANUAL_CHECK_STARTED);
-    autoUpdater.checkForUpdates().catch((err) => {
-      log.error(LOG_MESSAGES.UPDATE_MANUAL_CHECK_FAILED, err.message);
-      const win = getMainWindow();
-      if (win) {
-        win.webContents.send(
-          IPC_CHANNELS.UPDATE.MESSAGE,
-          `${UI_MESSAGES.UPDATE_ERROR_PREFIX} ${err.message}`
-        );
-      }
-    });
+    autoUpdater.checkForUpdates()
+      .then((result) => {
+        if (!result) {
+          log.info("Check skipped or result is null (e.g., not packed)");
+          const win = getMainWindow();
+          if (win) {
+            win.webContents.send(IPC_CHANNELS.UPDATE.MESSAGE, UI_MESSAGES.UPDATE_NONE);
+          }
+        }
+      })
+      .catch((err) => {
+        log.error(LOG_MESSAGES.UPDATE_MANUAL_CHECK_FAILED, err.message);
+        const win = getMainWindow();
+        if (win) {
+          win.webContents.send(
+            IPC_CHANNELS.UPDATE.MESSAGE,
+            `${UI_MESSAGES.UPDATE_ERROR_PREFIX} ${err.message}`
+          );
+        }
+      });
   });
 
   ipcMain.handle(IPC_CHANNELS.UPDATE.DOWNLOAD, async () => {

@@ -32,6 +32,11 @@ async function runSmokeTest() {
     args.push("--no-sandbox");
   }
 
+  const timestamp = Date.now();
+  const testUsername = `smoke_user_${timestamp}`;
+  const testEmail = `smoke_${timestamp}@gerbarium.ru`;
+  const testPassword = "SmokeTestPassword123!";
+
   const child = spawn("npx", ["electron", ...args], {
     cwd: root,
     stdio: "pipe",
@@ -39,6 +44,10 @@ async function runSmokeTest() {
     env: {
       ...process.env,
       NODE_ENV: "development",
+      SMOKE_TEST: "true",
+      TEST_USERNAME: testUsername,
+      TEST_EMAIL: testEmail,
+      TEST_PASSWORD: testPassword,
       ELECTRON_ENABLE_LOGGING: "true",
     },
   });
@@ -46,6 +55,7 @@ async function runSmokeTest() {
   let errorDetected = null;
   let windowCreated = false;
   let uiReady = false;
+  let smokeTestPassed = false;
 
   const handleOutput = (data) => {
     const output = data.toString();
@@ -57,7 +67,11 @@ async function runSmokeTest() {
 
     if (output.includes("RENDERER_READY")) {
       uiReady = true;
-      console.log("\n✅ Success detected: UI is ready.");
+    }
+
+    if (output.includes("SMOKE_TEST_PASSED")) {
+      smokeTestPassed = true;
+      console.log("\n✅ Success detected: Smoke test passed (Dashboard reached).");
       killProcess(child);
     }
 
@@ -90,18 +104,21 @@ async function runSmokeTest() {
       } else if (!uiReady) {
         killProcess(child);
         reject(new Error("\n❌ Smoke test failed: Window created, but UI (Renderer) never reported readiness."));
+      } else if (!smokeTestPassed) {
+        killProcess(child);
+        reject(new Error("\n❌ Smoke test failed: UI is ready, but Dashboard was never reached (Login failed)."));
       }
-    }, 25000);
+    }, 45000); // Increased timeout for full login flow
 
     child.on("exit", (code) => {
       clearTimeout(timeout);
       if (errorDetected) {
         reject(new Error(`\n❌ Smoke test failed! Critical error detected:\n${errorDetected}`));
-      } else if (uiReady) {
-        console.log("\n✨ Smoke test verified successfully: UI is alive.");
+      } else if (smokeTestPassed) {
+        console.log("\n✨ Smoke test verified successfully: App is fully functional.");
         resolve();
       } else {
-        reject(new Error(`\n❌ Electron exited prematurely with code ${code} without creating a window.`));
+        reject(new Error(`\n❌ Electron exited prematurely with code ${code} without passing smoke test.`));
       }
     });
   });

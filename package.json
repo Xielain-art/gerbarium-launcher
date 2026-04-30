@@ -30,7 +30,9 @@
     "publish-app": "npm run build && electron-builder build -p always",
     "gen-types": "npx openapi-typescript https://gerbarium-api.vercel.app/api/docs-json -o ./src/lib/api/v1.d.ts",
     "test": "vitest run tests/",
+    "test:unit": "vitest run tests/integrity.test.ts",
     "test:auth": "vitest run tests/auth.test.ts",
+    "test:prod": "vitest run tests/production.test.ts",
     "test:integrity": "vitest run tests/integrity.test.ts",
     "test:smoke": "node scripts/smoke-test.mjs"
   },

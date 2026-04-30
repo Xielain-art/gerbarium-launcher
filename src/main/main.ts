@@ -79,7 +79,8 @@ function sanitizeSettingsPatch(
 const appRoot = path.resolve(__dirname, "..", "..");
 const require = createRequire(__filename);
 
-const isDev = !app.isPackaged;
+const isSmokeTest = process.env.SMOKE_TEST === "true";
+const isDev = !app.isPackaged && !isSmokeTest;
 const LangLoader = require(
   path.join(appRoot, "_legacy_app", "assets", "js", "langloader"),
 ) as LegacyLangLoader;
@@ -373,6 +374,10 @@ function syncTrayState(): void {
 
 ipcMain.on(IPC_CHANNELS.SYSTEM.UI_READY, () => {
   log.info("RENDERER_READY");
+});
+
+ipcMain.on(IPC_CHANNELS.SYSTEM.SMOKE_TEST_PASSED, () => {
+  log.info("SMOKE_TEST_PASSED");
 });
 
 ipcMain.on(

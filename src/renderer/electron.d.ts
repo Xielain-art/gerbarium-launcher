@@ -30,6 +30,14 @@ import type {
 } from "../lib/api/changelog";
 
 export interface IElectronAPI {
+  // Smoke test config
+  getSmokeTestConfig: () => {
+    isSmokeTest: boolean;
+    testUsername?: string;
+    testEmail?: string;
+    testPassword?: string;
+  } | null;
+
   // App controls
   closeApp: () => void;
   getAppVersion: () => Promise<string>;
@@ -199,6 +207,8 @@ export interface IElectronAPI {
     openExternal: (url: string) => Promise<void>;
     openGitHubIssue: () => Promise<void>;
     selectDirectory: () => Promise<string | null>;
+    sendUiReady: () => void;
+    sendSmokeTestPassed: () => void;
     openPath: (path: string) => Promise<void>;
     openDataFolder: () => Promise<void>;
     sendSettingsUpdate: (settings: Partial<LauncherSettings>) => void;

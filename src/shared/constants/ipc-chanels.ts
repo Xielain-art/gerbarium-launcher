@@ -89,6 +89,7 @@ export const IPC_CHANNELS = {
     OPEN_DATA_FOLDER: "system:open-data-folder",
     SETTINGS_UPDATED: "system:settings-updated",
     UI_READY: "system:ui-ready",
+    SMOKE_TEST_PASSED: "system:smoke-test-passed",
   },
   LOG: {
     EXPORT_AND_REPORT: "logs:export-and-report",

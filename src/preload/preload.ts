@@ -32,6 +32,19 @@ function typedSend<K extends keyof IpcChannelMap>(
 }
 
 contextBridge.exposeInMainWorld("electronAPI", {
+  // Smoke test config
+  getSmokeTestConfig: () => {
+    if (process.env.SMOKE_TEST === "true") {
+      return {
+        isSmokeTest: true,
+        testUsername: process.env.TEST_USERNAME,
+        testEmail: process.env.TEST_EMAIL,
+        testPassword: process.env.TEST_PASSWORD,
+      };
+    }
+    return null;
+  },
+
   // App controls (legacy support)
   closeApp: () => typedInvoke(IPC_CHANNELS.WINDOW.CLOSE),
   // App version
@@ -256,6 +269,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
       typedInvoke(IPC_CHANNELS.SYSTEM.OPEN_GITHUB_ISSUE),
     selectDirectory: () => typedInvoke(IPC_CHANNELS.SYSTEM.SELECT_DIRECTORY),
     sendUiReady: () => ipcRenderer.send(IPC_CHANNELS.SYSTEM.UI_READY),
+    sendSmokeTestPassed: () => ipcRenderer.send(IPC_CHANNELS.SYSTEM.SMOKE_TEST_PASSED),
     openPath: (path: string) =>
       typedInvoke(IPC_CHANNELS.SYSTEM.OPEN_PATH, path),
     openDataFolder: () =>

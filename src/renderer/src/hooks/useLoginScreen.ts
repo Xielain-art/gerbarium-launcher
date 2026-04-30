@@ -108,6 +108,75 @@ export function useLoginScreen() {
   }, [refreshEmailVerificationStatus, verificationRequired]);
 
   useEffect(() => {
+    const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
+    if (smokeTestConfig?.isSmokeTest) {
+      const email = smokeTestConfig.testEmail || "smoke@gerbarium.ru";
+      const username = smokeTestConfig.testUsername || "smoke_user";
+      const password = smokeTestConfig.testPassword || "SmokeTestPassword123!";
+      
+      setLocalEmail(email);
+      setLocalUsername(username);
+      setLocalPassword(password);
+      setLocalPasswordConfirm(password);
+
+      // Auto-submit login after a short delay
+      const timer = setTimeout(() => {
+        const dummyEvent = { preventDefault: () => {} } as FormEvent;
+        void onSubmit(dummyEvent);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  // Handle auto-switching to registration if login fails in smoke test
+  useEffect(() => {
+    const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
+    if (smokeTestConfig?.isSmokeTest && error && mode === "login") {
+      // If login failed (likely user not found), switch to register
+      setMode("register");
+      setRegisterStep(1);
+      clearError();
+      
+      const timer = setTimeout(() => {
+        const dummyEvent = { preventDefault: () => {} } as FormEvent;
+        void onSubmit(dummyEvent); // Submit step 1 (email/username)
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, mode]);
+
+  // Handle auto-submitting registration step 2
+  useEffect(() => {
+    const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
+    if (smokeTestConfig?.isSmokeTest && mode === "register" && registerStep === 2 && !isLoading && !error) {
+      const timer = setTimeout(() => {
+        const dummyEvent = { preventDefault: () => {} } as FormEvent;
+        void onSubmit(dummyEvent);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [mode, registerStep, isLoading, error]);
+
+  // Handle auto-submitting verification code
+  useEffect(() => {
+    const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
+    if (
+      smokeTestConfig?.isSmokeTest &&
+      verificationRequired &&
+      emailVerification?.developmentCode &&
+      !verificationCode &&
+      !isLoading
+    ) {
+      setVerificationCode(emailVerification.developmentCode);
+      const timer = setTimeout(() => {
+        const dummyEvent = { preventDefault: () => {} } as FormEvent;
+        void onSubmit(dummyEvent);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [verificationRequired, emailVerification?.developmentCode, verificationCode, isLoading]);
+
+  useEffect(() => {
     if (!verificationRequired) {
       setResendCountdown(0);
       return;
