@@ -107,6 +107,8 @@ export function useLoginScreen() {
     }
   }, [refreshEmailVerificationStatus, verificationRequired]);
 
+  const [autoSubmitMode, setAutoSubmitMode] = useState<"login" | "register_step1" | "register_step2" | "verify" | null>(null);
+
   useEffect(() => {
     const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
     if (smokeTestConfig?.isSmokeTest) {
@@ -119,10 +121,9 @@ export function useLoginScreen() {
       setLocalPassword(password);
       setLocalPasswordConfirm(password);
 
-      // Auto-submit login after a short delay
+      // Trigger auto-login after state has a chance to settle
       const timer = setTimeout(() => {
-        const dummyEvent = { preventDefault: () => {} } as FormEvent;
-        void onSubmit(dummyEvent);
+        setAutoSubmitMode("login");
       }, 1500);
       return () => clearTimeout(timer);
     }
@@ -132,14 +133,12 @@ export function useLoginScreen() {
   useEffect(() => {
     const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
     if (smokeTestConfig?.isSmokeTest && error && mode === "login") {
-      // If login failed (likely user not found), switch to register
       setMode("register");
       setRegisterStep(1);
       clearError();
       
       const timer = setTimeout(() => {
-        const dummyEvent = { preventDefault: () => {} } as FormEvent;
-        void onSubmit(dummyEvent); // Submit step 1 (email/username)
+        setAutoSubmitMode("register_step1");
       }, 1000);
       return () => clearTimeout(timer);
     }
@@ -150,8 +149,7 @@ export function useLoginScreen() {
     const smokeTestConfig = window.electronAPI.getSmokeTestConfig();
     if (smokeTestConfig?.isSmokeTest && mode === "register" && registerStep === 2 && !isLoading && !error) {
       const timer = setTimeout(() => {
-        const dummyEvent = { preventDefault: () => {} } as FormEvent;
-        void onSubmit(dummyEvent);
+        setAutoSubmitMode("register_step2");
       }, 1000);
       return () => clearTimeout(timer);
     }
@@ -169,12 +167,22 @@ export function useLoginScreen() {
     ) {
       setVerificationCode(emailVerification.developmentCode);
       const timer = setTimeout(() => {
-        const dummyEvent = { preventDefault: () => {} } as FormEvent;
-        void onSubmit(dummyEvent);
+        setAutoSubmitMode("verify");
       }, 1000);
       return () => clearTimeout(timer);
     }
   }, [verificationRequired, emailVerification?.developmentCode, verificationCode, isLoading]);
+
+  // Centralized auto-submit executor
+  useEffect(() => {
+    if (autoSubmitMode && !isLoading) {
+      const modeToExecute = autoSubmitMode;
+      setAutoSubmitMode(null); // Reset
+      
+      const dummyEvent = { preventDefault: () => {} } as FormEvent;
+      void onSubmit(dummyEvent);
+    }
+  }, [autoSubmitMode, isLoading, onSubmit]);
 
   useEffect(() => {
     if (!verificationRequired) {
