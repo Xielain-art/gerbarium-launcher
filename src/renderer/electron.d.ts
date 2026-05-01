@@ -208,7 +208,6 @@ export interface IElectronAPI {
     openGitHubIssue: () => Promise<void>;
     selectDirectory: () => Promise<string | null>;
     sendUiReady: () => void;
-    sendSmokeTestPassed: () => void;
     openPath: (path: string) => Promise<void>;
     openDataFolder: () => Promise<void>;
     sendSettingsUpdate: (settings: Partial<LauncherSettings>) => void;

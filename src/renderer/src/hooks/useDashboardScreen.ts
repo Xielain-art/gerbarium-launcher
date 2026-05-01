@@ -225,18 +225,6 @@ export function useDashboardScreen() {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate({ to: ROUTES.LOGIN });
-    } else {
-      // In smoke test mode, signal that we reached the dashboard
-      const smokeTestConfig = window.electronAPI?.getSmokeTestConfig?.();
-      if (smokeTestConfig?.isSmokeTest) {
-        window.electronAPI?.system?.sendSmokeTestPassed?.();
-        
-        // After reaching dashboard, auto-logout to verify full flow
-        const timer = setTimeout(() => {
-          void onLogout();
-        }, 2000);
-        return () => clearTimeout(timer);
-      }
     }
   }, [isAuthenticated, navigate]);
 

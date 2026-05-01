@@ -42,6 +42,12 @@ export async function registerRequest(payload: ApiRegisterDto): Promise<ApiResul
     const { data, error, response } = await apiClient.POST("/api/auth/register", {
       body: payload,
     });
+    
+    // DEBUG LOG FOR SMOKE TESTS
+    if (process.env.SMOKE_TEST === "true") {
+      process.stdout.write(`[DEBUG_API_REGISTER] Data: ${JSON.stringify(data)}\n`);
+    }
+
     return buildApiResult<ApiAuthResponse>({
       response,
       data,
@@ -82,7 +88,19 @@ export async function getEmailVerificationStatusRequest(
         },
       },
     );
-    return buildApiResult<ApiEmailVerificationStatus>({ response, data, error });
+
+    // DEBUG LOG FOR SMOKE TESTS
+    if (process.env.SMOKE_TEST === "true") {
+      process.stdout.write(
+        `[DEBUG_API_STATUS] Data: ${JSON.stringify(data)}\n`,
+      );
+    }
+
+    return buildApiResult<ApiEmailVerificationStatus>({
+      response,
+      data,
+      error,
+    });
   } catch (error) {
     return buildNetworkErrorResult<ApiEmailVerificationStatus>(error);
   }
@@ -92,12 +110,27 @@ export async function resendEmailVerificationRequest(
   accessToken: string,
 ): Promise<ApiResult<ApiEmailVerificationStatus>> {
   try {
-    const { data, error, response } = await apiClient.POST("/api/auth/email/resend", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+    const { data, error, response } = await apiClient.POST(
+      "/api/auth/email/resend",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
+    );
+
+    // DEBUG LOG FOR SMOKE TESTS
+    if (process.env.SMOKE_TEST === "true") {
+      process.stdout.write(
+        `[DEBUG_API_RESEND] Data: ${JSON.stringify(data)}\n`,
+      );
+    }
+
+    return buildApiResult<ApiEmailVerificationStatus>({
+      response,
+      data,
+      error,
     });
-    return buildApiResult<ApiEmailVerificationStatus>({ response, data, error });
   } catch (error) {
     return buildNetworkErrorResult<ApiEmailVerificationStatus>(error);
   }

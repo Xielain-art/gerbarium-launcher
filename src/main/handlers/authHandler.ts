@@ -255,6 +255,16 @@ function mapEmailVerificationFailureCode(status?: number): string {
   return ERROR_CODES.AUTH_EMAIL_STATUS_FAILED;
 }
 
+function interceptSmokeTestCode(status?: ApiEmailVerificationStatus): void {
+  if (process.env.SMOKE_TEST === "true" && status?.developmentCode) {
+    const devCode = status.developmentCode;
+    (global as any).lastDevelopmentCode = devCode;
+    // Прямой вывод в stdout для перехвата Playwright
+    process.stdout.write(`[SMOKE_TEST_CODE]:${devCode}\n`);
+    log.info(`[SMOKE_TEST] Intercepted dev code: ${devCode}`);
+  }
+}
+
 function parseOrNull<T>(schema: { safeParse: (value: unknown) => { success: true; data: T } | { success: false } }, value: unknown): T | null {
   const parsed = schema.safeParse(value);
   return parsed.success ? parsed.data : null;
@@ -467,6 +477,9 @@ export default function authHandler(app: App) {
         );
         await writeStoredSession(secureDataPath, session);
 
+        // Store development code for smoke tests
+        interceptSmokeTestCode(authResult.data.emailVerification);
+
         log.info(LOG_MESSAGES.AUTH_LOGIN_SUCCESS, session.user.username);
         return {
           success: true,
@@ -524,6 +537,9 @@ export default function authHandler(app: App) {
           registerResult.setCookie,
         );
         await writeStoredSession(secureDataPath, session);
+
+        // Store development code for smoke tests
+        interceptSmokeTestCode(registerResult.data.emailVerification);
 
         log.info(LOG_MESSAGES.AUTH_REGISTER_SUCCESS, session.user.username);
         return {
@@ -638,6 +654,9 @@ export default function authHandler(app: App) {
       };
       await writeStoredSession(secureDataPath, updatedSession);
 
+      // Store development code for smoke tests
+      interceptSmokeTestCode(statusResult.data);
+
       return {
         success: true,
         emailVerification: mapEmailVerification(statusResult.data),
@@ -678,6 +697,9 @@ export default function authHandler(app: App) {
         user: applyEmailVerificationToUser(session.user, resendResult.data),
       };
       await writeStoredSession(secureDataPath, updatedSession);
+
+      // Store development code for smoke tests
+      interceptSmokeTestCode(resendResult.data);
 
       return {
         success: true,

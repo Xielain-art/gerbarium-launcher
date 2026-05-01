@@ -1,61 +1,86 @@
-# Gerbarium Launcher - Project Rules & Guidelines
+# Gerbarium Launcher
 
-This is an Electron-based game launcher monorepo using React (Vite) and TypeScript. 
-Strict adherence to architectural boundaries, type safety, and project-specific build rules is mandatory.
+## Project Overview
 
-## 📁 Project Structure & Key Directories
+Gerbarium Launcher (formerly HeliosLauncher/Electron Launcher) is an Electron-based desktop application designed as a custom Minecraft launcher for modded servers. It handles account management (Microsoft/Mojang OAuth), efficient asset management and validation, automatic Java installation/validation, and provides a natively built-in news feed and server status updates.
 
-- **Entrypoint:** `index.js` (loads compiled handlers from `dist/main/handlers/`).
-- `src/main/` — Electron Main Process code. Handles OS-level operations, file system, and heavy tasks.
-  - `src/main/handlers/` — Main IPC handlers (compiles to `dist/main/handlers/`).
-- `src/preload/` — Preload scripts. Secure bridge between Main and Renderer via `contextBridge`.
-- `src/renderer/` — Frontend application (React, Vite, Zustand, TanStack Query). STRICTLY NO direct Node.js access!
-- `src/lib/api/` — Core API layer. Contains all API interaction logic, service functions, and fetchers.
-  - `v1.d.ts` — **The Full API Structure.** This is the primary source of truth for all API-related types and schemas.
-- `src/shared/` — Shared files, types, and constants (IPC channels, error codes).
-- `dist/` — Build artifacts. **Do not edit directly.**
-- `_legacy_app/` — DEPRECATED. Use only as a reference; do not modify or extract patterns from here.
+## Tech Stack
 
-## 🛠 Build & Development Commands
+*   **Framework:** Electron
+*   **Frontend:** React 19, Vite
+*   **Styling:** Tailwind CSS (v4), shadcn/ui, Lucide React
+*   **State Management:** Zustand, TanStack React Query
+*   **Routing:** TanStack React Router
+*   **Language:** TypeScript
+*   **Testing:** Vitest, Playwright (for e2e/smoke if applicable)
+*   **Bundling:** Vite (UI), esbuild (Main/Preload processes), electron-builder (Distribution)
 
-- **Dev:** `npm run dev` — Concurrent dev (Vite UI, esbuild watch for main/preload, electron).
-- **Build:** `npm run build` — Production build (Vite UI, esbuild main/preload).
-- **Build Quirk (CRITICAL):** `build:main` / `dev:main` scripts MUST include the `--external:electron-log` flag. This prevents bundling `electron-log`, which causes duplicate IPC handler errors for `__ELECTRON_LOG__`.
-- **Transpilation:** There is no `tsc` build step. `esbuild` transpiles TS for main/preload directly.
+## Architecture
 
-## 🏗 Core Development Standards
+The source code is organized into distinct environments typical for modern Electron applications:
 
-### 1. Inter-Process Communication (Strict IPC) - CRITICAL
-- **NO "Magic Strings":** Never use hardcoded strings for IPC events and LOGS AND ERRORS (e.g., `ipcMain.handle('my-event')`).
-- **Channel Registry:** ALL events must be added to the `IPC_CHANNELS` constant and strongly typed within the `IpcChannelMap` interface inside `src/shared/constants/ipc-chanels.ts`. Update both simultaneously.
-- **Preload Isolation:** In `src/preload/preload.ts`, only invoke methods defined in `IpcChannelMap` using the `typedInvoke` wrapper.
-- **Renderer API:** All renderer APIs must be exposed via `window.electronAPI`. Do not attach random methods to the global `window` object.
+*   **`src/main/`**: Electron Main Process. Handles core system operations, window management, authentication handlers, Java process management, and secure storage.
+*   **`src/renderer/`**: The React UI.
+    *   **`src/renderer/src/`**: Contains the React application code (`components`, `hooks`, `pages`, `stores`, `styles`).
+*   **`src/preload/`**: Electron Preload scripts bridging the main and renderer processes securely.
+*   **`src/shared/`**: Code shared across Main, Preload, and Renderer processes (e.g., IPC channel definitions, constants, translations, error types).
+*   **`src/lib/`**: API definitions, clients, and types generated from OpenAPI specs.
 
-### 2. Main Process (Electron)
-- **Never Block the Main Thread:** Do not use synchronous methods for file system operations or archiving (e.g., `fs.readFileSync`, `zip.writeZip`). Strictly use asynchronous alternatives (e.g., `fs.promises`, `writeZipPromise` or streams).
-- **Logging:** Use `electron-log` exclusively (never `console.log`). Logs are written to `app.getPath('userData')/logs`.
-- **Error Handling:** `try/catch` blocks are mandatory. Handlers must gracefully return a standardized object: `{ success: false, error: string }`.
-  - *Java Handlers:* Must strictly use error codes defined in `src/shared/constants/errors.ts` (no hardcoded error strings).
-- **User Prompts:** Never save files to user directories (like Desktop) silently. Always use `dialog.showSaveDialog` or `dialog.showOpenDialog`.
+### Path Aliases
 
-### 3. Frontend Process (React Renderer)
-- **State Management (Client vs. Server):** - **Client State:** Use `Zustand` (located in `src/renderer/src/stores/`) strictly for local UI state (e.g., toggles, modals, current view). Do not use Redux or default to React Context API for global state.
-  - **Server State:** For fetching external data, caching, and background synchronization, ALWAYS use `TanStack Query` when it is safe to do so. Never store API responses inside Zustand.
-- **TanStack Query Architecture (Best Practices):**
-  - **Query Options Factory:** Utilize `queryOptions` from TanStack v5 to centralize query keys (`queryKey`) and fetching logic (`queryFn`). This ensures type safety and reusable prefetch logic.
-  - **Query Key Factories:** Query keys must be generated via factory objects, never hardcoded as strings directly in components.
-  - **Isolation of API:** Data fetching functions must be strictly isolated within the `src/lib/api/` layer and remain independent of React Query hooks.
-  - **Mutations:** Always handle cache updates gracefully. Use `useMutation` and mandate the invalidation of related query keys inside `onSuccess` using `queryClient.invalidateQueries`.
-- **Component Architecture ("Thin" Components):** - **Keep Components less than 150 lines of code:** React components must be strictly focused on rendering UI. Components should not be "fat" with logic. 
-  - **Extract Logic:** All business logic, complex state management, data transformation, and side effects MUST be extracted into custom hooks.
-  - **Separation of Concerns:** Maintain a strict separation between dumb UI components (`src/renderer/src/components/ui/`) and business logic wrappers/pages (`src/renderer/src/components/game/`, `src/renderer/src/pages/`).
-- **Node Integration:** `nodeIntegration` is disabled, and `contextIsolation` is enabled. Never attempt to import `fs`, `path`, or `child_process` directly inside React components.
+*   `@/*` -> `src/renderer/src/*`
+*   `@main/*` -> `src/main/*`
+*   `@renderer/*` -> `src/renderer/*`
+*   `@shared/*` -> `src/shared/*`
+*   `@preload/*` -> `src/preload/*`
 
-### 4. TypeScript Typing
-- **Strict Typing:** Strict mode is enabled. The use of `any` is strictly prohibited (use `unknown` or define proper interfaces).
-- **API Types:** All API-related types and data structures must be derived from or defined in `src/lib/api/v1.d.ts`.
-- **Shared Payloads:** Data payloads passed between Main and Renderer must be explicitly typed in the `src/shared/` directory.
+## Building and Running
 
-## 📦 Dependencies Notes
-- **Archiving:** For log exporting or zipping, rely on `archiver` + `@types/archiver`. Do not use synchronous zipper libraries.
-- **Server State:** For server state management, always use `@tanstack/react-query`. Strictly follow the `queryOptions` factory pattern and ensure all fetchers are located in `src/lib/api/`.
+### Prerequisites
+*   Node.js >= 20.18.0
+
+### Development
+
+The primary command to start the development environment (spawns both Vite dev server for the UI and watches the main/preload scripts):
+
+```bash
+npm run dev
+```
+
+Alternatively, you can run individual watch tasks:
+*   UI only: `npm run dev:ui`
+*   Main only: `npm run dev:main`
+*   Preload only: `npm run dev:preload`
+*   Electron: `npm run dev:electron`
+
+### Building
+
+To build the project without packaging into an installer:
+```bash
+npm run build
+```
+*(This sequentially runs `build:ui`, `build:main`, and `build:preload`)*
+
+### Distribution (Packaging)
+
+To build platform-specific installers using `electron-builder`:
+
+*   **All/Default Platform:** `npm run dist`
+*   **Windows:** `npm run dist:win`
+*   **macOS:** `npm run dist:mac`
+*   **Linux:** `npm run dist:linux`
+
+### Testing and Linting
+
+*   **Tests:** `npm run test` (Runs all Vitest suites in `tests/`)
+*   **Unit Tests:** `npm run test:unit`
+*   **Linting:** `npm run lint` (ESLint)
+*   **Type Generation:** `npm run gen-types` (Fetches OpenAPI specs to update API types)
+
+## Development Conventions
+
+*   **TypeScript:** Strict type checking is enabled. Use explicit typings over `any`.
+*   **Styling:** Use Tailwind CSS utility classes and `shadcn/ui` component patterns.
+*   **State:** Use `zustand` for global UI state and `react-query` for server state/data fetching.
+*   **Testing:** New features should include accompanying tests in the `tests/` directory using Vitest.
+*   **IPC Communication:** Ensure all Inter-Process Communication channels are defined in `src/shared/constants/ipc-chanels.ts` for type safety and maintainability.

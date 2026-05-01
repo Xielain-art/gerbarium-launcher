@@ -16,10 +16,12 @@ export function useUpdateScreen() {
   const [updateInfo, setUpdateInfo] = useState<UpdateInfoPayload | null>(null);
   const [downloadStarted, setDownloadStarted] = useState(false);
 
+  const isSmokeTest = window.electronAPI?.getSmokeTestConfig?.()?.isSmokeTest ?? false;
+
   useEffect(() => {
     setUpdateGatePassed(false);
 
-    if (isDevMode) {
+    if (isDevMode || isSmokeTest) {
       setUpdateGatePassed(true);
       navigate({ to: ROUTES.LOGIN });
       return;

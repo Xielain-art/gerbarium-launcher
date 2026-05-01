@@ -33,6 +33,10 @@ const checkUpdateGate = () => {
   return useStartupGateStore.getState().updateGatePassed;
 };
 
+const isDevOrSmokeTest = () => {
+  return import.meta.env.DEV || (window.electronAPI?.getSmokeTestConfig?.()?.isSmokeTest ?? false);
+};
+
 // Root route with Outlet for nested routes
 const rootRoute = createRootRoute({
   component: () => (
@@ -62,7 +66,7 @@ const loginRoute = createRoute({
   path: ROUTES.LOGIN,
   component: LoginScreen,
   beforeLoad: async () => {
-    if (!import.meta.env.DEV && !checkUpdateGate()) {
+    if (!isDevOrSmokeTest() && !checkUpdateGate()) {
       throw redirect({ to: ROUTES.UPDATE });
     }
     if (checkAuth()) {
@@ -77,7 +81,7 @@ const dashboardRoute = createRoute({
   path: ROUTES.DASHBOARD,
   component: DashboardScreen,
   beforeLoad: async () => {
-    if (!import.meta.env.DEV && !checkUpdateGate()) {
+    if (!isDevOrSmokeTest() && !checkUpdateGate()) {
       throw redirect({ to: ROUTES.UPDATE });
     }
     if (!checkAuth()) {
@@ -95,7 +99,7 @@ const settingsRoute = createRoute({
   path: ROUTES.SETTINGS,
   component: SettingsScreen,
   beforeLoad: async () => {
-    if (!import.meta.env.DEV && !checkUpdateGate()) {
+    if (!isDevOrSmokeTest() && !checkUpdateGate()) {
       throw redirect({ to: ROUTES.UPDATE });
     }
     if (!checkAuth()) {

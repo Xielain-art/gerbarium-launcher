@@ -10,13 +10,14 @@ const PHASES = [
   "Verifying launcher integrity...",
 ] as const;
 
-function getNextRoute(isDevMode: boolean): string {
-  return isDevMode ? ROUTES.LOGIN : ROUTES.UPDATE;
+function getNextRoute(isDevMode: boolean, isSmokeTest: boolean): string {
+  return isDevMode || isSmokeTest ? ROUTES.LOGIN : ROUTES.UPDATE;
 }
 
 export function useIntegrityCheckScreen() {
   const navigate = useNavigate();
   const isDevMode = import.meta.env.DEV;
+  const isSmokeTest = window.electronAPI?.getSmokeTestConfig?.()?.isSmokeTest ?? false;
   const [progress, setProgress] = useState(0);
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [statusMessage, setStatusMessage] = useState("Starting integrity check...");
@@ -46,7 +47,7 @@ export function useIntegrityCheckScreen() {
       setStatusMessage(message);
       window.setTimeout(() => {
         if (!isActive) return;
-        void navigate({ to: getNextRoute(isDevMode) });
+        void navigate({ to: getNextRoute(isDevMode, isSmokeTest) });
       }, delayMs);
     };
 

@@ -34,7 +34,7 @@
     "test:auth": "vitest run tests/auth.test.ts",
     "test:prod": "vitest run tests/production.test.ts",
     "test:integrity": "vitest run tests/integrity.test.ts",
-    "test:smoke": "node scripts/smoke-test.mjs"
+    "test:smoke": "playwright test tests/smoke.spec.ts"
   },
   "engines": {
     "node": ">=20.18.0"
@@ -80,6 +80,7 @@
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.59.1",
     "@rolldown/plugin-babel": "^0.2.3",
     "@stylistic/eslint-plugin": "^5.6.1",
     "@types/babel__core": "^7.20.5",
