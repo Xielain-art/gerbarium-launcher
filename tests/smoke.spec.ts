@@ -93,7 +93,18 @@ test.describe('Smoke Test - Full Auth Flow', () => {
 
     console.log('📧 Waiting for Verification Screen...');
     const codeInput = window.locator('#email-code');
-    await codeInput.waitFor({ state: 'visible', timeout: 30000 });
+    try {
+      await codeInput.waitFor({ state: 'visible', timeout: 30000 });
+    } catch (e) {
+      console.error('Timeout waiting for email code input.');
+      const errorText = await window.locator('[role="alert"]').textContent().catch(() => null);
+      if (errorText) {
+        console.error(`UI Error Message: ${errorText}`);
+      } else {
+        console.error('No UI Error Message found.');
+      }
+      throw e;
+    }
 
     console.log('🔍 Waiting for intercepted test code...');
     let finalVerificationCode = await codePromise;
