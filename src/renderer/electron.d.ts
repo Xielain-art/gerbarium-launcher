@@ -93,6 +93,26 @@ export interface IElectronAPI {
       emailVerification?: AuthEmailVerificationStatus;
       error?: string;
     }>;
+    registerTest: (payload: {
+      email: string;
+      username: string;
+      password: string;
+    }) => Promise<{
+      success: boolean;
+      user?: AuthSessionUser;
+      emailVerificationCode?: string;
+      error?: string;
+    }>;
+    requestDeleteCode: () => Promise<{
+      success: boolean;
+      error?: string;
+    }>;
+    deleteAccount: (payload: {
+      code: string;
+    }) => Promise<{
+      success: boolean;
+      error?: string;
+    }>;
     verifyEmail: (payload: {
       code: string;
     }) => Promise<{
@@ -144,6 +164,9 @@ export interface IElectronAPI {
       userId: string,
       roleIds: string[],
     ) => Promise<AdminUserMutationResponse>;
+    deleteTestUser: (
+      userId: string,
+    ) => Promise<{ success: boolean; error?: string }>;
     getRoles: () => Promise<AdminRolesResponse>;
     createRole: (payload: { name: string; description?: string }) => Promise<AdminRoleMutationResponse>;
     getStats: () => Promise<{ success: boolean; data?: ApiAdminStats; error?: string }>;

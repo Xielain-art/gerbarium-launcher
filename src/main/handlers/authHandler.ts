@@ -11,6 +11,9 @@ import {
   logoutRequest,
   profileRequest,
   refreshTokenRequest,
+  testRegisterRequest,
+  deleteAccountCodeRequest,
+  deleteAccountRequest,
   type ApiAuthResponse,
   type ApiEmailVerificationStatus,
   type ApiUser,
@@ -486,11 +489,29 @@ export default function authHandler(app: App): void {
           };
         }
 
-        const registerResult = await registerRequest({
-          email: validatedPayload.email,
-          username: validatedPayload.username,
-          password: validatedPayload.password,
-        });
+        let registerResult;
+        if (process.env.SMOKE_TEST === "true") {
+          registerResult = await testRegisterRequest({
+            email: validatedPayload.email,
+            username: validatedPayload.username,
+            password: validatedPayload.password,
+          });
+          if (registerResult.success && registerResult.data?.emailVerificationCode) {
+            const devCode = registerResult.data.emailVerificationCode;
+            (global as Record<string, unknown>).lastDevelopmentCode = devCode;
+            process.stdout.write(`[SMOKE_TEST_CODE]:${devCode}\n`);
+            log.info(`[SMOKE_TEST] Intercepted dev code: ${devCode}`);
+          }
+        } else {
+          registerResult = await registerRequest({
+            email: validatedPayload.email,
+            username: validatedPayload.username,
+            password: validatedPayload.password,
+          });
+          if (registerResult.success) {
+            interceptSmokeTestCode(registerResult.data?.emailVerification);
+          }
+        }
 
         if (!registerResult.success || !registerResult.data) {
           logApiFailure(LOG_MESSAGES.AUTH_API_ERROR, registerResult);
@@ -506,8 +527,6 @@ export default function authHandler(app: App): void {
         );
         await writeStoredSession(secureDataPath, session);
 
-        interceptSmokeTestCode(registerResult.data.emailVerification);
-
         log.info(LOG_MESSAGES.AUTH_REGISTER_SUCCESS, session.user.username);
         return {
           success: true,
@@ -522,6 +541,111 @@ export default function authHandler(app: App): void {
           success: false,
           error: ERROR_CODES.AUTH_REGISTER_FAILED,
         };
+      }
+    },
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.AUTH.REGISTER_TEST,
+    async (
+      _event,
+      payload: { email: string; username: string; password: string },
+    ) => {
+      log.info(
+        "[TEST_AUTH] Register attempt",
+        payload?.email,
+        payload?.username,
+      );
+      try {
+        const validatedPayload = parseOrNull(authRegisterSchema, payload);
+        if (!validatedPayload) {
+          return {
+            success: false,
+            error: ERROR_CODES.AUTH_VALIDATION_FAILED,
+          };
+        }
+
+        const registerResult = await testRegisterRequest({
+          email: validatedPayload.email,
+          username: validatedPayload.username,
+          password: validatedPayload.password,
+        });
+
+        if (!registerResult.success || !registerResult.data) {
+          logApiFailure("[TEST_AUTH] API error", registerResult);
+          return {
+            success: false,
+            error: mapAuthFailureCode(registerResult.status),
+          };
+        }
+
+        const session = buildOnlineSession(
+          registerResult.data,
+          registerResult.setCookie,
+        );
+        await writeStoredSession(secureDataPath, session);
+
+        log.info("[TEST_AUTH] Register success", session.user.username);
+        return {
+          success: true,
+          user: session.user,
+          emailVerificationCode: registerResult.data.emailVerificationCode,
+        };
+      } catch (error) {
+        log.error("[TEST_AUTH] Register failed", error);
+        return {
+          success: false,
+          error: ERROR_CODES.AUTH_REGISTER_FAILED,
+        };
+      }
+    },
+  );
+
+  ipcMain.handle(IPC_CHANNELS.AUTH.REQUEST_DELETE_CODE, async () => {
+    log.info("[AUTH] Request account deletion code");
+    try {
+      const session = await readResolvedOnlineSession(secureDataPath);
+      if (!session?.accessToken) {
+        return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+      }
+
+      const result = await deleteAccountCodeRequest(session.accessToken);
+      if (!result.success) {
+        logApiFailure("[AUTH] Delete code request failed", result);
+        return { success: false, error: ERROR_CODES.AUTH_API_ERROR };
+      }
+
+      return { success: true };
+    } catch (error) {
+      log.error("[AUTH] Delete code request failed", error);
+      return { success: false, error: ERROR_CODES.AUTH_INTERNAL_ERROR };
+    }
+  });
+
+  ipcMain.handle(
+    IPC_CHANNELS.AUTH.DELETE_ACCOUNT,
+    async (_event, payload: { code: string }) => {
+      log.info("[AUTH] Delete account attempt");
+      try {
+        const session = await readResolvedOnlineSession(secureDataPath);
+        if (!session?.accessToken) {
+          return { success: false, error: ERROR_CODES.AUTH_UNAUTHORIZED };
+        }
+
+        const result = await deleteAccountRequest(session.accessToken, {
+          code: payload.code,
+        });
+        if (!result.success) {
+          logApiFailure("[AUTH] Delete account failed", result);
+          const errorCode = result.status === 400 ? ERROR_CODES.AUTH_EMAIL_CODE_INVALID : ERROR_CODES.AUTH_API_ERROR;
+          return { success: false, error: errorCode };
+        }
+
+        await clearStoredSession(secureDataPath);
+        return { success: true };
+      } catch (error) {
+        log.error("[AUTH] Delete account failed", error);
+        return { success: false, error: ERROR_CODES.AUTH_INTERNAL_ERROR };
       }
     },
   );

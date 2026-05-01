@@ -15,7 +15,8 @@ export interface paths {
         get: operations["UsersController_me"];
         put?: never;
         post?: never;
-        delete?: never;
+        /** Delete the current account after confirming an email code. */
+        delete: operations["AccountController_deleteMe"];
         options?: never;
         head?: never;
         patch?: never;
@@ -270,6 +271,40 @@ export interface paths {
         get: operations["GmailOAuthController_callback"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/me/delete-code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send an email code to confirm deletion of the current account. */
+        post: operations["AccountController_requestAccountDeletionCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/test/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register a test account, assign the test role, and return the email verification code. */
+        post: operations["TestAuthController_register"];
         delete?: never;
         options?: never;
         head?: never;
@@ -590,6 +625,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/test-users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a test user without email confirmation. Admin only. */
+        delete: operations["AdminController_deleteTestUser"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/roles": {
         parameters: {
             query?: never;
@@ -606,6 +658,24 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/admin/roles/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a role only when no users have it. Admin only. */
+        delete: operations["AdminController_deleteRole"];
+        options?: never;
+        head?: never;
+        /** Update an existing role. Admin only. */
+        patch: operations["AdminController_updateRole"];
         trace?: never;
     };
     "/api/admin/permissions": {
@@ -859,6 +929,36 @@ export interface components {
             /** @example noreply@example.com */
             senderEmail: string;
         };
+        AccountDeletionCodeStatusDto: {
+            /** @example 42 */
+            resendAvailableInSeconds: number;
+            /**
+             * @description Whether this response triggered an account deletion confirmation email delivery attempt that succeeded.
+             * @example true
+             */
+            emailSent: boolean;
+            /**
+             * @description Development-only fallback code. Present only when NODE_ENV=development and Gmail OAuth is not connected.
+             * @example 123456
+             */
+            developmentCode?: string;
+        };
+        TestRegisterResponseDto: {
+            /**
+             * @description Short-lived JWT access token for Authorization: Bearer.
+             * @example eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+             */
+            accessToken: string;
+            /** @example 900 */
+            expiresIn: number;
+            user: components["schemas"]["UserResponseDto"];
+            emailVerification?: components["schemas"]["EmailVerificationStatusDto"];
+            /**
+             * @description Email verification code generated for this test registration.
+             * @example 123456
+             */
+            emailVerificationCode: string;
+        };
         GameServerResponseDto: {
             /** @example b3ab9f57-d124-463d-b1a7-6cbdeaf258a6 */
             id: string;
@@ -1012,7 +1112,7 @@ export interface components {
              *       "f5d490c7-0db8-49f9-9628-00313ed0e694"
              *     ]
              */
-            tagIds?: string[];
+            tagIds?: unknown[][];
         };
         UpdateNewsDto: {
             /** @example Season Two Starts Friday */
@@ -1030,7 +1130,7 @@ export interface components {
              *       "f5d490c7-0db8-49f9-9628-00313ed0e694"
              *     ]
              */
-            tagIds?: string[];
+            tagIds?: unknown[][];
         };
         ChangelogResponseDto: {
             /** @example 4d0ea760-e421-49f4-904c-dd44a4ad23dc */
@@ -1136,6 +1236,12 @@ export interface components {
             /** @example Can moderate public content. */
             description?: string;
         };
+        UpdateRoleDto: {
+            /** @example moderator */
+            name?: string;
+            /** @example Can moderate public content. */
+            description?: string;
+        };
         PermissionResponseDto: {
             /** @example 4f02df80-665e-4f8d-8d1d-229d123d8391 */
             id: string;
@@ -1209,6 +1315,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserResponseDto"];
+                };
+            };
+        };
+    };
+    AccountController_deleteMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyEmailDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailVerifiedResponseDto"];
                 };
             };
         };
@@ -1514,6 +1643,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GmailOAuthCallbackResponseDto"];
+                };
+            };
+        };
+    };
+    AccountController_requestAccountDeletionCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountDeletionCodeStatusDto"];
+                };
+            };
+        };
+    };
+    TestAuthController_register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestRegisterResponseDto"];
                 };
             };
         };
@@ -2108,6 +2279,30 @@ export interface operations {
             };
         };
     };
+    AdminController_deleteTestUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example true */
+                        success?: boolean;
+                    };
+                };
+            };
+        };
+    };
     AdminController_roles: {
         parameters: {
             query?: never;
@@ -2137,6 +2332,51 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["CreateRoleDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleResponseDto"];
+                };
+            };
+        };
+    };
+    AdminController_deleteRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Role deleted. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AdminController_updateRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRoleDto"];
             };
         };
         responses: {

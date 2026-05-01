@@ -24,6 +24,9 @@ export interface AdminUsersSectionResult {
   handleConfirmUnban: () => Promise<void>;
   handleSaveRoles: () => Promise<void>;
   handleCreateRole: () => Promise<void>;
+  handleUpdateRole: () => Promise<void>;
+  editingRole: { id: string; name: string; description?: string } | null;
+  setEditingRole: (role: { id: string; name: string; description?: string } | null) => void;
   // Paged pagination
   currentPage: number;
   totalPages: number;
@@ -55,6 +58,8 @@ export function useAdminUsersSection(
 
   // Role Search Query for Dialog
   const [roleSearchQuery, setRoleSearchQuery] = useState("");
+
+  const [editingRole, setEditingRole] = useState<{ id: string; name: string; description?: string } | null>(null);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -110,9 +115,27 @@ export function useAdminUsersSection(
       return;
     }
 
-    setNewRoleName("");
     setNewRoleDescription("");
     toast.success(ADMIN_TOASTS.roleCreated);
+  }
+
+  async function handleUpdateRole(): Promise<void> {
+    if (!editingRole) return;
+    
+    const result = await vm.updateRole(editingRole.id, {
+      description: newRoleDescription.trim() || undefined,
+    });
+
+    if (!result.success) {
+      setRoleFormError(result.error || "Failed to update role");
+      toast.error(result.error || "Failed to update role");
+      return;
+    }
+
+    setEditingRole(null);
+    setNewRoleName("");
+    setNewRoleDescription("");
+    toast.success("Роль обновлена");
   }
 
   return {
@@ -135,6 +158,9 @@ export function useAdminUsersSection(
     handleConfirmUnban,
     handleSaveRoles,
     handleCreateRole,
+    handleUpdateRole,
+    editingRole,
+    setEditingRole,
     currentPage: vm.currentPage,
     totalPages: vm.totalPages,
     setPage: vm.setPage,

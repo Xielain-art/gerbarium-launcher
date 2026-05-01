@@ -1,4 +1,5 @@
-import { Input } from "../ui";
+import { useState } from "react";
+import { Button, Input, Modal, ModalActions } from "../ui";
 import { Avatar } from "../game/Avatar";
 import type { ProfileSettingsTabProps } from "./types";
 
@@ -16,7 +17,15 @@ export function ProfileSettingsTab({
   profile,
   user,
   onUpdateProfile,
+  onDeleteAccount,
+  onRequestDeleteCode,
+  deletionNotice,
 }: ProfileSettingsTabProps): React.JSX.Element {
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteCode, setDeleteCode] = useState("");
+  const [isRequestingCode, setIsRequestingCode] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const skinUrl = profile.skinUrl || "";
   const capeUrl = profile.capeUrl || "";
 
@@ -36,6 +45,24 @@ export function ProfileSettingsTab({
 
   const rolesText = user?.roles?.map((role) => role.name).join(", ") || "user";
   const bannedText = user?.isBanned ? "Yes" : "No";
+
+  const handleDeleteClick = async (): Promise<void> => {
+    setIsRequestingCode(true);
+    const result = await onRequestDeleteCode();
+    setIsRequestingCode(false);
+    if (result.success) {
+      setShowDeleteModal(true);
+    }
+  };
+
+  const handleConfirmDelete = async (): Promise<void> => {
+    setIsDeleting(true);
+    const result = await onDeleteAccount(deleteCode);
+    setIsDeleting(false);
+    if (result.success) {
+      setShowDeleteModal(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -114,6 +141,65 @@ export function ProfileSettingsTab({
           />
         </div>
       </div>
+
+      <div className="mt-8 border-t-[3px] border-theme pt-6">
+        <h3 className="font-minecraft text-lg font-bold uppercase text-red-500">
+          {t.SETTINGS.PROFILE.DELETE_ACCOUNT_TITLE}
+        </h3>
+        <p className="mt-2 font-minecraft text-sm text-theme-muted">
+          {t.SETTINGS.PROFILE.DELETE_ACCOUNT_DESCRIPTION}
+        </p>
+        <div className="mt-4">
+          <Button
+            variant="danger"
+            onClick={handleDeleteClick}
+            isLoading={isRequestingCode}
+          >
+            {t.SETTINGS.PROFILE.DELETE_ACCOUNT_BUTTON}
+          </Button>
+        </div>
+      </div>
+
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title={t.SETTINGS.PROFILE.DELETE_ACCOUNT_MODAL_TITLE}
+        actions={
+          <ModalActions>
+            <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+              {t.COMMON.CANCEL}
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleConfirmDelete}
+              isLoading={isDeleting}
+              disabled={deleteCode.length < 6}
+            >
+              {t.SETTINGS.PROFILE.DELETE_ACCOUNT_MODAL_CONFIRM}
+            </Button>
+          </ModalActions>
+        }
+      >
+        <div className="space-y-4">
+          <p className="font-minecraft text-sm text-theme">
+            {t.SETTINGS.PROFILE.DELETE_ACCOUNT_MODAL_TEXT}
+          </p>
+          <Input
+            label={t.LOGIN.CODE_LABEL}
+            value={deleteCode}
+            onChange={(e) => setDeleteCode(e.target.value)}
+            placeholder={t.LOGIN.CODE_PLACEHOLDER}
+            maxLength={6}
+          />
+          {deletionNotice && (
+            <div
+              className={`font-minecraft text-xs ${deletionNotice.type === "error" ? "text-red-500" : "text-green-500"}`}
+            >
+              {deletionNotice.text}
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }

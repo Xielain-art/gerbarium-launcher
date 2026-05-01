@@ -7,6 +7,7 @@ import {
 import type {
   ApiAdminStats,
   ApiCreateRoleDto,
+  ApiUpdateRoleDto,
   ApiRole,
   ApiUser,
 } from "../../../../lib/api/admin";
@@ -274,7 +275,7 @@ export function useAdminChangelogQuery(filters: AdminChangelogFilters) {
   });
 }
 
-export function useAdminUserMutations(filters: UserFilters) {
+export function useAdminUserMutations(_filters: UserFilters) {
   const queryClient = useQueryClient();
   const invalidateUsers = async () => {
     await queryClient.invalidateQueries({
@@ -336,15 +337,33 @@ export function useAdminUserMutations(filters: UserFilters) {
         });
       },
     }),
+    updateRole: useMutation({
+      mutationFn: async ({
+        roleId,
+        payload,
+      }: {
+        roleId: string;
+        payload: ApiUpdateRoleDto;
+      }) =>
+        ensureSuccess(
+          await window.electronAPI.admin.updateRole(roleId, payload),
+          "Failed to update role",
+        ),
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.adminRoles(),
+        });
+      },
+    }),
   };
 }
 
 
-export function useAdminNewsMutations(filters: AdminNewsFilters) {
+export function useAdminNewsMutations(_filters: AdminNewsFilters) {
   const queryClient = useQueryClient();
   const invalidateNews = async () => {
     await queryClient.invalidateQueries({
-      queryKey: queryKeys.adminNews(filters),
+      queryKey: queryKeys.adminNews(_filters),
     });
   };
 

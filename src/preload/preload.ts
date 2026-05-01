@@ -138,6 +138,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
       typedInvoke(IPC_CHANNELS.AUTH.LOGIN, credentials),
     register: (payload: { email: string; username: string; password: string }) =>
       typedInvoke(IPC_CHANNELS.AUTH.REGISTER, payload),
+    registerTest: (payload: { email: string; username: string; password: string }) =>
+      typedInvoke(IPC_CHANNELS.AUTH.REGISTER_TEST, payload),
+    requestDeleteCode: () => typedInvoke(IPC_CHANNELS.AUTH.REQUEST_DELETE_CODE),
+    deleteAccount: (payload: { code: string }) =>
+      typedInvoke(IPC_CHANNELS.AUTH.DELETE_ACCOUNT, payload),
     verifyEmail: (payload: { code: string }) =>
       typedInvoke(IPC_CHANNELS.AUTH.VERIFY_EMAIL, payload),
     getEmailVerificationStatus: (): Promise<{
@@ -172,9 +177,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
     banUser: (userId: string, reason: string) => typedInvoke(IPC_CHANNELS.ADMIN.BAN_USER, userId, reason),
     unbanUser: (userId: string) => typedInvoke(IPC_CHANNELS.ADMIN.UNBAN_USER, userId),
     updateRoles: (userId: string, roleIds: string[]) => typedInvoke(IPC_CHANNELS.ADMIN.UPDATE_ROLES, userId, roleIds),
+    deleteTestUser: (userId: string) => typedInvoke(IPC_CHANNELS.ADMIN.DELETE_TEST_USER, userId),
     getRoles: () => typedInvoke(IPC_CHANNELS.ADMIN.GET_ROLES),
     createRole: (payload: { name: string; description?: string }) =>
       typedInvoke(IPC_CHANNELS.ADMIN.CREATE_ROLE, payload),
+    updateRole: (roleId: string, payload: { name?: string; description?: string }) =>
+      typedInvoke(IPC_CHANNELS.ADMIN.UPDATE_ROLE, roleId, payload),
     getStats: () => typedInvoke(IPC_CHANNELS.ADMIN.GET_STATS),
     getNews: (
       search?: string,

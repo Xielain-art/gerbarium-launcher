@@ -5,6 +5,7 @@ import type {
   ApiCreateRoleDto,
   ApiResult,
   ApiRole,
+  ApiUpdateRoleDto,
   ApiUser,
 } from "./types";
 export type {
@@ -12,6 +13,7 @@ export type {
   ApiCreateRoleDto,
   ApiResult,
   ApiRole,
+  ApiUpdateRoleDto,
   ApiUser,
 } from "./types";
 
@@ -150,6 +152,28 @@ export async function createRoleRequest(
   }
 }
 
+export async function updateRoleRequest(
+  accessToken: string,
+  roleId: string,
+  payload: ApiUpdateRoleDto,
+): Promise<ApiResult<ApiRole>> {
+  try {
+    const { data, error, response } = await apiClient.PATCH(
+      "/api/admin/roles/{id}",
+      {
+        params: { path: { id: roleId } },
+        body: payload,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+    return buildApiResult<ApiRole>({ response, data, error });
+  } catch (error) {
+    return buildNetworkErrorResult<ApiRole>(error);
+  }
+}
+
 export async function getAdminStatsRequest(
   accessToken: string,
 ): Promise<ApiResult<ApiAdminStats>> {
@@ -162,5 +186,33 @@ export async function getAdminStatsRequest(
     return buildApiResult<ApiAdminStats>({ response, data, error });
   } catch (error) {
     return buildNetworkErrorResult<ApiAdminStats>(error);
+  }
+}
+
+export async function deleteTestUserRequest(
+  accessToken: string,
+  userId: string,
+): Promise<ApiResult<{ success: boolean }>> {
+  try {
+    const { data, error, response } = await apiClient.DELETE(
+      "/api/admin/test-users/{id}",
+      {
+        params: { path: { id: userId } },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+    const result = buildApiResult<{ success: boolean }>({
+      response,
+      data,
+      error,
+    });
+    if (!result.success) {
+      return result;
+    }
+    return { ...result, data: { success: true } };
+  } catch (error) {
+    return buildNetworkErrorResult<{ success: boolean }>(error);
   }
 }

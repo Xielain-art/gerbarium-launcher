@@ -53,6 +53,9 @@ export interface ProfileSettingsTabProps extends SettingsBaseProps {
   profile: SettingsProfile;
   user: AuthUser | null;
   onUpdateProfile: (updates: Partial<SettingsProfile>) => void;
+  onDeleteAccount: (code?: string) => Promise<{ success: boolean; error?: string }>;
+  onRequestDeleteCode: () => Promise<{ success: boolean; error?: string }>;
+  deletionNotice: SettingsNotice | null;
 }
 
 export interface AdvancedSettingsTabProps extends SettingsBaseProps {

@@ -21,57 +21,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/users/me/minecraft/verification-code": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Start Minecraft account linking by resolving the submitted username and creating a verification code. */
-        post: operations["UsersController_startMinecraftLink"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/me/minecraft/link": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Confirm Minecraft account ownership and store UUID, username, skin, and cape URLs. */
-        post: operations["UsersController_confirmMinecraftLink"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/me/minecraft": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Unlink the authenticated user Minecraft profile. */
-        delete: operations["UsersController_unlinkMinecraft"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/auth/register": {
         parameters: {
             query?: never;
@@ -100,6 +49,57 @@ export interface paths {
         put?: never;
         /** Login with email or username and password. Returns a short-lived access token and stores the refresh token in an HTTP-only cookie. */
         post: operations["AuthController_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/email/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify the current account email with a six-digit code. */
+        post: operations["AuthController_verifyEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/email/verification-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Return email verification state and resend cooldown for the current user. */
+        get: operations["AuthController_emailVerificationStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/auth/email/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resend the email verification message. Returns remaining cooldown seconds. */
+        post: operations["AuthController_resendEmailVerification"];
         delete?: never;
         options?: never;
         head?: never;
@@ -174,23 +174,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/auth/profile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Return the authenticated account profile. */
-        get: operations["AuthController_profile"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/auth/link-provider": {
         parameters: {
             query?: never;
@@ -220,6 +203,74 @@ export interface paths {
         post?: never;
         /** Unlink an OAuth provider from the account. */
         delete: operations["AuthController_unlinkProvider"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/email/google/oauth-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Create a Google OAuth authorization URL for Gmail sending. */
+        get: operations["GmailOAuthController_createAuthorizationUrl"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/email/google/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Return Gmail OAuth sender connection status. */
+        get: operations["GmailOAuthController_status"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/email/google": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove stored Gmail OAuth sender credentials. */
+        delete: operations["GmailOAuthController_disconnect"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/email/google/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Google OAuth callback for Gmail sender setup. */
+        get: operations["GmailOAuthController_callback"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -336,7 +387,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Public news listing with pagination, sorting, date filtering, text search, and tag filtering. */
+        /** Public news listing with pagination, sorting, date filtering, text search, and tag ID filtering. */
         get: operations["NewsController_list"];
         put?: never;
         /** Create a news article. Admin/moderator only. */
@@ -345,6 +396,42 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/news/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List all existing news tags. */
+        get: operations["NewsController_listTags"];
+        put?: never;
+        /** Create a news tag. Admin/moderator only. */
+        post: operations["NewsController_createTag"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/news/tags/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a news tag. Admin/moderator only. */
+        delete: operations["NewsController_deleteTag"];
+        options?: never;
+        head?: never;
+        /** Update a news tag. Admin/moderator only. */
+        patch: operations["NewsController_updateTag"];
         trace?: never;
     };
     "/api/news/{idOrSlug}": {
@@ -442,7 +529,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List users with pagination, search, role filter, and ban status filter. */
+        /** List users with pagination, search, role ID filter, permission ID filters, and ban status filter. */
         get: operations["AdminController_users"];
         put?: never;
         post?: never;
@@ -503,6 +590,77 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List existing roles. Admin only. */
+        get: operations["AdminController_roles"];
+        put?: never;
+        /** Create a new role. Admin only. */
+        post: operations["AdminController_createRole"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List existing client permissions. Admin only. */
+        get: operations["AdminController_permissions"];
+        put?: never;
+        /** Create a new client permission. Admin only. */
+        post: operations["AdminController_createPermission"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/{id}/permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Replace all client permissions assigned to a user. Admin only. */
+        put: operations["AdminController_assignPermissions"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/{id}/permissions/{permissionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Grant one client permission to a user. Admin only. */
+        post: operations["AdminController_grantPermission"];
+        /** Remove one client permission from a user. Admin only. */
+        delete: operations["AdminController_revokePermission"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/stats": {
         parameters: {
             query?: never;
@@ -510,7 +668,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** View system statistics for the Minecraft ecosystem. */
+        /** View system statistics. */
         get: operations["AdminController_stats"];
         put?: never;
         post?: never;
@@ -542,25 +700,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        PlayerProfileResponseDto: {
-            /** @example 853c80ef-3c37-49fd-aa49-938b674adae6 */
-            minecraftUuid?: string;
-            /** @example jeb_ */
-            minecraftUsername?: string;
-            /** @example http://textures.minecraft.net/texture/abc123 */
-            skinUrl?: string;
-            /** @example http://textures.minecraft.net/texture/def456 */
-            capeUrl?: string;
-            /**
-             * @example verified
-             * @enum {string}
-             */
-            verificationStatus: "unlinked" | "pending" | "verified";
-            /**
-             * Format: date-time
-             * @example 2026-04-25T10:30:00.000Z
-             */
-            verifiedAt?: string;
+        UserAccessItemResponseDto: {
+            /** @example 15515736-b7f0-4214-a48b-d79dc0b77e9d */
+            id: string;
+            /** @example admin */
+            name: string;
         };
         UserResponseDto: {
             /** @example 06b53cf3-f7f1-44e5-badf-50e01d8e7e83 */
@@ -571,48 +715,43 @@ export interface components {
             username: string;
             /**
              * @example [
-             *       "user"
+             *       {
+             *         "id": "15515736-b7f0-4214-a48b-d79dc0b77e9d",
+             *         "name": "admin"
+             *       }
              *     ]
              */
-            roles: ("user" | "moderator" | "admin")[];
+            roles: components["schemas"]["UserAccessItemResponseDto"][];
+            /**
+             * @example [
+             *       {
+             *         "id": "4f02df80-665e-4f8d-8d1d-229d123d8391",
+             *         "name": "start-game"
+             *       }
+             *     ]
+             */
+            permissions: components["schemas"]["UserAccessItemResponseDto"][];
+            /** @example false */
+            emailVerified: boolean;
+            /**
+             * Format: date-time
+             * @example 2026-04-25T10:30:00.000Z
+             */
+            emailVerifiedAt?: string;
+            /**
+             * @description Seconds until the user can request another email verification message.
+             * @example 42
+             */
+            emailVerificationResendAvailableInSeconds: number;
             /** @example false */
             isBanned: boolean;
             /** @example Chargeback abuse */
             banReason?: string;
-            playerProfile?: components["schemas"]["PlayerProfileResponseDto"];
             /**
              * Format: date-time
              * @example 2026-04-25T10:30:00.000Z
              */
             createdAt: string;
-        };
-        StartMinecraftLinkDto: {
-            /**
-             * @description Minecraft Java username. A verification code is generated and stored for this profile.
-             * @example HerbCrafter
-             */
-            minecraftUsername: string;
-        };
-        MinecraftVerificationResponseDto: {
-            /** @example A7K2Q9 */
-            verificationCode: string;
-            /**
-             * @example pending
-             * @enum {string}
-             */
-            verificationStatus: "pending";
-        };
-        ConfirmMinecraftLinkDto: {
-            /**
-             * @description Minecraft Java username to resolve through Mojang services.
-             * @example HerbCrafter
-             */
-            minecraftUsername: string;
-            /**
-             * @description Verification code returned by the start endpoint. In lookup mode the code must match the pending profile; in username_code mode it must also be present in the resolved Minecraft name.
-             * @example A7K2Q9
-             */
-            verificationCode: string;
         };
         RegisterDto: {
             /** @example player@example.com */
@@ -621,6 +760,22 @@ export interface components {
             username: string;
             /** @example Use-a-long-random-password-42 */
             password: string;
+        };
+        EmailVerificationStatusDto: {
+            /** @example false */
+            emailVerified: boolean;
+            /** @example 42 */
+            resendAvailableInSeconds: number;
+            /**
+             * @description Whether this response triggered a verification email delivery attempt that succeeded.
+             * @example true
+             */
+            emailSent: boolean;
+            /**
+             * @description Development-only fallback code. Present only when NODE_ENV=development and Gmail OAuth is not connected.
+             * @example 123456
+             */
+            developmentCode?: string;
         };
         AuthResponseDto: {
             /**
@@ -631,6 +786,7 @@ export interface components {
             /** @example 900 */
             expiresIn: number;
             user: components["schemas"]["UserResponseDto"];
+            emailVerification?: components["schemas"]["EmailVerificationStatusDto"];
         };
         LoginDto: {
             /**
@@ -640,6 +796,17 @@ export interface components {
             identifier: string;
             /** @example Use-a-long-random-password-42 */
             password: string;
+        };
+        VerifyEmailDto: {
+            /**
+             * @description Six-digit verification code sent to the account email.
+             * @example 123456
+             */
+            code: string;
+        };
+        EmailVerifiedResponseDto: {
+            /** @example true */
+            success: boolean;
         };
         LogoutResponseDto: {
             /** @example true */
@@ -667,6 +834,30 @@ export interface components {
             provider: string;
             /** @example true */
             linked: boolean;
+        };
+        GmailOAuthUrlResponseDto: {
+            /** @example https://accounts.google.com/o/oauth2/v2/auth?client_id=...&scope=... */
+            authorizationUrl: string;
+        };
+        GmailOAuthStatusResponseDto: {
+            /** @example true */
+            connected: boolean;
+            /** @example noreply@example.com */
+            senderEmail?: string;
+            /** @example 2026-04-25T10:30:00.000Z */
+            connectedAt?: string;
+            /** @example https://www.googleapis.com/auth/gmail.send */
+            scope?: string;
+        };
+        GmailOAuthDisconnectResponseDto: {
+            /** @example true */
+            success: boolean;
+        };
+        GmailOAuthCallbackResponseDto: {
+            /** @example true */
+            success: boolean;
+            /** @example noreply@example.com */
+            senderEmail: string;
         };
         GameServerResponseDto: {
             /** @example b3ab9f57-d124-463d-b1a7-6cbdeaf258a6 */
@@ -744,6 +935,12 @@ export interface components {
             /** @example true */
             isPublic?: boolean;
         };
+        NewsArticleTagResponseDto: {
+            /** @example 2f88f7b9-93b2-4de5-9795-624e1a52b962 */
+            id: string;
+            /** @example season */
+            name: string;
+        };
         NewsResponseDto: {
             /** @example 8e536e64-5faa-476e-a402-85cd482af8ec */
             id: string;
@@ -757,11 +954,13 @@ export interface components {
             image?: string;
             /**
              * @example [
-             *       "season",
-             *       "survival"
+             *       {
+             *         "id": "2f88f7b9-93b2-4de5-9795-624e1a52b962",
+             *         "name": "season"
+             *       }
              *     ]
              */
-            tags: unknown[][];
+            tags: components["schemas"]["NewsArticleTagResponseDto"][];
             /** @example 06b53cf3-f7f1-44e5-badf-50e01d8e7e83 */
             authorId: string;
             /** @example AdminUser */
@@ -777,6 +976,26 @@ export interface components {
              */
             updatedAt: string;
         };
+        NewsTagResponseDto: {
+            /** @example 2f88f7b9-93b2-4de5-9795-624e1a52b962 */
+            id: string;
+            /** @example season */
+            name: string;
+            /**
+             * Format: date-time
+             * @example 2026-04-25T10:30:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2026-04-25T10:30:00.000Z
+             */
+            updatedAt: string;
+        };
+        NewsTagNameDto: {
+            /** @example season */
+            name: string;
+        };
         CreateNewsDto: {
             /** @example Season Two Starts Friday */
             title: string;
@@ -787,12 +1006,13 @@ export interface components {
             /** @example https://cdn.example.com/news/season-two.jpg */
             image?: string;
             /**
+             * @description Existing news tag IDs to attach to the article.
              * @example [
-             *       "season",
-             *       "survival"
+             *       "2f88f7b9-93b2-4de5-9795-624e1a52b962",
+             *       "f5d490c7-0db8-49f9-9628-00313ed0e694"
              *     ]
              */
-            tags?: unknown[][];
+            tagIds?: string[];
         };
         UpdateNewsDto: {
             /** @example Season Two Starts Friday */
@@ -804,12 +1024,13 @@ export interface components {
             /** @example https://cdn.example.com/news/season-two.jpg */
             image?: string;
             /**
+             * @description Existing news tag IDs to attach to the article.
              * @example [
-             *       "season",
-             *       "survival"
+             *       "2f88f7b9-93b2-4de5-9795-624e1a52b962",
+             *       "f5d490c7-0db8-49f9-9628-00313ed0e694"
              *     ]
              */
-            tags?: unknown[][];
+            tagIds?: string[];
         };
         ChangelogResponseDto: {
             /** @example 4d0ea760-e421-49f4-904c-dd44a4ad23dc */
@@ -889,12 +1110,59 @@ export interface components {
         };
         AssignRolesDto: {
             /**
+             * @description Role IDs to assign to the user.
              * @example [
-             *       "user",
-             *       "moderator"
+             *       "15515736-b7f0-4214-a48b-d79dc0b77e9d"
              *     ]
              */
-            roles: ("user" | "moderator" | "admin")[];
+            roleIds: unknown[][];
+        };
+        RoleResponseDto: {
+            /** @example 15515736-b7f0-4214-a48b-d79dc0b77e9d */
+            id: string;
+            /** @example moderator */
+            name: string;
+            /** @example Can moderate content. */
+            description?: string;
+            /**
+             * Format: date-time
+             * @example 2026-04-25T10:30:00.000Z
+             */
+            createdAt: string;
+        };
+        CreateRoleDto: {
+            /** @example moderator */
+            name: string;
+            /** @example Can moderate public content. */
+            description?: string;
+        };
+        PermissionResponseDto: {
+            /** @example 4f02df80-665e-4f8d-8d1d-229d123d8391 */
+            id: string;
+            /** @example start-game */
+            name: string;
+            /** @example Allows the launcher to start the game. */
+            description?: string;
+            /**
+             * Format: date-time
+             * @example 2026-04-25T10:30:00.000Z
+             */
+            createdAt: string;
+        };
+        CreatePermissionDto: {
+            /** @example start-game */
+            name: string;
+            /** @example Allows the launcher to start the game. */
+            description?: string;
+        };
+        AssignPermissionsDto: {
+            /**
+             * @description Permission IDs to assign to the user.
+             * @example [
+             *       "4f02df80-665e-4f8d-8d1d-229d123d8391"
+             *     ]
+             */
+            permissionIds: unknown[][];
         };
         AdminStatsDto: {
             /** @example 1420 */
@@ -927,71 +1195,6 @@ export interface components {
 export type $defs = Record<string, never>;
 export interface operations {
     UsersController_me: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserResponseDto"];
-                };
-            };
-        };
-    };
-    UsersController_startMinecraftLink: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["StartMinecraftLinkDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MinecraftVerificationResponseDto"];
-                };
-            };
-        };
-    };
-    UsersController_confirmMinecraftLink: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ConfirmMinecraftLinkDto"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserResponseDto"];
-                };
-            };
-        };
-    };
-    UsersController_unlinkMinecraft: {
         parameters: {
             query?: never;
             header?: never;
@@ -1052,6 +1255,67 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuthResponseDto"];
+                };
+            };
+        };
+    };
+    AuthController_verifyEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyEmailDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailVerifiedResponseDto"];
+                };
+            };
+        };
+    };
+    AuthController_emailVerificationStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailVerificationStatusDto"];
+                };
+            };
+        };
+    };
+    AuthController_resendEmailVerification: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailVerificationStatusDto"];
                 };
             };
         };
@@ -1130,25 +1394,6 @@ export interface operations {
             };
         };
     };
-    AuthController_profile: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserResponseDto"];
-                };
-            };
-        };
-    };
     AuthController_linkProvider: {
         parameters: {
             query?: never;
@@ -1189,6 +1434,86 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LogoutResponseDto"];
+                };
+            };
+        };
+    };
+    GmailOAuthController_createAuthorizationUrl: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GmailOAuthUrlResponseDto"];
+                };
+            };
+        };
+    };
+    GmailOAuthController_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GmailOAuthStatusResponseDto"];
+                };
+            };
+        };
+    };
+    GmailOAuthController_disconnect: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GmailOAuthDisconnectResponseDto"];
+                };
+            };
+        };
+    };
+    GmailOAuthController_callback: {
+        parameters: {
+            query: {
+                code: string;
+                state: string;
+                error: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GmailOAuthCallbackResponseDto"];
                 };
             };
         };
@@ -1375,7 +1700,8 @@ export interface operations {
         parameters: {
             query?: {
                 search?: string;
-                tag?: string;
+                /** @description Filter by news tag ID. */
+                tagId?: string;
                 fromDate?: string;
                 toDate?: string;
                 sortBy?: "createdAt" | "updatedAt" | "title";
@@ -1416,6 +1742,92 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NewsResponseDto"];
+                };
+            };
+        };
+    };
+    NewsController_listTags: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NewsTagResponseDto"][];
+                };
+            };
+        };
+    };
+    NewsController_createTag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewsTagNameDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NewsTagResponseDto"];
+                };
+            };
+        };
+    };
+    NewsController_deleteTag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    NewsController_updateTag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewsTagNameDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NewsTagResponseDto"];
                 };
             };
         };
@@ -1603,7 +2015,10 @@ export interface operations {
             query?: {
                 /** @description Email or username search. */
                 search?: string;
-                role?: "user" | "moderator" | "admin";
+                /** @description Role ID. */
+                role?: string;
+                /** @description Permission IDs. Can be provided as repeated params or comma-separated values. */
+                permissions?: string[];
                 banned?: boolean;
             };
             header?: never;
@@ -1682,6 +2097,159 @@ export interface operations {
                 "application/json": components["schemas"]["AssignRolesDto"];
             };
         };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponseDto"];
+                };
+            };
+        };
+    };
+    AdminController_roles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleResponseDto"][];
+                };
+            };
+        };
+    };
+    AdminController_createRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRoleDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleResponseDto"];
+                };
+            };
+        };
+    };
+    AdminController_permissions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PermissionResponseDto"][];
+                };
+            };
+        };
+    };
+    AdminController_createPermission: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePermissionDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PermissionResponseDto"];
+                };
+            };
+        };
+    };
+    AdminController_assignPermissions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignPermissionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponseDto"];
+                };
+            };
+        };
+    };
+    AdminController_grantPermission: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                permissionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponseDto"];
+                };
+            };
+        };
+    };
+    AdminController_revokePermission: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                permissionId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             200: {
                 headers: {

@@ -33,7 +33,7 @@ export function useAdminScreen() {
   const usersQuery = useAdminUsersQuery(filters);
   const rolesQuery = useAdminRolesQuery();
   const statsQuery = useAdminStatsQuery();
-  const { banUser, unbanUser, updateRoles, createRole } =
+  const { banUser, unbanUser, updateRoles, createRole, updateRole } =
     useAdminUserMutations({ search, role, banned });
 
   const usersData = usersQuery.data;
@@ -224,6 +224,17 @@ export function useAdminScreen() {
         return {
           success: false as const,
           error: getErrorMessage(error, "Failed to create role"),
+        };
+      }
+    },
+    updateRole: async (roleId: string, payload: { description?: string }) => {
+      try {
+        await updateRole.mutateAsync({ roleId, payload });
+        return { success: true as const };
+      } catch (error) {
+        return {
+          success: false as const,
+          error: getErrorMessage(error, "Failed to update role"),
         };
       }
     },

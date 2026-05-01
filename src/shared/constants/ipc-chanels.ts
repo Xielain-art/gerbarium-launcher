@@ -43,6 +43,9 @@ export const IPC_CHANNELS = {
     VERIFY_EMAIL: "auth:verify-email",
     GET_EMAIL_VERIFICATION_STATUS: "auth:get-email-verification-status",
     RESEND_EMAIL_VERIFICATION: "auth:resend-email-verification",
+    REGISTER_TEST: "auth:register-test",
+    REQUEST_DELETE_CODE: "auth:request-delete-code",
+    DELETE_ACCOUNT: "auth:delete-account",
     LOGIN_OFFLINE: "auth:login-offline",
     GET_SESSION: "auth:get-session",
     LOGOUT: "auth:logout",
@@ -52,8 +55,10 @@ export const IPC_CHANNELS = {
     BAN_USER: "admin:ban-user",
     UNBAN_USER: "admin:unban-user",
     UPDATE_ROLES: "admin:update-roles",
+    DELETE_TEST_USER: "admin:delete-test-user",
     GET_ROLES: "admin:get-roles",
     CREATE_ROLE: "admin:create-role",
+    UPDATE_ROLE: "admin:update-role",
     GET_STATS: "admin:get-stats",
     GET_NEWS: "admin:get-news",
     CREATE_NEWS: "admin:create-news",
@@ -346,6 +351,29 @@ export interface IpcChannelMap {
       error?: string;
     };
   };
+  [IPC_CHANNELS.AUTH.REGISTER_TEST]: {
+    args: [payload: { email: string; username: string; password: string }];
+    return: {
+      success: boolean;
+      user?: AuthSessionUser;
+      emailVerificationCode?: string;
+      error?: string;
+    };
+  };
+  [IPC_CHANNELS.AUTH.REQUEST_DELETE_CODE]: {
+    args: [];
+    return: {
+      success: boolean;
+      error?: string;
+    };
+  };
+  [IPC_CHANNELS.AUTH.DELETE_ACCOUNT]: {
+    args: [payload: { code: string }];
+    return: {
+      success: boolean;
+      error?: string;
+    };
+  };
   [IPC_CHANNELS.AUTH.VERIFY_EMAIL]: {
     args: [payload: { code: string }];
     return: {
@@ -414,12 +442,20 @@ export interface IpcChannelMap {
     args: [userId: string, roleIds: string[]];
     return: AdminUserMutationResponse;
   };
+  [IPC_CHANNELS.ADMIN.DELETE_TEST_USER]: {
+    args: [userId: string];
+    return: { success: boolean; error?: string };
+  };
   [IPC_CHANNELS.ADMIN.GET_ROLES]: {
     args: [];
     return: AdminRolesResponse;
   };
   [IPC_CHANNELS.ADMIN.CREATE_ROLE]: {
     args: [payload: { name: string; description?: string }];
+    return: AdminRoleMutationResponse;
+  };
+  [IPC_CHANNELS.ADMIN.UPDATE_ROLE]: {
+    args: [roleId: string, payload: { name?: string; description?: string }];
     return: AdminRoleMutationResponse;
   };
   [IPC_CHANNELS.ADMIN.GET_STATS]: {

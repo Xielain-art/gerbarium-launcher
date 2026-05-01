@@ -7,10 +7,12 @@ import { LOG_MESSAGES } from "../../shared/constants/log-messages";
 import {
   banUserRequest,
   createRoleRequest,
+  deleteTestUserRequest,
   getAdminStatsRequest,
   getRolesRequest,
   getUsersRequest,
   unbanUserRequest,
+  updateRoleRequest,
   updateUserRolesRequest,
 } from "../../lib/api/admin";
 import {
@@ -199,6 +201,14 @@ export default function adminHandler(app: App): void {
   );
 
   ipcMain.handle(
+    IPC_CHANNELS.ADMIN.DELETE_TEST_USER,
+    async (_event, userId: string): Promise<HandlerResult<unknown>> =>
+      withAdminAuth(app, "[ADMIN] Delete test user failed", (token) =>
+        deleteTestUserRequest(token, userId),
+      ),
+  );
+
+  ipcMain.handle(
     IPC_CHANNELS.ADMIN.GET_ROLES,
     async (): Promise<HandlerResult<unknown>> =>
       withAdminAuth(app, LOG_MESSAGES.ADMIN_GET_USERS_FAILED, (token) =>
@@ -214,6 +224,18 @@ export default function adminHandler(app: App): void {
     ): Promise<HandlerResult<unknown>> =>
       withAdminAuth(app, LOG_MESSAGES.ADMIN_UPDATE_ROLES_FAILED, (token) =>
         createRoleRequest(token, payload),
+      ),
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.ADMIN.UPDATE_ROLE,
+    async (
+      _event,
+      roleId: string,
+      payload: { name?: string; description?: string },
+    ): Promise<HandlerResult<unknown>> =>
+      withAdminAuth(app, LOG_MESSAGES.ADMIN_UPDATE_ROLE_FAILED, (token) =>
+        updateRoleRequest(token, roleId, payload),
       ),
   );
 

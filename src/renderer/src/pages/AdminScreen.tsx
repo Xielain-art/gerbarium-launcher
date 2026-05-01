@@ -207,6 +207,9 @@ export function AdminScreen(): React.JSX.Element {
             onRefresh={() => vm.fetchUsers()}
             onSetUserFilters={(filters) => vm.setFilters(filters)}
             onCreateRole={() => void handleCreateRole()}
+            onUpdateRole={() => void model.handleUpdateRole()}
+            editingRole={model.editingRole}
+            setEditingRole={model.setEditingRole}
             onOpenRoles={vm.openRolesModal}
             onOpenBan={vm.openBanModal}
             onOpenUnban={vm.openUnbanModal}

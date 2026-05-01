@@ -17,8 +17,13 @@ export type ApiEmailVerificationStatus =
   components["schemas"]["EmailVerificationStatusDto"];
 export type ApiEmailVerifiedResponse =
   components["schemas"]["EmailVerifiedResponseDto"];
+export type ApiAccountDeletionCodeStatus =
+  components["schemas"]["AccountDeletionCodeStatusDto"];
+export type ApiTestRegisterResponse =
+  components["schemas"]["TestRegisterResponseDto"];
 export type ApiRole = components["schemas"]["RoleResponseDto"];
 export type ApiCreateRoleDto = components["schemas"]["CreateRoleDto"];
+export type ApiUpdateRoleDto = components["schemas"]["UpdateRoleDto"];
 export type ApiAdminStats = components["schemas"]["AdminStatsDto"];
 
 export type ApiWrappedData<T> = T | { data: T };

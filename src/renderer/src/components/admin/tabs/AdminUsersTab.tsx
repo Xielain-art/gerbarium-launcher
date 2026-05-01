@@ -17,7 +17,7 @@ import type { ApiUser } from "../../../../../lib/api/types";
 interface AdminUsersTabProps {
   t: TranslationType;
   users: ApiUser[];
-  availableRoles: Array<{ id: string; name: string }>;
+  availableRoles: Array<{ id: string; name: string; description?: string }>;
   error: string | null;
   isLoading: boolean;
   isLoadingMore: boolean;
@@ -37,6 +37,9 @@ interface AdminUsersTabProps {
   onRefresh: () => void;
   onSetUserFilters: (filters: { role?: string; banned?: boolean }) => void;
   onCreateRole: () => void;
+  onUpdateRole: () => void;
+  editingRole: { id: string; name: string; description?: string } | null;
+  setEditingRole: (role: { id: string; name: string; description?: string } | null) => void;
   onOpenRoles: (user: ApiUser) => void;
   onOpenBan: (user: ApiUser) => void;
   onOpenUnban: (user: ApiUser) => void;
@@ -69,6 +72,9 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
     onRefresh,
     onSetUserFilters,
     onCreateRole,
+    onUpdateRole,
+    editingRole,
+    setEditingRole,
     onOpenRoles,
     onOpenBan,
     onOpenUnban,
@@ -198,8 +204,9 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
         <ShadcnInput
           label="Имя роли"
           placeholder="role-name"
-          value={newRoleName}
-          onChange={(e) => setNewRoleName(e.target.value)}
+          value={editingRole ? editingRole.name : newRoleName}
+          onChange={(e) => !editingRole && setNewRoleName(e.target.value)}
+          disabled={!!editingRole}
         />
         <ShadcnInput
           label="Описание"
@@ -207,15 +214,94 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
           value={newRoleDescription}
           onChange={(e) => setNewRoleDescription(e.target.value)}
         />
-        <ShadcnButton
-          variant="default"
-          onClick={onCreateRole}
-          disabled={isAdminApiBusy}
-          className="self-end"
-        >
-          Создать роль
-        </ShadcnButton>
+        <div className="flex gap-2 self-end">
+          {editingRole ? (
+            <>
+              <ShadcnButton
+                variant="default"
+                onClick={onUpdateRole}
+                disabled={isAdminApiBusy}
+                className="flex-1"
+              >
+                Сохранить
+              </ShadcnButton>
+              <ShadcnButton
+                variant="secondary"
+                onClick={() => {
+                  setEditingRole(null);
+                  setNewRoleName("");
+                  setNewRoleDescription("");
+                }}
+                disabled={isAdminApiBusy}
+              >
+                Отмена
+              </ShadcnButton>
+            </>
+          ) : (
+            <ShadcnButton
+              variant="default"
+              onClick={onCreateRole}
+              disabled={isAdminApiBusy}
+              className="w-full"
+            >
+              Создать роль
+            </ShadcnButton>
+          )}
+        </div>
       </div>
+      
+      {/* Roles List */}
+      <div className="mb-8 rounded-lg border border-white/5 bg-black/10 p-4">
+        <h3 className="mb-4 font-minecraft text-sm font-bold uppercase text-theme-muted">
+          Существующие роли
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          {availableRoles.map((role) => (
+            <div
+              key={role.id}
+              className="flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1.5"
+            >
+              <div className="flex flex-col">
+                <span className="font-minecraft text-sm font-bold text-theme">
+                  {role.name}
+                </span>
+                {role.description && (
+                  <span className="max-w-[200px] truncate text-[10px] text-theme-muted">
+                    {role.description}
+                  </span>
+                )}
+              </div>
+              <ShadcnButton
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-theme-muted hover:text-theme"
+                onClick={() => {
+                  setEditingRole(role);
+                  setNewRoleName(role.name);
+                  setNewRoleDescription(role.description || "");
+                }}
+                disabled={isAdminApiBusy}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                  <path d="m15 5 4 4" />
+                </svg>
+              </ShadcnButton>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {roleFormError && (
         <div className="mb-4 font-minecraft text-xs text-red-500">
           {roleFormError}

@@ -57,7 +57,10 @@ export interface SettingsScreenResult {
   onFindJava: () => Promise<void>;
   onSelectGameDirectory: () => Promise<void>;
   onExportLogs: () => Promise<void>;
+  onDeleteAccount: (code?: string) => Promise<{ success: boolean; error?: string }>;
+  onRequestDeleteCode: () => Promise<{ success: boolean; error?: string }>;
   supportNotice: SettingsNotice | null;
+  deletionNotice: SettingsNotice | null;
   isExporting: boolean;
   isDevMode: boolean;
 }
@@ -99,6 +102,9 @@ export function useSettingsScreen(): SettingsScreenResult {
   const [showConfirmReset, setShowConfirmReset] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [supportNotice, setSupportNotice] = useState<SettingsNotice | null>(
+    null,
+  );
+  const [deletionNotice, setDeletionNotice] = useState<SettingsNotice | null>(
     null,
   );
 
@@ -296,6 +302,38 @@ export function useSettingsScreen(): SettingsScreenResult {
     }
   }, [updateGeneral]);
 
+  const onRequestDeleteCode = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
+    setDeletionNotice(null);
+    try {
+      const result = await window.electronAPI.auth.requestDeleteCode();
+      if (!result.success) {
+        setDeletionNotice({ type: "error", text: t.STORE_ERRORS.AUTH_API_ERROR });
+      }
+      return result;
+    } catch (_err) {
+      setDeletionNotice({ type: "error", text: t.STORE_ERRORS.AUTH_UNEXPECTED_ERROR || "Unexpected error" });
+      return { success: false };
+    }
+  }, [t.STORE_ERRORS]);
+
+  const onDeleteAccount = useCallback(async (code?: string): Promise<{ success: boolean; error?: string }> => {
+    if (!code) return { success: false, error: "Missing code" };
+    setDeletionNotice(null);
+    try {
+      const result = await window.electronAPI.auth.deleteAccount({ code });
+      if (result.success) {
+        navigate({ to: ROUTES.LOGIN });
+      } else {
+        const errorKey = result.error === "ERR_AUTH_EMAIL_CODE_INVALID" ? "AUTH_EMAIL_CODE_INVALID" : "AUTH_API_ERROR";
+        setDeletionNotice({ type: "error", text: t.STORE_ERRORS[errorKey as keyof typeof t.STORE_ERRORS] || "Error" });
+      }
+      return result;
+    } catch (_err) {
+      setDeletionNotice({ type: "error", text: t.STORE_ERRORS.AUTH_UNEXPECTED_ERROR || "Unexpected error" });
+      return { success: false };
+    }
+  }, [t, navigate]);
+
   const renderActiveTab = useCallback((): ReactNode => {
     switch (activeTab) {
       case "general":
@@ -344,6 +382,9 @@ export function useSettingsScreen(): SettingsScreenResult {
             profile={profile}
             user={user}
             onUpdateProfile={updateProfile}
+            onDeleteAccount={onDeleteAccount}
+            onRequestDeleteCode={onRequestDeleteCode}
+            deletionNotice={deletionNotice}
           />
         );
       case "advanced":
@@ -390,6 +431,9 @@ export function useSettingsScreen(): SettingsScreenResult {
     profile,
     user,
     updateProfile,
+    onDeleteAccount,
+    onRequestDeleteCode,
+    deletionNotice,
     isExporting,
     supportNotice,
     isDevMode,
@@ -436,7 +480,10 @@ export function useSettingsScreen(): SettingsScreenResult {
     onFindJava,
     onSelectGameDirectory,
     onExportLogs,
+    onDeleteAccount,
+    onRequestDeleteCode,
     supportNotice,
+    deletionNotice,
     isExporting,
     isDevMode,
   };

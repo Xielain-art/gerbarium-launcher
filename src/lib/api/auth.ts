@@ -9,6 +9,8 @@ import type {
   ApiResult,
   ApiUser,
   ApiVerifyEmailDto,
+  ApiAccountDeletionCodeStatus,
+  ApiTestRegisterResponse,
 } from "./types";
 export type {
   ApiAuthResponse,
@@ -16,9 +18,9 @@ export type {
   ApiEmailVerifiedResponse,
   ApiLoginDto,
   ApiRegisterDto,
-  ApiResult,
-  ApiUser,
   ApiVerifyEmailDto,
+  ApiAccountDeletionCodeStatus,
+  ApiTestRegisterResponse,
 } from "./types";
 
 export async function loginRequest(payload: ApiLoginDto): Promise<ApiResult<ApiAuthResponse>> {
@@ -194,5 +196,65 @@ export async function logoutRequest(accessToken: string, cookie?: string): Promi
     };
   } catch (error) {
     return buildNetworkErrorResult<{ success: boolean }>(error);
+  }
+}
+
+export async function testRegisterRequest(
+  payload: ApiRegisterDto,
+): Promise<ApiResult<ApiTestRegisterResponse>> {
+  try {
+    const { data, error, response } = await apiClient.POST(
+      "/api/test/auth/register",
+      {
+        body: payload,
+      },
+    );
+    return buildApiResult<ApiTestRegisterResponse>({
+      response,
+      data,
+      error,
+      includeSetCookie: true,
+    });
+  } catch (error) {
+    return buildNetworkErrorResult<ApiTestRegisterResponse>(error);
+  }
+}
+
+export async function deleteAccountCodeRequest(
+  accessToken: string,
+): Promise<ApiResult<ApiAccountDeletionCodeStatus>> {
+  try {
+    const { data, error, response } = await apiClient.POST(
+      "/api/users/me/delete-code",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+    return buildApiResult<ApiAccountDeletionCodeStatus>({
+      response,
+      data,
+      error,
+    });
+  } catch (error) {
+    return buildNetworkErrorResult<ApiAccountDeletionCodeStatus>(error);
+  }
+}
+
+export async function deleteAccountRequest(
+  accessToken: string,
+  payload: ApiVerifyEmailDto,
+): Promise<ApiResult<ApiEmailVerifiedResponse>> {
+  try {
+    const { data, error, response } = await apiClient.DELETE("/api/users/me", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: payload,
+    });
+    return buildApiResult<ApiEmailVerifiedResponse>({ response, data, error });
+  } catch (error) {
+    return buildNetworkErrorResult<ApiEmailVerifiedResponse>(error);
   }
 }
