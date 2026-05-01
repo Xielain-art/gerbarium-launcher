@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
-function Toaster({ ...props }: ToasterProps) {
+function Toaster({ ...props }: ToasterProps): React.JSX.Element {
   return (
     <Sonner
       theme="dark"
@@ -19,5 +19,6 @@ function Toaster({ ...props }: ToasterProps) {
     />
   );
 }
+
 
 export { Toaster };

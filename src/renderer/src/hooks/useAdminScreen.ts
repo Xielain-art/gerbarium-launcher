@@ -2,21 +2,21 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "../hooks/useTranslation";
 import type { ApiUser } from "../../../lib/api/admin";
 import {
-  getVisibleUsers,
   useAdminRolesQuery,
+  useAdminStatsQuery,
   useAdminUserMutations,
   useAdminUsersQuery,
 } from "./queries/useAdminQueries";
-import { getErrorMessage } from "../lib/queryHelpers";
 
-const INITIAL_PAGE = 1;
+import { getErrorMessage } from "../lib/queryHelpers";
 
 export function useAdminScreen() {
   const t = useTranslation();
   const [search, setSearch] = useState("");
   const [role, setRole] = useState<string | undefined>(undefined);
   const [banned, setBanned] = useState<boolean | undefined>(undefined);
-  const [page, setPage] = useState(INITIAL_PAGE);
+  const [page, setPage] = useState(1);
+
   const [selectedUser, setSelectedUser] = useState<ApiUser | null>(null);
   const [banModalOpen, setBanModalOpen] = useState(false);
   const [banReason, setBanReason] = useState("");
@@ -26,18 +26,37 @@ export function useAdminScreen() {
   const [actionError, setActionError] = useState<string | null>(null);
 
   const filters = useMemo(
-    () => ({ search, role, banned }),
-    [banned, role, search],
+    () => ({ search, role, banned, page }),
+    [banned, role, search, page],
   );
+
   const usersQuery = useAdminUsersQuery(filters);
   const rolesQuery = useAdminRolesQuery();
+  const statsQuery = useAdminStatsQuery();
   const { banUser, unbanUser, updateRoles, createRole } =
-    useAdminUserMutations(filters);
+    useAdminUserMutations({ search, role, banned });
 
-  const users = getVisibleUsers(usersQuery.data ?? [], page);
-  const hasMore = users.length < (usersQuery.data?.length ?? 0);
+  const usersData = usersQuery.data;
+  const users = usersData?.items ?? [];
+
+  // Total pages logic
+  const totalUsersInDb = statsQuery.data?.userCount ?? 0;
+  const serverReportedTotal = usersData?.meta.total ?? 0;
+  
+  // Use the most reliable source for total count
+  const effectiveTotalUsers = Math.max(totalUsersInDb, serverReportedTotal, users.length);
+  const totalPages = Math.ceil(effectiveTotalUsers / 20) || 1; // 20 is ADMIN_USERS_PAGE_SIZE
+  
+  const hasMore = page < totalPages;
+
+
+
+
   const actionLoading =
-    banUser.isPending || unbanUser.isPending || updateRoles.isPending || createRole.isPending
+    banUser.isPending ||
+    unbanUser.isPending ||
+    updateRoles.isPending ||
+    createRole.isPending
       ? "pending"
       : null;
 
@@ -55,7 +74,7 @@ export function useAdminScreen() {
     if ("banned" in nextFilters) {
       setBanned(nextFilters.banned);
     }
-    setPage(INITIAL_PAGE);
+    setPage(1);
   };
 
   const fetchUsers = async () => {
@@ -66,9 +85,8 @@ export function useAdminScreen() {
     await rolesQuery.refetch();
   };
 
-  const fetchMoreUsers = async () => {
-    if (!hasMore) return;
-    setPage((prev) => prev + 1);
+  const setPageNumber = (newPage: number) => {
+    setPage(Math.max(1, Math.min(newPage, totalPages || 1)));
   };
 
   const openBanModal = (user: ApiUser) => {
@@ -79,7 +97,9 @@ export function useAdminScreen() {
   };
 
   const executeBan = async () => {
-    if (!selectedUser || !banReason.trim()) return;
+    if (!selectedUser || !banReason.trim()) {
+      return;
+    }
 
     try {
       await banUser.mutateAsync({ userId: selectedUser.id, reason: banReason });
@@ -96,7 +116,9 @@ export function useAdminScreen() {
   };
 
   const executeUnban = async () => {
-    if (!selectedUser) return;
+    if (!selectedUser) {
+      return;
+    }
 
     try {
       await unbanUser.mutateAsync(selectedUser.id);
@@ -122,7 +144,9 @@ export function useAdminScreen() {
   };
 
   const executeRolesUpdate = async () => {
-    if (!selectedUser) return;
+    if (!selectedUser) {
+      return;
+    }
 
     try {
       await updateRoles.mutateAsync({
@@ -144,28 +168,29 @@ export function useAdminScreen() {
         }))
       : Array.from(
           new Map(
-            (usersQuery.data ?? [])
-              .flatMap((user) => user.roles ?? [])
-              .map((roleItem) => [
-                roleItem.id,
-                {
-                  id: roleItem.id,
-                  name: roleItem.name,
-                  description: undefined,
-                },
-              ] as const),
+            users.flatMap((user) => user.roles ?? []).map((roleItem) => [
+              roleItem.id,
+              {
+                id: roleItem.id,
+                name: roleItem.name,
+                description: undefined,
+              },
+            ] as const),
           ).values(),
         );
 
   return {
     users,
     isLoading: usersQuery.isLoading,
-    isLoadingMore: false,
+    isLoadingMore: usersQuery.isFetching,
     actionLoading,
     error: usersQuery.isError
       ? getErrorMessage(usersQuery.error, "Failed to fetch users")
       : null,
     hasMore,
+    totalPages,
+    currentPage: page,
+    setPage: setPageNumber,
     search,
     role,
     banned,
@@ -183,7 +208,6 @@ export function useAdminScreen() {
     actionError,
     fetchUsers,
     fetchRoles,
-    fetchMoreUsers,
     openBanModal,
     executeBan,
     openUnbanModal,
@@ -206,3 +230,5 @@ export function useAdminScreen() {
     t,
   };
 }
+
+

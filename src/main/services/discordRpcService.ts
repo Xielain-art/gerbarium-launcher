@@ -38,8 +38,9 @@ export function createDiscordRpcService() {
   let enabled = false;
   const clientId = readDiscordClientId();
 
-  const disconnect = (): void => {
+  function disconnect(): void {
     if (!client) return;
+
     try {
       if (client.clearActivity) {
         client.clearActivity();
@@ -51,10 +52,11 @@ export function createDiscordRpcService() {
     } finally {
       client = null;
     }
-  };
+  }
 
-  const connect = (): void => {
+  function connect(): void {
     if (client || !enabled) return;
+
     if (!clientId) {
       log.warn(LOG_MESSAGES.DISCORD_RPC_CLIENT_ID_MISSING);
       return;
@@ -64,6 +66,7 @@ export function createDiscordRpcService() {
       const discordRpc = require("discord-rpc-patch") as DiscordRpcModule;
       client = new discordRpc.Client({ transport: "ipc" });
       const activity = buildDefaultActivity();
+
       client.on("ready", () => {
         try {
           client?.setActivity(activity);
@@ -72,6 +75,7 @@ export function createDiscordRpcService() {
           log.warn(LOG_MESSAGES.DISCORD_RPC_SET_ACTIVITY_FAILED, error);
         }
       });
+
       void client.login({ clientId }).catch((error: unknown) => {
         const errorText = error instanceof Error ? error.message : String(error);
         if (errorText.includes("ENOENT")) {
@@ -79,30 +83,26 @@ export function createDiscordRpcService() {
         } else {
           log.warn(LOG_MESSAGES.DISCORD_RPC_LOGIN_FAILED, errorText);
         }
-        if (client) {
-          client = null;
-        }
+        client = null;
       });
     } catch (error) {
       log.warn(LOG_MESSAGES.DISCORD_RPC_INIT_FAILED, error);
-      if (client) {
-        client = null;
-      }
+      client = null;
     }
-  };
+  }
 
-  const setEnabled = (next: boolean): void => {
+  function setEnabled(next: boolean): void {
     enabled = next;
     if (enabled) {
       connect();
-      return;
+    } else {
+      disconnect();
     }
-    disconnect();
-  };
+  }
 
-  const shutdown = (): void => {
+  function shutdown(): void {
     disconnect();
-  };
+  }
 
   return {
     setEnabled,

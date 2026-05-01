@@ -2,7 +2,7 @@ import { Button } from "../../shadcn/ui";
 import type { NewsItem } from "../../../types";
 import type { TranslationType } from "../../../../../shared/constants/translations";
 
-function getCategoryColor(category: string) {
+function getCategoryColor(category: string): string {
   const colors: Record<string, string> = {
     update: "bg-[var(--primary)] text-[var(--primary-foreground)]",
     event: "bg-[var(--secondary)] text-[var(--secondary-foreground)]",
@@ -14,18 +14,18 @@ function getCategoryColor(category: string) {
 
 function stripMarkdown(markdown: string): string {
   return markdown
-    .replace(/#{1,6}\s+/g, "")
-    .replace(/\*\*(.+?)\*\*/g, "$1")
-    .replace(/\*(.+?)\*/g, "$1")
-    .replace(/__(.+?)__/g, "$1")
-    .replace(/_(.+?)_/g, "$1")
-    .replace(/\[(.+?)\]\(.+?\)/g, "$1")
-    .replace(/`(.+?)`/g, "$1")
-    .replace(/```[\s\S]*?```/g, "")
-    .replace(/^>\s+/gm, "")
-    .replace(/^[-*+]\s+/gm, "")
-    .replace(/^\d+\.\s+/gm, "")
-    .replace(/\n+/g, " ")
+    .replace(/#{1,6}\s+/g, "") // Headers
+    .replace(/\*\*(.+?)\*\*/g, "$1") // Bold
+    .replace(/\*(.+?)\*/g, "$1") // Italic
+    .replace(/__(.+?)__/g, "$1") // Underline
+    .replace(/_(.+?)_/g, "$1") // Alternative italic
+    .replace(/\[(.+?)\]\(.+?\)/g, "$1") // Links
+    .replace(/`(.+?)`/g, "$1") // Inline code
+    .replace(/```[\s\S]*?```/g, "") // Code blocks
+    .replace(/^>\s+/gm, "") // Blockquotes
+    .replace(/^[-*+]\s+/gm, "") // Unordered lists
+    .replace(/^\d+\.\s+/gm, "") // Ordered lists
+    .replace(/\n+/g, " ") // Newlines to spaces
     .trim();
 }
 
@@ -36,12 +36,18 @@ interface Props {
   onSelectNews: (news: NewsItem) => void;
 }
 
-export function NewsCards({ t, news, placeholderImage, onSelectNews }: Props) {
+export function NewsCards({
+  t,
+  news,
+  placeholderImage,
+  onSelectNews,
+}: Props): React.JSX.Element {
   return (
     <div className="grid gap-5">
       {news.map((item) => {
         const plainText = stripMarkdown(item.content);
-        const preview = plainText.slice(0, 260) + (plainText.length > 260 ? "..." : "");
+        const preview =
+          plainText.slice(0, 260) + (plainText.length > 260 ? "..." : "");
 
         return (
           <article
@@ -70,16 +76,31 @@ export function NewsCards({ t, news, placeholderImage, onSelectNews }: Props) {
                     ))}
                   </div>
                 ) : (
-                  <span className={`rounded-[var(--radius)] px-3 py-1 text-xs font-semibold ${getCategoryColor(item.category)}`}>
-                    {t.NEWS.CATEGORIES[item.category as keyof typeof t.NEWS.CATEGORIES] || item.category}
+                  <span
+                    className={`rounded-[var(--radius)] px-3 py-1 text-xs font-semibold ${getCategoryColor(
+                      item.category,
+                    )}`}
+                  >
+                    {t.NEWS.CATEGORIES[
+                      item.category as keyof typeof t.NEWS.CATEGORIES
+                    ] || item.category}
                   </span>
                 )}
                 <span className="text-xs text-[var(--muted-foreground)]">
-                  {new Date(item.date).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })}
+                  {new Date(item.date).toLocaleDateString("ru-RU", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
                 </span>
               </div>
-              <h3 className="mb-3 break-words text-lg font-semibold text-[var(--foreground)]">{item.title}</h3>
-              <p className="break-words text-sm leading-relaxed text-[var(--muted-foreground)]" style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}>
+              <h3 className="mb-3 break-words text-lg font-semibold text-[var(--foreground)]">
+                {item.title}
+              </h3>
+              <p
+                className="break-words text-sm leading-relaxed text-[var(--muted-foreground)]"
+                style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
+              >
                 {preview}
               </p>
               <div className="mt-4">
@@ -94,3 +115,4 @@ export function NewsCards({ t, news, placeholderImage, onSelectNews }: Props) {
     </div>
   );
 }
+

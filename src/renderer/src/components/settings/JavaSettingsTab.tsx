@@ -8,12 +8,18 @@ function isJavaInstalled(installedVersions: number[], version: number): boolean 
   return installedVersions.includes(version);
 }
 
-export function JavaSettingsTab(props: JavaSettingsTabProps) {
-  const installedVersionNumbers = props.installedJava.map((java) => java.version);
+export function JavaSettingsTab(
+  props: JavaSettingsTabProps,
+): React.JSX.Element {
+  const installedVersionNumbers = props.installedJava.map(
+    (java) => java.version,
+  );
 
   return (
     <div className="space-y-6">
-      <h2 className="font-minecraft text-xl font-bold uppercase text-theme">{props.t.SETTINGS.JAVA.TITLE}</h2>
+      <h2 className="font-minecraft text-xl font-bold uppercase text-theme">
+        {props.t.SETTINGS.JAVA.TITLE}
+      </h2>
 
       <JavaInstalledList
         t={props.t}
@@ -39,7 +45,9 @@ export function JavaSettingsTab(props: JavaSettingsTabProps) {
         downloadJavaVersion={props.downloadJavaVersion}
         onSetDownloadJavaVersion={props.onSetDownloadJavaVersion}
         onDownloadJava={props.onDownloadJava}
-        isInstalled={(version) => isJavaInstalled(installedVersionNumbers, version)}
+        isInstalled={(version) =>
+          isJavaInstalled(installedVersionNumbers, version)
+        }
       />
 
       <JavaRamSection
@@ -57,3 +65,4 @@ export function JavaSettingsTab(props: JavaSettingsTabProps) {
     </div>
   );
 }
+

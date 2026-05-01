@@ -19,12 +19,14 @@ export function DashboardContentDialog({
   onClose,
   footer,
   children,
-}: Props) {
+}: Props): React.JSX.Element {
   return (
     <Dialog
       open={open}
       onOpenChange={(nextOpen) => {
-        if (!nextOpen) onClose();
+        if (!nextOpen) {
+          onClose();
+        }
       }}
       title={title}
       subtitle={subtitle}
@@ -42,4 +44,5 @@ export function DashboardContentDialog({
     </Dialog>
   );
 }
+
 

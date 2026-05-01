@@ -1,15 +1,16 @@
-import { app, ipcMain, IpcMainInvokeEvent, BrowserWindow } from "electron";
+import { app, ipcMain, type IpcMainInvokeEvent, BrowserWindow } from "electron";
 import {
   IPC_CHANNELS,
-  GameLaunchOptions,
-  GameProgressPayload,
+  type GameLaunchOptions,
+  type GameProgressPayload,
 } from "../../shared/constants/ipc-chanels";
 import { LOG_MESSAGES } from "../../shared/constants/log-messages";
 import { Client, Authenticator } from "minecraft-launcher-core";
 import os from "node:os";
 import path from "node:path";
 import log from "electron-log";
-import fs from "node:fs";
+import fs from "node:fs/promises";
+import { constants } from "node:fs";
 import { checkJavaVersion } from "./javaHandler";
 import { getRequiredJavaVersion } from "../config/javaConfig";
 
@@ -26,7 +27,7 @@ gameLog.transports.file.resolvePathFn = () => {
     app.getPath("userData"),
     "logs",
     dateFolder,
-    "minecraft.log"
+    "minecraft.log",
   );
 };
 
@@ -89,11 +90,11 @@ async function validateJavaPath(inputPath: string): Promise<string> {
   }
 
   try {
-    const stat = await fs.promises.stat(resolvedPath);
+    const stat = await fs.stat(resolvedPath);
     if (!stat.isFile()) {
       throw new Error("javaPath must be a file");
     }
-    await fs.promises.access(resolvedPath, fs.constants.R_OK);
+    await fs.access(resolvedPath, constants.R_OK);
   } catch (error) {
     throw new Error(`Invalid javaPath: ${toErrorMessage(error)}`);
   }
@@ -103,12 +104,12 @@ async function validateJavaPath(inputPath: string): Promise<string> {
 
 async function resolveRootPath(gamePath?: string): Promise<string> {
   if (!gamePath || !gamePath.trim()) {
-    await fs.promises.mkdir(DEFAULT_GAME_ROOT, { recursive: true });
+    await fs.mkdir(DEFAULT_GAME_ROOT, { recursive: true });
     return DEFAULT_GAME_ROOT;
   }
 
   const resolvedPath = validateAbsolutePath(gamePath, "gamePath");
-  await fs.promises.mkdir(resolvedPath, { recursive: true });
+  await fs.mkdir(resolvedPath, { recursive: true });
   return resolvedPath;
 }
 
@@ -120,6 +121,8 @@ function sanitizeJvmArgs(jvmArgs: string[]): string[] {
   if (jvmArgs.length > MAX_JVM_ARGS) {
     throw new Error(`Too many JVM arguments (max ${MAX_JVM_ARGS})`);
   }
+
+  const blockedChars = /[;&\n\r`|]/;
 
   return jvmArgs
     .map((arg) => arg.trim())
@@ -133,15 +136,7 @@ function sanitizeJvmArgs(jvmArgs: string[]): string[] {
         throw new Error(`Blocked JVM argument: ${arg}`);
       }
 
-      if (
-        arg.includes(";")
-        || arg.includes("|")
-        || arg.includes("&&")
-        || arg.includes("||")
-        || arg.includes("\n")
-        || arg.includes("\r")
-        || arg.includes("`")
-      ) {
+      if (blockedChars.test(arg)) {
         throw new Error(`Blocked JVM argument: ${arg}`);
       }
 
@@ -149,7 +144,10 @@ function sanitizeJvmArgs(jvmArgs: string[]): string[] {
     });
 }
 
-function sendProgress(mainWindow: BrowserWindow, payload: GameProgressPayload): void {
+function sendProgress(
+  mainWindow: BrowserWindow,
+  payload: GameProgressPayload,
+): void {
   if (mainWindow.isDestroyed()) {
     return;
   }
@@ -169,14 +167,18 @@ function sendProgress(mainWindow: BrowserWindow, payload: GameProgressPayload): 
 function parseJavaMajor(version: string): number {
   const trimmed = version.trim();
   const match = trimmed.match(/^(?:1\.)?(\d+)(?:[._-].*)?$/);
-  if (match && match[1]) {
-    const major = Number.parseInt(match[1], 10);
-    return Number.isNaN(major) ? 0 : major;
+  if (!match || !match[1]) {
+    return 0;
   }
-  return 0;
+
+  const major = Number.parseInt(match[1], 10);
+  return Number.isNaN(major) ? 0 : major;
 }
 
-async function validateJavaCompatibility(javaPath: string, minecraftVersion: string): Promise<void> {
+async function validateJavaCompatibility(
+  javaPath: string,
+  minecraftVersion: string,
+): Promise<void> {
   const detectedVersion = await checkJavaVersion(javaPath);
   if (!detectedVersion) {
     throw new Error("Unable to determine Java version from javaPath");
@@ -192,10 +194,12 @@ async function validateJavaCompatibility(javaPath: string, minecraftVersion: str
   }
 }
 
-function createProgressSender(mainWindow: BrowserWindow): (payload: GameProgressPayload) => void {
+function createProgressSender(
+  mainWindow: BrowserWindow,
+): (payload: GameProgressPayload) => void {
   let lastEmitTs = 0;
 
-  return (payload: GameProgressPayload) => {
+  return function (payload: GameProgressPayload): void {
     if (payload.type !== "progress") {
       sendProgress(mainWindow, payload);
       return;
@@ -219,7 +223,7 @@ function waitForLaunchStart(
     let isSettled = false;
     let timeoutId: NodeJS.Timeout | null = null;
 
-    const settle = (fn: () => void) => {
+    const settle = (fn: () => void): void => {
       if (isSettled) {
         return;
       }
@@ -233,21 +237,29 @@ function waitForLaunchStart(
       fn();
     };
 
-    const onSpawned = () => {
+    const onSpawned = (): void => {
       settle(resolve);
     };
 
-    const onCloseBeforeSpawn = (code: number | string) => {
+    const onCloseBeforeSpawn = (code: number | string): void => {
       const exitCode = Number(code);
       const normalizedCode = Number.isFinite(exitCode) ? exitCode : 0;
-      settle(() => reject(new Error(`Game process exited before startup (code ${normalizedCode})`)));
+      settle(() =>
+        reject(
+          new Error(
+            `Game process exited before startup (code ${normalizedCode})`,
+          ),
+        ),
+      );
     };
 
     launcher.once("arguments", onSpawned);
     launcher.once("close", onCloseBeforeSpawn);
 
     launchPromise.catch((error) => {
-      settle(() => reject(new Error(`Failed to launch game: ${toErrorMessage(error)}`)));
+      settle(() =>
+        reject(new Error(`Failed to launch game: ${toErrorMessage(error)}`)),
+      );
     });
 
     timeoutId = setTimeout(() => {
@@ -256,13 +268,13 @@ function waitForLaunchStart(
   });
 }
 
-export default function setupGameHandlers(mainWindow: BrowserWindow) {
+export default function setupGameHandlers(mainWindow: BrowserWindow): void {
   ipcMain.handle(
     IPC_CHANNELS.GAME.LAUNCH,
     async (
       _event: IpcMainInvokeEvent,
-      options: GameLaunchOptions
-    ) => {
+      options: GameLaunchOptions,
+    ): Promise<{ success: boolean; error?: string }> => {
       try {
         const username = validateRequiredText(options.username, "username");
         const version = validateRequiredText(options.version, "version");
@@ -340,7 +352,7 @@ export default function setupGameHandlers(mainWindow: BrowserWindow) {
           emitProgress({ type: "close", content: Number(e) || 0 });
         });
 
-        const launchPromise = launcher.launch(opts);
+        const launchPromise = launcher.launch(opts as Parameters<Client["launch"]>[0]);
         launchPromise.catch((error) => {
           const errorMessage = toErrorMessage(error);
           log.error(LOG_MESSAGES.GAME_LAUNCH_ASYNC_FAILED, error);
@@ -354,18 +366,21 @@ export default function setupGameHandlers(mainWindow: BrowserWindow) {
         log.error(LOG_MESSAGES.GAME_LAUNCH_SETUP_FAILED, error);
         return { success: false, error: toErrorMessage(error) };
       }
-    }
+    },
   );
 
-  ipcMain.handle(IPC_CHANNELS.GAME.GET_INSTALLED_VERSIONS, async () => {
-    const rootPath = DEFAULT_GAME_ROOT;
-    const versionsPath = path.join(rootPath, "versions");
+  ipcMain.handle(
+    IPC_CHANNELS.GAME.GET_INSTALLED_VERSIONS,
+    async (): Promise<string[]> => {
+      const rootPath = DEFAULT_GAME_ROOT;
+      const versionsPath = path.join(rootPath, "versions");
 
-    try {
-      const folders = await fs.promises.readdir(versionsPath);
-      return folders;
-    } catch {
-      return [];
-    }
-  });
+      try {
+        const folders = await fs.readdir(versionsPath);
+        return folders;
+      } catch {
+        return [];
+      }
+    },
+  );
 }

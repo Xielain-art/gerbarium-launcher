@@ -13,9 +13,9 @@ import { LOG_ACTIONS } from "../../../shared/constants/system";
 import { UI_STRINGS } from "../../../shared/constants/ui-strings";
 import { ERROR_CODES } from "../../../shared/constants/errors";
 
-const logAction = (action: string, details?: string) => {
+function logAction(action: string, details?: string): void {
   window.electronAPI.system.logAction(action, details);
-};
+}
 
 function toRoleItems(roles: unknown): Array<{ id: string; name: string }> {
   if (!Array.isArray(roles)) {
@@ -462,3 +462,4 @@ export const useAuthStore = create<AuthStoreState>()((set, get) => ({
     }
   },
 }));
+

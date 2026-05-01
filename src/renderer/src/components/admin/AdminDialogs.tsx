@@ -31,7 +31,7 @@ interface AdminDialogsProps {
   toggleRole: (roleId: string) => void;
 }
 
-export function AdminDialogs(props: AdminDialogsProps) {
+export function AdminDialogs(props: AdminDialogsProps): React.JSX.Element {
   return (
     <>
       <BanUserDialog
@@ -69,3 +69,4 @@ export function AdminDialogs(props: AdminDialogsProps) {
     </>
   );
 }
+

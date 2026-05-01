@@ -1,8 +1,12 @@
-import { useEffect } from 'react';
-import { useSettingsStore } from '../stores/useSettingsStore';
-import { THEME_CLASSNAMES, THEME_REGISTRY } from '../lib/themes/themeRegistry';
+import { useEffect } from "react";
+import { useSettingsStore } from "../stores/useSettingsStore";
+import { THEME_CLASSNAMES, THEME_REGISTRY } from "../lib/themes/themeRegistry";
 
-export function ThemeWrapper({ children }: { children: React.ReactNode }) {
+export function ThemeWrapper({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.JSX.Element {
   const theme = useSettingsStore((state) => state.general.theme);
   const themeMode = useSettingsStore((state) => state.general.themeMode);
 
@@ -13,8 +17,10 @@ export function ThemeWrapper({ children }: { children: React.ReactNode }) {
 
     document.body.classList.remove(...THEME_CLASSNAMES);
     document.documentElement.classList.remove(...THEME_CLASSNAMES);
+
     document.body.classList.add(`theme-${appliedTheme}`);
     document.documentElement.classList.add(`theme-${appliedTheme}`);
+
     document.body.classList.toggle("dark", themeMode === "dark");
     document.documentElement.classList.toggle("dark", themeMode === "dark");
 
@@ -28,3 +34,4 @@ export function ThemeWrapper({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
+

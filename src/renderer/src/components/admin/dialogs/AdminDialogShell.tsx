@@ -25,7 +25,7 @@ export function AdminDialogShell({
   size = "sm",
   footer,
   children,
-}: Props) {
+}: Props): React.JSX.Element {
   return (
     <ShadcnDialog
       open={open}
@@ -38,3 +38,4 @@ export function AdminDialogShell({
     </ShadcnDialog>
   );
 }
+

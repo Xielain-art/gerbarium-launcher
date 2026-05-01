@@ -1,4 +1,4 @@
-import { ipcMain, safeStorage, App } from "electron";
+import { ipcMain, safeStorage, type App } from "electron";
 import fs from "node:fs/promises";
 import path from "node:path";
 import log from "electron-log";
@@ -18,7 +18,9 @@ async function readSecureData(secureDataPath: string): Promise<SecureData> {
   try {
     const existing = await fs.readFile(secureDataPath, "utf-8");
     const parsed = JSON.parse(existing);
-    return typeof parsed === "object" && parsed !== null ? (parsed as SecureData) : {};
+    return typeof parsed === "object" && parsed !== null
+      ? (parsed as SecureData)
+      : {};
   } catch (error) {
     const err = error as NodeJS.ErrnoException;
     if (err.code === "ENOENT") {
@@ -28,17 +30,31 @@ async function readSecureData(secureDataPath: string): Promise<SecureData> {
   }
 }
 
-async function writeSecureData(secureDataPath: string, secureData: SecureData): Promise<void> {
+async function writeSecureData(
+  secureDataPath: string,
+  secureData: SecureData,
+): Promise<void> {
   await fs.mkdir(path.dirname(secureDataPath), { recursive: true });
-  await fs.writeFile(secureDataPath, JSON.stringify(secureData, null, 2), "utf-8");
+  await fs.writeFile(
+    secureDataPath,
+    JSON.stringify(secureData, null, 2),
+    "utf-8",
+  );
 }
 
-export default function secureStorageHandler(app: App) {
-  const secureDataPath = path.join(app.getPath("userData"), "secure-storage.json");
+export default function secureStorageHandler(app: App): void {
+  const secureDataPath = path.join(
+    app.getPath("userData"),
+    "secure-storage.json",
+  );
 
   ipcMain.handle(
     IPC_CHANNELS.SECURE_STORAGE.SET,
-    async (_event, key: string, value: string) => {
+    async (
+      _event,
+      key: string,
+      value: string,
+    ): Promise<{ success: boolean; error?: string }> => {
       log.info(LOG_MESSAGES.SECURE_STORAGE_SET, key);
       if (!isAllowedSecureStorageKey(key)) {
         log.warn(LOG_MESSAGES.SECURE_STORAGE_SET_FAILED, "Blocked key:", key);
@@ -58,7 +74,10 @@ export default function secureStorageHandler(app: App) {
         log.error(LOG_MESSAGES.SECURE_STORAGE_SET_FAILED, key, error);
         return {
           success: false,
-          error: error instanceof Error ? error.message : ERROR_CODES.SECURE_STORAGE_SET_FAILED,
+          error:
+            error instanceof Error
+              ? error.message
+              : ERROR_CODES.SECURE_STORAGE_SET_FAILED,
         };
       }
     },
@@ -66,7 +85,10 @@ export default function secureStorageHandler(app: App) {
 
   ipcMain.handle(
     IPC_CHANNELS.SECURE_STORAGE.GET,
-    async (_event, key: string) => {
+    async (
+      _event,
+      key: string,
+    ): Promise<{ success: boolean; value?: string | null; error?: string }> => {
       log.debug(LOG_MESSAGES.SECURE_STORAGE_GET, key);
       if (!isAllowedSecureStorageKey(key)) {
         log.warn(LOG_MESSAGES.SECURE_STORAGE_GET_FAILED, "Blocked key:", key);
@@ -88,7 +110,10 @@ export default function secureStorageHandler(app: App) {
         log.error(LOG_MESSAGES.SECURE_STORAGE_GET_FAILED, key, error);
         return {
           success: false,
-          error: error instanceof Error ? error.message : ERROR_CODES.SECURE_STORAGE_GET_FAILED,
+          error:
+            error instanceof Error
+              ? error.message
+              : ERROR_CODES.SECURE_STORAGE_GET_FAILED,
         };
       }
     },
@@ -96,11 +121,21 @@ export default function secureStorageHandler(app: App) {
 
   ipcMain.handle(
     IPC_CHANNELS.SECURE_STORAGE.DELETE,
-    async (_event, key: string) => {
+    async (
+      _event,
+      key: string,
+    ): Promise<{ success: boolean; error?: string }> => {
       log.info(LOG_MESSAGES.SECURE_STORAGE_DELETE, key);
       if (!isAllowedSecureStorageKey(key)) {
-        log.warn(LOG_MESSAGES.SECURE_STORAGE_DELETE_FAILED, "Blocked key:", key);
-        return { success: false, error: ERROR_CODES.SECURE_STORAGE_DELETE_FAILED };
+        log.warn(
+          LOG_MESSAGES.SECURE_STORAGE_DELETE_FAILED,
+          "Blocked key:",
+          key,
+        );
+        return {
+          success: false,
+          error: ERROR_CODES.SECURE_STORAGE_DELETE_FAILED,
+        };
       }
       try {
         await secureStorageLock.runExclusive(async () => {
@@ -113,7 +148,10 @@ export default function secureStorageHandler(app: App) {
         log.error(LOG_MESSAGES.SECURE_STORAGE_DELETE_FAILED, key, error);
         return {
           success: false,
-          error: error instanceof Error ? error.message : ERROR_CODES.SECURE_STORAGE_DELETE_FAILED,
+          error:
+            error instanceof Error
+              ? error.message
+              : ERROR_CODES.SECURE_STORAGE_DELETE_FAILED,
         };
       }
     },

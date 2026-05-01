@@ -10,3 +10,13 @@ export { Checkbox } from "./checkbox";
 export { Dialog } from "./dialog";
 export { TabsList } from "./tabs";
 export { Toaster } from "./sonner";
+export {
+  Pagination,
+  PaginationContent,
+  PaginationLink,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from "./pagination";
+

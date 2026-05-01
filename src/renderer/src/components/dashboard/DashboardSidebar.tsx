@@ -18,23 +18,51 @@ interface DashboardSidebarProps {
   onOpenAdminPanel?: () => void;
 }
 
-export function DashboardSidebar({ t, user, serverStatus, versions, selectedVersionId, onSelectVersion, onLogout, onOpenSettings, onOpenAdminPanel }: DashboardSidebarProps) {
+export function DashboardSidebar({
+  t,
+  user,
+  serverStatus,
+  versions,
+  selectedVersionId,
+  onSelectVersion,
+  onLogout,
+  onOpenSettings,
+  onOpenAdminPanel,
+}: DashboardSidebarProps): React.JSX.Element {
   const { isAdmin } = useRouteContext({ from: "/dashboard" });
 
   return (
-    <aside className="relative z-40 flex h-full w-80 flex-col border-r-[4px] border-theme bg-[color-mix(in_srgb,var(--theme-sidebar)_95%,transparent)] backdrop-blur-md shadow-2xl">
+    <aside className="relative z-40 flex h-full w-80 flex-col border-r-[4px] border-theme bg-[color-mix(in_srgb,var(--theme-sidebar)_95%,transparent)] shadow-2xl backdrop-blur-md">
       <div className="border-b-[3px] border-theme bg-[color-mix(in_srgb,var(--theme-surface)_50%,transparent)] p-5">
-        <SidebarProfileCard t={t} user={user} onOpenSettings={onOpenSettings} onLogout={onLogout} />
+        <SidebarProfileCard
+          t={t}
+          user={user}
+          onOpenSettings={onOpenSettings}
+          onLogout={onLogout}
+        />
       </div>
 
       <SidebarServerStatus t={t} serverStatus={serverStatus} />
-      <SidebarVersionsList t={t} versions={versions} selectedVersionId={selectedVersionId} onSelectVersion={onSelectVersion} />
+      <SidebarVersionsList
+        t={t}
+        versions={versions}
+        selectedVersionId={selectedVersionId}
+        onSelectVersion={onSelectVersion}
+      />
 
       <div className="border-t-[3px] border-theme bg-[color-mix(in_srgb,var(--theme-surface)_95%,transparent)] p-4">
         {isAdmin && onOpenAdminPanel && (
-          <Button onClick={onOpenAdminPanel} className="w-full justify-start" variant="minecraft" size="md">{t.DASHBOARD.ADMIN_PANEL}</Button>
+          <Button
+            onClick={onOpenAdminPanel}
+            className="w-full justify-start"
+            variant="minecraft"
+            size="md"
+          >
+            {t.DASHBOARD.ADMIN_PANEL}
+          </Button>
         )}
       </div>
     </aside>
   );
 }
+

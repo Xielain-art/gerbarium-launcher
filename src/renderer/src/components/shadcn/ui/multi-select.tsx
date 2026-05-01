@@ -17,37 +17,51 @@ interface MultiSelectProps {
   className?: string;
 }
 
-function MultiSelect({ className, label, options, value, onChange, placeholder = "Select items..." }: MultiSelectProps) {
+export function MultiSelect({
+  className,
+  label,
+  options,
+  value,
+  onChange,
+  placeholder = "Select items...",
+}: MultiSelectProps): React.JSX.Element {
   const [isOpen, setIsOpen] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    function handleClickOutside(event: MouseEvent): void {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
-    };
+    }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const toggleOption = (optionValue: string) => {
+  function toggleOption(optionValue: string): void {
     if (value.includes(optionValue)) {
       onChange(value.filter((v) => v !== optionValue));
     } else {
       onChange([...value, optionValue]);
     }
-  };
+  }
 
-  const removeOption = (optionValue: string) => {
+  function removeOption(optionValue: string): void {
     onChange(value.filter((v) => v !== optionValue));
-  };
+  }
 
   const selectedLabels = options.filter((opt) => value.includes(opt.value));
 
   return (
     <div className="space-y-1.5" ref={dropdownRef}>
-      {label ? <Label className="font-minecraft text-[10px] uppercase text-theme-muted">{label}</Label> : null}
+      {label && (
+        <Label className="font-minecraft text-[10px] uppercase text-theme-muted">
+          {label}
+        </Label>
+      )}
       <div className="relative">
         <div
           onClick={() => setIsOpen(!isOpen)}
@@ -67,8 +81,8 @@ function MultiSelect({ className, label, options, value, onChange, placeholder =
                 {opt.label}
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  onClick={(event) => {
+                    event.stopPropagation();
                     removeOption(opt.value);
                   }}
                   className="hover:text-theme-muted"
@@ -96,7 +110,7 @@ function MultiSelect({ className, label, options, value, onChange, placeholder =
                     <input
                       type="checkbox"
                       checked={isSelected}
-                      onChange={() => {}}
+                      readOnly
                       className="h-4 w-4"
                     />
                     {option.label}
@@ -111,4 +125,3 @@ function MultiSelect({ className, label, options, value, onChange, placeholder =
   );
 }
 
-export { MultiSelect };

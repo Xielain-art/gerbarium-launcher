@@ -2,7 +2,7 @@ import { WindowControls } from "../components";
 import { useLoginScreen } from "../hooks/useLoginScreen";
 import { LoginFormCard } from "../components/login";
 
-export function LoginScreen() {
+export function LoginScreen(): React.JSX.Element {
   const vm = useLoginScreen();
 
   if (vm.showSessionSpinner) {
@@ -63,7 +63,10 @@ export function LoginScreen() {
           onResendCode={vm.onResendCode}
           onRegisterStepBack={vm.onRegisterStepBack}
           onSubmit={vm.onSubmit}
+          onBlur={vm.onBlur}
+          validations={vm.validations}
         />
+
 
         <div className="text-center font-minecraft text-[11px] uppercase tracking-[0.16em] text-theme-muted/90">
           {vm.t.LOGIN.FOOTER_TEXT}
@@ -72,3 +75,4 @@ export function LoginScreen() {
     </div>
   );
 }
+

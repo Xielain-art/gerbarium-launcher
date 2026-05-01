@@ -1,5 +1,6 @@
 import { Button } from "../ui";
 import type { SupportSettingsTabProps } from "./types";
+import { cn } from "@/lib/utils";
 
 export function SupportSettingsTab({
   t,
@@ -9,7 +10,7 @@ export function SupportSettingsTab({
   onOpenGithub,
   showDevToolsButton,
   onOpenDevTools,
-}: SupportSettingsTabProps) {
+}: SupportSettingsTabProps): React.JSX.Element {
   return (
     <div className="space-y-6">
       <h2 className="font-minecraft text-xl font-bold uppercase text-theme">
@@ -23,11 +24,12 @@ export function SupportSettingsTab({
 
         {notice && (
           <div
-            className={`rounded border-[2px] px-3 py-2 font-minecraft text-xs whitespace-pre-line ${
+            className={cn(
+              "rounded border-[2px] px-3 py-2 font-minecraft text-xs whitespace-pre-line",
               notice.type === "success"
                 ? "border-[var(--btn-primary-border-lo)] bg-[color-mix(in_srgb,var(--mc-accent)_22%,transparent)] text-[color-mix(in_srgb,var(--mc-accent-hi)_50%,white)]"
-                : "border-[var(--mc-error-border)] bg-[var(--mc-error-bg)] text-[var(--mc-error-text)]"
-            }`}
+                : "border-[var(--mc-error-border)] bg-[var(--mc-error-bg)] text-[var(--mc-error-text)]",
+            )}
           >
             {notice.text}
           </div>
@@ -43,11 +45,7 @@ export function SupportSettingsTab({
             {t.SETTINGS.DEBUG.EXPORT_BUTTON}
           </Button>
 
-          <Button
-            variant="danger"
-            onClick={onOpenGithub}
-            className="w-full"
-          >
+          <Button variant="danger" onClick={onOpenGithub} className="w-full">
             {t.SETTINGS.DEBUG.GITHUB_ISSUES_BUTTON}
           </Button>
 
@@ -65,3 +63,4 @@ export function SupportSettingsTab({
     </div>
   );
 }
+

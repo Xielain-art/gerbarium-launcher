@@ -6,17 +6,26 @@ import type { UpdateInfoPayload } from "../../../shared/constants/ipc-chanels";
 import { useStartupGateStore } from "../stores/useStartupGateStore";
 import { useAppVersionQuery } from "./queries/useSystemQueries";
 
-export function useUpdateScreen() {
+export function useUpdateScreen(): {
+  appVersion: string;
+  updateMessage: string;
+  updateProgress: number;
+} {
   const navigate = useNavigate();
   const isDevMode = import.meta.env.DEV;
-  const setUpdateGatePassed = useStartupGateStore((state) => state.setUpdateGatePassed);
+  const setUpdateGatePassed = useStartupGateStore(
+    (state) => state.setUpdateGatePassed,
+  );
   const appVersionQuery = useAppVersionQuery();
-  const [updateMessage, setUpdateMessage] = useState<string>(UI_STRINGS.UPDATE_SCREEN.SEARCHING);
+  const [updateMessage, setUpdateMessage] = useState<string>(
+    UI_STRINGS.UPDATE_SCREEN.SEARCHING,
+  );
   const [updateProgress, setUpdateProgress] = useState<number>(0);
   const [updateInfo, setUpdateInfo] = useState<UpdateInfoPayload | null>(null);
   const [downloadStarted, setDownloadStarted] = useState(false);
 
-  const isSmokeTest = window.electronAPI?.getSmokeTestConfig?.()?.isSmokeTest ?? false;
+  const isSmokeTest =
+    window.electronAPI?.getSmokeTestConfig?.()?.isSmokeTest ?? false;
 
   useEffect(() => {
     setUpdateGatePassed(false);
@@ -44,7 +53,10 @@ export function useUpdateScreen() {
     });
 
     const unsubInfo = window.electronAPI.onUpdateInfo((info) => {
-      const payload = typeof info === "object" && info !== null ? (info as UpdateInfoPayload) : null;
+      const payload =
+        typeof info === "object" && info !== null
+          ? (info as UpdateInfoPayload)
+          : null;
       setUpdateInfo(payload);
     });
 
@@ -60,11 +72,13 @@ export function useUpdateScreen() {
       unsubInfo?.();
       unsubProgress?.();
     };
-  }, [navigate, isDevMode, setUpdateGatePassed]);
+  }, [navigate, isDevMode, setUpdateGatePassed, isSmokeTest]);
 
   useEffect(() => {
     if (updateInfo && !downloadStarted) {
-      setUpdateMessage(`${UI_STRINGS.UPDATE_SCREEN.FOUND} (${updateInfo.version})`);
+      setUpdateMessage(
+        `${UI_STRINGS.UPDATE_SCREEN.FOUND} (${updateInfo.version})`,
+      );
     }
   }, [updateInfo, downloadStarted]);
 
@@ -74,3 +88,4 @@ export function useUpdateScreen() {
     updateProgress,
   };
 }
+

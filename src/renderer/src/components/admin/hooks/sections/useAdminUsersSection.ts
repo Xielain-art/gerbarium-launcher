@@ -3,45 +3,142 @@ import { toast } from "sonner";
 import { useAdminPage } from "../../../../hooks/useAdminPage";
 import { ADMIN_TOASTS } from "./adminToasts";
 
-export function useAdminUsersSection(activeTab: string, scrollRef: React.RefObject<HTMLDivElement | null>, usersEndRef: React.RefObject<HTMLDivElement | null>) {
+
+export interface AdminUsersSectionResult {
+  vm: ReturnType<typeof useAdminPage>;
+  userSearchInput: string;
+  setUserSearchInput: (value: string) => void;
+  userRoleFilter: string;
+  setUserRoleFilter: (value: string) => void;
+  userBanFilter: "all" | "banned" | "active";
+  setUserBanFilter: (value: "all" | "banned" | "active") => void;
+  newRoleName: string;
+  setNewRoleName: (value: string) => void;
+  newRoleDescription: string;
+  setNewRoleDescription: (value: string) => void;
+  roleFormError: string | null;
+  roleSearchQuery: string;
+  setRoleSearchQuery: (value: string) => void;
+  isApplyingUserFilters: boolean;
+  handleConfirmBan: () => Promise<void>;
+  handleConfirmUnban: () => Promise<void>;
+  handleSaveRoles: () => Promise<void>;
+  handleCreateRole: () => Promise<void>;
+  // Paged pagination
+  currentPage: number;
+  totalPages: number;
+  setPage: (page: number) => void;
+}
+
+export function useAdminUsersSection(
+  activeTab: string,
+  _scrollRef: React.RefObject<HTMLDivElement | null>,
+  _usersEndRef: React.RefObject<HTMLDivElement | null>,
+): AdminUsersSectionResult {
   const vm = useAdminPage();
-  const { search, setFilters, hasMore, isLoading, isLoadingMore, fetchMoreUsers } = vm;
+  const {
+    search,
+    setFilters,
+    isLoading,
+  } = vm;
+
   const [userSearchInput, setUserSearchInput] = useState(vm.search);
   const [userRoleFilter, setUserRoleFilter] = useState<string>(vm.role ?? "all");
-  const [userBanFilter, setUserBanFilter] = useState<"all" | "banned" | "active">(vm.banned === undefined ? "all" : vm.banned ? "banned" : "active");
+  const [userBanFilter, setUserBanFilter] = useState<"all" | "banned" | "active">(
+    vm.banned === undefined ? "all" : vm.banned ? "banned" : "active",
+  );
+
+  // New Role Form State
   const [newRoleName, setNewRoleName] = useState("");
   const [newRoleDescription, setNewRoleDescription] = useState("");
   const [roleFormError, setRoleFormError] = useState<string | null>(null);
+
+  // Role Search Query for Dialog
   const [roleSearchQuery, setRoleSearchQuery] = useState("");
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      if (userSearchInput !== search) setFilters({ search: userSearchInput });
+    const timeout = setTimeout(() => {
+      if (userSearchInput !== search) {
+        setFilters({ search: userSearchInput });
+      }
     }, 350);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timeout);
   }, [userSearchInput, search, setFilters]);
 
-  useEffect(() => {
-    if (activeTab !== "users" || !hasMore || isLoading || isLoadingMore) return;
-    const target = usersEndRef.current;
-    if (!target) return;
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) void fetchMoreUsers();
-    }, { root: scrollRef.current, rootMargin: "0px 0px 400px 0px" });
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [activeTab, hasMore, isLoading, isLoadingMore, fetchMoreUsers, usersEndRef, scrollRef]);
+  async function handleConfirmBan(): Promise<void> {
+    await vm.executeBan();
+    if (!vm.actionError) {
+      toast.success(ADMIN_TOASTS.userBanned);
+    } else {
+      toast.error(vm.actionError);
+    }
+  }
 
-  const handleConfirmBan = async () => { await vm.executeBan(); if (!vm.actionError) toast.success(ADMIN_TOASTS.userBanned); else toast.error(vm.actionError); };
-  const handleConfirmUnban = async () => { await vm.executeUnban(); if (!vm.actionError) toast.success(ADMIN_TOASTS.userUnbanned); else toast.error(vm.actionError); };
-  const handleSaveRoles = async () => { await vm.executeRolesUpdate(); if (!vm.actionError) toast.success(ADMIN_TOASTS.rolesUpdated); else toast.error(vm.actionError); };
-  const handleCreateRole = async () => { const name = newRoleName.trim(); if (!name) return setRoleFormError("Role name is required"); const result = await vm.createRole({ name, description: newRoleDescription.trim() || undefined }); if (!result.success) { setRoleFormError(result.error || "Failed to create role"); toast.error(result.error || ADMIN_TOASTS.roleCreateError); return; } setNewRoleName(""); setNewRoleDescription(""); toast.success(ADMIN_TOASTS.roleCreated); };
+  async function handleConfirmUnban(): Promise<void> {
+    await vm.executeUnban();
+    if (!vm.actionError) {
+      toast.success(ADMIN_TOASTS.userUnbanned);
+    } else {
+      toast.error(vm.actionError);
+    }
+  }
+
+  async function handleSaveRoles(): Promise<void> {
+    await vm.executeRolesUpdate();
+    if (!vm.actionError) {
+      toast.success(ADMIN_TOASTS.rolesUpdated);
+    } else {
+      toast.error(vm.actionError);
+    }
+  }
+
+  async function handleCreateRole(): Promise<void> {
+    const name = newRoleName.trim();
+    if (!name) {
+      setRoleFormError("Role name is required");
+      return;
+    }
+
+    const result = await vm.createRole({
+      name,
+      description: newRoleDescription.trim() || undefined,
+    });
+
+    if (!result.success) {
+      setRoleFormError(result.error || "Failed to create role");
+      toast.error(result.error || ADMIN_TOASTS.roleCreateError);
+      return;
+    }
+
+    setNewRoleName("");
+    setNewRoleDescription("");
+    toast.success(ADMIN_TOASTS.roleCreated);
+  }
 
   return {
     vm,
-    userSearchInput, setUserSearchInput, userRoleFilter, setUserRoleFilter, userBanFilter, setUserBanFilter,
-    newRoleName, setNewRoleName, newRoleDescription, setNewRoleDescription, roleFormError, roleSearchQuery, setRoleSearchQuery,
-    isApplyingUserFilters: activeTab === "users" && vm.isLoading,
-    handleConfirmBan, handleConfirmUnban, handleSaveRoles, handleCreateRole,
+    userSearchInput,
+    setUserSearchInput,
+    userRoleFilter,
+    setUserRoleFilter,
+    userBanFilter,
+    setUserBanFilter,
+    newRoleName,
+    setNewRoleName,
+    newRoleDescription,
+    setNewRoleDescription,
+    roleFormError,
+    roleSearchQuery,
+    setRoleSearchQuery,
+    isApplyingUserFilters: activeTab === "users" && isLoading,
+    handleConfirmBan,
+    handleConfirmUnban,
+    handleSaveRoles,
+    handleCreateRole,
+    currentPage: vm.currentPage,
+    totalPages: vm.totalPages,
+    setPage: vm.setPage,
   };
 }
+
+

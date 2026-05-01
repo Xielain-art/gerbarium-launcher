@@ -35,7 +35,8 @@ function Button({
   variant,
   size,
   ...props
-}: React.ComponentProps<"button"> & VariantProps<typeof buttonVariants>) {
+}: React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants>): React.JSX.Element {
   return (
     <button
       data-slot="button"
@@ -44,5 +45,6 @@ function Button({
     />
   );
 }
+
 
 export { Button, buttonVariants };

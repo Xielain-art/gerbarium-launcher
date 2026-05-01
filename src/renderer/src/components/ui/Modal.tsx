@@ -1,6 +1,6 @@
-import { useEffect, useCallback } from 'react';
-import { Button } from './Button';
-import { UI_STRINGS } from '../../../../shared/constants/ui-strings';
+import { useEffect, useCallback } from "react";
+import { Button } from "./Button";
+import { UI_STRINGS } from "../../../../shared/constants/ui-strings";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -20,43 +20,47 @@ export function Modal({
   actions,
   closeOnBackdrop = true,
   showCloseButton = true,
-}: ModalProps) {
+}: ModalProps): React.JSX.Element | null {
   // Handle ESC key
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
 
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+    function handleEsc(event: KeyboardEvent): void {
+      if (event.key === "Escape") {
         onClose();
       }
-    };
+    }
 
-    document.addEventListener('keydown', handleEsc);
-    return () => document.removeEventListener('keydown', handleEsc);
+    document.addEventListener("keydown", handleEsc);
+    return () => document.removeEventListener("keydown", handleEsc);
   }, [isOpen, onClose]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
   const handleBackdropClick = useCallback(
-    (e: React.MouseEvent) => {
-      if (closeOnBackdrop && e.target === e.currentTarget) {
+    (event: React.MouseEvent) => {
+      if (closeOnBackdrop && event.target === event.currentTarget) {
         onClose();
       }
     },
-    [closeOnBackdrop, onClose]
+    [closeOnBackdrop, onClose],
   );
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div
@@ -64,26 +68,32 @@ export function Modal({
       onClick={handleBackdropClick}
     >
       <div
-        className="relative bg-[var(--mc-panel-bg)] border-[4px] border-t-[var(--mc-panel-border-hi)] border-l-[var(--mc-panel-border-hi)] border-b-[var(--mc-panel-border-lo)] border-r-[var(--mc-panel-border-lo)] shadow-2xl max-w-md w-full mx-4"
+        className="relative mx-4 w-full max-w-md border-[4px] border-b-[var(--mc-panel-border-lo)] border-l-[var(--mc-panel-border-hi)] border-r-[var(--mc-panel-border-lo)] border-t-[var(--mc-panel-border-hi)] bg-[var(--mc-panel-bg)] shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b-[3px] border-theme">
+        <div className="flex items-center justify-between border-b-[3px] border-theme p-4">
           <h2
             id="modal-title"
-            className="text-lg font-bold text-theme font-minecraft uppercase"
+            className="font-minecraft text-lg font-bold uppercase text-theme"
           >
             {title}
           </h2>
           {showCloseButton && (
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center text-theme-muted hover:text-theme transition-colors"
+              className="flex h-8 w-8 items-center justify-center text-theme-muted transition-colors hover:text-theme"
               aria-label={UI_STRINGS.WINDOW_CONTROLS.CLOSE}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth="2.5"
+              >
                 <path strokeLinecap="square" d="M6 6l12 12M6 18L18 6" />
               </svg>
             </button>
@@ -95,7 +105,7 @@ export function Modal({
 
         {/* Footer Actions */}
         {actions && (
-          <div className="flex gap-3 p-4 border-t-[3px] border-theme">
+          <div className="flex gap-3 border-t-[3px] border-theme p-4">
             {actions}
           </div>
         )}
@@ -104,7 +114,11 @@ export function Modal({
   );
 }
 
-export function ModalActions({ children }: { children: React.ReactNode }) {
+export function ModalActions({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.JSX.Element {
   return <div className="flex gap-3">{children}</div>;
 }
 
@@ -116,7 +130,7 @@ export function ConfirmModal({
   message,
   confirmText = UI_STRINGS.COMMON.CONFIRM,
   cancelText = UI_STRINGS.COMMON.CANCEL,
-  variant = 'primary',
+  variant = "primary",
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -125,12 +139,12 @@ export function ConfirmModal({
   message: string;
   confirmText?: string;
   cancelText?: string;
-  variant?: 'primary' | 'danger';
-}) {
-  const handleConfirm = () => {
+  variant?: "primary" | "danger";
+}): React.JSX.Element | null {
+  function handleConfirm(): void {
     onConfirm();
     onClose();
-  };
+  }
 
   return (
     <Modal
@@ -148,7 +162,8 @@ export function ConfirmModal({
         </>
       }
     >
-      <p className="text-theme font-minecraft text-sm">{message}</p>
+      <p className="font-minecraft text-sm text-theme">{message}</p>
     </Modal>
   );
 }
+

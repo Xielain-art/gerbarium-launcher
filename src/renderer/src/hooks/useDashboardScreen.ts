@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+} from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useDownloadStore } from "../stores/useDownloadStore";
@@ -6,15 +12,21 @@ import { useSettingsStore } from "../stores/useSettingsStore";
 import { useTranslation } from "./useTranslation";
 import { ROUTES, LOG_ACTIONS } from "../../../shared/constants/system";
 import type { LauncherSettings } from "../../../shared/constants/ipc-chanels";
-import type { ChangelogItem, GameVersion, NewsItem } from "../types";
+import type { ChangelogItem, GameVersion, NewsItem, AuthUser, ServerStatusData, DownloadProgress } from "../types";
 import {
   toQueryErrorMessage,
   usePublicChangelogQuery,
   usePublicNewsQuery,
   useServerStatusQuery,
 } from "./queries/useContentQueries";
-import { useAppVersionQuery, useInstalledVersionsQuery } from "./queries/useSystemQueries";
+import {
+  useAppVersionQuery,
+  useInstalledVersionsQuery,
+} from "./queries/useSystemQueries";
 import { UI_STRINGS } from "../../../shared/constants/ui-strings";
+import type { TranslationType } from "../../../shared/constants/translations";
+
+// --- Constants ---
 
 const INITIAL_VERSIONS: GameVersion[] = [
   {
@@ -49,32 +61,106 @@ const INITIAL_VERSIONS: GameVersion[] = [
 
 const CHANGELOG_PAGE_SIZE = 8;
 
-const parseJvmArgs = (jvmArgsText: string): string[] =>
-  jvmArgsText
+// --- Utilities ---
+
+function parseJvmArgs(jvmArgsText: string): string[] {
+  return jvmArgsText
     .split(/\s+/)
     .map((arg) => arg.trim())
     .filter(Boolean);
+}
 
-const toErrorMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : "Unknown error";
+function toErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "Unknown error";
+}
 
-const logAction = (action: string, details?: string): void => {
+function logAction(action: string, details?: string): void {
   void window.electronAPI?.system.logAction(action, details);
-};
+}
 
-const toLauncherSettingsPatch = (
-  settings: { minimizeToTray: boolean; gamePath?: string; discordRPC: boolean },
-): Partial<LauncherSettings> => ({
-  minimizeToTray: settings.minimizeToTray,
-  gamePath: settings.gamePath,
-  discordRPC: settings.discordRPC,
-});
+function toLauncherSettingsPatch(settings: {
+  minimizeToTray: boolean;
+  gamePath?: string;
+  discordRPC: boolean;
+}): Partial<LauncherSettings> {
+  return {
+    minimizeToTray: settings.minimizeToTray,
+    gamePath: settings.gamePath,
+    discordRPC: settings.discordRPC,
+  };
+}
 
-export function useDashboardScreen() {
+// --- Hook Result Interface ---
+
+export interface DashboardScreenResult {
+  t: TranslationType;
+  user: AuthUser | null;
+  serverStatus: ServerStatusData | null;
+  versions: GameVersion[];
+  selectedVersionId: string | null;
+  setSelectedVersionId: (id: string | null) => void;
+  selectedVersion: GameVersion | undefined;
+  appVersion: string;
+  news: NewsItem[];
+  newsOrder: "newest" | "oldest";
+  setNewsOrder: (order: "newest" | "oldest") => void;
+  newsTagFilter: string;
+  setNewsTagFilter: (tag: string) => void;
+  newsTags: Array<{ id: string; name: string }>;
+  changelog: ChangelogItem[];
+  contentTab: "news" | "changelog";
+  setContentTab: (tab: "news" | "changelog") => void;
+  isLoadingNews: boolean;
+  isLoadingChangelog: boolean;
+  isLoadingMoreChangelog: boolean;
+  hasMoreChangelog: boolean;
+  isChangelogInitialLoaded: boolean;
+  isLoadingMoreNews: boolean;
+  hasMoreNews: boolean;
+  isNewsInitialLoaded: boolean;
+  onLoadMoreNews: () => Promise<void>;
+  newsError: string | null;
+  changelogError: string | null;
+  onLoadMoreChangelog: () => Promise<void>;
+  isDownloading: boolean;
+  progress: DownloadProgress | null;
+  isLaunching: boolean;
+  launchProgress: number | null;
+  launchStatus: string;
+  launchError: string | null;
+  isConsoleVisible: boolean;
+  logs: string[];
+  logsEndRef: RefObject<HTMLDivElement | null>;
+  playBlockReason: string | null;
+  hasAdminAccess: boolean;
+  onPlay: () => Promise<void>;
+  onCancelDownload: () => void;
+  onToggleConsole: () => void;
+  onOpenSettings: () => void;
+  onOpenAdminPanel: () => void;
+  onLogout: () => Promise<void>;
+  selectedNews: NewsItem | null;
+  onSelectNews: (news: NewsItem | null) => void;
+  onCloseNews: () => void;
+  selectedChangelog: ChangelogItem | null;
+  onSelectChangelog: (changelog: ChangelogItem | null) => void;
+  onCloseChangelog: () => void;
+}
+
+// --- Main Hook ---
+
+export function useDashboardScreen(): DashboardScreenResult {
   const t = useTranslation();
   const navigate = useNavigate();
+
+  // Stores
   const { user, logout, isAuthenticated } = useAuthStore();
   const { isDownloading, progress, cancelDownload } = useDownloadStore();
+
+  // Local UI State
   const [newsOrder, setNewsOrder] = useState<"newest" | "oldest">("newest");
   const [newsTagFilter, setNewsTagFilter] = useState("all");
   const [versions, setVersions] = useState<GameVersion[]>(INITIAL_VERSIONS);
@@ -90,21 +176,14 @@ export function useDashboardScreen() {
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   const [selectedChangelog, setSelectedChangelog] =
     useState<ChangelogItem | null>(null);
-  const [contentTab, setContentTab] =
-    useState<"news" | "changelog">("news");
+  const [contentTab, setContentTab] = useState<"news" | "changelog">("news");
   const [changelogPage, setChangelogPage] = useState(1);
+
+  // Refs
   const closeOnLaunchRequestedRef = useRef(false);
   const logsEndRef = useRef<HTMLDivElement>(null);
-  const selectedVersion = versions.find((version) => version.id === selectedVersionId);
-  const hasAdminAccess = Boolean(
-    user?.roles?.some((role) => role.name === "admin") ||
-      user?.permissions?.some((permission) => permission.name === "admin"),
-  );
-  const banReason = user?.banReason?.trim();
-  const playBlockReason = user?.isBanned
-    ? `You are banned${banReason ? `: ${banReason}` : "."}`
-    : null;
 
+  // Queries
   const newsQuery = usePublicNewsQuery({
     tagId: newsTagFilter === "all" ? undefined : newsTagFilter,
     sortBy: "createdAt",
@@ -115,9 +194,22 @@ export function useDashboardScreen() {
   const appVersionQuery = useAppVersionQuery();
   const installedVersionsQuery = useInstalledVersionsQuery();
 
+  // Derived Data
+  const selectedVersion = versions.find(
+    (version) => version.id === selectedVersionId,
+  );
+  const hasAdminAccess = Boolean(
+    user?.roles?.some((role) => role.name === "admin") ||
+      user?.permissions?.some((permission) => permission.name === "admin"),
+  );
+  const banReason = user?.banReason?.trim();
+  const playBlockReason = user?.isBanned
+    ? `You are banned${banReason ? `: ${banReason}` : "."}`
+    : null;
+
   const news = useMemo(() => newsQuery.data?.items ?? [], [newsQuery.data]);
   const newsTags = useMemo(() => {
-    const tags = new Map<string, string>();
+    const tagsMap = new Map<string, string>();
     for (const item of news) {
       const names = item.tags ?? [];
       const ids = item.tagIds ?? [];
@@ -125,20 +217,22 @@ export function useDashboardScreen() {
         const id = ids[i]?.trim();
         const name = names[i]?.trim();
         if (id && name) {
-          tags.set(id, name);
+          tagsMap.set(id, name);
         }
       }
     }
-    return Array.from(tags.entries())
+    return Array.from(tagsMap.entries())
       .map(([id, name]) => ({ id, name }))
       .sort((a, b) => a.name.localeCompare(b.name, "ru"));
   }, [news]);
+
   const changelogItems = useMemo(
     () => changelogQuery.data ?? [],
     [changelogQuery.data],
   );
   const changelog = changelogItems.slice(0, changelogPage * CHANGELOG_PAGE_SIZE);
   const hasMoreChangelog = changelog.length < changelogItems.length;
+
   const newsError = newsQuery.isError
     ? toQueryErrorMessage(newsQuery.error, UI_STRINGS.STORE_ERRORS.NEWS_LOAD)
     : null;
@@ -149,22 +243,33 @@ export function useDashboardScreen() {
       )
     : null;
 
+  // --- Effects ---
+
+  // Update installed versions
   useEffect(() => {
-    if (!installedVersionsQuery.data) return;
+    if (!installedVersionsQuery.data) {
+      return;
+    }
     setVersions((prev) =>
       prev.map((version) => ({
         ...version,
-        isInstalled: installedVersionsQuery.data.includes(version.version || version.id),
+        isInstalled: installedVersionsQuery.data.includes(
+          version.version || version.id,
+        ),
       })),
     );
   }, [installedVersionsQuery.data]);
 
+  // Scroll to bottom of logs
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
 
+  // Handle Game Process IPC Events
   useEffect(() => {
-    if (!window.electronAPI?.game) return;
+    if (!window.electronAPI?.game) {
+      return;
+    }
 
     const unsubscribe = window.electronAPI.game.onProgress((data) => {
       if (data.type === "progress") {
@@ -190,6 +295,7 @@ export function useDashboardScreen() {
         setLaunchProgress(100);
         setLaunchStatus("Running...");
         logAction("GAME_PROCESS_SPAWNED", "Spawn event received");
+
         if (closeOnLaunchRequestedRef.current) {
           if (useSettingsStore.getState().general.minimizeToTray) {
             void window.electronAPI.closeWindow();
@@ -222,25 +328,32 @@ export function useDashboardScreen() {
     return () => unsubscribe();
   }, []);
 
+  // Protect route
   useEffect(() => {
     if (!isAuthenticated) {
       navigate({ to: ROUTES.LOGIN });
     }
   }, [isAuthenticated, navigate]);
 
+  // Sync settings with main process
   useEffect(() => {
-    if (!window.electronAPI) return;
+    if (!window.electronAPI) {
+      return;
+    }
     const currentSettings = useSettingsStore.getState().general;
     window.electronAPI.system?.sendSettingsUpdate?.(
       toLauncherSettingsPatch(currentSettings),
     );
   }, []);
 
+  // Reset changelog pagination when items change
   useEffect(() => {
     setChangelogPage(1);
   }, [changelogItems]);
 
-  const onPlay = async () => {
+  // --- Handlers ---
+
+  async function onPlay(): Promise<void> {
     if (playBlockReason) {
       setLaunchError(playBlockReason);
       return;
@@ -266,10 +379,12 @@ export function useDashboardScreen() {
       const bestJava =
         installedJava.find((javaItem) => javaItem.version >= 17) ??
         installedJava[0];
+
       let javaPath: string | null | undefined = bestJava?.path;
       if (!javaPath) {
         javaPath = await window.electronAPI.java.findSystemJava();
       }
+
       if (!javaPath) {
         throw new Error("Java not found. Install Java in settings.");
       }
@@ -290,6 +405,7 @@ export function useDashboardScreen() {
         fullscreen: settings.fullscreen,
         jvmArgs: parseJvmArgs(settings.jvmArgs),
       });
+
       if (!result.success) {
         throw new Error(result.error || "Game launch failed.");
       }
@@ -306,22 +422,27 @@ export function useDashboardScreen() {
       closeOnLaunchRequestedRef.current = false;
       logAction("GAME_LAUNCH_ERROR", message);
     }
-  };
+  }
 
-  const onOpenSettings = () => navigate({ to: ROUTES.SETTINGS });
-  const onOpenAdminPanel = () => {
+  function onOpenSettings(): void {
+    navigate({ to: ROUTES.SETTINGS });
+  }
+
+  function onOpenAdminPanel(): void {
     if (!hasAdminAccess) {
       setLaunchError("Access denied.");
       logAction("ADMIN_PANEL_ACCESS_DENIED", user?.username || "unknown");
       return;
     }
     navigate({ to: ROUTES.ADMIN });
-  };
-  const onLogout = async () => {
+  }
+
+  async function onLogout(): Promise<void> {
     await logout();
     navigate({ to: ROUTES.LOGIN });
-  };
-  const onToggleConsole = () => {
+  }
+
+  function onToggleConsole(): void {
     setIsConsoleVisible((prev) => {
       const next = !prev;
       logAction(
@@ -330,7 +451,7 @@ export function useDashboardScreen() {
       );
       return next;
     });
-  };
+  }
 
   return {
     t,
@@ -391,3 +512,4 @@ export function useDashboardScreen() {
     onCloseChangelog: () => setSelectedChangelog(null),
   };
 }
+

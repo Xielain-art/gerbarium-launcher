@@ -10,7 +10,7 @@ export function GeneralSettingsTab({
   onSelectGameDirectory,
   onOpenGamePath,
   onOpenDataFolder,
-}: GeneralSettingsTabProps) {
+}: GeneralSettingsTabProps): React.JSX.Element {
   return (
     <div className="space-y-6">
       <h2 className="font-minecraft text-xl font-bold uppercase text-theme">
@@ -30,7 +30,10 @@ export function GeneralSettingsTab({
         onChange={(e) => onUpdateGeneral({ theme: e.target.value as ThemeId })}
         options={THEME_REGISTRY.map((theme) => ({
           value: theme.id,
-          label: t.SETTINGS.GENERAL.THEMES[theme.translationKey as keyof typeof t.SETTINGS.GENERAL.THEMES] ?? theme.fallbackLabel,
+          label:
+            t.SETTINGS.GENERAL.THEMES[
+              theme.translationKey as keyof typeof t.SETTINGS.GENERAL.THEMES
+            ] ?? theme.fallbackLabel,
         }))}
       />
 
@@ -57,7 +60,7 @@ export function GeneralSettingsTab({
         />
       </div>
 
-      <div className="space-y-2 pt-4 border-t border-theme">
+      <div className="space-y-2 border-t border-theme pt-4">
         <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-theme">
           Game Files Path
         </label>
@@ -76,7 +79,7 @@ export function GeneralSettingsTab({
             Browse
           </button>
         </div>
-        <div className="flex gap-2 mt-2">
+        <div className="mt-2 flex gap-2">
           <button
             onClick={onOpenGamePath}
             className="font-minecraft text-xs text-[var(--mc-progress-fill-a)] hover:underline"
@@ -95,3 +98,4 @@ export function GeneralSettingsTab({
     </div>
   );
 }
+

@@ -19,32 +19,41 @@ import { useStartupGateStore } from "./stores/useStartupGateStore";
 import { ROUTES } from "../../shared/constants/system";
 import { CrashNoticeBanner } from "./components/layout/CrashNoticeBanner";
 
-// Helper function to check authentication using Zustand store state
-const checkAuth = () => {
+// --- Route Guards & Helpers ---
+
+function checkAuth(): boolean {
   const authState = useAuthStore.getState();
   return authState.isAuthenticated && authState.user?.emailVerified !== false;
-};
+}
 
-const checkIsAdmin = () => {
-  return useAuthStore.getState().user?.roles.some((role) => role.name === "admin");
-};
+function checkIsAdmin(): boolean {
+  const user = useAuthStore.getState().user;
+  return user?.roles.some((role) => role.name === "admin") ?? false;
+}
 
-const checkUpdateGate = () => {
+function checkUpdateGate(): boolean {
   return useStartupGateStore.getState().updateGatePassed;
-};
+}
 
-const isDevOrSmokeTest = () => {
-  return import.meta.env.DEV || (window.electronAPI?.getSmokeTestConfig?.()?.isSmokeTest ?? false);
-};
+function isDevOrSmokeTest(): boolean {
+  const isDev = import.meta.env.DEV;
+  const isSmoke =
+    window.electronAPI?.getSmokeTestConfig?.()?.isSmokeTest ?? false;
+  return isDev || isSmoke;
+}
+
+// --- Route Definitions ---
 
 // Root route with Outlet for nested routes
 const rootRoute = createRootRoute({
-  component: () => (
-    <div className="relative w-full h-screen bg-[var(--theme-bg)]">
-      <CrashNoticeBanner />
-      <Outlet />
-    </div>
-  ),
+  component: function RootLayout(): React.JSX.Element {
+    return (
+      <div className="relative h-screen w-full bg-[var(--theme-bg)]">
+        <CrashNoticeBanner />
+        <Outlet />
+      </div>
+    );
+  },
 });
 
 // Integrity route (always first)
@@ -122,7 +131,8 @@ const adminRoute = createRoute({
   },
 });
 
-// Build the route tree
+// --- Router Instance ---
+
 const routeTree = rootRoute.addChildren([
   integrityRoute,
   updateRoute,
@@ -132,13 +142,18 @@ const routeTree = rootRoute.addChildren([
   adminRoute,
 ]);
 
-// Create the router instance
 const hashHistory = createHashHistory();
-export const router = createRouter({ routeTree, history: hashHistory });
 
-// Type declarations for type-safe routing
+export const router = createRouter({
+  routeTree,
+  history: hashHistory,
+});
+
+// --- Type Safety ---
+
 declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
   }
 }
+

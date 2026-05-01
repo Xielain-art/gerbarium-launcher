@@ -22,8 +22,12 @@ function Badge({
   className,
   variant,
   ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof badgeVariants>) {
-  return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
+}: React.ComponentProps<"div"> &
+  VariantProps<typeof badgeVariants>): React.JSX.Element {
+  return (
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+  );
 }
+
 
 export { Badge, badgeVariants };

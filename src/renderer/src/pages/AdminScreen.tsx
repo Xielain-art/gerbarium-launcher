@@ -11,7 +11,7 @@ import { AdminNewsTab } from "../components/admin/tabs/AdminNewsTab";
 import { AdminChangelogTab } from "../components/admin/tabs/AdminChangelogTab";
 import { useAdminScreenModel } from "../components/admin/hooks/useAdminScreenModel";
 
-export function AdminScreen() {
+export function AdminScreen(): React.JSX.Element {
   const navigate = useNavigate();
   const model = useAdminScreenModel();
 
@@ -134,23 +134,54 @@ export function AdminScreen() {
     <div className="flex h-screen flex-col bg-theme-main-gradient p-4 text-theme lg:p-8">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <ButtonShadcn variant="ghost" size="icon" onClick={() => navigate({ to: ROUTES.DASHBOARD })} className="h-10 w-10 text-theme hover:bg-white/10">
+          <ButtonShadcn
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate({ to: ROUTES.DASHBOARD })}
+            className="h-10 w-10 text-theme hover:bg-white/10"
+          >
             <ArrowLeft className="h-6 w-6" />
           </ButtonShadcn>
-          <h1 className="font-minecraft text-2xl font-bold tracking-tighter">{vm.t.ADMIN.TITLE}</h1>
+          <h1 className="font-minecraft text-2xl font-bold tracking-tighter">
+            {vm.t.ADMIN.TITLE}
+          </h1>
         </div>
         <WindowControls />
       </div>
 
       <div ref={scrollRef} className="relative z-10 flex-1 overflow-y-auto pr-2">
         <div className="mb-6 flex gap-2">
-          <ButtonShadcn variant={activeTab === "users" ? "default" : "secondary"} onClick={() => setActiveTab("users")} className="font-minecraft uppercase tracking-wider">{vm.t.ADMIN.TAB_USERS}</ButtonShadcn>
-          <ButtonShadcn variant={activeTab === "news" ? "default" : "secondary"} onClick={() => setActiveTab("news")} className="font-minecraft uppercase tracking-wider">{vm.t.ADMIN.TAB_NEWS}</ButtonShadcn>
-          <ButtonShadcn variant={activeTab === "changelog" ? "default" : "secondary"} onClick={() => setActiveTab("changelog")} className="font-minecraft uppercase tracking-wider">Changelog</ButtonShadcn>
-          <ButtonShadcn variant={activeTab === "stats" ? "default" : "secondary"} onClick={() => setActiveTab("stats")} className="font-minecraft uppercase tracking-wider">Stats</ButtonShadcn>
+          <ButtonShadcn
+            variant={activeTab === "users" ? "default" : "secondary"}
+            onClick={() => setActiveTab("users")}
+            className="font-minecraft uppercase tracking-wider"
+          >
+            {vm.t.ADMIN.TAB_USERS}
+          </ButtonShadcn>
+          <ButtonShadcn
+            variant={activeTab === "news" ? "default" : "secondary"}
+            onClick={() => setActiveTab("news")}
+            className="font-minecraft uppercase tracking-wider"
+          >
+            {vm.t.ADMIN.TAB_NEWS}
+          </ButtonShadcn>
+          <ButtonShadcn
+            variant={activeTab === "changelog" ? "default" : "secondary"}
+            onClick={() => setActiveTab("changelog")}
+            className="font-minecraft uppercase tracking-wider"
+          >
+            Changelog
+          </ButtonShadcn>
+          <ButtonShadcn
+            variant={activeTab === "stats" ? "default" : "secondary"}
+            onClick={() => setActiveTab("stats")}
+            className="font-minecraft uppercase tracking-wider"
+          >
+            Stats
+          </ButtonShadcn>
         </div>
 
-        {activeTab === "users" ? (
+        {activeTab === "users" && (
           <AdminUsersTab
             t={vm.t}
             users={vm.users}
@@ -179,10 +210,15 @@ export function AdminScreen() {
             onOpenRoles={vm.openRolesModal}
             onOpenBan={vm.openBanModal}
             onOpenUnban={vm.openUnbanModal}
+            currentPage={model.currentPage}
+            totalPages={model.totalPages}
+            setPage={model.setPage}
           />
-        ) : null}
+        )}
 
-        {activeTab === "news" ? (
+
+
+        {activeTab === "news" && (
           <AdminNewsTab
             newsFormValidation={newsFormValidation}
             newsTagValidation={newsTagValidation}
@@ -238,9 +274,9 @@ export function AdminScreen() {
             isAdminApiBusy={isAdminApiBusy}
             newsTagFormError={newsTagFormError}
           />
-        ) : null}
+        )}
 
-        {activeTab === "changelog" ? (
+        {activeTab === "changelog" && (
           <AdminChangelogTab
             changelogTab={changelogTab}
             setChangelogTab={setChangelogTab}
@@ -278,20 +314,25 @@ export function AdminScreen() {
             handleUpdateChangelog={() => void handleUpdateChangelog()}
             changelogActionLoadingId={changelogActionLoadingId}
           />
-        ) : null}
+        )}
 
-        {activeTab === "stats" ? (
+        {activeTab === "stats" && (
           <AdminStatsPanel
             stats={statsQuery.data}
             isLoading={statsQuery.isLoading}
             isFetching={statsQuery.isFetching}
             errorMessage={statsError}
-            onRefresh={() => { void statsQuery.refetch(); }}
+            onRefresh={() => {
+              void statsQuery.refetch();
+            }}
           />
-        ) : null}
+        )}
       </div>
 
-      <ChangelogPreviewModal changelog={previewChangelog} onClose={() => setPreviewChangelog(null)} />
+      <ChangelogPreviewModal
+        changelog={previewChangelog}
+        onClose={() => setPreviewChangelog(null)}
+      />
       <AdminDialogs
         banModalOpen={vm.banModalOpen}
         setBanModalOpen={vm.setBanModalOpen}
@@ -317,3 +358,4 @@ export function AdminScreen() {
     </div>
   );
 }
+

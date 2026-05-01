@@ -30,6 +30,11 @@ import {
   authVerifyEmailSchema,
 } from "../../shared/validation/authValidation";
 import { secureStorageLock } from "../utils/secureStorageLock";
+import {
+  logApiFailure,
+  mapAuthFailureCode,
+  readErrorDetails,
+} from "../utils/apiHandlerUtils";
 
 export const SECURE_STORAGE_FILE_NAME = "secure-storage.json";
 const AUTH_SESSION_KEY = "auth:session";
@@ -43,36 +48,6 @@ export type AuthSessionPayload = {
   accessTokenExpiresAt?: number;
   refreshCookie?: string;
 };
-
-function logApiFailure(
-  context: string,
-  result: {
-    status?: number;
-    errorMessage?: string;
-    errorDetails?: string;
-  },
-): void {
-  log.error(
-    context,
-    "status:",
-    result.status ?? "n/a",
-    "message:",
-    result.errorMessage ?? "n/a",
-    "details:",
-    result.errorDetails ?? "n/a",
-  );
-}
-
-function readErrorDetails(result: unknown): string | undefined {
-  if (typeof result !== "object" || result === null) {
-    return undefined;
-  }
-  if (!("errorDetails" in result)) {
-    return undefined;
-  }
-  const value = (result as { errorDetails?: unknown }).errorDetails;
-  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
-}
 
 async function readSecureData(secureDataPath: string): Promise<SecureData> {
   try {
@@ -210,22 +185,6 @@ function applyEmailVerificationToUser(
   };
 }
 
-function mapAuthFailureCode(status?: number): string {
-  if (status === 401 || status === 403) {
-    return ERROR_CODES.AUTH_INVALID_CREDENTIALS;
-  }
-  if (status === 409) {
-    return ERROR_CODES.AUTH_ALREADY_EXISTS;
-  }
-  if (status === 429) {
-    return ERROR_CODES.AUTH_RATE_LIMIT;
-  }
-  if (status === 400) {
-    return ERROR_CODES.AUTH_VALIDATION_FAILED;
-  }
-  return ERROR_CODES.AUTH_API_REQUEST_FAILED;
-}
-
 function mapVerifyEmailFailureCode(status?: number): string {
   if (status === 400) {
     return ERROR_CODES.AUTH_EMAIL_CODE_INVALID;
@@ -258,14 +217,19 @@ function mapEmailVerificationFailureCode(status?: number): string {
 function interceptSmokeTestCode(status?: ApiEmailVerificationStatus): void {
   if (process.env.SMOKE_TEST === "true" && status?.developmentCode) {
     const devCode = status.developmentCode;
-    (global as any).lastDevelopmentCode = devCode;
-    // Прямой вывод в stdout для перехвата Playwright
+    (global as Record<string, unknown>).lastDevelopmentCode = devCode;
+    // Direct output to stdout for Playwright interception
     process.stdout.write(`[SMOKE_TEST_CODE]:${devCode}\n`);
     log.info(`[SMOKE_TEST] Intercepted dev code: ${devCode}`);
   }
 }
 
-function parseOrNull<T>(schema: { safeParse: (value: unknown) => { success: true; data: T } | { success: false } }, value: unknown): T | null {
+function parseOrNull<T>(
+  schema: {
+    safeParse: (value: unknown) => { success: true; data: T } | { success: false };
+  },
+  value: unknown,
+): T | null {
   const parsed = schema.safeParse(value);
   return parsed.success ? parsed.data : null;
 }
@@ -355,6 +319,7 @@ export async function resolveOnlineSession(
     return null;
   }
 
+  // Handle token expiration
   if (Date.now() >= activeSession.accessTokenExpiresAt) {
     const refreshed = await refreshOnlineSession(activeSession);
     if (!refreshed) {
@@ -367,79 +332,83 @@ export async function resolveOnlineSession(
     log.error(LOG_MESSAGES.AUTH_TOKEN_REFRESH_FAILED);
     return null;
   }
+
+  // Attempt to fetch profile
   const profileResult = await profileRequest(activeSession.accessToken);
-  if (!profileResult.success || !profileResult.data) {
-    if (profileResult.status === 401 || profileResult.status === 403) {
-      const refreshed = await refreshOnlineSession(activeSession);
-      if (!refreshed) {
-        logApiFailure(LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED, profileResult);
-        return null;
-      }
 
-      const refreshedProfile = await profileRequest(
-        refreshed.accessToken ?? "",
-      );
-      if (!refreshedProfile.success || !refreshedProfile.data) {
-        if (
-          typeof refreshedProfile.status === "number" &&
-          refreshedProfile.status >= 500
-        ) {
-          log.warn(
-            LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
-            refreshedProfile.status,
-            "Server 5xx while refreshing profile; keeping active session",
-          );
-          return refreshed;
-        }
-        log.error(
-          LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
-          "status:",
-          refreshedProfile.status ?? "n/a",
-          "message:",
-          refreshedProfile.errorMessage ?? "n/a",
-          "details:",
-          readErrorDetails(refreshedProfile) ?? "n/a",
-        );
-        return null;
-      }
+  // If profile fetch succeeded, return updated session
+  if (profileResult.success && profileResult.data) {
+    return {
+      ...activeSession,
+      user: mapApiUserToSessionUser(profileResult.data),
+    };
+  }
 
+  // Handle unauthorized/forbidden - try refreshing once
+  if (profileResult.status === 401 || profileResult.status === 403) {
+    const refreshed = await refreshOnlineSession(activeSession);
+    if (!refreshed) {
+      logApiFailure(LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED, profileResult);
+      return null;
+    }
+
+    const refreshedProfile = await profileRequest(refreshed.accessToken ?? "");
+    if (refreshedProfile.success && refreshedProfile.data) {
       return {
         ...refreshed,
         user: mapApiUserToSessionUser(refreshedProfile.data),
       };
     }
 
+    // Server error during refresh profile fetch - keep active session if it's 5xx
     if (
-      typeof profileResult.status === "number" &&
-      profileResult.status >= 500
+      typeof refreshedProfile.status === "number" &&
+      refreshedProfile.status >= 500
     ) {
       log.warn(
         LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
-        profileResult.status,
-        "Server 5xx on profile endpoint; using cached session user",
+        refreshedProfile.status,
+        "Server 5xx while refreshing profile; keeping active session",
       );
-      return activeSession;
+      return refreshed;
     }
 
     log.error(
       LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
       "status:",
-      profileResult.status ?? "n/a",
+      refreshedProfile.status ?? "n/a",
       "message:",
-      profileResult.errorMessage ?? "n/a",
+      refreshedProfile.errorMessage ?? "n/a",
       "details:",
-      readErrorDetails(profileResult) ?? "n/a",
+      readErrorDetails(refreshedProfile) ?? "n/a",
+    );
+    return null;
+  }
+
+  // Handle server errors - fallback to cached session
+  if (typeof profileResult.status === "number" && profileResult.status >= 500) {
+    log.warn(
+      LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
+      profileResult.status,
+      "Server 5xx on profile endpoint; using cached session user",
     );
     return activeSession;
   }
 
-  return {
-    ...activeSession,
-    user: mapApiUserToSessionUser(profileResult.data),
-  };
+  // Other failures - fallback to cached session
+  log.error(
+    LOG_MESSAGES.AUTH_PROFILE_FETCH_FAILED,
+    "status:",
+    profileResult.status ?? "n/a",
+    "message:",
+    profileResult.errorMessage ?? "n/a",
+    "details:",
+    readErrorDetails(profileResult) ?? "n/a",
+  );
+  return activeSession;
 }
 
-export default function authHandler(app: App) {
+export default function authHandler(app: App): void {
   const secureDataPath = path.join(
     app.getPath("userData"),
     SECURE_STORAGE_FILE_NAME,
@@ -477,7 +446,6 @@ export default function authHandler(app: App) {
         );
         await writeStoredSession(secureDataPath, session);
 
-        // Store development code for smoke tests
         interceptSmokeTestCode(authResult.data.emailVerification);
 
         log.info(LOG_MESSAGES.AUTH_LOGIN_SUCCESS, session.user.username);
@@ -538,7 +506,6 @@ export default function authHandler(app: App) {
         );
         await writeStoredSession(secureDataPath, session);
 
-        // Store development code for smoke tests
         interceptSmokeTestCode(registerResult.data.emailVerification);
 
         log.info(LOG_MESSAGES.AUTH_REGISTER_SUCCESS, session.user.username);
@@ -654,7 +621,6 @@ export default function authHandler(app: App) {
       };
       await writeStoredSession(secureDataPath, updatedSession);
 
-      // Store development code for smoke tests
       interceptSmokeTestCode(statusResult.data);
 
       return {
@@ -698,7 +664,6 @@ export default function authHandler(app: App) {
       };
       await writeStoredSession(secureDataPath, updatedSession);
 
-      // Store development code for smoke tests
       interceptSmokeTestCode(resendResult.data);
 
       return {

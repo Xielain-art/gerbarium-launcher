@@ -34,8 +34,10 @@ function Dialog({
   subtitleClassName,
   headerClassName,
   footerClassName,
-}: DialogProps) {
-  if (!open) return null;
+}: DialogProps): React.JSX.Element | null {
+  if (!open) {
+    return null;
+  }
 
   return (
     <div
@@ -52,20 +54,51 @@ function Dialog({
         )}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className={cn("mb-3 flex items-start justify-between gap-3 border-b border-white/10 pb-3", headerClassName)}>
+        <div
+          className={cn(
+            "mb-3 flex items-start justify-between gap-3 border-b border-white/10 pb-3",
+            headerClassName,
+          )}
+        >
           <div className="min-w-0">
-            <h3 className={cn("font-minecraft text-sm uppercase text-theme", titleClassName)}>{title}</h3>
-            {subtitle ? <div className={cn("mt-1 font-minecraft text-xs text-theme-muted", subtitleClassName)}>{subtitle}</div> : null}
+            <h3
+              className={cn(
+                "font-minecraft text-sm uppercase text-theme",
+                titleClassName,
+              )}
+            >
+              {title}
+            </h3>
+            {subtitle && (
+              <div
+                className={cn(
+                  "mt-1 font-minecraft text-xs text-theme-muted",
+                  subtitleClassName,
+                )}
+              >
+                {subtitle}
+              </div>
+            )}
           </div>
-          <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)} className={closeButtonClassName}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onOpenChange(false)}
+            className={closeButtonClassName}
+          >
             {closeButtonLabel ?? "x"}
           </Button>
         </div>
         <div className="space-y-3">{children}</div>
-        {footer ? <div className={cn("mt-4 flex justify-end gap-2", footerClassName)}>{footer}</div> : null}
+        {footer && (
+          <div className={cn("mt-4 flex justify-end gap-2", footerClassName)}>
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
 
 export { Dialog };

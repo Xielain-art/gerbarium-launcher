@@ -20,16 +20,22 @@ export async function getUsersRequest(
   search?: string,
   role?: string,
   banned?: boolean,
+  page?: number,
+  limit?: number,
 ): Promise<ApiResult<ApiUser[]>> {
   try {
     const query: {
       search?: string;
       role?: string;
       banned?: boolean;
+      page?: number;
+      limit?: number;
     } = {};
     if (search) query.search = search;
     if (role) query.role = role;
     if (typeof banned === "boolean") query.banned = banned;
+    if (page) query.page = page;
+    if (limit) query.limit = limit;
 
     const { data, error, response } = await apiClient.GET("/api/admin/users", {
       params: { query },
@@ -43,6 +49,7 @@ export async function getUsersRequest(
     return buildNetworkErrorResult<ApiUser[]>(error);
   }
 }
+
 
 export async function banUserRequest(
   accessToken: string,

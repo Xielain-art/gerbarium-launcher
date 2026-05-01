@@ -6,10 +6,14 @@ interface InputProps extends React.ComponentProps<"input"> {
   label?: string;
 }
 
-function Input({ className, type, label, ...props }: InputProps) {
+function Input({ className, type, label, ...props }: InputProps): React.JSX.Element {
   return (
     <div className="space-y-1.5">
-      {label ? <Label className="font-minecraft text-[10px] uppercase text-theme-muted">{label}</Label> : null}
+      {label && (
+        <Label className="font-minecraft text-[10px] uppercase text-theme-muted">
+          {label}
+        </Label>
+      )}
       <input
         type={type}
         data-slot="input"
@@ -22,5 +26,6 @@ function Input({ className, type, label, ...props }: InputProps) {
     </div>
   );
 }
+
 
 export { Input };

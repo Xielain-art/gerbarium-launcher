@@ -1,15 +1,26 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { SettingsState as SettingsStateType, SettingsGeneral, SettingsMods, SettingsProfile } from '../types';
-import { STORAGE_KEYS, LOG_ACTIONS, DEFAULT_SETTINGS } from '../../../shared/constants/system';
-import { UI_STRINGS } from '../../../shared/constants/ui-strings';
-import type { LauncherSettings } from '../../../shared/constants/ipc-chanels';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type {
+  SettingsState as SettingsStateType,
+  SettingsGeneral,
+  SettingsMods,
+  SettingsProfile,
+} from "../types";
+import {
+  STORAGE_KEYS,
+  LOG_ACTIONS,
+  DEFAULT_SETTINGS,
+} from "../../../shared/constants/system";
+import { UI_STRINGS } from "../../../shared/constants/ui-strings";
+import type { LauncherSettings } from "../../../shared/constants/ipc-chanels";
 
-const logAction = (action: string, details?: string) => {
+function logAction(action: string, details?: string): void {
   void window.electronAPI?.system.logAction(action, details);
-};
+}
 
-function toLauncherSettingsPatch(settings: SettingsGeneral): Partial<LauncherSettings> {
+function toLauncherSettingsPatch(
+  settings: SettingsGeneral,
+): Partial<LauncherSettings> {
   return {
     minimizeToTray: settings.minimizeToTray,
     gamePath: settings.gamePath,
@@ -35,7 +46,7 @@ interface SettingsState extends SettingsStateType {
 
 const defaultSettings: SettingsStateType = {
   general: {
-    javaPath: '',
+    javaPath: "",
     ramAllocation: DEFAULT_SETTINGS.RAM_GB,
     language: DEFAULT_SETTINGS.LANGUAGE,
     autoUpdates: true,
@@ -43,11 +54,11 @@ const defaultSettings: SettingsStateType = {
     minimizeToTray: false,
     discordRPC: true,
     jvmArgs: DEFAULT_SETTINGS.JVM_ARGS,
-    gamePath: '',
+    gamePath: "",
     fullscreen: false,
     showLaunchConsole: true,
-    theme: 'violet-base',
-    themeMode: 'light',
+    theme: "violet-base",
+    themeMode: "light",
   },
   mods: {
     enabledMods: [],
@@ -74,7 +85,7 @@ export const useSettingsStore = create<SettingsState>()(
       setIsDownloadingJava: (val) => set({ isDownloadingJava: val }),
       setJavaError: (err) => set({ javaError: err }),
       setIsJavaLoading: (val) => set({ isJavaLoading: val }),
-      
+
       updateGeneral: (updates) => {
         set((state) => {
           const newState = { ...state.general, ...updates };
@@ -86,43 +97,48 @@ export const useSettingsStore = create<SettingsState>()(
           }
           // Sync with main process
           if (window.electronAPI?.system?.sendSettingsUpdate) {
-            window.electronAPI.system.sendSettingsUpdate(toLauncherSettingsPatch(newState));
+            window.electronAPI.system.sendSettingsUpdate(
+              toLauncherSettingsPatch(newState),
+            );
           }
           return { general: newState };
         });
       },
-      
+
       updateMods: (updates) =>
         set((state) => ({
           mods: { ...state.mods, ...updates },
         })),
-      
+
       updateProfile: (updates) =>
         set((state) => ({
           profile: { ...state.profile, ...updates },
         })),
-      
+
       saveSettings: async () => {
         set({ isLoading: true, error: null });
-        
+
         try {
           // Mock save - replace with IPC call
           await new Promise((resolve) => setTimeout(resolve, 500));
-          
+
           // Settings are already persisted by zustand
           set({ isLoading: false });
-          logAction(LOG_ACTIONS.SAVE_SETTINGS, 'Settings saved successfully');
+          logAction(LOG_ACTIONS.SAVE_SETTINGS, "Settings saved successfully");
           return { success: true };
         } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.SETTINGS_SAVE;
+          const errorMessage =
+            err instanceof Error
+              ? err.message
+              : UI_STRINGS.STORE_ERRORS.SETTINGS_SAVE;
           set({ isLoading: false, error: errorMessage });
           logAction(LOG_ACTIONS.SAVE_SETTINGS_ERROR, errorMessage);
           return { success: false, error: errorMessage };
         }
       },
-      
+
       resetToDefaults: () => {
-        logAction(LOG_ACTIONS.RESET_SETTINGS, 'Settings reset to defaults');
+        logAction(LOG_ACTIONS.RESET_SETTINGS, "Settings reset to defaults");
         set(defaultSettings);
         localStorage.removeItem(STORAGE_KEYS.SETTINGS);
       },
@@ -134,6 +150,7 @@ export const useSettingsStore = create<SettingsState>()(
         mods: state.mods,
         profile: state.profile,
       }),
-    }
-  )
+    },
+  ),
 );
+

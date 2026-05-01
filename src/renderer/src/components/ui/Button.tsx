@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 type ButtonVariant = "minecraft" | "primary" | "secondary" | "danger" | "ghost";
 type ButtonSize = "sm" | "md" | "lg" | "xl";
@@ -19,9 +20,7 @@ export function Button({
   children,
   disabled,
   ...props
-}: ButtonProps) {
-  const baseStyles = "mc-btn gap-2";
-
+}: ButtonProps): React.JSX.Element {
   const variantStyles = {
     minecraft: "",
     primary: "mc-btn-primary",
@@ -39,12 +38,12 @@ export function Button({
 
   return (
     <button
-      className={`
-        ${baseStyles}
-        ${variantStyles[variant]}
-        ${sizeStyles[size]}
-        ${className}
-      `}
+      className={cn(
+        "mc-btn gap-2",
+        variantStyles[variant],
+        sizeStyles[size],
+        className,
+      )}
       disabled={disabled || isLoading}
       {...props}
     >
@@ -70,7 +69,8 @@ export function Button({
           />
         </svg>
       )}
-      <span className={isLoading ? "opacity-90" : ""}>{children}</span>
+      <span className={cn(isLoading && "opacity-90")}>{children}</span>
     </button>
   );
 }
+

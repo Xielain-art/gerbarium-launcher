@@ -7,7 +7,13 @@ interface CheckboxProps extends Omit<React.ComponentProps<"input">, "type" | "on
   onChange: () => void;
 }
 
-function Checkbox({ className, label, checked, onChange, ...props }: CheckboxProps) {
+function Checkbox({
+  className,
+  label,
+  checked,
+  onChange,
+  ...props
+}: CheckboxProps): React.JSX.Element {
   return (
     <label className="flex items-center gap-2">
       <input
@@ -17,9 +23,12 @@ function Checkbox({ className, label, checked, onChange, ...props }: CheckboxPro
         className={cn("h-4 w-4 rounded border border-[var(--input)]", className)}
         {...props}
       />
-      {label ? <span className="font-minecraft text-xs text-theme">{label}</span> : null}
+      {label && (
+        <span className="font-minecraft text-xs text-theme">{label}</span>
+      )}
     </label>
   );
 }
+
 
 export { Checkbox };

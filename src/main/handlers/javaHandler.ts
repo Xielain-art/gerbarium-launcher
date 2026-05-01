@@ -1,29 +1,29 @@
-import { exec } from "child_process";
-import path from "path";
-import fs from "fs-extra";
-import util from "util";
+import { exec } from "node:child_process";
+import path from "node:path";
+import fs from "node:fs/promises";
+import { createReadStream, createWriteStream } from "node:fs";
+import util from "node:util";
 import got from "got";
-import crypto from "node:crypto";
 import extract from "extract-zip";
 import tar from "tar-fs";
-import zlib from "zlib";
-import { pipeline } from "stream/promises";
+import zlib from "node:zlib";
+import { pipeline } from "node:stream/promises";
 import { app } from "electron";
 import { DownloadStatus } from "../../shared/constants/ipc-chanels";
 import { getJavaDownloadUrl, type JavaVersion } from "../config/javaConfig";
 import { ERROR_CODES } from "../../shared/constants/errors";
 import { LOG_MESSAGES } from "../../shared/constants/log-messages";
-import { 
-  PLATFORMS, 
-  DIRECTORIES, 
-  FILENAMES, 
-  COMMANDS, 
-  REGEX, 
-  JAVA_CONSTANTS, 
-  TIMEOUTS, 
-  HEADERS, 
+import {
+  PLATFORMS,
+  DIRECTORIES,
+  FILENAMES,
+  COMMANDS,
+  REGEX,
+  JAVA_CONSTANTS,
+  TIMEOUTS,
+  HEADERS,
   DOWNLOAD_STATUS,
-  FILE_EXTENSIONS
+  FILE_EXTENSIONS,
 } from "../../shared/constants/system";
 import { calculateFileSha256 } from "../utils/integrity";
 import log from "electron-log";
@@ -36,9 +36,20 @@ export interface ProgressUpdate {
   progress?: number;
 }
 
+export interface InstalledJava {
+  version: JavaVersion;
+  path: string;
+  detectedVersion: string;
+}
+
+/**
+ * Checks the version of a Java executable
+ */
 export async function checkJavaVersion(javaPath: string): Promise<string | null> {
   try {
-    const { stdout, stderr } = await execPromise(`"${javaPath}" ${COMMANDS.JAVA_VERSION}`);
+    const { stdout, stderr } = await execPromise(
+      `"${javaPath}" ${COMMANDS.JAVA_VERSION}`,
+    );
     const output = stdout + stderr;
     const match = output.match(REGEX.JAVA_VERSION);
     return match ? match[1] : null;
@@ -47,20 +58,31 @@ export async function checkJavaVersion(javaPath: string): Promise<string | null>
   }
 }
 
+/**
+ * Attempts to find Java in the system environment
+ */
 export async function findJavaInSystem(): Promise<string | null> {
   if (process.env.JAVA_HOME) {
     const javaPath = path.join(
       process.env.JAVA_HOME,
       DIRECTORIES.BIN,
-      process.platform === PLATFORMS.WINDOWS ? FILENAMES.JAVA_EXE : FILENAMES.JAVA,
+      process.platform === PLATFORMS.WINDOWS
+        ? FILENAMES.JAVA_EXE
+        : FILENAMES.JAVA,
     );
-    if (await fs.pathExists(javaPath)) {
+    try {
+      await fs.access(javaPath);
       return javaPath;
+    } catch {
+      // Not found in JAVA_HOME
     }
   }
 
   try {
-    const cmd = process.platform === PLATFORMS.WINDOWS ? COMMANDS.WHERE_JAVA : COMMANDS.WHICH_JAVA;
+    const cmd =
+      process.platform === PLATFORMS.WINDOWS
+        ? COMMANDS.WHERE_JAVA
+        : COMMANDS.WHICH_JAVA;
     const { stdout } = await execPromise(cmd);
     const paths = stdout.split(/\r?\n/).filter((p) => p.trim() !== "");
     return paths.length > 0 ? paths[0] : null;
@@ -69,15 +91,20 @@ export async function findJavaInSystem(): Promise<string | null> {
   }
 }
 
-export interface InstalledJava {
-  version: JavaVersion;
-  path: string;
-  detectedVersion: string;
-}
-
+/**
+ * Lists all JREs installed by the launcher
+ */
 export async function getInstalledJavaList(): Promise<InstalledJava[]> {
-  const javaDir = path.join(app.getPath(DIRECTORIES.USER_DATA), DIRECTORIES.JAVA);
-  if (!await fs.pathExists(javaDir)) return [];
+  const javaDir = path.join(
+    app.getPath(DIRECTORIES.USER_DATA),
+    DIRECTORIES.JAVA,
+  );
+
+  try {
+    await fs.access(javaDir);
+  } catch {
+    return [];
+  }
 
   const installed: InstalledJava[] = [];
   const entries = await fs.readdir(javaDir);
@@ -93,139 +120,157 @@ export async function getInstalledJavaList(): Promise<InstalledJava[]> {
     const javaVersion = parseInt(versionMatch[1], 10) as JavaVersion;
     if (!JAVA_CONSTANTS.SUPPORTED_VERSIONS.includes(javaVersion)) continue;
 
-    let finalPath: string | null = null;
-    const jdkFolders = await fs.readdir(entryPath).catch(() => []);
+    const finalPath = await findJavaBinaryInFolder(entryPath);
+    if (!finalPath) continue;
 
-    for (const jdkFolder of jdkFolders) {
-      const jdkPath = path.join(entryPath, jdkFolder);
-      const jdkStat = await fs.stat(jdkPath);
-      if (!jdkStat.isDirectory()) continue;
-
-      const binPath = path.join(jdkPath, DIRECTORIES.BIN);
-      const potentialJava = path.join(
-        binPath,
-        process.platform === PLATFORMS.WINDOWS ? FILENAMES.JAVA_EXE : FILENAMES.JAVA,
-      );
-
-      if (await fs.pathExists(potentialJava)) {
-        finalPath = potentialJava;
-        break;
-      }
-    }
-
-    if (finalPath && await fs.pathExists(finalPath)) {
-      const detectedVersion = await checkJavaVersion(finalPath);
-      if (detectedVersion) {
-        installed.push({ version: javaVersion, path: finalPath, detectedVersion });
-      }
+    const detectedVersion = await checkJavaVersion(finalPath);
+    if (detectedVersion) {
+      installed.push({ version: javaVersion, path: finalPath, detectedVersion });
     }
   }
 
   return installed.sort((a, b) => a.version - b.version);
 }
 
-export async function removeInstalledJava(javaVersion: JavaVersion): Promise<boolean> {
-  const targetDir = path.join(app.getPath(DIRECTORIES.USER_DATA), DIRECTORIES.JAVA, `${JAVA_CONSTANTS.JRE_PREFIX}${javaVersion}`);
+async function findJavaBinaryInFolder(folderPath: string): Promise<string | null> {
   try {
-    if (await fs.pathExists(targetDir)) {
-      await fs.remove(targetDir);
-      return true;
+    const jdkFolders = await fs.readdir(folderPath);
+    for (const jdkFolder of jdkFolders) {
+      const jdkPath = path.join(folderPath, jdkFolder);
+      const jdkStat = await fs.stat(jdkPath);
+      if (!jdkStat.isDirectory()) continue;
+
+      const binPath = path.join(jdkPath, DIRECTORIES.BIN);
+      const javaBinary = path.join(
+        binPath,
+        process.platform === PLATFORMS.WINDOWS
+          ? FILENAMES.JAVA_EXE
+          : FILENAMES.JAVA,
+      );
+
+      try {
+        await fs.access(javaBinary);
+        return javaBinary;
+      } catch {
+        continue;
+      }
     }
-    return false;
+  } catch {
+    // Ignore errors
+  }
+  return null;
+}
+
+/**
+ * Removes an installed JRE
+ */
+export async function removeInstalledJava(
+  javaVersion: JavaVersion,
+): Promise<boolean> {
+  const targetDir = path.join(
+    app.getPath(DIRECTORIES.USER_DATA),
+    DIRECTORIES.JAVA,
+    `${JAVA_CONSTANTS.JRE_PREFIX}${javaVersion}`,
+  );
+  try {
+    await fs.rm(targetDir, { recursive: true, force: true });
+    return true;
   } catch (error) {
     log.error(LOG_MESSAGES.JAVA_REMOVE_FAILED, error);
     return false;
   }
 }
 
+/**
+ * Downloads and extracts a JRE
+ */
 export async function downloadAndExtractJRE(
   javaVersion: JavaVersion,
   onProgress: (update: ProgressUpdate) => void,
 ): Promise<string> {
   const url = getJavaDownloadUrl(javaVersion);
-  const targetDir = path.join(app.getPath(DIRECTORIES.USER_DATA), DIRECTORIES.JAVA, `${JAVA_CONSTANTS.JRE_PREFIX}${javaVersion}`);
+  const targetDir = path.join(
+    app.getPath(DIRECTORIES.USER_DATA),
+    DIRECTORIES.JAVA,
+    `${JAVA_CONSTANTS.JRE_PREFIX}${javaVersion}`,
+  );
   const archivePath = path.join(targetDir, FILENAMES.JRE_ARCHIVE);
-  await fs.ensureDir(targetDir);
+
+  await fs.mkdir(targetDir, { recursive: true });
 
   try {
-    log.info(LOG_MESSAGES.JAVA_DOWNLOAD_START, javaVersion, 'from:', url);
-    const response = got.stream(url, { timeout: { socket: TIMEOUTS.JAVA_DOWNLOAD_SOCKET } });
-    const fileWriter = fs.createWriteStream(archivePath);
-
-    let totalBytes = 0;
-    response.on("response", (res) => {
-      totalBytes = parseInt(res.headers[HEADERS.CONTENT_LENGTH] || "0", 10);
-    });
-
-    response.on("downloadProgress", (progress) => {
-      if (totalBytes > 0) {
-        onProgress({
-          status: DOWNLOAD_STATUS.DOWNLOADING as DownloadStatus,
-          progress: Math.round((progress.transferred / totalBytes) * 100),
-        });
-      }
-    });
-
-    await new Promise<void>((resolve, reject) => {
-      response
-        .pipe(fileWriter)
-        .on("finish", () => resolve())
-        .on("error", (err) => reject(err));
+    await downloadJREArchive(url, archivePath, (progress) => {
+      onProgress({
+        status: DOWNLOAD_STATUS.DOWNLOADING as DownloadStatus,
+        progress,
+      });
     });
 
     onProgress({ status: DOWNLOAD_STATUS.VERIFYING as DownloadStatus });
-    const expectedChecksum = await fetchExpectedSha256(url);
-    const actualChecksum = await calculateFileSha256(archivePath);
-    if (actualChecksum.toLowerCase() !== expectedChecksum.toLowerCase()) {
-      throw new Error(`${ERROR_CODES.JAVA_CORRUPTED}: checksum mismatch`);
-    }
+    await verifyJREChecksum(url, archivePath);
 
     onProgress({ status: DOWNLOAD_STATUS.EXTRACTING as DownloadStatus });
-    if (url.endsWith(`.${FILE_EXTENSIONS.ZIP}`)) {
-      await extract(archivePath, { dir: targetDir });
-    } else {
-      await pipeline(
-        fs.createReadStream(archivePath),
-        zlib.createGunzip(),
-        tar.extract(targetDir),
-      );
+    await extractJREArchive(url, archivePath, targetDir);
+    await fs.rm(archivePath, { force: true });
+
+    const javaBinaryPath = await findJavaBinaryInFolder(targetDir);
+    if (!javaBinaryPath) {
+      throw new Error(ERROR_CODES.JAVA_FOLDER_NOT_FOUND);
     }
-    await fs.remove(archivePath);
-
-    const files = await fs.readdir(targetDir);
-    let jreFolder: string | undefined;
-
-    for (const file of files) {
-      const entryPath = path.join(targetDir, file);
-      const stat = await fs.stat(entryPath);
-      if (stat.isDirectory()) {
-        jreFolder = file;
-        break;
-      }
-    }
-
-    if (!jreFolder) throw new Error(ERROR_CODES.JAVA_FOLDER_NOT_FOUND);
-
-    const javaBinaryPath = path.join(
-      targetDir,
-      jreFolder,
-      DIRECTORIES.BIN,
-      process.platform === PLATFORMS.WINDOWS ? FILENAMES.JAVA_EXE : FILENAMES.JAVA,
-    );
 
     const version = await checkJavaVersion(javaBinaryPath);
     if (!version) {
-      await fs.remove(path.join(targetDir, jreFolder));
+      // Cleanup corrupted installation
+      await fs.rm(targetDir, { recursive: true, force: true });
       throw new Error(ERROR_CODES.JAVA_CORRUPTED);
     }
 
-    if (process.platform !== PLATFORMS.WINDOWS) await fs.chmod(javaBinaryPath, 0o755);
+    if (process.platform !== PLATFORMS.WINDOWS) {
+      await fs.chmod(javaBinaryPath, 0o755);
+    }
 
     onProgress({ status: DOWNLOAD_STATUS.DONE as DownloadStatus });
     return javaBinaryPath;
   } catch (err) {
-    await fs.remove(archivePath);
+    await fs.rm(archivePath, { force: true });
     throw err;
+  }
+}
+
+async function downloadJREArchive(
+  url: string,
+  destPath: string,
+  onProgress: (progress: number) => void,
+): Promise<void> {
+  log.info(LOG_MESSAGES.JAVA_DOWNLOAD_START, "from:", url);
+  const response = got.stream(url, {
+    timeout: { socket: TIMEOUTS.JAVA_DOWNLOAD_SOCKET },
+  });
+  const fileWriter = createWriteStream(destPath);
+
+  let totalBytes = 0;
+  response.on("response", (res) => {
+    totalBytes = parseInt(res.headers[HEADERS.CONTENT_LENGTH] || "0", 10);
+  });
+
+  response.on("downloadProgress", (progress) => {
+    if (totalBytes > 0) {
+      onProgress(Math.round((progress.transferred / totalBytes) * 100));
+    }
+  });
+
+  await pipeline(response, fileWriter);
+}
+
+async function verifyJREChecksum(
+  url: string,
+  archivePath: string,
+): Promise<void> {
+  const expectedChecksum = await fetchExpectedSha256(url);
+  const actualChecksum = await calculateFileSha256(archivePath);
+
+  if (actualChecksum.toLowerCase() !== expectedChecksum.toLowerCase()) {
+    throw new Error(`${ERROR_CODES.JAVA_CORRUPTED}: checksum mismatch`);
   }
 }
 
@@ -240,4 +285,21 @@ async function fetchExpectedSha256(archiveUrl: string): Promise<string> {
   }
 
   return match[1];
+}
+
+async function extractJREArchive(
+  url: string,
+  archivePath: string,
+  targetDir: string,
+): Promise<void> {
+  if (url.endsWith(`.${FILE_EXTENSIONS.ZIP}`)) {
+    await extract(archivePath, { dir: targetDir });
+    return;
+  }
+
+  await pipeline(
+    createReadStream(archivePath),
+    zlib.createGunzip(),
+    tar.extract(targetDir),
+  );
 }

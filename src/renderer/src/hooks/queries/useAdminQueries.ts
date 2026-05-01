@@ -22,6 +22,7 @@ import type {
   ApiNewsTag,
   ApiUpdateNewsDto,
 } from "../../../../lib/api/news";
+
 import { queryKeys } from "../../lib/queryKeys";
 import { ensureSuccess } from "../../lib/queryHelpers";
 
@@ -51,21 +52,53 @@ type AdminChangelogFilters = {
 const ADMIN_USERS_PAGE_SIZE = 20;
 const ADMIN_NEWS_PAGE_SIZE = 10;
 
-function normalizeUsersPayload(payload: unknown): ApiUser[] {
+interface UserListPayload {
+  items: ApiUser[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+function normalizeUserListPayload(
+  payload: unknown,
+  page: number,
+  limit: number,
+): UserListPayload {
+  let items: ApiUser[] = [];
+  let total = 0;
+
   if (Array.isArray(payload)) {
-    return payload as ApiUser[];
+    items = payload;
+    total = payload.length;
+  } else if (payload && typeof payload === "object") {
+    const p = payload as any;
+    items = Array.isArray(p.items) ? p.items : Array.isArray(p.data) ? p.data : [];
+    total = typeof p.total === "number" ? p.total : (p.meta && typeof p.meta.total === "number") ? p.meta.total : items.length;
   }
 
-  if (
-    typeof payload === "object" &&
-    payload !== null &&
-    "data" in payload &&
-    Array.isArray((payload as { data?: unknown }).data)
-  ) {
-    return (payload as { data: ApiUser[] }).data;
+  const totalPages = Math.ceil(total / limit);
+
+  // Client-side slice if server returns all items
+  if (items.length > limit && totalPages <= 1) {
+    const start = (page - 1) * limit;
+    return {
+      items: items.slice(start, start + limit),
+      meta: { page, limit, total: items.length, totalPages: Math.ceil(items.length / limit) },
+    };
   }
 
-  return [];
+  return {
+    items,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages: totalPages || 1,
+    },
+  };
 }
 
 function normalizeNewsListPayload(
@@ -73,53 +106,44 @@ function normalizeNewsListPayload(
   page: number,
   limit: number,
 ): ApiNewsListPayload {
-  if (
-    typeof payload === "object" &&
-    payload !== null &&
-    "items" in payload &&
-    Array.isArray((payload as { items?: unknown }).items) &&
-    "meta" in payload
-  ) {
-    return payload as ApiNewsListPayload;
-  }
+  let items: ApiNews[] = [];
+  let total = 0;
+  let totalPages = 0;
 
   if (Array.isArray(payload)) {
-    const items = payload as ApiNews[];
-    return {
-      items,
-      meta: {
-        page,
-        limit,
-        total: items.length,
-        totalPages: 1,
-      },
-    };
+    items = payload;
+    total = items.length;
+    totalPages = 1; // Array-only response means we don't know the real total, assume 1 page
+  } else if (payload && typeof payload === "object") {
+    const p = payload as any;
+    items = Array.isArray(p.items)
+      ? p.items
+      : Array.isArray(p.data)
+        ? p.data
+        : [];
+    
+    // Check various common metadata locations
+    const m = p.meta || p;
+    total = typeof m.total === "number" ? m.total : items.length;
+    totalPages = typeof m.totalPages === "number" ? m.totalPages : Math.ceil(total / limit) || 1;
   }
 
   return {
-    items: [],
+    items,
     meta: {
       page,
       limit,
-      total: 0,
-      totalPages: 0,
+      total,
+      totalPages: totalPages || 1,
     },
   };
 }
 
-async function getUsers(filters: UserFilters): Promise<ApiUser[]> {
-  const result = await window.electronAPI.admin.getUsers(
-    filters.search,
-    undefined,
-    undefined,
-    filters.role,
-    filters.banned,
-  );
 
-  return normalizeUsersPayload(
-    ensureSuccess(result, "Failed to fetch users").data,
-  );
-}
+
+
+
+
 
 async function getRoles(): Promise<ApiRole[]> {
   const result = await window.electronAPI.admin.getRoles();
@@ -158,12 +182,30 @@ async function getAdminChangelog(
   return ensureSuccess(result, "Failed to fetch changelog").data ?? [];
 }
 
-export function useAdminUsersQuery(filters: UserFilters) {
+export function useAdminUsersQuery(filters: UserFilters & { page: number }) {
   return useQuery({
     queryKey: queryKeys.adminUsers(filters),
-    queryFn: () => getUsers(filters),
+    queryFn: async () => {
+      const result = await window.electronAPI.admin.getUsers(
+        filters.search,
+        filters.page,
+        ADMIN_USERS_PAGE_SIZE,
+        filters.role,
+        filters.banned,
+      );
+
+      return normalizeUserListPayload(
+        ensureSuccess(result, "Failed to fetch users").data,
+        filters.page,
+        ADMIN_USERS_PAGE_SIZE,
+      );
+    },
+    // Keep data fresh for a bit to avoid constant reloading during navigation
+    staleTime: 5000,
   });
 }
+
+
 
 export function useAdminRolesQuery() {
   return useQuery({
@@ -236,13 +278,19 @@ export function useAdminUserMutations(filters: UserFilters) {
   const queryClient = useQueryClient();
   const invalidateUsers = async () => {
     await queryClient.invalidateQueries({
-      queryKey: queryKeys.adminUsers(filters),
+      queryKey: ["admin-users"],
     });
   };
 
   return {
     banUser: useMutation({
-      mutationFn: async ({ userId, reason }: { userId: string; reason: string }) =>
+      mutationFn: async ({
+        userId,
+        reason,
+      }: {
+        userId: string;
+        reason: string;
+      }) =>
         ensureSuccess(
           await window.electronAPI.admin.banUser(userId, reason),
           "Failed to ban user",
@@ -290,6 +338,7 @@ export function useAdminUserMutations(filters: UserFilters) {
     }),
   };
 }
+
 
 export function useAdminNewsMutations(filters: AdminNewsFilters) {
   const queryClient = useQueryClient();
@@ -417,6 +466,3 @@ export function useAdminChangelogMutations(filters: AdminChangelogFilters) {
   };
 }
 
-export function getVisibleUsers(users: ApiUser[], page: number): ApiUser[] {
-  return users.slice(0, page * ADMIN_USERS_PAGE_SIZE);
-}

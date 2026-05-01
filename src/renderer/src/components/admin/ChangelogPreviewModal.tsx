@@ -7,21 +7,31 @@ interface ChangelogPreviewModalProps {
 }
 
 function stringifyChangelogChanges(changes: unknown): string {
-  if (!Array.isArray(changes)) return "";
+  if (!Array.isArray(changes)) {
+    return "";
+  }
+
   const lines = changes.flatMap((entry) => {
-    if (typeof entry === "string") return [entry];
-    if (Array.isArray(entry)) {
-      return entry.filter((value): value is string => typeof value === "string");
+    if (typeof entry === "string") {
+      return [entry];
     }
+
+    if (Array.isArray(entry)) {
+      return entry.filter(
+        (value): value is string => typeof value === "string",
+      );
+    }
+
     return [];
   });
+
   return lines.join("\n");
 }
 
 export function ChangelogPreviewModal({
   changelog,
   onClose,
-}: ChangelogPreviewModalProps) {
+}: ChangelogPreviewModalProps): React.JSX.Element | null {
   if (!changelog) {
     return null;
   }
@@ -33,11 +43,7 @@ export function ChangelogPreviewModal({
           <h3 className="font-minecraft text-lg text-theme">
             Changelog v{changelog.version}
           </h3>
-          <button
-            type="button"
-            className="mc-btn mc-btn-sm"
-            onClick={onClose}
-          >
+          <button type="button" className="mc-btn mc-btn-sm" onClick={onClose}>
             Закрыть
           </button>
         </div>
@@ -53,10 +59,16 @@ export function ChangelogPreviewModal({
             </span>
           </div>
           <div
-            className="max-w-full font-minecraft text-sm leading-relaxed text-theme-muted [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-[var(--mc-accent)] [&_a]:underline"
-            style={{ overflowWrap: "anywhere", wordBreak: "break-word", whiteSpace: "normal" }}
+            className="max-w-full font-minecraft text-sm leading-relaxed text-theme-muted [&_a]:text-[var(--mc-accent)] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
+            style={{
+              overflowWrap: "anywhere",
+              wordBreak: "break-word",
+              whiteSpace: "normal",
+            }}
             dangerouslySetInnerHTML={{
-              __html: renderMarkdownToSafeHtml(stringifyChangelogChanges(changelog.changes)),
+              __html: renderMarkdownToSafeHtml(
+                stringifyChangelogChanges(changelog.changes),
+              ),
             }}
           />
           <button
@@ -73,4 +85,5 @@ export function ChangelogPreviewModal({
     </div>
   );
 }
+
 

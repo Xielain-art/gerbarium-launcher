@@ -11,13 +11,20 @@ interface Props {
   onClose: () => void;
 }
 
-export function ChangelogPreviewModal({ t, changelog, onClose }: Props) {
+export function ChangelogPreviewModal({
+  t,
+  changelog,
+  onClose,
+}: Props): React.JSX.Element | null {
   const html = useMemo(
-    () => (changelog ? renderMarkdownToSafeHtml(changelog.changes.join("\n")) : ""),
+    () =>
+      changelog ? renderMarkdownToSafeHtml(changelog.changes.join("\n")) : "",
     [changelog],
   );
 
-  if (!changelog) return null;
+  if (!changelog) {
+    return null;
+  }
 
   return (
     <DashboardContentDialog
@@ -30,7 +37,12 @@ export function ChangelogPreviewModal({ t, changelog, onClose }: Props) {
           <Button type="button" variant="secondary" size="sm" onClick={onClose}>
             {t.DASHBOARD.CLOSE}
           </Button>
-          <Button type="button" onClick={() => void window.electronAPI.system.openExternal(changelog.downloadUrl)}>
+          <Button
+            type="button"
+            onClick={() =>
+              void window.electronAPI.system.openExternal(changelog.downloadUrl)
+            }
+          >
             {t.DASHBOARD.DOWNLOAD_RELEASE}
           </Button>
         </div>
@@ -43,10 +55,21 @@ export function ChangelogPreviewModal({ t, changelog, onClose }: Props) {
               Mandatory
             </span>
           )}
-          <span className="text-xs text-[var(--muted-foreground)]">{new Date(changelog.releaseDate).toLocaleDateString("ru-RU")}</span>
+          <span className="text-xs text-[var(--muted-foreground)]">
+            {new Date(changelog.releaseDate).toLocaleDateString("ru-RU")}
+          </span>
         </div>
-        <div className="max-w-full text-sm leading-relaxed text-[var(--muted-foreground)] [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-[var(--primary)] [&_a]:underline" style={{ overflowWrap: "anywhere", wordBreak: "break-word", whiteSpace: "normal" }} dangerouslySetInnerHTML={{ __html: html }} />
+        <div
+          className="max-w-full text-sm leading-relaxed text-[var(--muted-foreground)] [&_a]:text-[var(--primary)] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
+          style={{
+            overflowWrap: "anywhere",
+            wordBreak: "break-word",
+            whiteSpace: "normal",
+          }}
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
       </div>
     </DashboardContentDialog>
   );
 }
+

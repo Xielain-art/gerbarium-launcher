@@ -5,7 +5,7 @@ export function AdvancedSettingsTab({
   t,
   general,
   onUpdateGeneral,
-}: AdvancedSettingsTabProps) {
+}: AdvancedSettingsTabProps): React.JSX.Element {
   const advancedTranslations = t.SETTINGS.ADVANCED;
 
   return (
@@ -17,11 +17,11 @@ export function AdvancedSettingsTab({
       <div className="rounded border-[2px] border-theme bg-[var(--theme-surface-soft)] p-4 space-y-3">
         <Checkbox
           id="show-launch-console"
-          label={
-            advancedTranslations.SHOW_LAUNCH_CONSOLE
-          }
+          label={advancedTranslations.SHOW_LAUNCH_CONSOLE}
           checked={general.showLaunchConsole}
-          onChange={(e) => onUpdateGeneral({ showLaunchConsole: e.target.checked })}
+          onChange={(e) =>
+            onUpdateGeneral({ showLaunchConsole: e.target.checked })
+          }
         />
         <p className="font-minecraft text-xs text-theme-muted">
           {advancedTranslations.SHOW_LAUNCH_CONSOLE_HELP}
@@ -30,3 +30,4 @@ export function AdvancedSettingsTab({
     </div>
   );
 }
+

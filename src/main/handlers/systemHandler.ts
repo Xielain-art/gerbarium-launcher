@@ -31,10 +31,16 @@ function isSafeHttpUrl(rawUrl: string): boolean {
 
 function isSubPath(candidate: string, root: string): boolean {
   const relative = path.relative(root, candidate);
-  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
+  return (
+    relative === "" ||
+    (!relative.startsWith("..") && !path.isAbsolute(relative))
+  );
 }
 
-function resolveAllowedRoots(electronApp: App, settings: RuntimeSettings): string[] {
+function resolveAllowedRoots(
+  electronApp: App,
+  settings: RuntimeSettings,
+): string[] {
   const roots = [
     path.resolve(DEFAULT_GAME_ROOT),
     path.resolve(electronApp.getPath("userData")),
@@ -53,88 +59,122 @@ async function resolveValidatedDirectory(
   settingsReader: SettingsReader,
 ): Promise<string | null> {
   const trimmed = rawPath.trim();
-  const resolved = trimmed ? path.resolve(trimmed) : path.resolve(DEFAULT_GAME_ROOT);
+  const resolved = trimmed
+    ? path.resolve(trimmed)
+    : path.resolve(DEFAULT_GAME_ROOT);
 
-  let stat;
   try {
-    stat = await fs.stat(resolved);
+    const stat = await fs.stat(resolved);
+    if (!stat.isDirectory()) {
+      return null;
+    }
+
+    const allowedRoots = resolveAllowedRoots(electronApp, settingsReader());
+    const isAllowed = allowedRoots.some((root) => isSubPath(resolved, root));
+
+    return isAllowed ? resolved : null;
   } catch {
     return null;
   }
-
-  if (!stat.isDirectory()) {
-    return null;
-  }
-
-  const allowedRoots = resolveAllowedRoots(electronApp, settingsReader());
-  const isAllowed = allowedRoots.some((root) => isSubPath(resolved, root));
-  return isAllowed ? resolved : null;
 }
 
 export default function systemHandler(
   electronApp: App,
   settingsReader: SettingsReader = () => ({}),
-) {
-  ipcMain.handle(IPC_CHANNELS.SYSTEM.GET_MEMORY, (): SystemMemory => {
-    log.debug(LOG_MESSAGES.SYSTEM_GET_MEMORY);
-    return {
-      total: Math.round(os.totalmem() / 1024 / 1024),
-      free: Math.round(os.freemem() / 1024 / 1024),
-    };
-  });
+): void {
+  ipcMain.handle(
+    IPC_CHANNELS.SYSTEM.GET_MEMORY,
+    (): SystemMemory => {
+      log.debug(LOG_MESSAGES.SYSTEM_GET_MEMORY);
+      return {
+        total: Math.round(os.totalmem() / 1024 / 1024),
+        free: Math.round(os.freemem() / 1024 / 1024),
+      };
+    },
+  );
 
-  ipcMain.handle(IPC_CHANNELS.SYSTEM.GET_CPUS, () => {
-    log.debug(LOG_MESSAGES.SYSTEM_GET_CPUS);
-    return os.cpus().length;
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.SYSTEM.GET_CPUS,
+    (): number => {
+      log.debug(LOG_MESSAGES.SYSTEM_GET_CPUS);
+      return os.cpus().length;
+    },
+  );
 
-  ipcMain.handle(IPC_CHANNELS.APP.GET_VERSION, () => {
-    return electronApp.getVersion();
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.APP.GET_VERSION,
+    (): string => {
+      return electronApp.getVersion();
+    },
+  );
 
-  ipcMain.handle(IPC_CHANNELS.SYSTEM.OPEN_EXTERNAL, async (_event, url: string) => {
-    if (!isSafeHttpUrl(url)) {
-      log.warn(LOG_MESSAGES.SYSTEM_BLOCKED_UNSAFE_EXTERNAL_URL, url);
-      return;
-    }
+  ipcMain.handle(
+    IPC_CHANNELS.SYSTEM.OPEN_EXTERNAL,
+    async (_event, url: string): Promise<void> => {
+      if (!isSafeHttpUrl(url)) {
+        log.warn(LOG_MESSAGES.SYSTEM_BLOCKED_UNSAFE_EXTERNAL_URL, url);
+        return;
+      }
 
-    await shell.openExternal(url);
-  });
+      await shell.openExternal(url);
+    },
+  );
 
-  ipcMain.handle(IPC_CHANNELS.SYSTEM.OPEN_GITHUB_ISSUE, async () => {
-    const issueBody = encodeURIComponent(
-      GITHUB_TEMPLATES.CONTACT_BODY(process.platform, process.arch, electronApp.getVersion()),
-    );
+  ipcMain.handle(
+    IPC_CHANNELS.SYSTEM.OPEN_GITHUB_ISSUE,
+    async (): Promise<void> => {
+      const issueBody = encodeURIComponent(
+        GITHUB_TEMPLATES.CONTACT_BODY(
+          process.platform,
+          process.arch,
+          electronApp.getVersion(),
+        ),
+      );
 
-    await shell.openExternal(`${EXTERNAL_URLS.GITHUB_ISSUES}?body=${issueBody}`);
-  });
+      await shell.openExternal(
+        `${EXTERNAL_URLS.GITHUB_ISSUES}?body=${issueBody}`,
+      );
+    },
+  );
 
-  ipcMain.handle(IPC_CHANNELS.SYSTEM.SELECT_DIRECTORY, async () => {
-    const result = await dialog.showOpenDialog({
-      properties: ["openDirectory", "createDirectory"],
-    });
-    return result.canceled ? null : result.filePaths[0];
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.SYSTEM.SELECT_DIRECTORY,
+    async (): Promise<string | null> => {
+      const result = await dialog.showOpenDialog({
+        properties: ["openDirectory", "createDirectory"],
+      });
+      return result.canceled ? null : result.filePaths[0];
+    },
+  );
 
-  ipcMain.handle(IPC_CHANNELS.SYSTEM.OPEN_PATH, async (_event, targetPath: string) => {
-    const safeDirectory = await resolveValidatedDirectory(
-      electronApp,
-      typeof targetPath === "string" ? targetPath : "",
-      settingsReader,
-    );
+  ipcMain.handle(
+    IPC_CHANNELS.SYSTEM.OPEN_PATH,
+    async (_event, targetPath: string): Promise<void> => {
+      const safeDirectory = await resolveValidatedDirectory(
+        electronApp,
+        typeof targetPath === "string" ? targetPath : "",
+        settingsReader,
+      );
 
-    if (!safeDirectory) {
-      log.warn(LOG_MESSAGES.SYSTEM_BLOCKED_UNSAFE_OPEN_PATH, targetPath);
-      return;
-    }
+      if (!safeDirectory) {
+        log.warn(LOG_MESSAGES.SYSTEM_BLOCKED_UNSAFE_OPEN_PATH, targetPath);
+        return;
+      }
 
-    const openError = await shell.openPath(safeDirectory);
-    if (openError) {
-      log.error(LOG_MESSAGES.SYSTEM_OPEN_PATH_FAILED, { safeDirectory, openError });
-    }
-  });
+      const openError = await shell.openPath(safeDirectory);
+      if (openError) {
+        log.error(LOG_MESSAGES.SYSTEM_OPEN_PATH_FAILED, {
+          safeDirectory,
+          openError,
+        });
+      }
+    },
+  );
 
-  ipcMain.handle(IPC_CHANNELS.SYSTEM.OPEN_DATA_FOLDER, async () => {
-    await shell.openPath(electronApp.getPath("userData"));
-  });
+  ipcMain.handle(
+    IPC_CHANNELS.SYSTEM.OPEN_DATA_FOLDER,
+    async (): Promise<void> => {
+      await shell.openPath(electronApp.getPath("userData"));
+    },
+  );
 }

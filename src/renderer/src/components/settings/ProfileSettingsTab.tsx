@@ -16,19 +16,24 @@ export function ProfileSettingsTab({
   profile,
   user,
   onUpdateProfile,
-}: ProfileSettingsTabProps) {
+}: ProfileSettingsTabProps): React.JSX.Element {
   const skinUrl = profile.skinUrl || "";
   const capeUrl = profile.capeUrl || "";
-  const skinUrlError = skinUrl.length > 0 && !isValidHttpUrl(skinUrl)
-    ? t.SETTINGS.PROFILE.URL_VALIDATION_ERROR
-    : undefined;
-  const capeUrlError = capeUrl.length > 0 && !isValidHttpUrl(capeUrl)
-    ? t.SETTINGS.PROFILE.URL_VALIDATION_ERROR
-    : undefined;
+
+  const skinUrlError =
+    skinUrl.length > 0 && !isValidHttpUrl(skinUrl)
+      ? t.SETTINGS.PROFILE.URL_VALIDATION_ERROR
+      : undefined;
+
+  const capeUrlError =
+    capeUrl.length > 0 && !isValidHttpUrl(capeUrl)
+      ? t.SETTINGS.PROFILE.URL_VALIDATION_ERROR
+      : undefined;
 
   const displayUsername = user?.username || profile.username;
   const displayMinecraftUsername = displayUsername;
   const displaySkinUrl = profile.skinUrl;
+
   const rolesText = user?.roles?.map((role) => role.name).join(", ") || "user";
   const bannedText = user?.isBanned ? "Yes" : "No";
 
@@ -46,13 +51,26 @@ export function ProfileSettingsTab({
             size="xl"
           />
           <div className="space-y-1 font-minecraft text-xs text-theme">
-            <div><span className="text-theme-muted">Email:</span> {user?.email || "-"}</div>
-            <div><span className="text-theme-muted">Roles:</span> {rolesText}</div>
-            <div><span className="text-theme-muted">Banned:</span> {bannedText}</div>
+            <div>
+              <span className="text-theme-muted">Email:</span>{" "}
+              {user?.email || "-"}
+            </div>
+            <div>
+              <span className="text-theme-muted">Roles:</span> {rolesText}
+            </div>
+            <div>
+              <span className="text-theme-muted">Banned:</span> {bannedText}
+            </div>
             {user?.isBanned && (
-              <div><span className="text-theme-muted">Ban reason:</span> {user?.banReason || "-"}</div>
+              <div>
+                <span className="text-theme-muted">Ban reason:</span>{" "}
+                {user?.banReason || "-"}
+              </div>
             )}
-            <div><span className="text-theme-muted">Minecraft username:</span> {displayMinecraftUsername || "-"}</div>
+            <div>
+              <span className="text-theme-muted">Minecraft username:</span>{" "}
+              {displayMinecraftUsername || "-"}
+            </div>
           </div>
         </div>
       </div>
@@ -99,3 +117,4 @@ export function ProfileSettingsTab({
     </div>
   );
 }
+

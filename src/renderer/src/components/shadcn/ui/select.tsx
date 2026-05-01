@@ -14,10 +14,21 @@ interface SelectProps extends React.ComponentProps<"select"> {
   onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-function Select({ className, label, options, value, onChange, ...props }: SelectProps) {
+function Select({
+  className,
+  label,
+  options,
+  value,
+  onChange,
+  ...props
+}: SelectProps): React.JSX.Element {
   return (
     <div className="space-y-1.5">
-      {label ? <Label className="font-minecraft text-[10px] uppercase text-theme-muted">{label}</Label> : null}
+      {label && (
+        <Label className="font-minecraft text-[10px] uppercase text-theme-muted">
+          {label}
+        </Label>
+      )}
       <select
         value={value}
         onChange={onChange}
@@ -40,5 +51,6 @@ function Select({ className, label, options, value, onChange, ...props }: Select
     </div>
   );
 }
+
 
 export { Select };

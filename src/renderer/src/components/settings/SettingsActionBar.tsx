@@ -10,21 +10,17 @@ export function SettingsActionBar({
   t,
   activeTab,
   onReset,
-}: SettingsActionBarProps) {
+}: SettingsActionBarProps): React.JSX.Element | null {
   if (activeTab !== "general") {
     return null;
   }
 
   return (
     <div className="mx-auto mt-6 flex max-w-2xl gap-4">
-      <Button
-        onClick={onReset}
-        variant="danger"
-        size="lg"
-        className="flex-1"
-      >
+      <Button onClick={onReset} variant="danger" size="lg" className="flex-1">
         {t.SETTINGS.ACTIONS.RESET_BUTTON}
       </Button>
     </div>
   );
 }
+

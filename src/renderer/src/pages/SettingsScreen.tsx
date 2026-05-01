@@ -6,7 +6,7 @@ import {
   SettingsTabNav,
 } from "../components/settings";
 
-export function SettingsScreen() {
+export function SettingsScreen(): React.JSX.Element {
   const vm = useSettingsScreen();
 
   return (
@@ -14,7 +14,11 @@ export function SettingsScreen() {
       <SettingsHeader t={vm.t} onBack={vm.onBack} onLogout={vm.onLogout} />
 
       <main className="flex flex-1 overflow-hidden">
-        <SettingsTabNav t={vm.t} activeTab={vm.activeTab} onChangeTab={vm.setActiveTab} />
+        <SettingsTabNav
+          t={vm.t}
+          activeTab={vm.activeTab}
+          onChangeTab={vm.setActiveTab}
+        />
 
         <div className="flex-1 overflow-y-auto bg-[var(--theme-bg)] p-6">
           <Card className="mx-auto max-w-2xl p-6">
@@ -43,3 +47,4 @@ export function SettingsScreen() {
     </div>
   );
 }
+
