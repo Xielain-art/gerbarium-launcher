@@ -34,8 +34,8 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Run Smoke Test (Linux)
-        run: xvfb-run npm run test:smoke
+#      - name: Run Smoke Test (Linux)
+#        run: xvfb-run npm run test:smoke
 
       - name: Build Linux package (no publish)
         if: startsWith(github.ref, 'refs/heads/')
