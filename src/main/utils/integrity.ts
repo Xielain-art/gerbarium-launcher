@@ -99,27 +99,29 @@ function getLatestYmlFilename(): string {
   return "latest.yml";
 }
 
-const LATEST_YML_URL = `https://github.com/Xielain-art/gerbarium-releases/releases/latest/download/${getLatestYmlFilename()}`;
-
 /**
  * Fetches the expected ASAR SHA256 hash from the latest release metadata
  */
 export async function fetchExpectedAsarSha256(): Promise<string | null> {
+  const filename = getLatestYmlFilename();
+  const url = `https://github.com/Xielain-art/gerbarium-releases/releases/latest/download/${filename}`;
+  
   try {
-    const latestYml = await got(LATEST_YML_URL, {
+    log.info(`Fetching integrity metadata from: ${url}`);
+    const latestYml = await got(url, {
       timeout: { request: 7000 },
       retry: { limit: 1 },
     }).text();
     const expectedHash = extractAsarSha256FromLatestYml(latestYml);
 
     if (!expectedHash) {
-      log.warn(LOG_MESSAGES.APP_LATEST_YML_MISSING_HASH);
+      log.warn(`ASAR integrity check skipped: ${filename} does not contain appAsarSha256/asarSha256`);
       return null;
     }
 
     return expectedHash;
   } catch (error) {
-    log.warn(LOG_MESSAGES.APP_LATEST_YML_FETCH_FAILED, error);
+    log.warn(`Failed to fetch ${filename} for ASAR integrity check:`, error);
     return null;
   }
 }
@@ -152,12 +154,13 @@ export async function verifyAsarIntegrity(
   }
 
   const expectedHashRaw = await fetchExpectedAsarSha256();
+  const filename = getLatestYmlFilename();
   if (!expectedHashRaw || !isHexHash(expectedHashRaw)) {
     log.warn(LOG_MESSAGES.APP_EXPECTED_HASH_INVALID);
     return {
       ok: true,
       status: "offline",
-      message: "Unable to fetch hash from latest.yml (offline or missing key).",
+      message: `Unable to fetch hash from ${filename} (offline or missing key).`,
     };
   }
 

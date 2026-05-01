@@ -1,5 +1,5 @@
 // Requirements
-const { app, BrowserWindow, Menu, Tray, ipcMain } = require("electron");
+const { app, BrowserWindow, Menu, Tray, ipcMain, nativeImage } = require("electron");
 const isDev = require("./_legacy_app/assets/js/isdev");
 const path = require("path");
 const LangLoader = require("./_legacy_app/assets/js/langloader");
@@ -72,7 +72,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: CONSTANTS.WINDOW_CONFIG.WIDTH,
     height: CONSTANTS.WINDOW_CONFIG.HEIGHT,
-    icon: getPlatformIcon("SealCircle"),
+    icon: getAppIcon("SealCircle"),
     frame: false,
     webPreferences: {
       preload: path.join(__dirname, "dist", "preload", "preload.js"),
@@ -184,13 +184,32 @@ function getPlatformIcon(filename) {
   );
 }
 
+/**
+ * Gets a NativeImage icon, resizing it on Linux if it exceeds X11 request limits.
+ * Large icons (e.g. 2048x2048) can cause X11 to crash with "Cannot send request of length...".
+ */
+function getAppIcon(filename) {
+  const iconPath = getPlatformIcon(filename);
+  const icon = nativeImage.createFromPath(iconPath);
+
+  // X11 has a limit on the length of a single request.
+  // 2048x2048 RGBA is ~16MB, which often exceeds this.
+  if (process.platform === "linux") {
+    const size = icon.getSize();
+    if (size.width > 512 || size.height > 512) {
+      return icon.resize({ width: 256, height: 256 });
+    }
+  }
+  return icon;
+}
+
 let tray = null;
 let settings = { minimizeToTray: false };
 
 function createTray() {
   if (tray) return;
-  
-  tray = new Tray(getPlatformIcon("SealCircle"));
+
+  tray = new Tray(getAppIcon("SealCircle"));
   const contextMenu = Menu.buildFromTemplate([
     { label: "Показать лаунчер", click: () => {
       if (win) {

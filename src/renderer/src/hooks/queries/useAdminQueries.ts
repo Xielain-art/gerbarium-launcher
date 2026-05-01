@@ -75,9 +75,9 @@ function normalizeUserListPayload(
     items = payload;
     total = payload.length;
   } else if (payload && typeof payload === "object") {
-    const p = payload as any;
+    const p = payload as Record<string, unknown>;
     items = Array.isArray(p.items) ? p.items : Array.isArray(p.data) ? p.data : [];
-    total = typeof p.total === "number" ? p.total : (p.meta && typeof p.meta.total === "number") ? p.meta.total : items.length;
+    total = typeof p.total === "number" ? p.total : (p.meta && typeof p.meta === "object" && p.meta !== null && "total" in p.meta && typeof (p.meta as Record<string, unknown>).total === "number") ? (p.meta as Record<string, unknown>).total as number : items.length;
   }
 
   const totalPages = Math.ceil(total / limit);
@@ -116,7 +116,7 @@ function normalizeNewsListPayload(
     total = items.length;
     totalPages = 1; // Array-only response means we don't know the real total, assume 1 page
   } else if (payload && typeof payload === "object") {
-    const p = payload as any;
+    const p = payload as Record<string, unknown>;
     items = Array.isArray(p.items)
       ? p.items
       : Array.isArray(p.data)
@@ -124,7 +124,7 @@ function normalizeNewsListPayload(
         : [];
     
     // Check various common metadata locations
-    const m = p.meta || p;
+    const m = (p.meta && typeof p.meta === "object" && p.meta !== null) ? p.meta as Record<string, unknown> : p;
     total = typeof m.total === "number" ? m.total : items.length;
     totalPages = typeof m.totalPages === "number" ? m.totalPages : Math.ceil(total / limit) || 1;
   }
