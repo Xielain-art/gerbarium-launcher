@@ -29,9 +29,12 @@ jobs:
       - name: Run unit tests
         env:
           NODE_ENV: development
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
         run: npm run test:unit
 
       - name: Build application
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
         run: npm run build
 
 #      - name: Run Smoke Test (Windows)

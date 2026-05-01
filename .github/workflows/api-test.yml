@@ -27,4 +27,5 @@ jobs:
       - name: Run API Tests
         env:
           NODE_ENV: development
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
         run: npm run test:auth
