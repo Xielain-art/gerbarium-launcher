@@ -62,23 +62,42 @@ test.describe('Smoke Test - Full Auth Flow', () => {
     await expect(window.locator('#register-email')).toBeVisible({ timeout: 10000 });
 
     console.log(`👤 Step 2: Filling registration details (${uniqueUsername})`);
-    await window.locator('#register-email').fill(uniqueEmail);
-    await window.locator('#auth-username').fill(uniqueUsername);
+    const emailInput = window.locator('#register-email');
+    const usernameInput = window.locator('#auth-username');
+    
+    await emailInput.fill(uniqueEmail);
+    await usernameInput.fill(uniqueUsername);
+    
+    // Verify values were filled correctly to ensure state update
+    expect(await emailInput.inputValue()).toBe(uniqueEmail);
+    expect(await usernameInput.inputValue()).toBe(uniqueUsername);
     
     // Click "Next" to go to password step
     const nextButton = window.locator('button[type="submit"]');
+    console.log(`🔘 Button text before click: "${await nextButton.textContent()}"`);
+    
+    await expect(nextButton).toBeEnabled({ timeout: 5000 });
     await nextButton.click();
 
     console.log('🔑 Step 3: Filling passwords...');
     const passInput = window.locator('#auth-password');
     try {
-      await passInput.waitFor({ state: 'visible', timeout: 10000 });
+      // Wait for Step 2 UI to appear
+      await expect(passInput).toBeVisible({ timeout: 15000 });
+      console.log('✅ Transitioned to password step.');
     } catch (e) {
-      console.error('Failed to transition to password step.');
+      console.error('❌ Failed to transition to password step.');
+      
+      // Check for validation errors
       const errorText = await window.locator('[role="alert"]').textContent().catch(() => null);
       if (errorText) {
-        console.error(`Validation Error: ${errorText}`);
+        console.error(`🔴 UI Validation Error: ${errorText}`);
+      } else {
+        console.error('ℹ️ No UI Validation Error found. Form might not have submitted.');
       }
+      
+      // Take a screenshot if possible for debugging (Playwright supports this)
+      await window.screenshot({ path: 'test-results/failed-transition.png' }).catch(() => null);
       throw e;
     }
     await passInput.fill(password);
