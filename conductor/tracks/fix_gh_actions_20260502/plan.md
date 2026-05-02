@@ -1,10 +1,10 @@
 # Implementation Plan: Fix GitHub Actions CI/CD Issues
 
-## Phase 1: Fix Windows Smoke Test
+## Phase 1: Fix Windows Smoke Test [checkpoint: 2197497]
 - [x] Task: Update Windows Workflow [b29ff48]
     - [ ] Edit `.github/workflows/build-windows.yml` to uncomment the `npm run test:smoke` step.
     - [ ] Add a preceding step to install Playwright browsers (`npx playwright install chromium`) to ensure the runner has the necessary environment.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Fix Windows Smoke Test' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Fix Windows Smoke Test' (Protocol in workflow.md) [2197497]
 
 ## Phase 2: Unify Release Process
 - [ ] Task: Remove OS-specific Publishing
