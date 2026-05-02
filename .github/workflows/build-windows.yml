@@ -37,8 +37,13 @@ jobs:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
         run: npm run build
 
-#      - name: Run Smoke Test (Windows)
-#        run: npm run test:smoke
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Smoke Test (Windows)
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+        run: npm run test:smoke
 
       - name: Build Windows package (no publish)
         if: startsWith(github.ref, 'refs/heads/')
