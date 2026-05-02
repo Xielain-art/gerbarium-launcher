@@ -10,8 +10,26 @@ on:
   workflow_dispatch:
 
 jobs:
+  debug-context:
+    name: Debug GitHub Context
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print trigger context
+        shell: bash
+        run: |
+          echo "event_name=${{ github.event_name }}"
+          echo "ref=${{ github.ref }}"
+          echo "ref_type=${{ github.ref_type }}"
+          echo "ref_name=${{ github.ref_name }}"
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            echo "is_version_tag=true"
+          else
+            echo "is_version_tag=false"
+          fi
+
   ci:
     name: CI (${{ matrix.os }})
+    needs: debug-context
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
