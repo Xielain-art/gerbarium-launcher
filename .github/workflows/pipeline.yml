@@ -106,4 +106,4 @@ jobs:
             artifacts/*.AppImage
             artifacts/*.dmg
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ variables.GH_TOKEN }}
