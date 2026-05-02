@@ -1,8 +1,8 @@
 # Implementation Plan: Интеграция PR refactor-auth-handler
 
 ## Phase 1: Preparation and Code Review
-- [ ] Task: Fetch changes from `refactor-auth-handler` branch and analyze the diff
-- [ ] Task: Conductor - User Manual Verification 'Preparation and Code Review' (Protocol in workflow.md)
+- [x] Task: Fetch changes from `refactor-auth-handler` branch and analyze the diff
+- [~] Task: Conductor - User Manual Verification 'Preparation and Code Review' (Protocol in workflow.md)
 
 ## Phase 2: Adaptation and Integration
 - [ ] Task: Apply refactored code from the PR to the main branch
