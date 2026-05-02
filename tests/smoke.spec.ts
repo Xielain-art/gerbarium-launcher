@@ -55,16 +55,32 @@ test.describe('Smoke Test - Full Auth Flow', () => {
     await window.waitForTimeout(1000);
 
     console.log('📝 Switching to Register Mode...');
-    await window.locator('.auth-switch__button').nth(1).click();
+    const registerModeButton = window.locator('.auth-switch__button').nth(1);
+    await registerModeButton.click();
+    
+    // Verify we are actually in Register mode
+    await expect(window.locator('#register-email')).toBeVisible({ timeout: 10000 });
 
     console.log(`👤 Step 2: Filling registration details (${uniqueUsername})`);
     await window.locator('#register-email').fill(uniqueEmail);
     await window.locator('#auth-username').fill(uniqueUsername);
-    await window.locator('button[type="submit"]').click();
+    
+    // Click "Next" to go to password step
+    const nextButton = window.locator('button[type="submit"]');
+    await nextButton.click();
 
     console.log('🔑 Step 3: Filling passwords...');
     const passInput = window.locator('#auth-password');
-    await passInput.waitFor({ state: 'visible' });
+    try {
+      await passInput.waitFor({ state: 'visible', timeout: 10000 });
+    } catch (e) {
+      console.error('Failed to transition to password step.');
+      const errorText = await window.locator('[role="alert"]').textContent().catch(() => null);
+      if (errorText) {
+        console.error(`Validation Error: ${errorText}`);
+      }
+      throw e;
+    }
     await passInput.fill(password);
     await window.locator('#auth-password-confirm').fill(password);
     
