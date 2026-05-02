@@ -37,7 +37,7 @@ import {
   resolveOnlineSession,
   SECURE_STORAGE_FILE_NAME,
   writeStoredSession,
-} from "./authHandler";
+} from "./auth/utils";
 import {
   type ApiRequestResult,
   type HandlerResult,

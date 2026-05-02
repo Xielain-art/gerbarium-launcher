@@ -10,106 +10,10 @@ import { useAuthStore } from "../stores/useAuthStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
 import { useTranslation } from "./useTranslation";
 import { ROUTES } from "../../../shared/constants/system";
-import {
-  emailCodeSchema,
-  emailSchema,
-  loginIdentifierSchema,
-  passwordSchema,
-  PASSWORD_MAX_LENGTH,
-  usernameSchema,
-  EMAIL_MAX_LENGTH,
-} from "../lib/validation/authValidation";
-import type { TranslationType } from "../../../shared/constants/translations";
-import { z } from "zod";
-
-// --- Utilities ---
-
-function localizeAuthError(
-  error: string | null,
-  t: TranslationType,
-): string | null {
-  if (!error) {
-    return null;
-  }
-
-  const byCode: Record<string, string> = {
-    ERR_AUTH_INVALID_CREDENTIALS: t.STORE_ERRORS.AUTH_INVALID_CREDENTIALS,
-    ERR_AUTH_ALREADY_EXISTS: t.STORE_ERRORS.AUTH_ALREADY_EXISTS,
-    ERR_AUTH_RATE_LIMIT: t.STORE_ERRORS.AUTH_RATE_LIMIT,
-    ERR_AUTH_VALIDATION_FAILED: t.STORE_ERRORS.AUTH_VALIDATION_FAILED,
-    ERR_AUTH_API_REQUEST_FAILED: t.STORE_ERRORS.AUTH_SERVICE_UNAVAILABLE,
-    ERR_AUTH_LOGIN_FAILED: t.STORE_ERRORS.AUTH_LOGIN,
-    ERR_AUTH_REGISTER_FAILED: t.STORE_ERRORS.AUTH_REGISTER,
-    ERR_AUTH_EMAIL_CODE_INVALID: t.STORE_ERRORS.AUTH_EMAIL_CODE_INVALID,
-    ERR_AUTH_EMAIL_ALREADY_VERIFIED: t.STORE_ERRORS.AUTH_EMAIL_ALREADY_VERIFIED,
-    ERR_AUTH_VERIFY_EMAIL_FAILED: t.STORE_ERRORS.AUTH_VERIFY_EMAIL,
-    ERR_AUTH_RESEND_EMAIL_FAILED: t.STORE_ERRORS.AUTH_RESEND_EMAIL,
-    ERR_AUTH_EMAIL_STATUS_FAILED: t.STORE_ERRORS.AUTH_EMAIL_STATUS,
-    ERR_AUTH_UNAUTHORIZED: t.STORE_ERRORS.AUTH_UNAUTHORIZED,
-  };
-
-  return byCode[error] || error;
-}
-
-function clearAuthDrafts(
-  setters: Array<(value: string) => void>,
-  setOfflineMode: (value: boolean) => void,
-): void {
-  for (const setter of setters) {
-    setter("");
-  }
-  setOfflineMode(false);
-}
-
-// --- Hook Result Interface ---
-
-interface FieldValidation {
-  isValid: boolean;
-  error: string | null;
-  touched: boolean;
-}
-
-export interface LoginScreenResult {
-  t: TranslationType;
-  language: string;
-  isLoading: boolean;
-  showSessionSpinner: boolean;
-  mode: "login" | "register";
-  registerStep: 1 | 2;
-  localUsername: string;
-  localEmail: string;
-  localPassword: string;
-  localPasswordConfirm: string;
-  verificationCode: string;
-  offlineMode: boolean;
-  verificationRequired: boolean;
-  verificationEmail: string;
-  resendCountdown: number;
-  developmentCode: string | undefined;
-  emailWasSent: boolean;
-  localizedError: string | null;
-  onLanguageChange: (nextLanguage: string) => void;
-  onRegisterStepBack: () => void;
-  onUsernameChange: (value: string) => void;
-  onEmailChange: (value: string) => void;
-  onPasswordChange: (value: string) => void;
-  onConfirmPasswordChange: (value: string) => void;
-  onVerificationCodeChange: (value: string) => void;
-  onToggleOfflineMode: (enabled: boolean) => void;
-  onSwitchMode: (nextMode: "login" | "register") => void;
-  onUseAnotherAccount: () => Promise<void>;
-  onResendCode: () => Promise<void>;
-  onSubmit: (e: FormEvent) => Promise<void>;
-  onBlur: (field: keyof typeof touchedFields) => void;
-  // Field-specific validation
-  validations: {
-    username: FieldValidation;
-    email: FieldValidation;
-    password: FieldValidation;
-    passwordConfirm: FieldValidation;
-    verificationCode: FieldValidation;
-  };
-}
+import type { LoginScreenResult } from "./login/types";
+import { localizeAuthError, clearAuthDrafts } from "./login/utils";
+import { loginIdentifierSchema } from "../lib/validation/authValidation";
+import { useLoginValidation } from "./login/useLoginValidation";
 
 // --- Main Hook ---
 
@@ -165,42 +69,7 @@ export function useLoginScreen(): LoginScreenResult {
 
   // --- Real-time Validation ---
 
-  const validations = useMemo(() => {
-    const check = (
-      schema: z.ZodTypeAny,
-      value: string,
-      field: keyof typeof touchedFields,
-      errorMsg: string,
-    ) => {
-      try {
-        schema.parse(value);
-        return { isValid: true, error: null, touched: touchedFields[field] };
-      } catch {
-        return {
-          isValid: false,
-          error: touchedFields[field] ? errorMsg : null,
-          touched: touchedFields[field],
-        };
-      }
-    };
-
-    return {
-      username: check(
-        mode === "login" && !localUsername.includes("@") ? loginIdentifierSchema : usernameSchema,
-        localUsername,
-        "username",
-        mode === "login" ? t.STORE_ERRORS.AUTH_LOGIN_INVALID : t.STORE_ERRORS.AUTH_USERNAME_INVALID
-      ),
-      email: check(emailSchema, localEmail, "email", t.STORE_ERRORS.AUTH_EMAIL_INVALID),
-      password: check(passwordSchema, localPassword, "password", t.STORE_ERRORS.AUTH_PASSWORD_INVALID),
-      passwordConfirm: {
-        isValid: localPassword === localPasswordConfirm,
-        error: touchedFields.passwordConfirm && localPassword !== localPasswordConfirm ? t.STORE_ERRORS.AUTH_PASSWORDS_MISMATCH : null,
-        touched: touchedFields.passwordConfirm
-      },
-      verificationCode: check(emailCodeSchema, verificationCode, "verificationCode", t.STORE_ERRORS.AUTH_EMAIL_CODE_INVALID),
-    };
-  }, [localUsername, localEmail, localPassword, localPasswordConfirm, verificationCode, touchedFields, t, mode]);
+  const validations = useLoginValidation(t, mode, offlineMode, localUsername, localEmail, localPassword, localPasswordConfirm, verificationCode, touchedFields);
 
   // --- Effects ---
 
