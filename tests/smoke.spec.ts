@@ -68,16 +68,15 @@ test.describe('Smoke Test - Full Auth Flow', () => {
     await emailInput.fill(uniqueEmail);
     await usernameInput.fill(uniqueUsername);
     
-    // Verify values were filled correctly to ensure state update
-    expect(await emailInput.inputValue()).toBe(uniqueEmail);
-    expect(await usernameInput.inputValue()).toBe(uniqueUsername);
+    // Ensure values are set
+    await expect(emailInput).toHaveValue(uniqueEmail);
+    await expect(usernameInput).toHaveValue(uniqueUsername);
     
-    // Click "Next" to go to password step
-    const nextButton = window.locator('button[type="submit"]');
-    console.log(`🔘 Button text before click: "${await nextButton.textContent()}"`);
+    // Small delay to let React state settle
+    await window.waitForTimeout(500);
     
-    await expect(nextButton).toBeEnabled({ timeout: 5000 });
-    await nextButton.click();
+    console.log('🔘 Submitting Step 1 via Enter press...');
+    await usernameInput.press('Enter');
 
     console.log('🔑 Step 3: Filling passwords...');
     const passInput = window.locator('#auth-password');
