@@ -1,13 +1,13 @@
 # Implementation Plan: Fix Smoke Test Registration Flow
 
 ## Phase 1: Investigate and Fix Test Flow
-- [ ] Task: Analyze Registration Flow Changes
-    - [ ] Review recent changes to `src/main/handlers/authHandler.ts` or related auth handlers to understand expected UI flow.
-    - [ ] Run the application locally and perform the registration flow manually to observe the UI steps and timings.
-- [ ] Task: Update Smoke Test Logic
-    - [ ] Modify `tests/smoke.spec.ts` around line 67 to correctly wait for the transition to the password input screen.
-    - [ ] Add appropriate assertions or wait conditions (e.g., waiting for specific network requests or DOM elements) before trying to fill the `#auth-password` field.
-- [ ] Task: Verify Smoke Test Fix
+- [x] Task: Analyze Registration Flow Changes [d7ad2fc]
+    - [x] Review recent changes to `src/main/handlers/authHandler.ts` or related auth handlers to understand expected UI flow.
+    - [x] Run the application locally and perform the registration flow manually to observe the UI steps and timings.
+- [x] Task: Update Smoke Test Logic [9c180a7]
+    - [x] Modify `tests/smoke.spec.ts` around line 67 to correctly wait for the transition to the password input screen.
+    - [x] Add appropriate assertions or wait conditions (e.g., waiting for specific network requests or DOM elements) before trying to fill the `#auth-password` field.
+- [~] Task: Verify Smoke Test Fix
     - [ ] Run `npm run test:smoke` to confirm the test executes successfully from start to finish without hanging.
     - [ ] Ensure cleanup steps at the end of the test execute correctly.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Investigate and Fix Test Flow' (Protocol in workflow.md)
