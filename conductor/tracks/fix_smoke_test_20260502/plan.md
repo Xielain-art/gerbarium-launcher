@@ -7,7 +7,7 @@
 - [x] Task: Update Smoke Test Logic [9c180a7]
     - [x] Modify `tests/smoke.spec.ts` around line 67 to correctly wait for the transition to the password input screen.
     - [x] Add appropriate assertions or wait conditions (e.g., waiting for specific network requests or DOM elements) before trying to fill the `#auth-password` field.
-- [~] Task: Verify Smoke Test Fix
-    - [ ] Run `npm run test:smoke` to confirm the test executes successfully from start to finish without hanging.
-    - [ ] Ensure cleanup steps at the end of the test execute correctly.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Investigate and Fix Test Flow' (Protocol in workflow.md)
+- [x] Task: Verify Smoke Test Fix [7d7fb10]
+    - [x] Run `npm run test:smoke` to confirm the test executes successfully from start to finish without hanging.
+    - [x] Ensure cleanup steps at the end of the test execute correctly.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Investigate and Fix Test Flow' (Protocol in workflow.md) [7d7fb10]

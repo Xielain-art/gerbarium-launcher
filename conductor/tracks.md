@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Fix smoke test failing during registration flow**
+- [x] **Track: Fix smoke test failing during registration flow**
 *Link: [./tracks/fix_smoke_test_20260502/](./tracks/fix_smoke_test_20260502/)*
