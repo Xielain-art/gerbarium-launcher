@@ -1,8 +1,0 @@
-{
-  "track_id": "fix_gh_actions_20260502",
-  "type": "chore",
-  "status": "new",
-  "created_at": "2026-05-02T18:00:00Z",
-  "updated_at": "2026-05-02T18:00:00Z",
-  "description": "Fix GitHub Actions CI/CD Issues"
-}
