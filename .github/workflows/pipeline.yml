@@ -119,6 +119,9 @@ jobs:
             release/*.exe
             release/*.AppImage
             release/*.dmg
+            release/*.yml
+            release/*.yaml
+            release/*.blockmap
           if-no-files-found: error
 
   release:
@@ -147,3 +150,6 @@ jobs:
             artifacts/*.exe
             artifacts/*.AppImage
             artifacts/*.dmg
+            artifacts/*.yml
+            artifacts/*.yaml
+            artifacts/*.blockmap
