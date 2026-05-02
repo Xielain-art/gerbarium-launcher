@@ -32,7 +32,7 @@ describe("Authentication Flow", () => {
       userId = result.data.user.id;
       verificationCode = result.data.emailVerificationCode;
     }
-  }, 30000);
+  });
 
   test("should verify email with provided test code", async () => {
     expect(accessToken).toBeDefined();
@@ -43,7 +43,7 @@ describe("Authentication Flow", () => {
     });
 
     expect(verifyResult.success).toBe(true);
-  }, 30000);
+  });
 
   test("should login with registered credentials", async () => {
     const result = await loginRequest({
@@ -56,7 +56,7 @@ describe("Authentication Flow", () => {
       expect(result.data.accessToken).toBeDefined();
       accessToken = result.data.accessToken;
     }
-  }, 30000);
+  });
 
   test("should fetch user profile with valid token", async () => {
     expect(accessToken).toBeDefined();
@@ -68,7 +68,7 @@ describe("Authentication Flow", () => {
       expect(result.data.username).toBe(testUser.username);
       expect(result.data.id).toBe(userId);
     }
-  }, 30000);
+  });
 
   test("should fail login with wrong password", async () => {
     const result = await loginRequest({
@@ -77,7 +77,7 @@ describe("Authentication Flow", () => {
     });
 
     expect(result.success).toBe(false);
-  }, 30000);
+  });
 
   afterAll(async () => {
     if (accessToken && userId) {

@@ -3,7 +3,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type RefObject,
 } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "../stores/useAuthStore";
@@ -11,8 +10,8 @@ import { useDownloadStore } from "../stores/useDownloadStore";
 import { useSettingsStore } from "../stores/useSettingsStore";
 import { useTranslation } from "./useTranslation";
 import { ROUTES, LOG_ACTIONS } from "../../../shared/constants/system";
-import type { LauncherSettings } from "../../../shared/constants/ipc-chanels";
-import type { ChangelogItem, GameVersion, NewsItem, AuthUser, ServerStatusData, DownloadProgress } from "../types";
+
+import type { ChangelogItem, GameVersion, NewsItem } from "../types";
 import {
   toQueryErrorMessage,
   usePublicChangelogQuery,
@@ -24,133 +23,12 @@ import {
   useInstalledVersionsQuery,
 } from "./queries/useSystemQueries";
 import { UI_STRINGS } from "../../../shared/constants/ui-strings";
-import type { TranslationType } from "../../../shared/constants/translations";
 
-// --- Constants ---
-
-const INITIAL_VERSIONS: GameVersion[] = [
-  {
-    id: "gerbarium-1.2",
-    name: "Gerbarium v1.2",
-    type: "gerbarium",
-    isInstalled: false,
-    version: "1.20.4",
-  },
-  {
-    id: "fabric-1.21",
-    name: "Fabric 1.21",
-    type: "fabric",
-    isInstalled: false,
-    version: "1.21",
-  },
-  {
-    id: "forge-1.20.1",
-    name: "Forge 1.20.1",
-    type: "forge",
-    isInstalled: false,
-    version: "1.20.1",
-  },
-  {
-    id: "vanilla-1.21.4",
-    name: "Vanilla 1.21.4",
-    type: "vanilla",
-    isInstalled: true,
-    version: "1.21.4",
-  },
-];
-
-const CHANGELOG_PAGE_SIZE = 8;
-
-// --- Utilities ---
-
-function parseJvmArgs(jvmArgsText: string): string[] {
-  return jvmArgsText
-    .split(/\s+/)
-    .map((arg) => arg.trim())
-    .filter(Boolean);
-}
-
-function toErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return "Unknown error";
-}
-
-function logAction(action: string, details?: string): void {
-  void window.electronAPI?.system.logAction(action, details);
-}
-
-function toLauncherSettingsPatch(settings: {
-  minimizeToTray: boolean;
-  gamePath?: string;
-  discordRPC: boolean;
-}): Partial<LauncherSettings> {
-  return {
-    minimizeToTray: settings.minimizeToTray,
-    gamePath: settings.gamePath,
-    discordRPC: settings.discordRPC,
-  };
-}
-
-// --- Hook Result Interface ---
-
-export interface DashboardScreenResult {
-  t: TranslationType;
-  user: AuthUser | null;
-  serverStatus: ServerStatusData | null;
-  versions: GameVersion[];
-  selectedVersionId: string | null;
-  setSelectedVersionId: (id: string | null) => void;
-  selectedVersion: GameVersion | undefined;
-  appVersion: string;
-  news: NewsItem[];
-  newsOrder: "newest" | "oldest";
-  setNewsOrder: (order: "newest" | "oldest") => void;
-  newsTagFilter: string;
-  setNewsTagFilter: (tag: string) => void;
-  newsTags: Array<{ id: string; name: string }>;
-  changelog: ChangelogItem[];
-  contentTab: "news" | "changelog";
-  setContentTab: (tab: "news" | "changelog") => void;
-  isLoadingNews: boolean;
-  isLoadingChangelog: boolean;
-  isLoadingMoreChangelog: boolean;
-  hasMoreChangelog: boolean;
-  isChangelogInitialLoaded: boolean;
-  isLoadingMoreNews: boolean;
-  hasMoreNews: boolean;
-  isNewsInitialLoaded: boolean;
-  onLoadMoreNews: () => Promise<void>;
-  newsError: string | null;
-  changelogError: string | null;
-  onLoadMoreChangelog: () => Promise<void>;
-  isDownloading: boolean;
-  progress: DownloadProgress | null;
-  isLaunching: boolean;
-  launchProgress: number | null;
-  launchStatus: string;
-  launchError: string | null;
-  isConsoleVisible: boolean;
-  logs: string[];
-  logsEndRef: RefObject<HTMLDivElement | null>;
-  playBlockReason: string | null;
-  hasAdminAccess: boolean;
-  onPlay: () => Promise<void>;
-  onCancelDownload: () => void;
-  onToggleConsole: () => void;
-  onOpenSettings: () => void;
-  onOpenAdminPanel: () => void;
-  onLogout: () => Promise<void>;
-  selectedNews: NewsItem | null;
-  onSelectNews: (news: NewsItem | null) => void;
-  onCloseNews: () => void;
-  selectedChangelog: ChangelogItem | null;
-  onSelectChangelog: (changelog: ChangelogItem | null) => void;
-  onCloseChangelog: () => void;
-}
 
 // --- Main Hook ---
+
+import type { DashboardScreenResult } from "./dashboard/types";
+import { parseJvmArgs, toErrorMessage, logAction, toLauncherSettingsPatch, INITIAL_VERSIONS, CHANGELOG_PAGE_SIZE } from "./dashboard/utils";
 
 export function useDashboardScreen(): DashboardScreenResult {
   const t = useTranslation();
