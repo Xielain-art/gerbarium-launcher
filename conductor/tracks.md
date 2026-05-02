@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Интеграция PR refactor-auth-handler**
+- [x] **Track: Интеграция PR refactor-auth-handler**
   *Link: [./tracks/refactor_auth_handler_20260502/](./tracks/refactor_auth_handler_20260502/)*
