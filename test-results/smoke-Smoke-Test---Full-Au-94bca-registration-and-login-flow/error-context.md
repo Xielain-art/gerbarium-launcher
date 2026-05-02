@@ -12,27 +12,7 @@
 # Error details
 
 ```
-Error: Process failed to launch!
-```
-
-```
-Error: electron.launch: WebSocket error: connect ECONNREFUSED 127.0.0.1:58652
-Call log:
-  - <launching> /mnt/e/gerbarium-launcher/node_modules/electron/dist/electron.exe -r /mnt/e/gerbarium-launcher/node_modules/playwright-core/lib/server/electron/loader.js --inspect=0 --remote-debugging-port=0 . --no-sandbox --user-data-dir=/mnt/e/gerbarium-launcher/test-user-data
-  - <launched> pid=4716
-  - [pid=4716][out]
-  - [pid=4716][err] Debugger listening on ws://127.0.0.1:58652/cd41b124-b0ba-4661-9a76-c5fb435e77c2
-  - [pid=4716][err] For help, see: https://nodejs.org/en/docs/inspector
-  - <ws connecting> ws://127.0.0.1:58652/cd41b124-b0ba-4661-9a76-c5fb435e77c2
-  - <ws error> ws://127.0.0.1:58652/cd41b124-b0ba-4661-9a76-c5fb435e77c2 error connect ECONNREFUSED 127.0.0.1:58652
-  - <ws connect error> ws://127.0.0.1:58652/cd41b124-b0ba-4661-9a76-c5fb435e77c2 connect ECONNREFUSED 127.0.0.1:58652
-  - <ws disconnected> ws://127.0.0.1:58652/cd41b124-b0ba-4661-9a76-c5fb435e77c2 code=1006 reason=
-  - [pid=4716] <kill>
-  - [pid=4716] <will force kill>
-  - [pid=4716] <process did exit: exitCode=null, signal=SIGKILL>
-  - [pid=4716] starting temporary directories cleanup
-  - [pid=4716] finished temporary directories cleanup
-
+TimeoutError: electronApplication.firstWindow: Timeout 30000ms exceeded while waiting for event "window"
 ```
 
 # Test source
@@ -52,8 +32,7 @@ Call log:
   12  |       fs.rmSync(userDataPath, { recursive: true, force: true });
   13  |     }
   14  | 
-> 15  |     app = await electron.launch({
-      |           ^ Error: electron.launch: WebSocket error: connect ECONNREFUSED 127.0.0.1:58652
+  15  |     app = await electron.launch({
   16  |       args: ['.', '--no-sandbox', `--user-data-dir=${userDataPath}`],
   17  |       env: {
   18  |         ...process.env,
@@ -61,7 +40,8 @@ Call log:
   20  |         SMOKE_TEST: 'true',
   21  |       }
   22  |     });
-  23  |     window = await app.firstWindow();
+> 23  |     window = await app.firstWindow();
+      |                        ^ TimeoutError: electronApplication.firstWindow: Timeout 30000ms exceeded while waiting for event "window"
   24  |     await window.waitForLoadState('domcontentloaded');
   25  |   });
   26  | 
@@ -134,24 +114,32 @@ Call log:
   93  | 
   94  |     console.log('📧 Waiting for Verification Screen...');
   95  |     const codeInput = window.locator('#email-code');
-  96  |     await codeInput.waitFor({ state: 'visible', timeout: 30000 });
-  97  | 
-  98  |     console.log('🔍 Waiting for intercepted test code...');
-  99  |     let finalVerificationCode = await codePromise;
-  100 | 
-  101 |     if (!finalVerificationCode) {
-  102 |       console.log('🔄 Fallback: fetching code via evaluate');
-  103 |       finalVerificationCode = await window.evaluate(() => (global as unknown as Record<string, unknown>).lastDevelopmentCode as string || '');
-  104 |     }
-  105 | 
-  106 |     if (!finalVerificationCode) {
-  107 |       throw new Error('Could not intercept verification code from stdout.');
-  108 |     }
-  109 | 
-  110 |     console.log(`✅ Test user registered. Code: ${finalVerificationCode}`);
-  111 |     console.log(`🔘 Entering code: ${finalVerificationCode}`);
-  112 |     await codeInput.fill(finalVerificationCode);
-  113 |     await window.locator('button[type="submit"]').click();
-  114 | 
-  115 |     console.log('🏠 Waiting for Dashboard...');
+  96  |     try {
+  97  |       await codeInput.waitFor({ state: 'visible', timeout: 30000 });
+  98  |     } catch (e) {
+  99  |       console.error('Timeout waiting for email code input.');
+  100 |       const errorText = await window.locator('[role="alert"]').textContent().catch(() => null);
+  101 |       if (errorText) {
+  102 |         console.error(`UI Error Message: ${errorText}`);
+  103 |       } else {
+  104 |         console.error('No UI Error Message found.');
+  105 |       }
+  106 |       throw e;
+  107 |     }
+  108 | 
+  109 |     console.log('🔍 Waiting for intercepted test code...');
+  110 |     let finalVerificationCode = await codePromise;
+  111 | 
+  112 |     if (!finalVerificationCode) {
+  113 |       console.log('🔄 Fallback: fetching code via evaluate');
+  114 |       finalVerificationCode = await window.evaluate(() => (global as unknown as Record<string, unknown>).lastDevelopmentCode as string || '');
+  115 |     }
+  116 | 
+  117 |     if (!finalVerificationCode) {
+  118 |       throw new Error('Could not intercept verification code from stdout.');
+  119 |     }
+  120 | 
+  121 |     console.log(`✅ Test user registered. Code: ${finalVerificationCode}`);
+  122 |     console.log(`🔘 Entering code: ${finalVerificationCode}`);
+  123 |     await codeInput.fill(finalVerificationCode);
 ```
