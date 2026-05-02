@@ -83,15 +83,42 @@ function assertEncryptionAvailable(): void {
 }
 
 function encryptSession(payload: AuthSessionPayload): string {
+  const json = JSON.stringify(payload);
+  if (
+    process.env.SMOKE_TEST === "true" &&
+    !safeStorage.isEncryptionAvailable()
+  ) {
+    log.warn(
+      "[SMOKE_TEST] safeStorage not available, using plain base64 fallback",
+    );
+    return Buffer.from(json).toString("base64");
+  }
+
   assertEncryptionAvailable();
-  const encrypted = safeStorage.encryptString(JSON.stringify(payload));
+  const encrypted = safeStorage.encryptString(json);
   return encrypted.toString("base64");
 }
 
 function decryptSession(encryptedBase64: string): AuthSessionPayload {
+  let decrypted: string;
+  if (
+    process.env.SMOKE_TEST === "true" &&
+    !safeStorage.isEncryptionAvailable()
+  ) {
+    try {
+      decrypted = Buffer.from(encryptedBase64, "base64").toString("utf-8");
+      // Try to parse to see if it's valid JSON (plain base64 fallback)
+      return JSON.parse(decrypted) as AuthSessionPayload;
+    } catch {
+      log.debug(
+        "[SMOKE_TEST] Data is not plain base64 JSON, trying safeStorage",
+      );
+    }
+  }
+
   assertEncryptionAvailable();
   const encrypted = Buffer.from(encryptedBase64, "base64");
-  const decrypted = safeStorage.decryptString(encrypted);
+  decrypted = safeStorage.decryptString(encrypted);
   const parsed = JSON.parse(decrypted) as AuthSessionPayload;
   if (
     !parsed?.mode ||

@@ -49,76 +49,101 @@ export default function secureStorageHandler(app: App): void {
   );
 
   ipcMain.handle(
-    IPC_CHANNELS.SECURE_STORAGE.SET,
-    async (
-      _event,
-      key: string,
-      value: string,
-    ): Promise<{ success: boolean; error?: string }> => {
-      log.info(LOG_MESSAGES.SECURE_STORAGE_SET, key);
-      if (!isAllowedSecureStorageKey(key)) {
-        log.warn(LOG_MESSAGES.SECURE_STORAGE_SET_FAILED, "Blocked key:", key);
-        return { success: false, error: ERROR_CODES.SECURE_STORAGE_SET_FAILED };
-      }
-      try {
-        await secureStorageLock.runExclusive(async () => {
+  IPC_CHANNELS.SECURE_STORAGE.SET,
+  async (
+    _event,
+    key: string,
+    value: string,
+  ): Promise<{ success: boolean; error?: string }> => {
+    log.info(LOG_MESSAGES.SECURE_STORAGE_SET, key);
+    if (!isAllowedSecureStorageKey(key)) {
+      log.warn(LOG_MESSAGES.SECURE_STORAGE_SET_FAILED, "Blocked key:", key);
+      return { success: false, error: ERROR_CODES.SECURE_STORAGE_SET_FAILED };
+    }
+    try {
+      await secureStorageLock.runExclusive(async () => {
+        let encryptedBase64: string;
+        if (
+          process.env.SMOKE_TEST === "true" &&
+          !safeStorage.isEncryptionAvailable()
+        ) {
+          log.warn(
+            "[SMOKE_TEST] Encryption not available for set, using plain base64",
+          );
+          encryptedBase64 = Buffer.from(value).toString("base64");
+        } else {
           const encrypted = safeStorage.encryptString(value);
-          const encryptedBase64 = encrypted.toString("base64");
-          const secureData = await readSecureData(secureDataPath);
-          secureData[key] = encryptedBase64;
-          await writeSecureData(secureDataPath, secureData);
-        });
-        log.info(LOG_MESSAGES.SECURE_STORAGE_SET_OK, key);
-        return { success: true };
-      } catch (error) {
-        log.error(LOG_MESSAGES.SECURE_STORAGE_SET_FAILED, key, error);
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : ERROR_CODES.SECURE_STORAGE_SET_FAILED,
-        };
-      }
-    },
+          encryptedBase64 = encrypted.toString("base64");
+        }
+        const secureData = await readSecureData(secureDataPath);
+        secureData[key] = encryptedBase64;
+        await writeSecureData(secureDataPath, secureData);
+      });
+      log.info(LOG_MESSAGES.SECURE_STORAGE_SET_OK, key);
+      return { success: true };
+    } catch (error) {
+      log.error(LOG_MESSAGES.SECURE_STORAGE_SET_FAILED, key, error);
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : ERROR_CODES.SECURE_STORAGE_SET_FAILED,
+      };
+    }
+  },
   );
 
   ipcMain.handle(
-    IPC_CHANNELS.SECURE_STORAGE.GET,
-    async (
-      _event,
-      key: string,
-    ): Promise<{ success: boolean; value?: string | null; error?: string }> => {
-      log.debug(LOG_MESSAGES.SECURE_STORAGE_GET, key);
-      if (!isAllowedSecureStorageKey(key)) {
-        log.warn(LOG_MESSAGES.SECURE_STORAGE_GET_FAILED, "Blocked key:", key);
-        return { success: false, error: ERROR_CODES.SECURE_STORAGE_GET_FAILED };
-      }
-      try {
-        return await secureStorageLock.runExclusive(async () => {
-          const secureData = await readSecureData(secureDataPath);
-          const encryptedBase64 = secureData[key];
-          if (!encryptedBase64) {
-            return { success: true, value: null };
+  IPC_CHANNELS.SECURE_STORAGE.GET,
+  async (
+    _event,
+    key: string,
+  ): Promise<{ success: boolean; value?: string | null; error?: string }> => {
+    log.debug(LOG_MESSAGES.SECURE_STORAGE_GET, key);
+    if (!isAllowedSecureStorageKey(key)) {
+      log.warn(LOG_MESSAGES.SECURE_STORAGE_GET_FAILED, "Blocked key:", key);
+      return { success: false, error: ERROR_CODES.SECURE_STORAGE_GET_FAILED };
+    }
+    try {
+      return await secureStorageLock.runExclusive(async () => {
+        const secureData = await readSecureData(secureDataPath);
+        const encryptedBase64 = secureData[key];
+        if (!encryptedBase64) {
+          return { success: true, value: null };
+        }
+
+        if (
+          process.env.SMOKE_TEST === "true" &&
+          !safeStorage.isEncryptionAvailable()
+        ) {
+          try {
+            const decrypted =
+              Buffer.from(encryptedBase64, "base64").toString("utf-8");
+            return { success: true, value: decrypted };
+          } catch {
+            log.debug(
+              "[SMOKE_TEST] GET: data is not plain base64, trying safeStorage",
+            );
           }
+        }
 
-          const encrypted = Buffer.from(encryptedBase64, "base64");
-          const decrypted = safeStorage.decryptString(encrypted);
-          return { success: true, value: decrypted };
-        });
-      } catch (error) {
-        log.error(LOG_MESSAGES.SECURE_STORAGE_GET_FAILED, key, error);
-        return {
-          success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : ERROR_CODES.SECURE_STORAGE_GET_FAILED,
-        };
-      }
-    },
+        const encrypted = Buffer.from(encryptedBase64, "base64");
+        const decrypted = safeStorage.decryptString(encrypted);
+        return { success: true, value: decrypted };
+      });
+    } catch (error) {
+      log.error(LOG_MESSAGES.SECURE_STORAGE_GET_FAILED, key, error);
+      return {
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : ERROR_CODES.SECURE_STORAGE_GET_FAILED,
+      };
+    }
+  },
   );
-
   ipcMain.handle(
     IPC_CHANNELS.SECURE_STORAGE.DELETE,
     async (
