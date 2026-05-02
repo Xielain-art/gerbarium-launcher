@@ -10,7 +10,7 @@
 - [ ] Task: Conductor - User Manual Verification 'Investigation and Reproduction' (Protocol in workflow.md)
 
 ## Phase 2: Implementation and Fix
-- [x] Task: Fix - Implement safeStorage fallback for SMOKE_TEST mode [0236152]
+- [x] Task: Fix - Implement safeStorage fallback for SMOKE_TEST mode [e52609f]
     - [x] Add fallback to plain base64 in `src/main/handlers/authHandler.ts` if encryption is unavailable during SMOKE_TEST
     - [x] Add similar fallback in `src/main/handlers/secureStorageHandler.ts`
 - [ ] Task: Verification - Confirm smoke test passes with fallback
