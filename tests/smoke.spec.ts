@@ -11,7 +11,6 @@ test.describe('Smoke Test - Full Auth Flow', () => {
     if (fs.existsSync(userDataPath)) {
       fs.rmSync(userDataPath, { recursive: true, force: true });
     }
-
     app = await electron.launch({
       args: ['.', '--no-sandbox', `--user-data-dir=${userDataPath}`],
       env: {
@@ -20,6 +19,7 @@ test.describe('Smoke Test - Full Auth Flow', () => {
         SMOKE_TEST: 'true',
       }
     });
+
     window = await app.firstWindow();
     await window.waitForLoadState('domcontentloaded');
   });
