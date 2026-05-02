@@ -100,9 +100,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           draft: true
+          repository: Xielain-art/gerbarium-releases
           files: |
             artifacts/*.exe
             artifacts/*.AppImage
             artifacts/*.dmg
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
