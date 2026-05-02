@@ -75,30 +75,13 @@ test.describe('Smoke Test - Full Auth Flow', () => {
     // Small delay to let React state settle
     await window.waitForTimeout(500);
     
-    console.log('🔘 Submitting Step 1 via Enter press...');
+    console.log('🔘 Submitting Step 1...');
     await usernameInput.press('Enter');
 
     console.log('🔑 Step 3: Filling passwords...');
     const passInput = window.locator('#auth-password');
-    try {
-      // Wait for Step 2 UI to appear
-      await expect(passInput).toBeVisible({ timeout: 15000 });
-      console.log('✅ Transitioned to password step.');
-    } catch (e) {
-      console.error('❌ Failed to transition to password step.');
-      
-      // Check for validation errors
-      const errorText = await window.locator('[role="alert"]').textContent().catch(() => null);
-      if (errorText) {
-        console.error(`🔴 UI Validation Error: ${errorText}`);
-      } else {
-        console.error('ℹ️ No UI Validation Error found. Form might not have submitted.');
-      }
-      
-      // Take a screenshot if possible for debugging (Playwright supports this)
-      await window.screenshot({ path: 'test-results/failed-transition.png' }).catch(() => null);
-      throw e;
-    }
+    await expect(passInput).toBeVisible({ timeout: 15000 });
+    
     await passInput.fill(password);
     await window.locator('#auth-password-confirm').fill(password);
     
