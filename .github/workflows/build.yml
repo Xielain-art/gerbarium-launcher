@@ -43,21 +43,14 @@ jobs:
         run: xvfb-run npm run test:smoke
 
       - name: Build Linux package (no publish)
-        if: startsWith(github.ref, 'refs/heads/')
+        if: startsWith(github.ref, 'refs/heads/') || startsWith(github.ref, 'refs/tags/')
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
           DISCORD_RPC_CLIENT_ID: ${{ vars.DISCORD_RPC_CLIENT_ID }}
         run: npm run dist:linux
 
-      - name: Build and Publish Linux package (with publish)
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          API_BASE_URL: ${{ vars.API_BASE_URL }}
-          DISCORD_RPC_CLIENT_ID: ${{ vars.DISCORD_RPC_CLIENT_ID }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: npm run publish-app
-
       - name: Upload Linux artifacts
+
         uses: actions/upload-artifact@v4
         with:
           name: gerbarium-linux

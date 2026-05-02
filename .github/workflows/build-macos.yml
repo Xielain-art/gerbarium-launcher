@@ -41,21 +41,14 @@ jobs:
 #        run: npm run test:smoke
 
       - name: Build macOS package (no publish)
-        if: startsWith(github.ref, 'refs/heads/')
+        if: startsWith(github.ref, 'refs/heads/') || startsWith(github.ref, 'refs/tags/')
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
           DISCORD_RPC_CLIENT_ID: ${{ vars.DISCORD_RPC_CLIENT_ID }}
         run: npm run dist:mac
 
-      - name: Build and Publish macOS package (with publish)
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          API_BASE_URL: ${{ vars.API_BASE_URL }}
-          DISCORD_RPC_CLIENT_ID: ${{ vars.DISCORD_RPC_CLIENT_ID }}
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: npm run publish-app
-
       - name: Upload macOS artifacts
+
         uses: actions/upload-artifact@v4
         with:
           name: gerbarium-macos
