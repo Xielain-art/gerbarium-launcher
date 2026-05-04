@@ -32,8 +32,8 @@ export function DashboardSidebar({
   const { isAdmin } = useRouteContext({ from: "/dashboard" });
 
   return (
-    <aside className="relative z-40 flex h-full w-80 flex-col border-r-[4px] border-theme bg-[color-mix(in_srgb,var(--theme-sidebar)_95%,transparent)] shadow-2xl backdrop-blur-md">
-      <div className="border-b-[3px] border-theme bg-[color-mix(in_srgb,var(--theme-surface)_50%,transparent)] p-5">
+    <aside className="relative z-40 flex h-full w-72 flex-col border-r border-[#2e2e2e] bg-[#171717]">
+      <div className="p-4 pt-6">
         <SidebarProfileCard
           t={t}
           user={user}
@@ -43,6 +43,9 @@ export function DashboardSidebar({
       </div>
 
       <SidebarServerStatus t={t} serverStatus={serverStatus} />
+      
+      <div className="my-4 h-[1px] w-full bg-[#2e2e2e]" />
+
       <SidebarVersionsList
         t={t}
         versions={versions}
@@ -50,18 +53,18 @@ export function DashboardSidebar({
         onSelectVersion={onSelectVersion}
       />
 
-      <div className="border-t-[3px] border-theme bg-[color-mix(in_srgb,var(--theme-surface)_95%,transparent)] p-4">
-        {isAdmin && onOpenAdminPanel && (
+      {(isAdmin && onOpenAdminPanel) && (
+        <div className="mt-auto border-t border-[#2e2e2e] p-4">
           <Button
             onClick={onOpenAdminPanel}
-            className="w-full justify-start"
-            variant="minecraft"
+            className="w-full justify-center gap-2 rounded-md bg-[#3ecf8e] font-mono text-[10px] font-bold uppercase tracking-wider text-[#0f0f0f] hover:bg-[#3ecf8e]/90"
+            variant="default"
             size="md"
           >
             {t.DASHBOARD.ADMIN_PANEL}
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </aside>
   );
 }

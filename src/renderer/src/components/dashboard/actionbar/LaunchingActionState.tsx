@@ -47,39 +47,34 @@ export function LaunchingActionState({
   return (
     <div className="flex items-center justify-between gap-6">
       <div className="flex min-w-0 flex-1 items-center gap-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--mc-progress-fill-a)] border-t-transparent" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#3ecf8e] border-t-transparent" />
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex items-center justify-between">
-            <div className="flex items-center gap-2 font-minecraft text-sm text-[var(--mc-progress-fill-a)]">
+            <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-widest text-[#3ecf8e]">
               <span className="capitalize">{launchStatus || launchPhase}</span>
               {launchPercent === null && <span className="animate-pulse">...</span>}
             </div>
             {launchPercent !== null && (
-              <div className="font-minecraft text-xs text-[var(--mc-progress-fill-a)]">
+              <div className="font-mono text-[11px] font-bold text-[#fafafa]">
                 {launchPercent}%
               </div>
             )}
           </div>
-          <div className="truncate font-minecraft text-base font-bold text-theme">
+          <div className="truncate font-sans text-sm font-medium text-[#fafafa]">
             {selectedVersion?.name || "Minecraft"}
-          </div>
-          <div className="mt-1 font-minecraft text-xs text-theme-muted">
-            {launchPhase}
           </div>
           <ProgressBar
             progress={launchPercent !== null ? launchPercent : 0}
-            status={launchStatus || launchPhase}
-            className="mt-3"
+            className="mt-2 h-1.5"
           />
         </div>
       </div>
       <Button
         onClick={onToggleConsole}
         variant="secondary"
-        size="lg"
-        className="min-w-[170px] shrink-0"
+        size="md"
+        className="min-w-[140px] shrink-0 rounded-md border border-[#2e2e2e] bg-[#242424] font-sans text-xs font-medium text-[#fafafa] hover:border-[#363636] hover:bg-[#2e2e2e]"
       >
-        <span className="mr-2">{t.DASHBOARD.CANCEL_ICON}</span>
         {isConsoleVisible ? t.DASHBOARD.HIDE_CONSOLE : t.DASHBOARD.SHOW_CONSOLE}
       </Button>
     </div>

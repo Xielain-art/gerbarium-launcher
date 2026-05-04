@@ -1194,14 +1194,17 @@ body, button {
     overflow-y: auto;
 }
 .settingsTab::-webkit-scrollbar {
-    width: 2px;
+    width: 6px;
 }
 .settingsTab::-webkit-scrollbar-track {
-    display: none;
+    background: transparent;
 }
 .settingsTab::-webkit-scrollbar-thumb {
     border-radius: 10px;
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.50);
+    background: rgba(255, 255, 255, 0.2);
+}
+.settingsTab::-webkit-scrollbar-thumb:hover {
+    background: #3ecf8e;
 }
 
 /* Add spacing to the top of each settings tab. */
@@ -1933,15 +1936,30 @@ input:checked + .toggleSwitchSlider:before {
 .settingsSelectOptions[hidden] {
     display: none;
 }
-.settingsSelectOptions::-webkit-scrollbar {
-    width: 2px;
+.settingsSelectOptions::-webkit-scrollbar,
+#newsArticleContentScrollable::-webkit-scrollbar,
+#serverSelectListScrollable::-webkit-scrollbar,
+#accountSelectListScrollable::-webkit-scrollbar {
+    width: 6px;
 }
-.settingsSelectOptions::-webkit-scrollbar-track {
-    display: none;
+.settingsSelectOptions::-webkit-scrollbar-track,
+#newsArticleContentScrollable::-webkit-scrollbar-track,
+#serverSelectListScrollable::-webkit-scrollbar-track,
+#accountSelectListScrollable::-webkit-scrollbar-track {
+    background: transparent;
 }
-.settingsSelectOptions::-webkit-scrollbar-thumb {
+.settingsSelectOptions::-webkit-scrollbar-thumb,
+#newsArticleContentScrollable::-webkit-scrollbar-thumb,
+#serverSelectListScrollable::-webkit-scrollbar-thumb,
+#accountSelectListScrollable::-webkit-scrollbar-thumb {
     border-radius: 10px;
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.50);
+    background: rgba(255, 255, 255, 0.2);
+}
+.settingsSelectOptions::-webkit-scrollbar-thumb:hover,
+#newsArticleContentScrollable::-webkit-scrollbar-thumb:hover,
+#serverSelectListScrollable::-webkit-scrollbar-thumb:hover,
+#accountSelectListScrollable::-webkit-scrollbar-thumb:hover {
+    background: #3ecf8e;
 }
 
 /* Shared styles between options and selection div. */

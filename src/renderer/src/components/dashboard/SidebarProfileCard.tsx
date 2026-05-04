@@ -37,52 +37,55 @@ export function SidebarProfileCard({
   const roleLabels = getRoleLabels(user);
 
   return (
-    <ShadcnCard className="border-white/10 bg-black/20 p-3">
-      <div className="flex items-center gap-3">
-        <div className="shrink-0 py-1 pl-1">
+    <div className="rounded-xl border border-[#2e2e2e] bg-[#171717] p-4 transition-all hover:border-[#363636]">
+      <div className="flex items-center gap-4">
+        <div className="relative shrink-0">
           <Avatar username={user?.username} size="lg" />
+          <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-[#171717] bg-[#3ecf8e]" />
         </div>
         <div className="min-w-0 flex-1">
           <span
-            className="block truncate font-minecraft text-sm font-bold text-theme"
+            className="block truncate font-sans text-sm font-medium text-[#fafafa]"
             title={user?.username || ""}
           >
             {user?.username || t.DASHBOARD.PLAYER_DEFAULT}
           </span>
-          <div className="mt-0.5 font-minecraft text-xs text-theme-muted">
+          <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-[#898989]">
             {t.DASHBOARD.PLAYER_ID_LABEL}{" "}
             {user?.id?.slice(0, 8) || t.DASHBOARD.PLAYER_ID_UNKNOWN}
           </div>
-          <div className="mt-1.5 flex flex-wrap gap-1.5">
+          <div className="mt-2 flex flex-wrap gap-1.5">
             {roleLabels.map((role) => (
               <ShadcnBadge
                 key={role}
-                variant="secondary"
-                className="border-0 bg-[var(--mc-accent)] px-2 py-0.5 font-minecraft text-[10px] font-bold text-white"
+                variant="outline"
+                className="border-[#2e2e2e] bg-[#2e2e2e]/30 px-2 py-0 font-sans text-[10px] font-medium text-[#3ecf8e]"
               >
                 {role}
               </ShadcnBadge>
             ))}
           </div>
         </div>
-        <div className="ml-auto flex shrink-0 flex-col items-stretch gap-2">
-          <button
-            onClick={onOpenSettings}
-            className="mc-btn mc-btn-sm h-8 w-8 justify-center p-0"
-            title={t.DASHBOARD.SETTINGS_BUTTON}
-          >
-            <Settings className="h-4 w-4" />
-          </button>
-          <button
-            onClick={onLogout}
-            className="mc-btn mc-btn-sm h-8 w-8 justify-center p-0"
-            title={t.DASHBOARD.LOGOUT_TOOLTIP}
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
-        </div>
       </div>
-    </ShadcnCard>
+      
+      <div className="mt-4 flex gap-2 border-t border-[#2e2e2e] pt-3">
+        <button
+          onClick={onOpenSettings}
+          className="flex h-8 flex-1 items-center justify-center gap-2 rounded-md border border-[#2e2e2e] bg-transparent font-sans text-xs font-medium text-[#898989] transition-colors hover:border-[#363636] hover:bg-[#242424] hover:text-[#fafafa]"
+          title={t.DASHBOARD.SETTINGS_BUTTON}
+        >
+          <Settings className="h-3.5 w-3.5" />
+          {t.DASHBOARD.SETTINGS_BUTTON}
+        </button>
+        <button
+          onClick={onLogout}
+          className="flex h-8 w-10 items-center justify-center rounded-md border border-[#2e2e2e] bg-transparent text-[#898989] transition-colors hover:border-[#destructive]/50 hover:bg-[color:var(--destructive)]/10 hover:text-[color:var(--destructive)]"
+          title={t.DASHBOARD.LOGOUT_TOOLTIP}
+        >
+          <LogOut className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
   );
 }
 

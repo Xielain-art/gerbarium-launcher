@@ -14,14 +14,7 @@ export function DashboardScreen(): React.JSX.Element {
   const vm = useDashboardScreen();
 
   return (
-    <div className="bg-theme-main-gradient flex h-screen w-full overflow-hidden">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-30"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }}
-      />
-
+    <div className="flex h-screen w-full overflow-hidden bg-[#0f0f0f]">
       <DashboardSidebar
         t={vm.t}
         user={vm.user}
@@ -34,10 +27,10 @@ export function DashboardScreen(): React.JSX.Element {
         onOpenAdminPanel={vm.onOpenAdminPanel}
       />
 
-      <main className="relative z-10 flex flex-1 flex-col overflow-hidden">
+      <main className="relative z-10 flex flex-1 flex-col overflow-hidden bg-[#171717]">
         <div className="absolute right-4 top-4 z-50 flex items-center gap-4">
           {vm.appVersion && (
-            <div className="font-minecraft text-xs text-theme-muted">
+            <div className="font-mono text-[10px] uppercase tracking-wider text-[#898989]">
               {vm.t.DASHBOARD.VERSION_DISPLAY_LABEL} {vm.appVersion}
             </div>
           )}
@@ -47,13 +40,15 @@ export function DashboardScreen(): React.JSX.Element {
 
         <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto pb-4 pt-20">
           {!vm.isLaunching && (
-            <div className="mb-4 flex items-center gap-2 px-6">
+            <div className="mb-6 flex items-center gap-1 px-6">
               <button
                 type="button"
                 onClick={() => vm.setContentTab("news")}
                 className={cn(
-                  "mc-btn mc-btn-sm",
-                  vm.contentTab === "news" && "mc-btn-primary",
+                  "rounded-[9999px] px-4 py-1.5 font-sans text-xs font-medium transition-all",
+                  vm.contentTab === "news"
+                    ? "bg-[#2e2e2e] text-[#fafafa]"
+                    : "text-[#898989] hover:text-[#fafafa]",
                 )}
               >
                 {vm.t.DASHBOARD.TAB_NEWS}
@@ -62,8 +57,10 @@ export function DashboardScreen(): React.JSX.Element {
                 type="button"
                 onClick={() => vm.setContentTab("changelog")}
                 className={cn(
-                  "mc-btn mc-btn-sm",
-                  vm.contentTab === "changelog" && "mc-btn-primary",
+                  "rounded-[9999px] px-4 py-1.5 font-sans text-xs font-medium transition-all",
+                  vm.contentTab === "changelog"
+                    ? "bg-[#2e2e2e] text-[#fafafa]"
+                    : "text-[#898989] hover:text-[#fafafa]",
                 )}
               >
                 {vm.t.DASHBOARD.TAB_CHANGELOG}

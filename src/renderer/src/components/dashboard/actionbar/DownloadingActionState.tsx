@@ -18,13 +18,13 @@ export function DownloadingActionState({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <div className="font-minecraft text-sm text-theme-muted">
+          <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#898989]">
             {progress?.status || t.COMMON.LOADING}
           </div>
-          <div className="font-minecraft text-sm text-[var(--mc-progress-fill-a)]">
+          <div className="mt-1 font-mono text-[11px] text-[#3ecf8e]">
             {progress?.speed && <span>{progress.speed}</span>}
             {progress?.speed && progress?.eta && (
-              <span className="mx-2">|</span>
+              <span className="mx-2 opacity-30">|</span>
             )}
             {progress?.eta && (
               <span>
@@ -33,16 +33,18 @@ export function DownloadingActionState({
             )}
           </div>
         </div>
-        <Button onClick={onCancelDownload} variant="danger" size="lg">
-          <span className="mr-2">{t.DASHBOARD.CANCEL_ICON}</span>
+        <Button
+          onClick={onCancelDownload}
+          variant="danger"
+          size="md"
+          className="rounded-md border border-[color:var(--destructive)]/30 bg-transparent text-xs font-medium text-[color:var(--destructive)] hover:bg-[color:var(--destructive)]/10"
+        >
           {t.COMMON.CANCEL}
         </Button>
       </div>
       <ProgressBar
         progress={progress?.progress || 0}
-        status={progress?.status || t.COMMON.LOADING}
-        speed={progress?.speed}
-        eta={progress?.eta}
+        className="h-1.5"
       />
     </div>
   );

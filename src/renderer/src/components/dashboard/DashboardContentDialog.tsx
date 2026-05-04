@@ -30,14 +30,14 @@ export function DashboardContentDialog({
       }}
       title={title}
       subtitle={subtitle}
-      contentClassName={`max-h-[85vh] ${maxWidthClassName} overflow-y-auto overflow-x-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-0 text-[var(--card-foreground)] shadow-[var(--shadow-lg)]`}
-      overlayClassName="bg-[color:var(--background)]/75 p-6 backdrop-blur-md"
-      headerClassName="mb-0 border-b border-[var(--border)] px-5 py-4"
-      titleClassName="font-sans text-lg normal-case text-[var(--card-foreground)] sm:text-xl"
-      subtitleClassName="font-sans text-xs text-[var(--muted-foreground)] sm:text-sm"
-      closeButtonClassName="shrink-0 self-start border border-[var(--border)] bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
+      contentClassName={`max-h-[85vh] ${maxWidthClassName} overflow-y-auto overflow-x-hidden rounded-xl border border-[#2e2e2e] bg-[#171717] p-0 text-[#fafafa]`}
+      overlayClassName="bg-[#0f0f0f]/80 p-6 backdrop-blur-sm"
+      headerClassName="mb-0 border-b border-[#2e2e2e] px-5 py-4"
+      titleClassName="font-sans text-lg font-medium text-[#fafafa] sm:text-xl"
+      subtitleClassName="font-mono text-[10px] uppercase tracking-wider text-[#898989]"
+      closeButtonClassName="shrink-0 self-start border border-[#2e2e2e] bg-[#242424] text-[#898989] hover:bg-[#2e2e2e] hover:text-[#fafafa]"
       closeButtonLabel="✕"
-      footerClassName="mt-0 border-t border-[var(--border)] px-5 py-4"
+      footerClassName="mt-0 border-t border-[#2e2e2e] px-5 py-4"
       footer={footer}
     >
       {children}

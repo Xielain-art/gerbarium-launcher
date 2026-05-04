@@ -38,9 +38,10 @@ export function DashboardActionBar({
   onToggleConsole,
 }: DashboardActionBarProps): React.JSX.Element {
   return (
-    <div className="shrink-0 border-t-[4px] border-theme bg-[color-mix(in_srgb,var(--theme-surface)_95%,transparent)] p-6 shadow-2xl backdrop-blur-md">
+    <div className="relative shrink-0 border-t border-[#2e2e2e] bg-[#171717] p-6">
       {(errorMessage || playBlockReason) && (
-        <div className="mb-4 rounded border-[2px] border-[var(--mc-error-border)] bg-[var(--mc-error-bg)] px-3 py-2 font-minecraft text-xs text-[var(--mc-error-text)]">
+        <div className="mb-4 flex items-center gap-3 rounded-lg border border-[color:var(--destructive)]/30 bg-[color:var(--destructive)]/10 px-4 py-3 font-mono text-[11px] font-medium text-[color:var(--destructive)]">
+          <span className="text-sm">⚠️</span>
           {playBlockReason || errorMessage}
         </div>
       )}

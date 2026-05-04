@@ -16,52 +16,59 @@ export function JavaSettingsTab(
   );
 
   return (
-    <div className="space-y-6">
-      <h2 className="font-minecraft text-xl font-bold uppercase text-theme">
-        {props.t.SETTINGS.JAVA.TITLE}
-      </h2>
+    <div className="mx-auto max-w-4xl space-y-8 p-8">
+      <div>
+        <h2 className="text-2xl font-semibold tracking-tight text-[#fafafa]">
+          {props.t.SETTINGS.JAVA.TITLE}
+        </h2>
+        <p className="mt-1 text-sm text-[#898989]">
+          Configure Java runtime environment and memory allocation.
+        </p>
+      </div>
 
-      <JavaInstalledList
-        t={props.t}
-        installedJava={props.installedJava}
-        selectedPath={props.general.javaPath}
-        onSelectInstalledJava={props.onSelectInstalledJava}
-        onRemoveJava={props.onRemoveJava}
-      />
+      <div className="grid gap-6">
+        <JavaInstalledList
+          t={props.t}
+          installedJava={props.installedJava}
+          selectedPath={props.general.javaPath}
+          onSelectInstalledJava={props.onSelectInstalledJava}
+          onRemoveJava={props.onRemoveJava}
+        />
 
-      <JavaPathSection
-        t={props.t}
-        javaPath={props.general.javaPath}
-        onUpdateJavaPath={(path) => props.onUpdateGeneral({ javaPath: path })}
-        onSelectJava={props.onSelectJava}
-        onFindJava={props.onFindJava}
-        javaLoading={props.javaLoading}
-        javaError={props.javaError}
-        javaVersion={props.javaVersion}
-        isDownloadingJava={props.isDownloadingJava}
-        javaProgress={props.javaProgress}
-        javaStatus={props.javaStatus}
-        javaVersions={props.javaVersions}
-        downloadJavaVersion={props.downloadJavaVersion}
-        onSetDownloadJavaVersion={props.onSetDownloadJavaVersion}
-        onDownloadJava={props.onDownloadJava}
-        isInstalled={(version) =>
-          isJavaInstalled(installedVersionNumbers, version)
-        }
-      />
+        <JavaPathSection
+          t={props.t}
+          javaPath={props.general.javaPath}
+          onUpdateJavaPath={(path) => props.onUpdateGeneral({ javaPath: path })}
+          onSelectJava={props.onSelectJava}
+          onFindJava={props.onFindJava}
+          javaLoading={props.javaLoading}
+          javaError={props.javaError}
+          javaVersion={props.javaVersion}
+          isDownloadingJava={props.isDownloadingJava}
+          javaProgress={props.javaProgress}
+          javaStatus={props.javaStatus}
+          javaVersions={props.javaVersions}
+          downloadJavaVersion={props.downloadJavaVersion}
+          onSetDownloadJavaVersion={props.onSetDownloadJavaVersion}
+          onDownloadJava={props.onDownloadJava}
+          isInstalled={(version) =>
+            isJavaInstalled(installedVersionNumbers, version)
+          }
+        />
 
-      <JavaRamSection
-        t={props.t}
-        maxRamGb={props.maxRamGb}
-        ramAllocation={props.general.ramAllocation}
-        onUpdateRam={(ram) => props.onUpdateGeneral({ ramAllocation: ram })}
-      />
+        <JavaRamSection
+          t={props.t}
+          maxRamGb={props.maxRamGb}
+          ramAllocation={props.general.ramAllocation}
+          onUpdateRam={(ram) => props.onUpdateGeneral({ ramAllocation: ram })}
+        />
 
-      <JavaJvmArgsSection
-        t={props.t}
-        jvmArgs={props.general.jvmArgs || ""}
-        onUpdateJvmArgs={(jvmArgs) => props.onUpdateGeneral({ jvmArgs })}
-      />
+        <JavaJvmArgsSection
+          t={props.t}
+          jvmArgs={props.general.jvmArgs || ""}
+          onUpdateJvmArgs={(jvmArgs) => props.onUpdateGeneral({ jvmArgs })}
+        />
+      </div>
     </div>
   );
 }

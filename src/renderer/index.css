@@ -16,85 +16,79 @@
 }
 
 :root {
-  --theme-bg: #171614;
-  --theme-bg-gradient-a: #1a1c20;
-  --theme-bg-gradient-b: #2b2d31;
-  --theme-surface: #2b2d31;
-  --theme-surface-soft: #25272c;
-  --theme-sidebar: #1e2025;
-  --theme-text: #e0e0e0;
-  --theme-text-muted: #8a8a8a;
-  --theme-border: #1a1a1a;
-  --theme-border-hi: #5a5a5a;
-  --btn-bg: #3c3c3c;
-  --btn-bg-hover: #4a4a4a;
-  --btn-bg-active: #323232;
-  --btn-text: #e0e0e0;
-  --btn-border-hi: #5a5a5a;
-  --btn-border-lo: #1a1a1a;
-  --btn-primary-bg-a: #3a753a;
-  --btn-primary-bg-b: #2d5a2d;
-  --btn-primary-bg-hover-a: #4a8a4a;
-  --btn-primary-bg-hover-b: #3d6a3d;
-  --btn-primary-border-hi: #4a9a4a;
-  --btn-primary-border-lo: #2a5a2a;
-  --btn-secondary-bg: #5a5a5a;
-  --btn-secondary-bg-hover: #6a6a6a;
-  --btn-secondary-border-hi: #7a7a7a;
-  --btn-secondary-border-lo: #3a3a3a;
-  --btn-danger-bg-a: #8b2a2a;
-  --btn-danger-bg-b: #5a1a1a;
-  --btn-danger-bg-hover-a: #9a3a3a;
-  --btn-danger-bg-hover-b: #6a2a2a;
-  --btn-danger-border-hi: #aa3a3a;
-  --btn-danger-border-lo: #5a1a1a;
-  --mc-panel-bg: var(--theme-surface);
-  --mc-panel-border-hi: var(--theme-border-hi);
-  --mc-panel-border-lo: var(--theme-border);
-  --mc-panel-hover: color-mix(in srgb, var(--theme-surface) 82%, var(--theme-text) 18%);
-  --mc-input-bg: var(--theme-surface);
-  --mc-input-text: var(--theme-text);
-  --mc-input-placeholder: color-mix(in srgb, var(--theme-text-muted) 70%, transparent);
-  --mc-input-focus: color-mix(in srgb, var(--theme-border-hi) 80%, var(--theme-text) 20%);
-  --mc-error-border: color-mix(in srgb, var(--btn-danger-bg-a) 45%, transparent);
-  --mc-error-bg: color-mix(in srgb, var(--btn-danger-bg-a) 28%, transparent);
-  --mc-error-text: color-mix(in srgb, var(--btn-danger-border-hi) 75%, var(--theme-text) 25%);
-  --mc-skeleton-base: color-mix(in srgb, var(--theme-surface) 88%, var(--theme-text) 12%);
-  --mc-skeleton-highlight: color-mix(in srgb, var(--theme-surface) 74%, var(--theme-text) 26%);
-  --mc-accent: var(--btn-primary-bg-a);
-  --mc-accent-hi: var(--btn-primary-border-hi);
-  --mc-progress-fill-a: #55aaff;
-  --mc-progress-fill-b: var(--btn-primary-bg-hover-a);
-  --mc-progress-fill-c: var(--btn-primary-bg-a);
-  --mc-window-danger-hover: #e81123;
-  --mc-window-danger-active: #c4101f;
-  /* shadcn semantic fallback tokens */
-  --background: oklch(0.96 0.01 271.34);
-  --foreground: oklch(0.21 0.03 263.61);
-  --card: oklch(0.98 0.01 271.41);
-  --card-foreground: oklch(0.21 0.03 263.61);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.03 263.61);
-  --primary: oklch(0.48 0.2 260.47);
-  --primary-foreground: #ffffff;
-  --secondary: oklch(0.91 0.02 274.06);
-  --secondary-foreground: oklch(0.37 0.03 259.73);
-  --muted: oklch(0.94 0.02 274.86);
-  --muted-foreground: oklch(0.55 0.02 264.41);
-  --accent: oklch(0.95 0.02 260.18);
-  --accent-foreground: oklch(0.48 0.2 260.47);
-  --destructive: oklch(0.58 0.22 27.29);
-  --destructive-foreground: #ffffff;
-  --border: oklch(0.89 0.02 259.43);
-  --input: oklch(0.9 0.01 266.73);
-  --ring: oklch(0.48 0.2 260.47);
+  /* Supabase-inspired tokens */
+  --supabase-bg-deep: #0f0f0f;
+  --supabase-bg-main: #171717;
+  --supabase-green: #3ecf8e;
+  --supabase-green-link: #00c573;
+  --supabase-border-subtle: #242424;
+  --supabase-border-standard: #2e2e2e;
+  --supabase-border-prominent: #363636;
+  --supabase-border-accent: rgba(62, 207, 142, 0.3);
+  
+  --theme-bg: var(--supabase-bg-main);
+  --theme-bg-gradient-a: #0f0f0f;
+  --theme-bg-gradient-b: #171717;
+  --theme-surface: #171717;
+  --theme-surface-soft: #1c1c1c;
+  --theme-sidebar: #121212;
+  --theme-text: #fafafa;
+  --theme-text-muted: #898989;
+  --theme-border: var(--supabase-border-standard);
+  --theme-border-hi: var(--supabase-border-prominent);
+  
+  --mc-accent: var(--supabase-green);
+  --mc-accent-hi: #50e3a1;
+
+  /* Legacy and shadcn fallback tokens */
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 153 60% 53%; /* Supabase Green */
+  --primary-foreground: 153 60% 5%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 153 60% 53%;
   --radius: 0.5rem;
 }
 
+/* Avenir Font */
+@font-face {
+  font-family: 'Avenir';
+  src: url('./assets/fonts/Avenir-Roman.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Avenir';
+  src: url('./assets/fonts/Avenir-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Avenir';
+  src: url('./assets/fonts/Avenir-Heavy.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
 
 body {
   background-color: var(--theme-bg);
   color: var(--theme-text);
+  font-family: 'Avenir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   transition: background-color 180ms ease, color 180ms ease;
 }
 
@@ -364,26 +358,23 @@ body,
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 14px;
-  height: 14px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--theme-surface-soft);
-  border-left: 3px solid var(--theme-border);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--theme-surface) 70%, var(--theme-text-muted));
-  border: 3px solid var(--theme-surface-soft);
-  border-top-color: var(--theme-border-hi);
-  border-left-color: var(--theme-border-hi);
-  border-bottom-color: var(--theme-border);
-  border-right-color: var(--theme-border);
+  background: var(--supabase-border-prominent);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--theme-surface) 50%, var(--theme-text));
+  background: var(--supabase-green);
 }
 
 /* Pixel-perfect rendering */

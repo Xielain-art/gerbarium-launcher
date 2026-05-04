@@ -21,11 +21,11 @@ export function Select({
   const selectId = id || label?.toLowerCase().replace(/\s+/g, "-");
 
   return (
-    <div className={cn("flex flex-col gap-1", className)}>
+    <div className={cn("flex flex-col gap-1.5", className)}>
       {label && (
         <label
           htmlFor={selectId}
-          className="font-minecraft text-sm font-bold uppercase tracking-wide text-theme"
+          className="text-[12px] font-medium uppercase tracking-wider text-[#898989]"
         >
           {label}
         </label>
@@ -33,29 +33,32 @@ export function Select({
       <div className="relative">
         <select
           id={selectId}
-          className="mc-select appearance-none text-base transition-colors duration-75 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-10 w-full appearance-none rounded-md border border-[#2e2e2e] bg-[#0f0f0f] px-3 py-2 text-sm text-[#fafafa] transition-all focus:border-[#3ecf8e] focus:outline-none focus:ring-1 focus:ring-[#3ecf8e] disabled:cursor-not-allowed disabled:opacity-50"
           {...props}
         >
           {options.map((option) => (
             <option
               key={option.value}
               value={option.value}
-              className="bg-[var(--mc-input-bg)] text-[var(--mc-input-text)]"
+              className="bg-[#171717] text-[#fafafa]"
             >
               {option.label}
             </option>
           ))}
         </select>
         {/* Custom Arrow */}
-        <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-theme-muted">
+        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#898989]">
           <svg
-            className="h-4 w-4"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            viewBox="0 0 24 24"
-            strokeWidth="3"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <path strokeLinecap="square" d="M19 9l-7 7-7-7" />
+            <path d="M6 9l6 6 6-6" />
           </svg>
         </div>
       </div>

@@ -60,5 +60,3 @@ htmlcov/
 ```
 release/
 dist-electron/
-
-.gemini/

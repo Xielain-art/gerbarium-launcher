@@ -100,8 +100,8 @@ export function ChangelogFeed({
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="mc-spinner h-10 w-10 rounded-full border-2 border-[var(--primary)] border-t-transparent" />
-          <span className="text-xs text-[var(--muted-foreground)]">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#3ecf8e] border-t-transparent" />
+          <span className="font-mono text-[10px] font-medium uppercase tracking-widest text-[#898989]">
             {t.COMMON.LOADING}
           </span>
         </div>
@@ -112,10 +112,10 @@ export function ChangelogFeed({
   if (error) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 text-center">
-        <div className="text-lg text-[var(--destructive)]">
-          ⚠️ {t.DASHBOARD.FAILED_TO_LOAD_NEWS}
+        <div className="font-sans text-lg font-medium text-[color:var(--destructive)]">
+          {t.DASHBOARD.FAILED_TO_LOAD_NEWS}
         </div>
-        <div className="max-w-md text-sm text-[var(--muted-foreground)]">
+        <div className="max-w-md font-sans text-sm text-[#898989]">
           {error}
         </div>
       </div>
@@ -124,69 +124,80 @@ export function ChangelogFeed({
 
   return (
     <div className="overflow-x-hidden px-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-lg font-semibold tracking-wide text-[var(--foreground)]">
+      <div className="mb-10">
+        <h2 className="font-sans text-xl font-medium tracking-tight text-[#fafafa]">
           Changelog
         </h2>
+        <p className="font-mono text-[10px] uppercase tracking-wider text-[#898989]">
+          Technical updates and release history.
+        </p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="relative space-y-12 before:absolute before:left-[11px] before:top-2 before:h-full before:w-[1px] before:bg-[#2e2e2e]">
         {changelog.map((item) => {
           const { html, isTruncated } = getTruncatedMarkdown(item);
 
           return (
-            <article
-              key={item.id}
-              className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-4 text-[var(--card-foreground)] shadow-[var(--shadow-md)]"
-            >
-              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <h3 className="text-base font-semibold text-[var(--foreground)]">
-                  v{item.version}
-                </h3>
-                <div className="flex items-center gap-2">
+            <article key={item.id} className="relative pl-10">
+              <div className="absolute left-0 top-1.5 h-[23px] w-[23px] rounded-full border-4 border-[#171717] bg-[#3ecf8e]" />
+              
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <h3 className="font-mono text-lg font-bold text-[#fafafa]">
+                    v{item.version}
+                  </h3>
                   {item.mandatory && (
-                    <span className="rounded bg-[color:var(--destructive)]/20 px-2 py-1 text-[10px] uppercase text-[var(--destructive)]">
+                    <span className="rounded border border-[color:var(--destructive)]/30 bg-[color:var(--destructive)]/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-[color:var(--destructive)]">
                       Mandatory
                     </span>
                   )}
-                  <span className="text-xs text-[var(--muted-foreground)]">
-                    {new Date(item.releaseDate).toLocaleDateString("ru-RU")}
-                  </span>
                 </div>
+                <time className="font-mono text-[10px] font-medium uppercase tracking-wider text-[#898989]">
+                  {new Date(item.releaseDate).toLocaleDateString("ru-RU", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric"
+                  })}
+                </time>
               </div>
-              <div
-                className="mb-3 min-w-0 max-w-full text-xs leading-relaxed text-[var(--muted-foreground)] [&_a]:text-[var(--primary)] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
-                style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
-                dangerouslySetInnerHTML={{ __html: html }}
-              />
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                {isTruncated && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => onSelectChangelog(item)}
+
+              <div className="rounded-xl border border-[#2e2e2e] bg-[#0f0f0f] p-5">
+                <div
+                  className="prose prose-sm prose-invert mb-5 max-w-full font-sans text-xs leading-relaxed text-[#b4b4b4] [&_a]:text-[#3ecf8e] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
+                  style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
+                  dangerouslySetInnerHTML={{ __html: html }}
+                />
+                
+                <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[#2e2e2e] pt-4">
+                  {isTruncated && (
+                    <button
+                      type="button"
+                      onClick={() => onSelectChangelog(item)}
+                      className="font-sans text-xs font-medium text-[#3ecf8e] hover:text-[#00c573]"
+                    >
+                      {t.DASHBOARD.READ_MORE}
+                    </button>
+                  )}
+                  <a
+                    href={item.downloadUrl}
+                    className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-widest text-[#898989] transition-colors hover:text-[#fafafa]"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      void window.electronAPI.system.openExternal(
+                        item.downloadUrl,
+                      );
+                    }}
                   >
-                    {t.DASHBOARD.READ_MORE}
-                  </Button>
-                )}
-                <a
-                  href={item.downloadUrl}
-                  className="text-xs text-[var(--primary)] underline"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    void window.electronAPI.system.openExternal(
-                      item.downloadUrl,
-                    );
-                  }}
-                >
-                  {t.DASHBOARD.DOWNLOAD_RELEASE}
-                </a>
+                    <span className="text-sm">↓</span>
+                    {t.DASHBOARD.DOWNLOAD_RELEASE}
+                  </a>
+                </div>
               </div>
             </article>
           );
         })}
         {changelog.length === 0 && (
-          <div className="py-10 text-center text-[var(--muted-foreground)]">
+          <div className="py-10 text-center font-sans text-sm text-[#898989]">
             {t.DASHBOARD.NO_MORE_NEWS}
           </div>
         )}
@@ -194,12 +205,12 @@ export function ChangelogFeed({
 
       <div ref={loadMoreRef} className="h-6 w-full" />
       {isLoadingMore && (
-        <div className="py-3 text-center text-xs text-[var(--muted-foreground)]">
+        <div className="py-3 text-center font-mono text-[10px] uppercase tracking-wider text-[#898989]">
           {t.DASHBOARD.LOADING_MORE_NEWS}
         </div>
       )}
       {!hasMore && changelog.length > 0 && (
-        <div className="py-3 text-center text-xs text-[var(--muted-foreground)]">
+        <div className="py-3 text-center font-mono text-[10px] uppercase tracking-wider text-[#898989]">
           {t.DASHBOARD.NO_MORE_NEWS}
         </div>
       )}

@@ -1,5 +1,6 @@
 import { Button } from "../ui";
 import type { SettingsBaseProps, SettingsTab } from "./types";
+import { RotateCcw } from "lucide-react";
 
 interface SettingsActionBarProps extends SettingsBaseProps {
   activeTab: SettingsTab;
@@ -16,8 +17,14 @@ export function SettingsActionBar({
   }
 
   return (
-    <div className="mx-auto mt-6 flex max-w-2xl gap-4">
-      <Button onClick={onReset} variant="danger" size="lg" className="flex-1">
+    <div className="mx-auto mt-8 flex max-w-4xl justify-end px-8 pb-8">
+      <Button 
+        onClick={onReset} 
+        variant="danger" 
+        size="md" 
+        className="flex items-center gap-2"
+      >
+        <RotateCcw size={16} />
         {t.SETTINGS.ACTIONS.RESET_BUTTON}
       </Button>
     </div>

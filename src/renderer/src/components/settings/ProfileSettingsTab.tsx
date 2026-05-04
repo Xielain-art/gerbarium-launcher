@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Button, Input, Modal, ModalActions } from "../ui";
+import { Button, Input, Modal, ModalActions, Card } from "../ui";
 import { Avatar } from "../game/Avatar";
 import type { ProfileSettingsTabProps } from "./types";
+import { ShieldAlert, Trash2, Mail, User as UserIcon, ShieldCheck, Ban } from "lucide-react";
 
 function isValidHttpUrl(value: string): boolean {
   try {
@@ -44,7 +45,6 @@ export function ProfileSettingsTab({
   const displaySkinUrl = profile.skinUrl;
 
   const rolesText = user?.roles?.map((role) => role.name).join(", ") || "user";
-  const bannedText = user?.isBanned ? "Yes" : "No";
 
   const handleDeleteClick = async (): Promise<void> => {
     setIsRequestingCode(true);
@@ -65,99 +65,137 @@ export function ProfileSettingsTab({
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="font-minecraft text-xl font-bold uppercase text-theme">
-        {t.SETTINGS.PROFILE.TITLE}
-      </h2>
+    <div className="mx-auto max-w-4xl space-y-8 p-8">
+      <div>
+        <h2 className="text-2xl font-semibold tracking-tight text-[#fafafa]">
+          {t.SETTINGS.PROFILE.TITLE}
+        </h2>
+        <p className="mt-1 text-sm text-[#898989]">
+          Manage your account profile and Minecraft appearance.
+        </p>
+      </div>
 
-      <div className="rounded border-[3px] border-t-[var(--mc-panel-border-lo)] border-l-[var(--mc-panel-border-lo)] border-b-[var(--mc-panel-border-hi)] border-r-[var(--mc-panel-border-hi)] bg-[var(--mc-input-bg)] p-4 shadow-[inset_2px_2px_0px_var(--mc-panel-border-lo),inset_-2px_-2px_0px_var(--mc-panel-border-hi)]">
-        <div className="flex items-start gap-4">
-          <Avatar
-            username={displayMinecraftUsername}
-            skinUrl={displaySkinUrl}
-            size="xl"
-          />
-          <div className="space-y-1 font-minecraft text-xs text-theme">
-            <div>
-              <span className="text-theme-muted">Email:</span>{" "}
-              {user?.email || "-"}
+      <div className="grid gap-6">
+        <Card className="p-6">
+          <div className="flex flex-col gap-8 md:flex-row md:items-center">
+            <div className="flex shrink-0 flex-col items-center gap-4">
+              <Avatar
+                username={displayMinecraftUsername}
+                skinUrl={displaySkinUrl}
+                size="xl"
+                className="ring-2 ring-[#2e2e2e]"
+              />
+              <span className="text-xs font-bold uppercase tracking-widest text-[#4d4d4d]">
+                Avatar Preview
+              </span>
             </div>
-            <div>
-              <span className="text-theme-muted">Roles:</span> {rolesText}
-            </div>
-            <div>
-              <span className="text-theme-muted">Banned:</span> {bannedText}
-            </div>
-            {user?.isBanned && (
-              <div>
-                <span className="text-theme-muted">Ban reason:</span>{" "}
-                {user?.banReason || "-"}
+
+            <div className="grid flex-1 gap-6 sm:grid-cols-2">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#4d4d4d]">
+                  <Mail size={12} />
+                  Email Address
+                </div>
+                <div className="text-sm font-medium text-[#fafafa]">
+                  {user?.email || "Offline Account"}
+                </div>
               </div>
-            )}
-            <div>
-              <span className="text-theme-muted">Minecraft username:</span>{" "}
-              {displayMinecraftUsername || "-"}
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#4d4d4d]">
+                  <ShieldCheck size={12} />
+                  Roles
+                </div>
+                <div className="text-sm font-medium text-[#fafafa]">
+                  {rolesText}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#4d4d4d]">
+                  <UserIcon size={12} />
+                  Minecraft Username
+                </div>
+                <div className="text-sm font-medium text-[#fafafa]">
+                  {displayMinecraftUsername || "—"}
+                </div>
+              </div>
+
+              {user?.isBanned && (
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#ff8080]">
+                    <Ban size={12} />
+                    Status
+                  </div>
+                  <div className="text-sm font-medium text-[#ff8080]">
+                    Banned: {user?.banReason || "No reason provided"}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </div>
+        </Card>
 
-      <div className="space-y-4">
-        <Input
-          label={t.SETTINGS.PROFILE.USERNAME_LABEL}
-          value={displayUsername}
-          onChange={(e) => onUpdateProfile({ username: e.target.value })}
-          placeholder={t.SETTINGS.PROFILE.USERNAME_PLACEHOLDER}
-        />
+        <Card className="p-6">
+          <h3 className="mb-6 text-xs font-bold uppercase tracking-[0.2em] text-[#4d4d4d]">
+            Identity & Skins
+          </h3>
+          <div className="space-y-6">
+            <Input
+              label={t.SETTINGS.PROFILE.USERNAME_LABEL}
+              value={displayUsername}
+              onChange={(e) => onUpdateProfile({ username: e.target.value })}
+              placeholder={t.SETTINGS.PROFILE.USERNAME_PLACEHOLDER}
+            />
 
-        <Input
-          label={t.SETTINGS.PROFILE.SKIN_URL_LABEL}
-          type="url"
-          value={displaySkinUrl || ""}
-          error={skinUrlError}
-          onChange={(e) => onUpdateProfile({ skinUrl: e.target.value })}
-          placeholder={t.SETTINGS.PROFILE.SKIN_URL_PLACEHOLDER}
-        />
+            <div className="grid gap-6 md:grid-cols-2">
+              <Input
+                label={t.SETTINGS.PROFILE.SKIN_URL_LABEL}
+                type="url"
+                value={displaySkinUrl || ""}
+                error={skinUrlError}
+                onChange={(e) => onUpdateProfile({ skinUrl: e.target.value })}
+                placeholder={t.SETTINGS.PROFILE.SKIN_URL_PLACEHOLDER}
+              />
 
-        <Input
-          label={t.SETTINGS.PROFILE.CAPE_URL_LABEL}
-          type="url"
-          value={capeUrl}
-          error={capeUrlError}
-          onChange={(e) => onUpdateProfile({ capeUrl: e.target.value })}
-          placeholder={t.SETTINGS.PROFILE.CAPE_URL_PLACEHOLDER}
-        />
-      </div>
+              <Input
+                label={t.SETTINGS.PROFILE.CAPE_URL_LABEL}
+                type="url"
+                value={capeUrl}
+                error={capeUrlError}
+                onChange={(e) => onUpdateProfile({ capeUrl: e.target.value })}
+                placeholder={t.SETTINGS.PROFILE.CAPE_URL_PLACEHOLDER}
+              />
+            </div>
+          </div>
+        </Card>
 
-      <div className="space-y-2">
-        <label className="font-minecraft text-sm font-bold uppercase tracking-wide text-theme">
-          {t.SETTINGS.PROFILE.SKIN_PREVIEW_TITLE}
-        </label>
-        <div className="flex items-center justify-center rounded border-[3px] border-t-[var(--mc-panel-border-lo)] border-l-[var(--mc-panel-border-lo)] border-b-[var(--mc-panel-border-hi)] border-r-[var(--mc-panel-border-hi)] bg-[var(--mc-input-bg)] p-4 shadow-[inset_2px_2px_0px_var(--mc-panel-border-lo),inset_-2px_-2px_0px_var(--mc-panel-border-hi)]">
-          <Avatar
-            username={displayMinecraftUsername}
-            skinUrl={displaySkinUrl}
-            size="xl"
-          />
-        </div>
-      </div>
-
-      <div className="mt-8 border-t-[3px] border-theme pt-6">
-        <h3 className="font-minecraft text-lg font-bold uppercase text-red-500">
-          {t.SETTINGS.PROFILE.DELETE_ACCOUNT_TITLE}
-        </h3>
-        <p className="mt-2 font-minecraft text-sm text-theme-muted">
-          {t.SETTINGS.PROFILE.DELETE_ACCOUNT_DESCRIPTION}
-        </p>
-        <div className="mt-4">
-          <Button
-            variant="danger"
-            onClick={handleDeleteClick}
-            isLoading={isRequestingCode}
-          >
-            {t.SETTINGS.PROFILE.DELETE_ACCOUNT_BUTTON}
-          </Button>
-        </div>
+        <Card className="border-[#451212] bg-[#1a0f0f] p-6">
+          <div className="flex items-start gap-4">
+            <div className="rounded-full bg-[#451212] p-2 text-[#ff8080]">
+              <ShieldAlert size={20} />
+            </div>
+            <div className="flex-1 space-y-1">
+              <h3 className="text-sm font-semibold text-[#fafafa]">
+                {t.SETTINGS.PROFILE.DELETE_ACCOUNT_TITLE}
+              </h3>
+              <p className="text-sm text-[#ff8080]/80">
+                {t.SETTINGS.PROFILE.DELETE_ACCOUNT_DESCRIPTION}
+              </p>
+              <div className="pt-4">
+                <Button
+                  variant="danger"
+                  onClick={handleDeleteClick}
+                  isLoading={isRequestingCode}
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 size={16} />
+                  {t.SETTINGS.PROFILE.DELETE_ACCOUNT_BUTTON}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
       </div>
 
       <Modal
@@ -166,7 +204,7 @@ export function ProfileSettingsTab({
         title={t.SETTINGS.PROFILE.DELETE_ACCOUNT_MODAL_TITLE}
         actions={
           <ModalActions>
-            <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            <Button variant="outline" onClick={() => setShowDeleteModal(false)}>
               {t.COMMON.CANCEL}
             </Button>
             <Button
@@ -181,7 +219,7 @@ export function ProfileSettingsTab({
         }
       >
         <div className="space-y-4">
-          <p className="font-minecraft text-sm text-theme">
+          <p className="text-sm leading-relaxed text-[#898989]">
             {t.SETTINGS.PROFILE.DELETE_ACCOUNT_MODAL_TEXT}
           </p>
           <Input
@@ -193,7 +231,10 @@ export function ProfileSettingsTab({
           />
           {deletionNotice && (
             <div
-              className={`font-minecraft text-xs ${deletionNotice.type === "error" ? "text-red-500" : "text-green-500"}`}
+              className={cn(
+                "rounded-md p-3 text-xs font-medium",
+                deletionNotice.type === "error" ? "bg-[#451212] text-[#ff8080]" : "bg-[#0b2b1a] text-[#3ecf8e]"
+              )}
             >
               {deletionNotice.text}
             </div>
