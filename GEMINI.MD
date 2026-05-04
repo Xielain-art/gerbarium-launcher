@@ -84,3 +84,13 @@ To build platform-specific installers using `electron-builder`:
 *   **State:** Use `zustand` for global UI state and `react-query` for server state/data fetching.
 *   **Testing:** New features should include accompanying tests in the `tests/` directory using Vitest.
 *   **IPC Communication:** Ensure all Inter-Process Communication channels are defined in `src/shared/constants/ipc-chanels.ts` for type safety and maintainability.
+
+## graphify
+
+This project has a graphify knowledge graph at graphify-out/.
+
+Rules:
+- Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure
+- If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
+- For cross-module "how does X relate to Y" questions, prefer `graphify query "<question>"`, `graphify path "<A>" "<B>"`, or `graphify explain "<concept>"` over grep — these traverse the graph's EXTRACTED + INFERRED edges instead of scanning files
+- After modifying code files in this session, run `graphify update .` to keep the graph current (AST-only, no API cost)

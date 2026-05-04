@@ -1,0 +1,914 @@
+{
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/lib/api/admin.ts": {
+    "mtime": 1777895334.1993904,
+    "hash": "74f4b0ea35b84937bdfcc3628646397a"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/lib/api/auth.ts": {
+    "mtime": 1777895334.2025483,
+    "hash": "b7af9af46266cf03d350355a4ffe3a26"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/lib/api/changelog.ts": {
+    "mtime": 1777386801.3437493,
+    "hash": "ac5c99089e65c3e8c7671f5f32deaeeb"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/lib/api/client.ts": {
+    "mtime": 1777552717.329168,
+    "hash": "8a036f16b44499010fc96bd5a56b7436"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/lib/api/news.ts": {
+    "mtime": 1777459597.881347,
+    "hash": "ff595bcc427e339e3f1331389209723a"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/lib/api/result.ts": {
+    "mtime": 1777446782.2165174,
+    "hash": "aed2ac11ae18655bf519b9fd44ec828d"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/lib/api/types.ts": {
+    "mtime": 1777895334.2025483,
+    "hash": "f25cd232fbbecc743d5f99cc6f11ab53"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/lib/api/v1.d.ts": {
+    "mtime": 1777895334.2025483,
+    "hash": "1960c4b7c4bb1fa21a415cb4fa97587b"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/lib/api/v1.old.d.ts": {
+    "mtime": 1777895334.2025483,
+    "hash": "072429ad703172f80ea2cc3fd82d36c1"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/main-constants.ts": {
+    "mtime": 1777037162.139135,
+    "hash": "615f591644cb5b5efc602b92c888e2ab"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/main.ts": {
+    "mtime": 1777895334.205678,
+    "hash": "a151c36ff199eb6045b33ad284952264"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/config/javaConfig.ts": {
+    "mtime": 1777289395.5053964,
+    "hash": "bc228dcd466adbce41ae7ce770f9b0e0"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/handlers/adminHandler.ts": {
+    "mtime": 1777895334.2045536,
+    "hash": "5645f47b3ba1883a03a123409314f7d9"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/handlers/authHandler.ts": {
+    "mtime": 1777895334.205678,
+    "hash": "702da63867a561ead818e1441d3442e7"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/handlers/gameHandler.ts": {
+    "mtime": 1777895334.205678,
+    "hash": "9cb5694c340138e724ccaf2dc323f206"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/handlers/javaHandler.ts": {
+    "mtime": 1777895334.205678,
+    "hash": "94aa6bb5fed6976e80a196a833ea045c"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/handlers/javaHandlerWrapper.ts": {
+    "mtime": 1777895334.205678,
+    "hash": "018bc11913888d198998ebb3ed0bf12a"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/handlers/logHandler.ts": {
+    "mtime": 1777895334.205678,
+    "hash": "d9e0a9da2e870416cbc00644ed66119c"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/handlers/secureStorageHandler.ts": {
+    "mtime": 1777895334.205678,
+    "hash": "09452427931690e1757b0e8d7dea6b0d"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/handlers/systemHandler.ts": {
+    "mtime": 1777895334.205678,
+    "hash": "8392860fb14d1e9f8b7722499781205c"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/handlers/updateHandler.ts": {
+    "mtime": 1777895334.205678,
+    "hash": "6ca09aeda89f178d3c2de708d454d9c3"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/handlers/windowControlsHandler.ts": {
+    "mtime": 1777895334.205678,
+    "hash": "e25a14ef531aef3bbd0988582c0a103d"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/handlers/auth/utils.ts": {
+    "mtime": 1777895334.2045536,
+    "hash": "1627ccd58f3f22c685e0661aa8506c36"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/services/discordRpcService.ts": {
+    "mtime": 1777895334.205678,
+    "hash": "13c891d7a0f4c741e1055a482366a8ba"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/types/declarations.d.ts": {
+    "mtime": 1777021867.5103574,
+    "hash": "d00b9af135bc700580ff0506fdd87ed3"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/utils/apiHandlerUtils.ts": {
+    "mtime": 1777895334.2099075,
+    "hash": "1430e8a4955b28565a2191722e393a7d"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/utils/crashReport.ts": {
+    "mtime": 1777552717.329168,
+    "hash": "5b9d6d56e49c81c37980f37a5ddfe1c8"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/utils/dateFolder.ts": {
+    "mtime": 1777289395.509932,
+    "hash": "1ac45f709c0693d6d6cccc8bcca59d31"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/utils/integrity.ts": {
+    "mtime": 1777895334.2099075,
+    "hash": "cf50d9c2b30fbbb111df40c515e831e9"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/utils/mutex.ts": {
+    "mtime": 1777274714.8539,
+    "hash": "66f37e2f1ccd7887081a363f30d0fbc6"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/utils/secureStorageLock.ts": {
+    "mtime": 1777274714.8559449,
+    "hash": "73e8c55bfbf186d8f721147b881ac41a"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/main/utils/settings.ts": {
+    "mtime": 1777895334.2099075,
+    "hash": "6cf7edb479c4f84c55968bc52c87f9a3"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/preload/preload.ts": {
+    "mtime": 1777895334.2099075,
+    "hash": "993ee5dd7c3e9245f2295b26b7be7654"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/electron.d.ts": {
+    "mtime": 1777895334.2099075,
+    "hash": "eae331ed525f2730f59e555a3ce00aa1"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/main.tsx": {
+    "mtime": 1777895334.2099075,
+    "hash": "062fdffec746032b71a150dea3685b50"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/router.tsx": {
+    "mtime": 1777895334.265249,
+    "hash": "01444de82772d86f10a406835ea44011"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/vite-env.d.ts": {
+    "mtime": 1777289395.5279045,
+    "hash": "8f68c27c3fc38817b2726b20e2d4f1ee"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/index.ts": {
+    "mtime": 1777296593.9000065,
+    "hash": "512dbc70290e14d7591ff6caa80e6684"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/ThemeWrapper.tsx": {
+    "mtime": 1777895334.2120154,
+    "hash": "98e22d8e6e1879e7629e40b79aacb535"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/types.ts": {
+    "mtime": 1777286887.0544007,
+    "hash": "7ed394d31b8e60149adca2f239f22a78"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/AdminDialogs.tsx": {
+    "mtime": 1777895334.2120154,
+    "hash": "d112a739f82e16b473178f36cdfc6694"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/AdminStatsPanel.tsx": {
+    "mtime": 1777895334.2120154,
+    "hash": "6f67cd544f8612f4305d0de201e79ded"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/ChangelogPreviewModal.tsx": {
+    "mtime": 1777895334.2133546,
+    "hash": "e8a3ac84849ff97e23b0807ff3b7d478"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/dialogs/AdminDialogShell.tsx": {
+    "mtime": 1777895334.2139509,
+    "hash": "5c58b91cd677a2b347ee39d949aed36d"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/dialogs/BanUserDialog.tsx": {
+    "mtime": 1777895334.214603,
+    "hash": "38783ab7101aaebe62290707cb19725b"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/dialogs/RolesDialog.tsx": {
+    "mtime": 1777895334.215612,
+    "hash": "d39fbc076f3bf3ff9b5c12414727c2d0"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/dialogs/UnbanUserDialog.tsx": {
+    "mtime": 1777895334.215612,
+    "hash": "5ca938397fba5934e5ff2032458f1595"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/hooks/useAdminScreenModel.ts": {
+    "mtime": 1777895334.2176304,
+    "hash": "f7e730533586bd8a6f625cdda3147ba2"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/hooks/sections/adminToasts.ts": {
+    "mtime": 1777459597.9202836,
+    "hash": "7f098d4e8b71103e412df3015c02eeaf"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/hooks/sections/useAdminChangelogSection.ts": {
+    "mtime": 1777895334.215612,
+    "hash": "716c8b0a1d8f10fca28040f78e7d5d7e"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/hooks/sections/useAdminNewsSection.ts": {
+    "mtime": 1777895334.215612,
+    "hash": "f86e49a7aa3c06fdf072eb9a86d68160"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/hooks/sections/useAdminUsersSection.ts": {
+    "mtime": 1777895334.2176304,
+    "hash": "0b55945704fc976ad50ecb4197f89ca3"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/tabs/AdminChangelogTab.tsx": {
+    "mtime": 1777895334.2176304,
+    "hash": "876312dab2fd8e6bc97a93223e4ff6fc"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/tabs/AdminNewsTab.tsx": {
+    "mtime": 1777895334.2176304,
+    "hash": "7537c3c900920a5817378995bcb0f35f"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/tabs/AdminUsersTab.tsx": {
+    "mtime": 1777895334.2176304,
+    "hash": "d4cabfb412e0a20c988b330ec7fa57c5"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/tabs/news/NewsFormSubTab.tsx": {
+    "mtime": 1777895334.2196472,
+    "hash": "f33ebb647ea179198a3fb693aa7ed9d8"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/tabs/news/NewsListSubTab.tsx": {
+    "mtime": 1777895334.2196472,
+    "hash": "da56354b8ca08e20396f3bfacafdcc19"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/tabs/news/NewsTagsSubTab.tsx": {
+    "mtime": 1777895334.2196472,
+    "hash": "89f0be4966a645602b72118c325f98da"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/admin/tabs/news/types.ts": {
+    "mtime": 1777895334.220663,
+    "hash": "88aedac5fa3bfe22cd7aace079b50d3a"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/ChangelogFeed.tsx": {
+    "mtime": 1777895334.220663,
+    "hash": "49d49c9d2e67ae515e7be7e31837591e"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/ChangelogPreviewModal.tsx": {
+    "mtime": 1777895334.2216763,
+    "hash": "60ee280ff56af05b7e3bb1eefba9ce50"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/DashboardActionBar.tsx": {
+    "mtime": 1777895334.2216763,
+    "hash": "45afd0c1e539f88972749bb95b63cae4"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/DashboardContentDialog.tsx": {
+    "mtime": 1777895334.2216763,
+    "hash": "2f00a600c932f59c11a0fffb8b69f863"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/DashboardSidebar.tsx": {
+    "mtime": 1777895334.2216763,
+    "hash": "10c1671e7c8fda9218507b1f303289e7"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/LaunchConsole.tsx": {
+    "mtime": 1777895334.2216763,
+    "hash": "0b526c037dcb70e7a038dc7c5bc4b211"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/NewsFeed.tsx": {
+    "mtime": 1777895334.2236934,
+    "hash": "50bb53a0c75a229741947f274593bb1c"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/NewsPreviewModal.tsx": {
+    "mtime": 1777895334.2236934,
+    "hash": "17e07be3f4b8d9dce5aa60d1f3eb0d44"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/SidebarProfileCard.tsx": {
+    "mtime": 1777895334.2236934,
+    "hash": "eb4bfa0a1b2bc381f985d5d3702c39c8"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/SidebarServerStatus.tsx": {
+    "mtime": 1777895334.224711,
+    "hash": "f91c2ab1810fc8f62ca3da71a2d43975"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/SidebarVersionsList.tsx": {
+    "mtime": 1777895334.224711,
+    "hash": "823a07d90e40eea218efbdf39f77a31a"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/actionbar/DownloadingActionState.tsx": {
+    "mtime": 1777895334.224711,
+    "hash": "23f1410a960f3523c19ee05fe262c804"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/actionbar/IdleActionState.tsx": {
+    "mtime": 1777895334.224711,
+    "hash": "b231136885952ceaa8457770a44a59d0"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/actionbar/LaunchingActionState.tsx": {
+    "mtime": 1777895334.226225,
+    "hash": "5bb924f5f7e327f78aeb541e02bb2120"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/newsfeed/NewsCards.tsx": {
+    "mtime": 1777895334.226225,
+    "hash": "80307ee7d1323c3e9e98e93a2668447e"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/newsfeed/NewsFeedFilters.tsx": {
+    "mtime": 1777895334.226225,
+    "hash": "b023faaceccc706e88895af075a29a0d"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/dashboard/newsfeed/NewsFeedState.tsx": {
+    "mtime": 1777895334.226225,
+    "hash": "e4d7eeb53279faad6c7773899aa4be6a"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/game/Avatar.tsx": {
+    "mtime": 1777274714.858727,
+    "hash": "50ca7bfc0c4beea22301ca879257164d"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/game/index.ts": {
+    "mtime": 1777289395.5135446,
+    "hash": "9d6021481291f2ea4ff016789acff817"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/layout/CrashNoticeBanner.tsx": {
+    "mtime": 1777895334.226225,
+    "hash": "716fd18dc2a338f627750dd91beb9b1d"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/layout/index.ts": {
+    "mtime": 1777473221.9542828,
+    "hash": "6727f07716e9de0729f6622360236ea3"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/layout/ThemeToggleButton.tsx": {
+    "mtime": 1777895334.226225,
+    "hash": "9cac27a7d7248349c2460bdee371ce88"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/layout/WindowControls.tsx": {
+    "mtime": 1777895334.2283287,
+    "hash": "253be21ad094998e72a7f5352b5f263f"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/login/index.ts": {
+    "mtime": 1777274714.858727,
+    "hash": "81132ae6632b328afe73ab3f51d9933b"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/login/LoginFormCard.tsx": {
+    "mtime": 1777895334.2299516,
+    "hash": "e1cae4f0471e90d31ff7515377c009d4"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/login/LoginVerificationSection.tsx": {
+    "mtime": 1777895334.2312038,
+    "hash": "1ac714289ee82fd0300f76c7f6bea8ba"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/AdvancedSettingsTab.tsx": {
+    "mtime": 1777895334.2322125,
+    "hash": "1f306aab41fc5aec62ff4cd73a530c74"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/GeneralSettingsTab.tsx": {
+    "mtime": 1777895334.232721,
+    "hash": "e8127bc3ff647fe710503495376dd4e3"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/index.ts": {
+    "mtime": 1777274714.8634064,
+    "hash": "e95bafe9e06d8a24f1fe341e97f96116"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/JavaSettingsTab.tsx": {
+    "mtime": 1777895334.232721,
+    "hash": "cf834d7bdc4d5e48240c10de4a6278af"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/ProfileSettingsTab.tsx": {
+    "mtime": 1777895334.233744,
+    "hash": "13b9f61350e3d09001185798d84e6c92"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/SettingsActionBar.tsx": {
+    "mtime": 1777895334.2348843,
+    "hash": "6979ac9549a69c388229ca464dbf58c8"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/SettingsHeader.tsx": {
+    "mtime": 1777895334.2348843,
+    "hash": "3ee6a1828d9af0bdc3131e65d9779f95"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/SettingsTabNav.tsx": {
+    "mtime": 1777895334.2348843,
+    "hash": "6bfd536b3d016c76de8c6b7d33367c68"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/SupportSettingsTab.tsx": {
+    "mtime": 1777895334.2348843,
+    "hash": "3f071f3d49f7ad62c8974dfabad5edad"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/types.ts": {
+    "mtime": 1777895334.2370894,
+    "hash": "edba8bfb2f7ec8bd78080f771b9e7f39"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/java/JavaInstalledList.tsx": {
+    "mtime": 1777895334.2370894,
+    "hash": "2b01656a715cfa6f416a9d1aa6afb6d2"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/java/JavaJvmArgsSection.tsx": {
+    "mtime": 1777895334.2370894,
+    "hash": "30eac65dc7ac17dfa9996e6e89904d74"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/java/JavaPathSection.tsx": {
+    "mtime": 1777895334.2370894,
+    "hash": "81eb86140a7d7df3e0645e0ca9de683e"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/java/JavaRamSection.tsx": {
+    "mtime": 1777895334.2370894,
+    "hash": "6681ab73935310d42aca34c7e744d800"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/index.ts": {
+    "mtime": 1777296517.0606062,
+    "hash": "d514fedace63afff2d4f5ec64e3b39bf"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/ui/badge.tsx": {
+    "mtime": 1777895334.2391002,
+    "hash": "870194ec2a06857568b35dcea1411804"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/ui/button.tsx": {
+    "mtime": 1777895334.2391002,
+    "hash": "549a62802d931e6c604a38c5e231a14f"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/ui/card.tsx": {
+    "mtime": 1777895334.2391002,
+    "hash": "a8351f360c12b662bfbdfd40f2906bc2"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/ui/checkbox.tsx": {
+    "mtime": 1777895334.2391002,
+    "hash": "da559f8dd238624057a84e5f66691923"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/ui/dialog.tsx": {
+    "mtime": 1777895334.240695,
+    "hash": "be634cc999340831d44d9bfcbb0897e7"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/ui/index.ts": {
+    "mtime": 1777895334.2413912,
+    "hash": "1a5f28f528086a2c4e6614d84fd8746a"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/ui/input.tsx": {
+    "mtime": 1777895334.2413912,
+    "hash": "3fee611df6cf3e7438eb5d4af3cd1112"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/ui/label.tsx": {
+    "mtime": 1777895334.241897,
+    "hash": "beef0f1da91f8934ea7de8e59e2120c3"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/ui/multi-select.tsx": {
+    "mtime": 1777895334.242915,
+    "hash": "92902ef46b57a465516ea3f9d09d9de6"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/ui/pagination.tsx": {
+    "mtime": 1777895334.2434337,
+    "hash": "54b368a16f2fdf1c79cbb148330191e8"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/ui/select.tsx": {
+    "mtime": 1777895334.2439518,
+    "hash": "1fa4b11dabe749352aca0e2ed85c4cf9"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/ui/sonner.tsx": {
+    "mtime": 1777895334.2444894,
+    "hash": "33e38a61a3fd0dde312d7806ccd645fa"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/ui/tabs.tsx": {
+    "mtime": 1777895334.245004,
+    "hash": "22aaf054d1747c754607a29779303ed4"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/shadcn/ui/textarea.tsx": {
+    "mtime": 1777895334.2455628,
+    "hash": "257fa6549d0d25c1f6a321a72bff5f5c"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/ui/Button.tsx": {
+    "mtime": 1777895334.2461512,
+    "hash": "ede353e7c362471deaac58b289aebb29"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/ui/Card.tsx": {
+    "mtime": 1777895334.2473135,
+    "hash": "e9d0ca72f8fe06f1cbfd0167808f930c"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/ui/Checkbox.tsx": {
+    "mtime": 1777895334.247849,
+    "hash": "c46b8cf56a63db6d226fb74293db1058"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/ui/index.ts": {
+    "mtime": 1777289395.5145571,
+    "hash": "c5f98a8e1909d95fc6a1eec2d6105447"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/ui/Input.tsx": {
+    "mtime": 1777895334.2491183,
+    "hash": "b00ab8652dc35c6a672a579afe2f061a"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/ui/Modal.tsx": {
+    "mtime": 1777895334.2496567,
+    "hash": "45520e9174595665c3b8f77b71b43ce0"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/ui/ProgressBar.tsx": {
+    "mtime": 1777895334.2502284,
+    "hash": "f807ba866f33b5d38afe8b30205e8da5"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/ui/Select.tsx": {
+    "mtime": 1777895334.2507782,
+    "hash": "13a4672d9dbcb555e346401ac233c49d"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/update/index.ts": {
+    "mtime": 1777274714.8683581,
+    "hash": "8ede602ba7fc97b0d09884e257cb428b"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/update/UpdateStatusCard.tsx": {
+    "mtime": 1777274714.8683581,
+    "hash": "266f19cb2ed0a69221c6f6de9f0feb24"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/useAdminPage.ts": {
+    "mtime": 1777895334.25572,
+    "hash": "28bfde2ec3ce4519ddaa9b7361645852"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/useAdminScreen.ts": {
+    "mtime": 1777895334.2577734,
+    "hash": "5c24482ba3b3656c9ac2f1cd6f6ec657"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/useDashboardScreen.ts": {
+    "mtime": 1777895334.2577734,
+    "hash": "8f0b5f06a2157c2ae073fc4fcb1e4b0e"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/useIntegrityCheckScreen.ts": {
+    "mtime": 1777895334.2589736,
+    "hash": "88c4f901af8f4fabf8288085fe9f966b"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/useJava.ts": {
+    "mtime": 1777473221.9542828,
+    "hash": "3a77c4fcc3a47053c7ff02c67b949250"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/useLoginScreen.ts": {
+    "mtime": 1777895334.2594824,
+    "hash": "9f054ff3a8f31572e356b34a82101875"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/useSettingsScreen.tsx": {
+    "mtime": 1777895334.2599983,
+    "hash": "14a1e9f3207a4e7fd6f3d2fdfe0c9302"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/useTranslation.ts": {
+    "mtime": 1777895334.2599983,
+    "hash": "1c5bb13de6b0cba1900a1ab7102e85b0"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/useUpdateScreen.ts": {
+    "mtime": 1777895334.2599983,
+    "hash": "c98c29a83d1c518f1fb119f2f907a55d"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/useWindowControls.ts": {
+    "mtime": 1777289395.5223808,
+    "hash": "00ce6446d300e2c8c3a7fd938371e0ba"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/dashboard/types.ts": {
+    "mtime": 1777895334.2513208,
+    "hash": "4da512a6b9637abe3f5c7cfd76c7cdd3"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/dashboard/utils.ts": {
+    "mtime": 1777895334.251963,
+    "hash": "47d2b934447bbd20d7537bbdba886bca"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/login/types.ts": {
+    "mtime": 1777895334.2525022,
+    "hash": "5f5594a5c36ae1f775044a710916a9ef"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/login/useLoginValidation.ts": {
+    "mtime": 1777895334.2525022,
+    "hash": "7b79dc7136a30e3bcac515b88cb97f93"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/login/utils.ts": {
+    "mtime": 1777895334.2530382,
+    "hash": "061629cef4519f05d421b2479ffd5897"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/queries/useAdminQueries.ts": {
+    "mtime": 1777895334.25572,
+    "hash": "fafa42061b5214e5773ac1522e12dbc9"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/queries/useContentQueries.ts": {
+    "mtime": 1777459597.9495482,
+    "hash": "2886f4be918d26ca39a40cf8eca47178"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/queries/useSystemQueries.ts": {
+    "mtime": 1777459597.9502194,
+    "hash": "ed66f778a890759a5cc3cddc78baa3e4"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/queries/admin/types.ts": {
+    "mtime": 1777895334.2535813,
+    "hash": "cfbdb7050b9ccbbdd30835244bbe14f2"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/queries/admin/useAdminChangelogQueries.ts": {
+    "mtime": 1777895334.2541425,
+    "hash": "0e626521d38baef5f3ab06047feb7bbb"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/queries/admin/useAdminNewsQueries.ts": {
+    "mtime": 1777895334.2541425,
+    "hash": "b6d12f77b479728e1506c0410dae6290"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/queries/admin/useAdminUsersQueries.ts": {
+    "mtime": 1777895334.2546556,
+    "hash": "1c60965b6f44e616b3fa853db803ca3c"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/queries/admin/utils.ts": {
+    "mtime": 1777895334.2546556,
+    "hash": "ffd81f1bb75e88e3a6000c9ad4c34850"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/settings/types.ts": {
+    "mtime": 1777895334.25572,
+    "hash": "cb8ae2e1f122028b79c219239f838a28"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/settings/useSettingsTabRenderer.tsx": {
+    "mtime": 1777895334.25572,
+    "hash": "bb7ab064e9d6182e03e15233b1ea81a4"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/lib/markdown.ts": {
+    "mtime": 1777895334.2599983,
+    "hash": "2cf3fd105fed8f3a29b30cbb5851d6d2"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/lib/queryClient.ts": {
+    "mtime": 1777459597.9529965,
+    "hash": "867e4ec1fba320dba26079f10c80422d"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/lib/queryHelpers.ts": {
+    "mtime": 1777895334.2599983,
+    "hash": "904bac9afddd508ff05af26f6580ccaa"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/lib/queryKeys.ts": {
+    "mtime": 1777459597.9535398,
+    "hash": "23b93522bea04302e76cc51ee7ad4909"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/lib/utils.ts": {
+    "mtime": 1777296517.0733716,
+    "hash": "b36b4471fa392f7fd52db5d67e6d22e8"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/lib/themes/themeRegistry.ts": {
+    "mtime": 1777473221.9605126,
+    "hash": "93f6a99bc06a3ebbffc07dbd83cc7fda"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/lib/validation/authValidation.ts": {
+    "mtime": 1777473221.9605126,
+    "hash": "8ffa162d65fe27815556560df1c4c697"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/lib/validation/newsValidation.ts": {
+    "mtime": 1777462900.7569344,
+    "hash": "91d5d938c0ca5904daedb0180cbe2191"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/lib/validation/useNewsFormValidation.ts": {
+    "mtime": 1777463205.7774012,
+    "hash": "a4cda9af25a15deb3a18958e28765986"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/pages/AdminScreen.tsx": {
+    "mtime": 1777895334.2633486,
+    "hash": "898d07a32152c4f0c44db5fe6f45770e"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/pages/DashboardScreen.tsx": {
+    "mtime": 1777895334.2643576,
+    "hash": "774fca82b037fcbbbb3bbe6ba5ac08eb"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/pages/index.ts": {
+    "mtime": 1777276387.6492524,
+    "hash": "e4ba0bbf96c13f2b610a3d8415c453ef"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/pages/IntegrityCheckScreen.tsx": {
+    "mtime": 1777895334.265249,
+    "hash": "ed5ac0d743737c531786fdac6afc53c9"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/pages/LoginScreen.tsx": {
+    "mtime": 1777895334.265249,
+    "hash": "4b9d77d50e0b6a20f2dcc0ad4ec17379"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/pages/SettingsScreen.tsx": {
+    "mtime": 1777895334.265249,
+    "hash": "1faa2244f3aaee6976630d5ff902f0fd"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/pages/UpdateScreen.tsx": {
+    "mtime": 1777895334.265249,
+    "hash": "c953ad4350ebaa6a3effeecfc940a6ce"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/stores/useAdminChangelogStore.ts": {
+    "mtime": 1777386801.55942,
+    "hash": "acc83a40551834e3e7b85192d80eadaf"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/stores/useAdminNewsStore.ts": {
+    "mtime": 1777446782.2411234,
+    "hash": "207106454c3d4fdd96a22a10d656efb0"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/stores/useAdminStore.ts": {
+    "mtime": 1777459597.9552503,
+    "hash": "6c14d4caf978a43b61bd4d4d2f402ea8"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/stores/useAuthStore.ts": {
+    "mtime": 1777895334.2677956,
+    "hash": "71c0d24d03696e34d95a0bd739e52073"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/stores/useChangelogStore.ts": {
+    "mtime": 1777386801.6242712,
+    "hash": "12ba233d19b4761d21a551e2bd0965ec"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/stores/useDownloadStore.ts": {
+    "mtime": 1777459597.9552503,
+    "hash": "79a1f8aa3960f1b479db6d1ec2cc7f83"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/stores/useNewsStore.ts": {
+    "mtime": 1777446782.2411234,
+    "hash": "e303aeac81c49b23891fdb6ebfc4676b"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/stores/useServerStatusStore.ts": {
+    "mtime": 1777036429.3133235,
+    "hash": "52b49be817dfbb4cba7eeaa1e80a78fd"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/stores/useSettingsStore.ts": {
+    "mtime": 1777895334.2677956,
+    "hash": "d7de50974901a73f95c830e718e6cb3a"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/stores/useStartupGateStore.ts": {
+    "mtime": 1777274714.8721387,
+    "hash": "f0ad639d81d45450bf11977e6cd6a401"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/styles/themes/auto-load-themes.ts": {
+    "mtime": 1777473221.964249,
+    "hash": "3658fa25bf68a470ace3b52efcfde3fc"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/types/index.ts": {
+    "mtime": 1777473221.9686875,
+    "hash": "8a950d8e56ab87be17e45135592b1a9d"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/shared/constants/errors.ts": {
+    "mtime": 1777895334.2677956,
+    "hash": "cb59b340166c79e6e53e0421dc97e8de"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/shared/constants/ipc-chanels.ts": {
+    "mtime": 1777895334.2677956,
+    "hash": "3f049ee37418e12c68abef48ba2b2ac1"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/shared/constants/log-messages.ts": {
+    "mtime": 1777895334.2729254,
+    "hash": "0ed445fe7bc6d33ba618264e6f0a9788"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/shared/constants/system.ts": {
+    "mtime": 1777446782.2483916,
+    "hash": "9edf64c4da340b1c38a0288ad57500ec"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/shared/constants/translations.ts": {
+    "mtime": 1777459597.9590983,
+    "hash": "93df4bcc97b5f2c6f028d2aca8d91d5b"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/shared/constants/ui-strings.ts": {
+    "mtime": 1777284931.80224,
+    "hash": "241d49ed85dd24fca86af418db9306af"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/shared/constants/ipc/channels.ts": {
+    "mtime": 1777895334.2703357,
+    "hash": "4a7c8a89d71107ee82e6e45dae45bb67"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/shared/constants/ipc/map.ts": {
+    "mtime": 1777895334.2703357,
+    "hash": "f50557e9b471ebbf6b6d5d98dcfa725c"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/shared/constants/ipc/models.ts": {
+    "mtime": 1777895334.2703357,
+    "hash": "efe985c3b62233db15a036fcc50108e0"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/shared/validation/authValidation.ts": {
+    "mtime": 1777473221.97194,
+    "hash": "800d1d90760ea0a1effee632226523d1"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/GEMINI.MD": {
+    "mtime": 1777895440.4047265,
+    "hash": "e53099ddfb1c2966622511f6eed88550"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/README.md": {
+    "mtime": 1777895334.157991,
+    "hash": "06edc8e51019bd357ee42c912cf4d9d2"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/index.md": {
+    "mtime": 1777895334.1906219,
+    "hash": "fd4dd8099eb518705151106972f245e6"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/product-guidelines.md": {
+    "mtime": 1777895334.1906219,
+    "hash": "7eedd1d0368cbc800a507006e4039426"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/product.md": {
+    "mtime": 1777895334.1906219,
+    "hash": "bc107034ccb0e7ac13f029b9c568e038"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/tech-stack.md": {
+    "mtime": 1777895334.1906219,
+    "hash": "682f8dead3163ad0a772ce5f5425657e"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/tracks.md": {
+    "mtime": 1777895334.1906219,
+    "hash": "7afa911145ae62fac135a4e7d8039650"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/workflow.md": {
+    "mtime": 1777895334.1906219,
+    "hash": "850f46e6dda0fdd839cca3cbb791d8b5"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/fix_gh_actions_20260502/index.md": {
+    "mtime": 1777895334.183941,
+    "hash": "a829944c3cc5a433e9fe66ef4c4fb588"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/fix_gh_actions_20260502/plan.md": {
+    "mtime": 1777895334.183941,
+    "hash": "079351155952fd6a28ce773e737b8c93"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/fix_gh_actions_20260502/spec.md": {
+    "mtime": 1777895334.183941,
+    "hash": "a932c066f99e3bba158d5f40d4e6f760"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/fix_release_target_20260502/index.md": {
+    "mtime": 1777895334.1850324,
+    "hash": "fae8cd61ac26bd30a7263ca754a54b49"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/fix_release_target_20260502/plan.md": {
+    "mtime": 1777895334.1850324,
+    "hash": "f1293f487d50bdda0e42405c44b2b66a"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/fix_release_target_20260502/spec.md": {
+    "mtime": 1777895334.1850324,
+    "hash": "48db4078387b13508610ae251f10b2e0"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/fix_smoke_linux_20260502/index.md": {
+    "mtime": 1777895334.1850324,
+    "hash": "52ab71c3c6a6e94b5e730959d78fa9be"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/fix_smoke_linux_20260502/plan.md": {
+    "mtime": 1777895334.1850324,
+    "hash": "12d1f0941de0cf2032af831e1619ce71"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/fix_smoke_linux_20260502/spec.md": {
+    "mtime": 1777895334.1850324,
+    "hash": "da5f48d9a96a0e76bf7016eb15673f7d"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/fix_smoke_test_20260502/index.md": {
+    "mtime": 1777895334.1870472,
+    "hash": "8f61f1e725eb7f1765ba22c1e8805a48"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/fix_smoke_test_20260502/plan.md": {
+    "mtime": 1777895334.1870472,
+    "hash": "f5e855973e5ca00db61d323e5954227b"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/fix_smoke_test_20260502/spec.md": {
+    "mtime": 1777895334.1870472,
+    "hash": "91157aad47ecd89a46deeaba21717d36"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/refactor_auth_handler_20260502/index.md": {
+    "mtime": 1777895334.1870472,
+    "hash": "3dcdf096753a878f8e7b5755602c361c"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/refactor_auth_handler_20260502/plan.md": {
+    "mtime": 1777895334.1890547,
+    "hash": "cba53fad38b963c46da930f051d1521b"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/archive/refactor_auth_handler_20260502/spec.md": {
+    "mtime": 1777895334.1890547,
+    "hash": "b69b90712c32c74c65eb72ecb01d66f6"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/code_styleguides/general.md": {
+    "mtime": 1777895334.1890547,
+    "hash": "640f6aea0dfb778d58f1f93aaf18979c"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/code_styleguides/html-css.md": {
+    "mtime": 1777895334.1890547,
+    "hash": "045b8342765a0e2c393ef9a9c05ac92e"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/code_styleguides/javascript.md": {
+    "mtime": 1777895334.1890547,
+    "hash": "2d94a4d1ae8598635435861329b5ef22"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/conductor/code_styleguides/typescript.md": {
+    "mtime": 1777895334.1890547,
+    "hash": "562ef547a24bbae421b5f94d347a3499"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/docs/distro.md": {
+    "mtime": 1777895334.1926386,
+    "hash": "4e84a1bb68de6af70c5e5ef18fc8cfb6"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/docs/MicrosoftAuth.md": {
+    "mtime": 1777895334.1926386,
+    "hash": "89f76e499c2d35debb06c9110b2be27e"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/README.md": {
+    "mtime": 1776865989.7978857,
+    "hash": "d1eff0d9ede9e1d129deaf18cecdd747"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/assets/hero.png": {
+    "mtime": 1776869380.7163856,
+    "hash": "aead493361b27e7510691c5d7072dfc1"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/assets/react.svg": {
+    "mtime": 1776869380.7174394,
+    "hash": "f0402b67b6ce880f65666bb49e841696"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/assets/vite.svg": {
+    "mtime": 1776869380.7179804,
+    "hash": "6d5180a782d64c8cf51ba01c2a2184d8"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/public/photo_2026-04-23_10-34-22.jpg": {
+    "mtime": 1776934600.2365053,
+    "hash": "7f1d12f49364640180dee2bafb2e854e"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/public/photo_2026-04-23_10-34-56.jpg": {
+    "mtime": 1776934600.2365053,
+    "hash": "9ac9169cdde5fa6d841ebd68b1ecbc56"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/public/photo_2026-04-23_10-35-07.jpg": {
+    "mtime": 1776934600.2375214,
+    "hash": "7f1d12f49364640180dee2bafb2e854e"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/public/photo_2026-04-23_10-35-12.jpg": {
+    "mtime": 1776934600.2380302,
+    "hash": "1dad73a6eeac54e1e72b6b04684af590"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/assets/photo_2026-04-23_10-34-22.jpg": {
+    "mtime": 1776934600.2386448,
+    "hash": "7f1d12f49364640180dee2bafb2e854e"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/assets/photo_2026-04-23_10-34-56.jpg": {
+    "mtime": 1776934600.2392354,
+    "hash": "9ac9169cdde5fa6d841ebd68b1ecbc56"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/assets/photo_2026-04-23_10-35-07.jpg": {
+    "mtime": 1776934600.2397437,
+    "hash": "7f1d12f49364640180dee2bafb2e854e"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/assets/photo_2026-04-23_10-35-12.jpg": {
+    "mtime": 1776934600.2397437,
+    "hash": "1dad73a6eeac54e1e72b6b04684af590"
+  }
+}
