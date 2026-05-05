@@ -60,3 +60,6 @@ htmlcov/
 ```
 release/
 dist-electron/
+.agents
+.codex
+.gemini

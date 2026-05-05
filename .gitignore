@@ -60,3 +60,4 @@ htmlcov/
 ```
 release/
 dist-electron/
+.codex/config.toml
