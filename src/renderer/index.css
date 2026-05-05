@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --animate-spin-slow: spin 3s linear infinite;
+}
+
 /* Minecraft font */
 @font-face {
   font-family: 'Minecraft';

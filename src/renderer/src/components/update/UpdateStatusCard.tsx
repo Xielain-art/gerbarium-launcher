@@ -1,4 +1,6 @@
+import { RefreshCw } from "lucide-react";
 import { UI_STRINGS } from "../../../../shared/constants/ui-strings";
+import { ProgressBar } from "../ui/ProgressBar";
 
 interface UpdateStatusCardProps {
   appVersion: string;
@@ -12,46 +14,36 @@ export function UpdateStatusCard({
   updateProgress,
 }: UpdateStatusCardProps) {
   return (
-    <div className="w-full max-w-md">
-      <div className="mb-8 flex justify-center">
-        <div className="flex h-24 w-24 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--theme-surface)_50%,transparent)] shadow-2xl">
-          <span className="text-5xl">UP</span>
+    <div className="w-full max-w-md p-8 border border-[#2e2e2e] bg-[#0f0f0f] rounded-lg">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="p-2 rounded bg-[#3ecf8e]/10">
+          <RefreshCw size={20} className="text-[#3ecf8e] animate-spin-slow" />
+        </div>
+        <div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3ecf8e]">
+            System Update
+          </div>
+          <h1 className="font-sans text-lg font-medium text-[#fafafa] leading-tight">
+            Gerbarium Launcher
+          </h1>
         </div>
       </div>
 
-      <h1 className="mb-2 text-center font-minecraft text-2xl font-bold text-theme">
-        Gerbarium Launcher
-      </h1>
+      <div className="space-y-6">
+        <ProgressBar
+          progress={updateProgress}
+          status={updateMessage}
+        />
 
-      {appVersion && (
-        <p className="mb-8 text-center font-minecraft text-sm text-theme-muted">
-          {UI_STRINGS.COMMON.VERSION}: {appVersion}
-        </p>
-      )}
-
-      <div className="mc-card">
-        <div className="mb-4 text-center">
-          <p className="font-minecraft text-sm text-[var(--mc-progress-fill-a)]">{updateMessage}</p>
-        </div>
-
-        {updateProgress > 0 && (
-          <div className="space-y-2">
-            <div className="mc-progress">
-              <div
-                className="mc-progress-fill mc-progress-striped"
-                style={{ width: `${updateProgress}%` }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="font-minecraft text-base font-bold text-white drop-shadow-[2px_2px_0_#000]">
-                  {Math.round(updateProgress)}%
-                </span>
-              </div>
-            </div>
+        {appVersion && (
+          <div className="flex justify-between items-center border-t border-[#2e2e2e] pt-4 font-mono text-[10px] uppercase tracking-wider text-[#4d4d4d]">
+            <span>{UI_STRINGS.COMMON.VERSION}</span>
+            <span>{appVersion}</span>
           </div>
         )}
       </div>
 
-      <p className="mt-6 text-center font-minecraft text-xs text-theme-muted">
+      <p className="mt-8 text-center font-mono text-[9px] uppercase tracking-widest text-[#4d4d4d]/60">
         {UI_STRINGS.UPDATE_SCREEN.COPYRIGHT}
       </p>
     </div>
