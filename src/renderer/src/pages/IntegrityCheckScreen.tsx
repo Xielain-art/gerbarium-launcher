@@ -1,3 +1,4 @@
+import { ShieldCheck } from "lucide-react";
 import { ProgressBar } from "../components/ui/ProgressBar";
 import { useIntegrityCheckScreen } from "../hooks/useIntegrityCheckScreen";
 
@@ -5,25 +6,32 @@ export function IntegrityCheckScreen(): React.JSX.Element {
   const vm = useIntegrityCheckScreen();
 
   return (
-    <div className="bg-theme-main-gradient relative flex h-screen w-full items-center justify-center overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--mc-progress-fill-a)_22%,transparent),transparent_55%)]" />
-      <div className="relative w-full max-w-2xl rounded-xl border border-theme bg-[color-mix(in_srgb,var(--theme-bg)_74%,black_26%)] p-8 shadow-2xl backdrop-blur-md">
-        <div className="mb-4 font-minecraft text-xs uppercase tracking-wider text-[var(--mc-progress-fill-a)]">
-          Security Preflight
+    <div className="relative flex h-screen w-full items-center justify-center bg-[#171717] overflow-hidden">
+      <div className="auth-grid-overlay opacity-[0.05]" />
+      
+      <div className="relative w-full max-w-md p-8 border border-[#2e2e2e] bg-[#0f0f0f] rounded-lg">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 rounded bg-[#3ecf8e]/10">
+            <ShieldCheck size={20} className="text-[#3ecf8e]" />
+          </div>
+          <div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3ecf8e]">
+              Security Preflight
+            </div>
+            <h1 className="font-sans text-lg font-medium text-[#fafafa] leading-tight">
+              Verifying Integrity
+            </h1>
+          </div>
         </div>
-        <h1 className="mb-2 font-minecraft text-2xl text-theme">
-          Checking Launcher Integrity
-        </h1>
-        <p className="mb-6 font-minecraft text-sm text-theme-muted">
-          {vm.statusMessage}
-        </p>
+
         <ProgressBar
           progress={vm.progress}
           status={vm.phaseText}
-          className="mb-2"
+          className="mb-4"
         />
-        <div className="font-minecraft text-xs text-theme-muted">
-          {vm.progress}%
+
+        <div className="font-mono text-[9px] text-[#4d4d4d] leading-relaxed">
+          {vm.statusMessage}
         </div>
       </div>
     </div>
