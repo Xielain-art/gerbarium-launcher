@@ -17,7 +17,7 @@
     "ADMIN_PANEL": "Админ-панель", "READ_MORE": "Подробнее", "LOADING_MORE_NEWS": "Загрузка новостей...", "NO_MORE_NEWS": "Больше новостей нет.", "FAILED_TO_LOAD_NEWS": "Не удалось загрузить новости", "TRY_AGAIN": "Повторить", "CLOSE": "Закрыть", "DOWNLOAD_RELEASE": "Скачать релиз", "TAB_NEWS": "Новости", "TAB_CHANGELOG": "Changelog", "HIDE_CONSOLE": "Скрыть консоль", "SHOW_CONSOLE": "Показать консоль"
   },
   "SETTINGS": {
-    "TITLE": "Настройки", "BACK_BUTTON": "← Назад", "LOGOUT_BUTTON": "Выйти",
+    "TITLE": "Настройки", "BACK_BUTTON": "Назад", "LOGOUT_BUTTON": "Выйти",
     "TABS": { "general": "ОБЩИЕ", "java": "JAVA", "profile": "ПРОФИЛЬ", "advanced": "ADVANCED", "support": "ПОДДЕРЖКА" },
     "GENERAL": { "TITLE": "Общие настройки", "LANGUAGE_LABEL": "Язык", "LANGUAGE_OPTIONS": [{ "value": "ru", "label": "Русский" }, { "value": "en", "label": "English" }], "CLOSE_ON_LAUNCH": "Закрывать лаунчер при запуске игры", "MINIMIZE_TO_TRAY": "Сворачивать в трей", "DISCORD_RPC": "Показывать статус в Discord (RPC)", "THEME_LABEL": "Тема оформления", "THEMES": { "gerbarium": "Gerbarium", "dark": "Темная", "light": "Светлая" } },
     "JAVA": { "TITLE": "Настройки Java", "INSTALLED_VERSIONS": "Установленные версии", "PATH_LABEL": "Путь к Java", "PATH_PLACEHOLDER": "C:/Program Files/Java/jdk/bin/java.exe", "BROWSE_BUTTON": "Выбрать файл", "RAM_LABEL": "Выделение ОЗУ:", "JVM_ARGS_LABEL": "Аргументы JVM", "JVM_ARGS_PLACEHOLDER": "-XX:+UseG1GC -XX:MaxGCPauseMillis=50", "JVM_ARGS_HELP": "Дополнительные параметры запуска Java" },

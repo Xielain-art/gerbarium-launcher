@@ -11,10 +11,9 @@ export function Card({
     <div
       onClick={onClick}
       className={cn(
-        "mc-card p-4",
-        active &&
-          "border-b-[var(--btn-primary-border-lo)] border-l-[var(--mc-accent)] border-r-[var(--btn-primary-border-lo)] border-t-[var(--mc-accent)] shadow-[inset_2px_2px_0px_var(--mc-accent-hi),inset_-2px_-2px_0px_var(--btn-primary-border-lo)]",
-        onClick && "mc-card-clickable transition-colors",
+        "relative overflow-hidden rounded-lg border border-[#2e2e2e] bg-[#111111] transition-all duration-200",
+        active && "border-[#3ecf8e] ring-1 ring-[#3ecf8e]",
+        onClick && "cursor-pointer hover:border-[#363636] hover:bg-[#141414] active:scale-[0.99]",
         className,
       )}
     >

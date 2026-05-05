@@ -17,11 +17,11 @@ export function JavaSettingsTab(
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-8">
-      <div>
+      <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-semibold tracking-tight text-[#fafafa]">
           {props.t.SETTINGS.JAVA.TITLE}
         </h2>
-        <p className="mt-1 text-sm text-[#898989]">
+        <p className="text-sm text-[#898989]">
           Configure Java runtime environment and memory allocation.
         </p>
       </div>
@@ -56,18 +56,20 @@ export function JavaSettingsTab(
           }
         />
 
-        <JavaRamSection
-          t={props.t}
-          maxRamGb={props.maxRamGb}
-          ramAllocation={props.general.ramAllocation}
-          onUpdateRam={(ram) => props.onUpdateGeneral({ ramAllocation: ram })}
-        />
+        <div className="grid gap-6 md:grid-cols-1">
+          <JavaRamSection
+            t={props.t}
+            maxRamGb={props.maxRamGb}
+            ramAllocation={props.general.ramAllocation}
+            onUpdateRam={(ram) => props.onUpdateGeneral({ ramAllocation: ram })}
+          />
 
-        <JavaJvmArgsSection
-          t={props.t}
-          jvmArgs={props.general.jvmArgs || ""}
-          onUpdateJvmArgs={(jvmArgs) => props.onUpdateGeneral({ jvmArgs })}
-        />
+          <JavaJvmArgsSection
+            t={props.t}
+            jvmArgs={props.general.jvmArgs || ""}
+            onUpdateJvmArgs={(jvmArgs) => props.onUpdateGeneral({ jvmArgs })}
+          />
+        </div>
       </div>
     </div>
   );

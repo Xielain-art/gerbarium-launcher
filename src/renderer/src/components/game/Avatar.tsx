@@ -37,7 +37,7 @@ export function Avatar({
   const imageUrl = getAvatarUrl();
 
   return (
-    <div className={`${sizeMap[size]} ${className}`}>
+    <div className={`${sizeMap[size]} relative overflow-hidden rounded-lg flex items-center justify-center bg-[#1a1a1a] ${className}`}>
       {showBody ? (
         // Full body render
         <img
@@ -48,14 +48,12 @@ export function Avatar({
         />
       ) : (
         // Head only (face icon)
-        <div className="w-full h-full bg-[var(--mc-accent)] border-[3px] border-t-[var(--mc-accent-hi)] border-l-[var(--mc-accent-hi)] border-b-[var(--btn-primary-border-lo)] border-r-[var(--btn-primary-border-lo)] flex items-center justify-center overflow-hidden">
-          <img
-            src={imageUrl}
-            alt={username || 'Player'}
-            className="w-full h-full object-cover"
-            style={{ imageRendering: 'pixelated' }}
-          />
-        </div>
+        <img
+          src={imageUrl}
+          alt={username || 'Player'}
+          className="w-full h-full object-cover"
+          style={{ imageRendering: 'pixelated' }}
+        />
       )}
     </div>
   );

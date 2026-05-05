@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { TranslationType } from "../../../../../shared/constants/translations";
 import { Card } from "../../ui";
+import { Cpu } from "lucide-react";
 
 interface Props {
   t: TranslationType;
@@ -30,17 +31,25 @@ export function JavaRamSection({
 
   return (
     <Card className="p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#4d4d4d]">
-          {t.SETTINGS.JAVA.RAM_LABEL}
-        </h3>
-        <span className="rounded-full bg-[#111111] px-3 py-1 text-sm font-semibold text-[#3ecf8e] border border-[#2e2e2e]">
-          {localRamAllocation} {t.COMMON.GB}
-        </span>
+      <div className="mb-8 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Cpu size={16} className="text-[#4d4d4d]" />
+          <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
+            {t.SETTINGS.JAVA.RAM_LABEL}
+          </h3>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[10px] font-medium uppercase tracking-wider text-[#4d4d4d]">
+            Allocation
+          </span>
+          <span className="rounded-md bg-[#0b2b1a] px-3 py-1 font-mono text-sm font-bold text-[#3ecf8e] border border-[#3ecf8e]/20 shadow-[0_0_12px_rgba(62,207,142,0.1)]">
+            {localRamAllocation} {t.COMMON.GB}
+          </span>
+        </div>
       </div>
       
       <div className="space-y-4">
-        <div className="flex items-center gap-4">
+        <div className="group relative flex items-center">
           <input
             type="range"
             min="1"
@@ -53,10 +62,14 @@ export function JavaRamSection({
             onMouseUp={commitRamAllocation}
             onTouchEnd={commitRamAllocation}
             onKeyUp={commitRamAllocation}
-            className="h-2 flex-1 cursor-pointer appearance-none rounded-full bg-[#111111] border border-[#2e2e2e] focus:outline-none focus:ring-2 focus:ring-[#3ecf8e]/50 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#0f0f0f] [&::-webkit-slider-thumb]:bg-[#3ecf8e] [&::-webkit-slider-thumb]:transition-transform hover:[&::-webkit-slider-thumb]:scale-110"
+            className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-[#111111] border border-[#2e2e2e] focus:outline-none focus:ring-2 focus:ring-[#3ecf8e]/20
+              [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#0f0f0f] [&::-webkit-slider-thumb]:bg-[#3ecf8e] [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(62,207,142,0.4)] [&::-webkit-slider-thumb]:transition-all hover:[&::-webkit-slider-thumb]:scale-125 hover:[&::-webkit-slider-thumb]:bg-[#50e3a1]"
+            style={{
+              background: `linear-gradient(to right, #3ecf8e 0%, #3ecf8e ${(localRamAllocation / maxRamGb) * 100}%, #111111 ${(localRamAllocation / maxRamGb) * 100}%, #111111 100%)`
+            }}
           />
         </div>
-        <div className="flex justify-between text-[11px] font-medium tracking-wide text-[#898989]">
+        <div className="flex justify-between font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
           <span>
             1 {t.COMMON.GB}
           </span>

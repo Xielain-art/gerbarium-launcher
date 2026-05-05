@@ -36,7 +36,7 @@ export function SettingsTabNav({
     <div className="flex w-72 shrink-0 flex-col border-r border-[#2e2e2e] bg-[#0f0f0f]">
       <div className="flex-1 space-y-1 p-6">
         <div className="mb-8 px-2">
-          <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#4d4d4d]">
+          <h2 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
             Configuration
           </h2>
         </div>
@@ -76,7 +76,7 @@ export function SettingsTabNav({
                   <ChevronRight size={14} className="text-[#3ecf8e]" />
                 )}
                 {isActive && (
-                  <div className="absolute left-0 top-1/4 h-1/2 w-[2px] rounded-full bg-[#3ecf8e]" />
+                  <div className="absolute left-0 top-2 h-[calc(100%-16px)] w-[2px] rounded-full bg-[#3ecf8e]" />
                 )}
               </button>
             );
@@ -85,7 +85,7 @@ export function SettingsTabNav({
       </div>
 
       {/* Account Section at the bottom */}
-      <div className="border-t border-[#2e2e2e] p-6">
+      <div className="border-t border-[#2e2e2e] bg-[#0c0c0c] p-6">
         <div className="flex items-center gap-4 px-2">
           <div className="relative">
             <Avatar 
@@ -93,13 +93,13 @@ export function SettingsTabNav({
               size="sm" 
               className="ring-1 ring-[#2e2e2e] transition-all group-hover:ring-[#3ecf8e]"
             />
-            <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#0f0f0f] bg-[#3ecf8e]" />
+            <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#0c0c0c] bg-[#3ecf8e] shadow-[0_0_8px_rgba(62,207,142,0.5)]" />
           </div>
           <div className="flex flex-1 flex-col min-w-0">
             <span className="truncate text-sm font-semibold text-[#fafafa]">
               {user?.username || "Player"}
             </span>
-            <span className="truncate text-[11px] font-medium text-[#4d4d4d]">
+            <span className="font-mono truncate text-[10px] font-medium uppercase tracking-wider text-[#4d4d4d]">
               {user?.email || "Local Player"}
             </span>
           </div>

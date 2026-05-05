@@ -40,6 +40,8 @@
   --mc-accent: var(--supabase-green);
   --mc-accent-hi: #50e3a1;
 
+  --font-mono: 'Source Code Pro', 'Office Code Pro', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+
   /* Legacy and shadcn fallback tokens */
   --background: 240 10% 3.9%;
   --foreground: 0 0% 98%;

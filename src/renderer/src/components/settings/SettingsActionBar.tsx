@@ -17,15 +17,15 @@ export function SettingsActionBar({
   }
 
   return (
-    <div className="mx-auto mt-8 flex max-w-4xl justify-end px-8 pb-8">
+    <div className="mx-auto mt-4 flex max-w-4xl justify-end px-8 pb-12">
       <Button 
         onClick={onReset} 
         variant="danger" 
         size="md" 
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 border-[#ff8080]/20 bg-[#451212]/20 font-semibold text-[#ff8080] hover:bg-[#451212]/40"
       >
         <RotateCcw size={16} />
-        {t.SETTINGS.ACTIONS.RESET_BUTTON}
+        <span className="font-mono text-[11px] uppercase tracking-wider">{t.SETTINGS.ACTIONS.RESET_BUTTON}</span>
       </Button>
     </div>
   );
