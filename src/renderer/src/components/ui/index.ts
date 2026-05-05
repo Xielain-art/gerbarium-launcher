@@ -5,3 +5,4 @@ export { Card } from './Card';
 export { ProgressBar } from './ProgressBar';
 export { Modal, ModalActions, ConfirmModal } from './Modal';
 export { Select } from './Select';
+export * from "./InputOTP";
