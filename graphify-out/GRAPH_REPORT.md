@@ -1,16 +1,16 @@
 # Graph Report - gerbarium-launcher  (2026-05-05)
 
 ## Corpus Check
-- 227 files · ~490,666 words
+- 227 files · ~492,787 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1143 nodes · 1767 edges · 164 communities detected
+- 1144 nodes · 1772 edges · 161 communities detected
 - Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 152 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `62507938`
+- Built from commit: `cb61e96a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -79,15 +79,15 @@
 - [[_COMMUNITY_Community 61|Community 61]]
 - [[_COMMUNITY_Community 62|Community 62]]
 - [[_COMMUNITY_Community 63|Community 63]]
-- [[_COMMUNITY_Community 64|Community 64]]
 - [[_COMMUNITY_Community 65|Community 65]]
 - [[_COMMUNITY_Community 66|Community 66]]
+- [[_COMMUNITY_Community 67|Community 67]]
 - [[_COMMUNITY_Community 68|Community 68]]
 - [[_COMMUNITY_Community 69|Community 69]]
 - [[_COMMUNITY_Community 70|Community 70]]
-- [[_COMMUNITY_Community 71|Community 71]]
-- [[_COMMUNITY_Community 72|Community 72]]
 - [[_COMMUNITY_Community 73|Community 73]]
+- [[_COMMUNITY_Community 74|Community 74]]
+- [[_COMMUNITY_Community 75|Community 75]]
 - [[_COMMUNITY_Community 76|Community 76]]
 - [[_COMMUNITY_Community 77|Community 77]]
 - [[_COMMUNITY_Community 78|Community 78]]
@@ -104,9 +104,9 @@
 - [[_COMMUNITY_Community 89|Community 89]]
 - [[_COMMUNITY_Community 90|Community 90]]
 - [[_COMMUNITY_Community 91|Community 91]]
-- [[_COMMUNITY_Community 92|Community 92]]
-- [[_COMMUNITY_Community 93|Community 93]]
-- [[_COMMUNITY_Community 94|Community 94]]
+- [[_COMMUNITY_Community 201|Community 201]]
+- [[_COMMUNITY_Community 202|Community 202]]
+- [[_COMMUNITY_Community 203|Community 203]]
 - [[_COMMUNITY_Community 204|Community 204]]
 - [[_COMMUNITY_Community 205|Community 205]]
 - [[_COMMUNITY_Community 206|Community 206]]
@@ -119,18 +119,18 @@
 - [[_COMMUNITY_Community 213|Community 213]]
 - [[_COMMUNITY_Community 214|Community 214]]
 - [[_COMMUNITY_Community 215|Community 215]]
-- [[_COMMUNITY_Community 216|Community 216]]
 - [[_COMMUNITY_Community 217|Community 217]]
-- [[_COMMUNITY_Community 218|Community 218]]
-- [[_COMMUNITY_Community 220|Community 220]]
-- [[_COMMUNITY_Community 222|Community 222]]
-- [[_COMMUNITY_Community 224|Community 224]]
-- [[_COMMUNITY_Community 226|Community 226]]
-- [[_COMMUNITY_Community 228|Community 228]]
-- [[_COMMUNITY_Community 232|Community 232]]
-- [[_COMMUNITY_Community 234|Community 234]]
-- [[_COMMUNITY_Community 239|Community 239]]
+- [[_COMMUNITY_Community 219|Community 219]]
+- [[_COMMUNITY_Community 221|Community 221]]
+- [[_COMMUNITY_Community 223|Community 223]]
+- [[_COMMUNITY_Community 225|Community 225]]
+- [[_COMMUNITY_Community 229|Community 229]]
+- [[_COMMUNITY_Community 231|Community 231]]
+- [[_COMMUNITY_Community 236|Community 236]]
+- [[_COMMUNITY_Community 238|Community 238]]
+- [[_COMMUNITY_Community 240|Community 240]]
 - [[_COMMUNITY_Community 241|Community 241]]
+- [[_COMMUNITY_Community 242|Community 242]]
 - [[_COMMUNITY_Community 243|Community 243]]
 - [[_COMMUNITY_Community 244|Community 244]]
 - [[_COMMUNITY_Community 245|Community 245]]
@@ -164,21 +164,18 @@
 - [[_COMMUNITY_Community 273|Community 273]]
 - [[_COMMUNITY_Community 274|Community 274]]
 - [[_COMMUNITY_Community 275|Community 275]]
-- [[_COMMUNITY_Community 276|Community 276]]
 - [[_COMMUNITY_Community 277|Community 277]]
-- [[_COMMUNITY_Community 278|Community 278]]
 - [[_COMMUNITY_Community 280|Community 280]]
-- [[_COMMUNITY_Community 283|Community 283]]
-- [[_COMMUNITY_Community 284|Community 284]]
-- [[_COMMUNITY_Community 290|Community 290]]
-- [[_COMMUNITY_Community 294|Community 294]]
-- [[_COMMUNITY_Community 296|Community 296]]
-- [[_COMMUNITY_Community 298|Community 298]]
-- [[_COMMUNITY_Community 302|Community 302]]
+- [[_COMMUNITY_Community 281|Community 281]]
+- [[_COMMUNITY_Community 287|Community 287]]
+- [[_COMMUNITY_Community 291|Community 291]]
+- [[_COMMUNITY_Community 293|Community 293]]
+- [[_COMMUNITY_Community 295|Community 295]]
+- [[_COMMUNITY_Community 299|Community 299]]
+- [[_COMMUNITY_Community 301|Community 301]]
 - [[_COMMUNITY_Community 304|Community 304]]
 - [[_COMMUNITY_Community 307|Community 307]]
-- [[_COMMUNITY_Community 310|Community 310]]
-- [[_COMMUNITY_Community 315|Community 315]]
+- [[_COMMUNITY_Community 312|Community 312]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 63 edges
@@ -204,11 +201,11 @@
 - `updateSelectedServer()` --calls--> `fullSettingsSave()`  [INFERRED]
   _legacy_app/assets/js/scripts/landing.js → _legacy_app/assets/js/scripts/settings.js
 
-## Communities (323 total, 115 thin omitted)
+## Communities (320 total, 112 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.09
-Nodes (73): banUserRequest(), createRoleRequest(), deleteTestUserRequest(), getAdminStatsRequest(), getRolesRequest(), getUsersRequest(), unbanUserRequest(), updateRoleRequest() (+65 more)
+Cohesion: 0.08
+Nodes (75): banUserRequest(), createRoleRequest(), deleteTestUserRequest(), getAdminStatsRequest(), getRolesRequest(), getUsersRequest(), unbanUserRequest(), updateRoleRequest() (+67 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.08
@@ -231,28 +228,28 @@ Cohesion: 0.14
 Nodes (28): getJavaDownloadUrl(), getJavaVersionLabel(), getRequiredJavaVersion(), createProgressSender(), parseJavaMajor(), parseMemoryGb(), resolveRootPath(), sanitizeJvmArgs() (+20 more)
 
 ### Community 6 - "Community 6"
+Cohesion: 0.07
+Nodes (8): React, commitRamAllocation(), cn(), NewsFeedState(), src/renderer/assets/react.svg, cn(), cn(), Toaster()
+
+### Community 7 - "Community 7"
 Cohesion: 0.09
 Nodes (13): logAction(), useJava(), useLoginScreen(), useSettingsScreen(), isTranslationLocale(), useTranslation(), useWindowControls(), useLoginValidation() (+5 more)
 
-### Community 7 - "Community 7"
-Cohesion: 0.07
-Nodes (6): getStatusText(), cn(), Badge(), Checkbox(), cn(), cn()
-
 ### Community 8 - "Community 8"
+Cohesion: 0.07
+Nodes (6): getStatusText(), cn(), Checkbox(), cn(), cn(), cn()
+
+### Community 9 - "Community 9"
 Cohesion: 0.13
 Nodes (21): createUserActionsLogger(), sanitizeLogSegment(), setupLogHandler(), createMenu(), createTray(), createWindow(), destroyTray(), getAppIcon() (+13 more)
 
-### Community 9 - "Community 9"
-Cohesion: 0.07
-Nodes (7): React, commitRamAllocation(), NewsFeedState(), src/renderer/assets/react.svg, cn(), cn(), Toaster()
-
-### Community 11 - "Community 11"
-Cohesion: 0.15
-Nodes (6): stringifyChangelogChanges(), getMarkdown(), getTruncatedMarkdown(), ChangelogPreviewModal(), NewsPreviewModal(), renderMarkdownToSafeHtml()
+### Community 10 - "Community 10"
+Cohesion: 0.11
+Nodes (6): getLaunchPhase(), Button(), handleConfirm(), handleEsc(), ProgressBar(), UpdateStatusCard()
 
 ### Community 12 - "Community 12"
-Cohesion: 0.14
-Nodes (4): getLaunchPhase(), Button(), handleConfirm(), handleEsc()
+Cohesion: 0.15
+Nodes (6): stringifyChangelogChanges(), getMarkdown(), getTruncatedMarkdown(), ChangelogPreviewModal(), NewsPreviewModal(), renderMarkdownToSafeHtml()
 
 ### Community 13 - "Community 13"
 Cohesion: 0.15
@@ -268,7 +265,7 @@ Nodes (5): getVersionIcon(), SidebarVersionsList(), Card(), CardContent(), CardT
 
 ### Community 16 - "Community 16"
 Cohesion: 0.2
-Nodes (6): formatRole(), getRoleLabels(), SidebarProfileCard(), Avatar(), getAvatarUrl(), SettingsTabNav()
+Nodes (6): Avatar(), getAvatarUrl(), handleConfirmDelete(), handleDeleteClick(), isValidHttpUrl(), SettingsTabNav()
 
 ### Community 17 - "Community 17"
 Cohesion: 0.18
@@ -315,12 +312,12 @@ Cohesion: 0.43
 Nodes (3): getNextRoute(), useIntegrityCheckScreen(), IntegrityCheckScreen()
 
 ### Community 28 - "Community 28"
-Cohesion: 0.52
-Nodes (5): buildAuthUser(), buildEmailVerificationState(), logAction(), mergeUserVerification(), toRoleItems()
-
-### Community 29 - "Community 29"
 Cohesion: 0.43
 Nodes (4): calculateExpiryDate(), fullMicrosoftAuthFlow(), microsoftErrorDisplayable(), validateSelectedMicrosoftAccount()
+
+### Community 29 - "Community 29"
+Cohesion: 0.52
+Nodes (5): buildAuthUser(), buildEmailVerificationState(), logAction(), mergeUserVerification(), toRoleItems()
 
 ### Community 30 - "Community 30"
 Cohesion: 0.29
@@ -348,11 +345,11 @@ Nodes (3): subscription(), typedInvoke(), typedSend()
 
 ### Community 39 - "Community 39"
 Cohesion: 0.6
-Nodes (3): handleClickOutside(), removeOption(), toggleOption()
+Nodes (3): formatRole(), getRoleLabels(), SidebarProfileCard()
 
 ### Community 40 - "Community 40"
 Cohesion: 0.6
-Nodes (3): handleConfirmDelete(), handleDeleteClick(), isValidHttpUrl()
+Nodes (3): handleClickOutside(), removeOption(), toggleOption()
 
 ### Community 41 - "Community 41"
 Cohesion: 0.4
@@ -370,52 +367,52 @@ Nodes (3): Vite, src/renderer/README.md, src/renderer/assets/vite.svg
 Cohesion: 0.83
 Nodes (3): bootstrapElectron(), isServerReady(), wait()
 
-### Community 49 - "Community 49"
+### Community 48 - "Community 48"
 Cohesion: 0.5
 Nodes (4): AdminNewsTab, NewsFormSubTab, NewsListSubTab, NewsTagsSubTab
 
-### Community 50 - "Community 50"
+### Community 49 - "Community 49"
 Cohesion: 0.5
 Nodes (4): NewsPreviewModal, ChangelogPreviewModal, DashboardContentDialog, src/renderer/src/components/dashboard/NewsPreviewModal.tsx
 
-### Community 51 - "Community 51"
+### Community 50 - "Community 50"
 Cohesion: 0.5
 Nodes (4): WindowControls, src/renderer/src/components/layout/WindowControls.tsx, src/renderer/src/hooks/useWindowControls.ts, useWindowControls
 
-### Community 52 - "Community 52"
+### Community 51 - "Community 51"
 Cohesion: 0.5
 Nodes (4): LoginFormCard, LoginVerificationSection, src/renderer/src/components/login/LoginFormCard.tsx, src/renderer/src/components/login/LoginVerificationSection.tsx
 
-### Community 68 - "Community 68"
+### Community 65 - "Community 65"
 Cohesion: 0.67
 Nodes (3): getUsersRequest, adminHandler, apiClient
 
-### Community 69 - "Community 69"
+### Community 66 - "Community 66"
 Cohesion: 0.67
 Nodes (3): setupGameHandlers, getRequiredJavaVersion, checkJavaVersion
 
-### Community 72 - "Community 72"
+### Community 69 - "Community 69"
 Cohesion: 0.67
 Nodes (3): DistroIndex, Nebula, docs/distro.md
 
-### Community 73 - "Community 73"
+### Community 70 - "Community 70"
 Cohesion: 0.67
 Nodes (3): AzureEntraID, MicrosoftAuthentication, docs/MicrosoftAuth.md
 
 ## Knowledge Gaps
 - **75 isolated node(s):** `banUserRequest`, `apiClient`, `createWindow`, `getRequiredJavaVersion`, `adminHandler` (+70 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **115 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **112 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Community 7` to `Community 6`, `Community 39`, `Community 40`, `Community 9`, `Community 11`, `Community 12`, `Community 13`, `Community 47`, `Community 15`, `Community 16`, `Community 20`, `Community 23`, `Community 62`, `Community 63`?**
-  _High betweenness centrality (0.034) - this node is a cross-community bridge._
-- **Why does `getErrorMessage()` connect `Community 1` to `Community 4`, `Community 6`?**
-  _High betweenness centrality (0.028) - this node is a cross-community bridge._
-- **Why does `listChangelogRequest()` connect `Community 0` to `Community 4`, `Community 45`?**
-  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Why does `cn()` connect `Community 8` to `Community 6`, `Community 7`, `Community 40`, `Community 10`, `Community 12`, `Community 45`, `Community 13`, `Community 15`, `Community 16`, `Community 20`, `Community 23`, `Community 60`?**
+  _High betweenness centrality (0.037) - this node is a cross-community bridge._
+- **Why does `getErrorMessage()` connect `Community 1` to `Community 4`, `Community 7`?**
+  _High betweenness centrality (0.032) - this node is a cross-community bridge._
+- **Why does `listChangelogRequest()` connect `Community 0` to `Community 4`?**
+  _High betweenness centrality (0.031) - this node is a cross-community bridge._
 - **Are the 32 inferred relationships involving `buildNetworkErrorResult()` (e.g. with `getUsersRequest()` and `banUserRequest()`) actually correct?**
   _`buildNetworkErrorResult()` has 32 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 28 inferred relationships involving `buildApiResult()` (e.g. with `getUsersRequest()` and `banUserRequest()`) actually correct?**
@@ -423,4 +420,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `banUserRequest`, `apiClient`, `createWindow` to the rest of the system?**
   _75 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.09 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08 - nodes in this community are weakly interconnected._

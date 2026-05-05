@@ -32,8 +32,8 @@
     "hash": "1760d441d0bccc0465be14bb12684319"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/lib/api/auth.ts": {
-    "mtime": 1777981868.6088994,
-    "hash": "0ea584cca8433cc9b22d427b9e28cef1"
+    "mtime": 1777988032.9851005,
+    "hash": "2311dbe76c3601dcd9ae95ce65df8c47"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/lib/api/changelog.ts": {
     "mtime": 1777980598.705991,
@@ -48,7 +48,7 @@
     "hash": "144f978b3d6a12f97207c2b187979000"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/lib/api/result.ts": {
-    "mtime": 1777980598.7753692,
+    "mtime": 1777988354.5862448,
     "hash": "50ba0f6e2e7dec2b759e0797192e6d20"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/lib/api/types.ts": {
@@ -360,12 +360,12 @@
     "hash": "5792c0cf9b775fd5e8659ade1a2a0798"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/login/LoginFormCard.tsx": {
-    "mtime": 1777980678.8023117,
-    "hash": "8271aaa7fb169e7cdc200bb98458dac6"
+    "mtime": 1777991802.2387917,
+    "hash": "576bda764083ffaf964088e15be94662"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/login/LoginVerificationSection.tsx": {
-    "mtime": 1777980678.9420402,
-    "hash": "1d691d5a3b90b135207491c974e65ae9"
+    "mtime": 1777991843.6694543,
+    "hash": "2ab964dad8d71e519d308c02aec3c272"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/settings/AdvancedSettingsTab.tsx": {
     "mtime": 1777980679.025085,
@@ -512,8 +512,8 @@
     "hash": "b254bb9af27bd1e0651de9c933658829"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/ui/ProgressBar.tsx": {
-    "mtime": 1777980606.922245,
-    "hash": "7ef6458c7478e21701515d491d86285c"
+    "mtime": 1777989592.555384,
+    "hash": "906740878f30d0efc1d8472f2e53009f"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/ui/Select.tsx": {
     "mtime": 1777980680.3110967,
@@ -524,8 +524,8 @@
     "hash": "1b4e009d701f876644657fe950f324b6"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/components/update/UpdateStatusCard.tsx": {
-    "mtime": 1777980607.0782807,
-    "hash": "908465fa9b12de8c512e244c6775089c"
+    "mtime": 1777989961.062412,
+    "hash": "9e6489fd2fc946619568cb7113e5c82f"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/hooks/useAdminPage.ts": {
     "mtime": 1777980608.2298322,
@@ -676,20 +676,20 @@
     "hash": "fcfde74cb44538c21ac28068b9854041"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/pages/IntegrityCheckScreen.tsx": {
-    "mtime": 1777980609.2336385,
-    "hash": "46bbf57098b2c7ab513319c5c2d24184"
+    "mtime": 1777989699.7702062,
+    "hash": "8664994e77874c035417d44fd1414c30"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/pages/LoginScreen.tsx": {
-    "mtime": 1777982200.259157,
-    "hash": "03af48e15865634084da7e1b292082d4"
+    "mtime": 1777991876.246258,
+    "hash": "de1c4d1657a2d535325462d6a5db6fd1"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/pages/SettingsScreen.tsx": {
     "mtime": 1777980680.5228722,
     "hash": "6a618b535ca472cbf3f873b63a2d9e5e"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/pages/UpdateScreen.tsx": {
-    "mtime": 1777980609.3784988,
-    "hash": "ca26879d25fcad13aaa02680aec21263"
+    "mtime": 1777990523.9832067,
+    "hash": "cbdeb8a007d94015e3eaca62fe1c6b11"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/src/stores/useAdminChangelogStore.ts": {
     "mtime": 1777980609.519307,
@@ -1063,13 +1063,33 @@
     "mtime": 1777980663.5040832,
     "hash": "4aa85c0136f711f50b1038dc35b4edcc"
   },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/docs/superpowers/plans/2026-05-05-core-ui-redesign.md": {
+    "mtime": 1777989377.2168193,
+    "hash": "a4abd8df7233d26423c9dbc533829143"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/docs/superpowers/plans/2026-05-20-progressbar-redesign.md": {
+    "mtime": 1777989548.9941306,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/docs/superpowers/specs/2026-05-05-auth-ui-refactor-design.md": {
     "mtime": 1777979301.353425,
     "hash": "a259029a2cebfbfc10cbb92e7c884a93"
   },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/docs/superpowers/specs/2026-05-05-core-ui-redesign.md": {
+    "mtime": 1777989082.298199,
+    "hash": "b9b31e3724c783f66e0b4f11984561ae"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/docs/superpowers/specs/2026-05-20-progressbar-redesign-design.md": {
+    "mtime": 1777989539.3544102,
+    "hash": "eb11048539972ed69eace2620dc30ef3"
+  },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/README.md": {
     "mtime": 1777980599.4585352,
     "hash": "987442a8c620e4b9d478748fe65a6a46"
+  },
+  "/mnt/c/Users/user/test/ggg/gerbarium-launcher/test-results/smoke-Smoke-Test---Full-Au-94bca-registration-and-login-flow/error-context.md": {
+    "mtime": 1777988339.337784,
+    "hash": "7a966b25de700596a07d003dac14d0e4"
   },
   "/mnt/c/Users/user/test/ggg/gerbarium-launcher/src/renderer/assets/hero.png": {
     "mtime": 1776869380.7163856,

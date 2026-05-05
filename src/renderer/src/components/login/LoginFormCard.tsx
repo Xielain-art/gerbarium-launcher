@@ -2,10 +2,6 @@ import type { FormEvent } from "react";
 import type { TranslationType } from "../../../../shared/constants/translations";
 import {
   Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
   Select,
 } from "../shadcn/ui";
 import { LoginVerificationSection } from "./LoginVerificationSection";
@@ -91,38 +87,36 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
       : t.LOGIN.LOGIN_DESCRIPTION;
 
   return (
-    <Card className="w-full max-w-[420px] overflow-hidden rounded-xl border border-[#2e2e2e] bg-[#171717] shadow-none">
-      <CardHeader className="space-y-2 p-3 pb-2 sm:p-3 sm:pb-2">
-        <div className="flex items-center justify-between gap-3">
-          <span className="font-mono text-[12px] uppercase tracking-[1.2px] text-[#898989]">
-            {modeBadge}
-          </span>
-          <div className="auth-language-shell auth-language-shell--inline self-center">
-            <Select
-              label={t.LOGIN.LANGUAGE_LABEL}
-              value={props.language}
-              onChange={(e) => props.onLanguageChange(e.target.value)}
-              options={props.languageOptions.map((option) => ({
-                value: option.value,
-                label: option.value.toUpperCase(),
-              }))}
-              className="auth-language-select auth-language-select--compact h-8 min-w-[78px] rounded-xl border-white/12 bg-white/6 px-2.5 text-xs text-theme"
-            />
-          </div>
+    <div className="relative z-10 w-full max-w-[420px] p-8 border border-[#2e2e2e] bg-[#0f0f0f] rounded-xl shadow-2xl">
+      <div className="flex flex-col items-center mb-6 text-center">
+        <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#3ecf8e] mb-1.5">
+          Authentication
         </div>
+        <h1 className="text-2xl font-sans font-medium text-[#fafafa] tracking-tight leading-tight">
+          {title}
+        </h1>
+        <p className="mt-2 text-sm leading-relaxed text-[#898989]">
+          {description}
+        </p>
+      </div>
 
-        <div className="space-y-1">
-          <CardTitle className="text-[32px] font-normal leading-[1.00] tracking-tight text-[#fafafa]">
-            {title}
-          </CardTitle>
-          <p className="mt-3 max-w-[24rem] text-[16px] leading-[1.50] text-[#898989]">
-            {description}
-          </p>
-        </div>
+      <div className="absolute top-4 right-4">
+        <Select
+          label={t.LOGIN.LANGUAGE_LABEL}
+          value={props.language}
+          onChange={(e) => props.onLanguageChange(e.target.value)}
+          options={props.languageOptions.map((option) => ({
+            value: option.value,
+            label: option.value.toUpperCase(),
+          }))}
+          className="auth-language-select auth-language-select--compact h-7 min-w-[64px] rounded-lg border-[#363636] bg-white/5 px-2 text-[10px] text-[#fafafa] focus:border-[#3ecf8e]"
+        />
+      </div>
 
+      <div className="space-y-5">
         {!props.verificationRequired && (
           <div className="flex justify-center">
-            <div className="auth-switch grid w-full max-w-[286px] grid-cols-2 gap-1 p-1">
+            <div className="auth-switch grid w-full grid-cols-2 gap-1 p-1 bg-[#171717] border border-[#2e2e2e] rounded-full">
               <Button
                 type="button"
                 size="sm"
@@ -130,8 +124,10 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
                 onClick={() => props.onSwitchMode("login")}
                 disabled={props.isLoading}
                 className={cn(
-                  "auth-switch__button h-8 rounded-full px-3 font-mono text-[12px] uppercase tracking-[1.2px]",
-                  !isRegisterMode && "auth-switch__button--active",
+                  "h-7 rounded-full px-3 font-mono text-[10px] uppercase tracking-wider transition-all",
+                  !isRegisterMode 
+                    ? "bg-[#3ecf8e] text-[#0f0f0f] shadow-sm hover:bg-[#3ecf8e]/90" 
+                    : "text-[#898989] hover:text-[#fafafa] hover:bg-white/5",
                 )}
               >
                 {t.LOGIN.SWITCH_TO_LOGIN}
@@ -143,8 +139,10 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
                 onClick={() => props.onSwitchMode("register")}
                 disabled={props.isLoading}
                 className={cn(
-                  "auth-switch__button h-8 rounded-full px-3 font-mono text-[12px] uppercase tracking-[1.2px]",
-                  isRegisterMode && "auth-switch__button--active",
+                  "h-7 rounded-full px-3 font-mono text-[10px] uppercase tracking-wider transition-all",
+                  isRegisterMode 
+                    ? "bg-[#3ecf8e] text-[#0f0f0f] shadow-sm hover:bg-[#3ecf8e]/90" 
+                    : "text-[#898989] hover:text-[#fafafa] hover:bg-white/5",
                 )}
               >
                 {t.LOGIN.CREATE_ACCOUNT}
@@ -154,48 +152,56 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
         )}
 
         {isRegisterMode && !props.verificationRequired && (
-          <div className="auth-steps">
+          <div className="auth-steps grid grid-cols-2 gap-2">
             <div
               className={cn(
-                "auth-step",
-                props.registerStep === 1 ? "auth-step--active" : "auth-step--done",
+                "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] transition-all",
+                props.registerStep === 1 
+                  ? "border-[#3ecf8e]/40 bg-[#3ecf8e]/10 text-[#fafafa]" 
+                  : "border-[#2e2e2e] bg-[#171717] text-[#898989]",
               )}
             >
-              <span className="auth-step__dot">1</span>
+              <span className={cn(
+                "flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold",
+                props.registerStep === 1 ? "bg-[#3ecf8e] text-[#0f0f0f]" : "bg-[#2e2e2e] text-[#898989]"
+              )}>1</span>
               <span>{t.LOGIN.REGISTER_STEP_ACCOUNT}</span>
             </div>
             <div
               className={cn(
-                "auth-step",
-                props.registerStep === 2 && "auth-step--active",
+                "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] transition-all",
+                props.registerStep === 2 
+                  ? "border-[#3ecf8e]/40 bg-[#3ecf8e]/10 text-[#fafafa]" 
+                  : "border-[#2e2e2e] bg-[#171717] text-[#898989]",
               )}
             >
-              <span className="auth-step__dot">2</span>
+              <span className={cn(
+                "flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold",
+                props.registerStep === 2 ? "bg-[#3ecf8e] text-[#0f0f0f]" : "bg-[#2e2e2e] text-[#898989]"
+              )}>2</span>
               <span>{t.LOGIN.REGISTER_STEP_PASSWORD}</span>
             </div>
           </div>
         )}
 
         {props.verificationRequired && props.emailWasSent && (
-          <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-3 py-2.5 text-xs font-medium tracking-[0.04em] text-emerald-100">
+          <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-medium text-emerald-400 text-center">
             {t.LOGIN.EMAIL_SENT_NOTICE}
           </div>
         )}
         {props.error && (
           <div
-            className="rounded-2xl border border-red-400/30 bg-red-500/10 px-3 py-2.5 text-sm leading-5 text-red-100"
+            className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[12px] leading-snug text-red-400 text-center"
             role="alert"
           >
             {props.error}
           </div>
         )}
-      </CardHeader>
 
-      <CardContent className="p-3 pt-0 sm:p-3 sm:pt-0">
         <form
           onSubmit={(event) => void props.onSubmit(event)}
           noValidate
-          className="space-y-2.5"
+          className="space-y-4"
         >
           {props.verificationRequired ? (
             <LoginVerificationSection
@@ -208,6 +214,7 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
               onVerificationCodeChange={props.onVerificationCodeChange}
               onResendCode={props.onResendCode}
               onUseAnotherAccount={props.onUseAnotherAccount}
+              onBlur={props.onBlur}
               validation={props.validations.verificationCode}
             />
           ) : (
@@ -230,11 +237,9 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
               validations={props.validations}
             />
           )}
-
-
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
