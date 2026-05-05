@@ -55,7 +55,7 @@ test.describe('Smoke Test - Full Auth Flow', () => {
     await window.waitForTimeout(1000);
 
     console.log('📝 Switching to Register Mode...');
-    const registerModeButton = window.locator('.auth-switch__button').nth(1);
+    const registerModeButton = window.locator('.auth-switch button').nth(1);
     await registerModeButton.click();
     
     // Verify we are actually in Register mode
@@ -76,11 +76,12 @@ test.describe('Smoke Test - Full Auth Flow', () => {
     await window.waitForTimeout(500);
     
     console.log('🔘 Submitting Step 1...');
-    await usernameInput.press('Enter');
+    await window.locator('button[type="submit"]').click();
 
     console.log('🔑 Step 3: Filling passwords...');
     const passInput = window.locator('#auth-password');
     await expect(passInput).toBeVisible({ timeout: 15000 });
+    await expect(window.locator('#auth-password-confirm')).toBeVisible({ timeout: 15000 });
     
     await passInput.fill(password);
     await window.locator('#auth-password-confirm').fill(password);
@@ -127,12 +128,34 @@ test.describe('Smoke Test - Full Auth Flow', () => {
     let finalVerificationCode = await codePromise;
 
     if (!finalVerificationCode) {
-      console.log('🔄 Fallback: fetching code via evaluate');
-      finalVerificationCode = await window.evaluate(() => (global as unknown as Record<string, unknown>).lastDevelopmentCode as string || '');
+      const badgeText = await window
+        .locator('text=/\\d{6}/')
+        .first()
+        .textContent()
+        .catch(() => null);
+      const badgeMatch = badgeText?.match(/(\d{6})/);
+      finalVerificationCode = badgeMatch?.[1] || '';
     }
 
     if (!finalVerificationCode) {
-      throw new Error('Could not intercept verification code from stdout.');
+      finalVerificationCode = await window.evaluate(async () => {
+        const electronAPI = (window as unknown as {
+          electronAPI: {
+            auth: {
+              getEmailVerificationStatus: () => Promise<{
+                success: boolean;
+                emailVerification?: { developmentCode?: string };
+              }>;
+            };
+          };
+        }).electronAPI;
+        const status = await electronAPI.auth.getEmailVerificationStatus();
+        return status.emailVerification?.developmentCode || '';
+      });
+    }
+
+    if (!finalVerificationCode) {
+      throw new Error('Could not resolve verification code.');
     }
 
     console.log(`✅ Test user registered. Code: ${finalVerificationCode}`);
@@ -165,3 +188,4 @@ test.describe('Smoke Test - Full Auth Flow', () => {
     }
   });
 });
+

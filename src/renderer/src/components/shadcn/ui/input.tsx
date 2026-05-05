@@ -18,7 +18,7 @@ function Input({ className, type, label, ...props }: InputProps): React.JSX.Elem
         type={type}
         data-slot="input"
         className={cn(
-          "flex h-9 w-full rounded-md border border-[var(--input)] bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50",
+          "flex h-9 w-full rounded-[6px] border border-[#2e2e2e] bg-[#0f0f0f] px-3 py-1 text-sm text-[#fafafa] transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-[#fafafa] placeholder:text-[#898989] focus-visible:border-[#3ecf8e] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#3ecf8e]/30 disabled:cursor-not-allowed disabled:opacity-50",
           className,
         )}
         {...props}

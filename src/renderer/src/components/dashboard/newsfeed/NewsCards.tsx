@@ -1,4 +1,3 @@
-import { Button } from "../../shadcn/ui";
 import type { NewsItem } from "../../../types";
 import type { TranslationType } from "../../../../../shared/constants/translations";
 import { cn } from "@/lib/utils";

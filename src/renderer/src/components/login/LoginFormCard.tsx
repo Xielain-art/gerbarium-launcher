@@ -2,6 +2,10 @@ import type { FormEvent } from "react";
 import type { TranslationType } from "../../../../shared/constants/translations";
 import {
   Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
   Select,
 } from "../shadcn/ui";
 import { LoginVerificationSection } from "./LoginVerificationSection";
@@ -74,12 +78,6 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
       ? t.LOGIN.CREATE_ACCOUNT
       : t.LOGIN.SUBMIT_BUTTON;
 
-  const modeBadge = props.verificationRequired
-    ? t.LOGIN.MODE_VERIFY
-    : isRegisterMode
-      ? t.LOGIN.MODE_REGISTER
-      : t.LOGIN.MODE_LOGIN;
-
   const description = props.verificationRequired
     ? t.LOGIN.VERIFY_DESCRIPTION(props.verificationEmail)
     : isRegisterMode
@@ -87,19 +85,7 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
       : t.LOGIN.LOGIN_DESCRIPTION;
 
   return (
-    <div className="relative z-10 w-full max-w-[420px] p-8 border border-[#2e2e2e] bg-[#0f0f0f] rounded-xl shadow-2xl">
-      <div className="flex flex-col items-center mb-6 text-center">
-        <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#3ecf8e] mb-1.5">
-          Authentication
-        </div>
-        <h1 className="text-2xl font-sans font-medium text-[#fafafa] tracking-tight leading-tight">
-          {title}
-        </h1>
-        <p className="mt-2 text-sm leading-relaxed text-[#898989]">
-          {description}
-        </p>
-      </div>
-
+    <Card className="relative z-10 w-full max-w-[420px] rounded-2xl border-[#2e2e2e] bg-[#171717]/95 text-[#fafafa] shadow-none backdrop-blur-sm">
       <div className="absolute top-4 right-4">
         <Select
           label={t.LOGIN.LANGUAGE_LABEL}
@@ -112,8 +98,17 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
           className="auth-language-select auth-language-select--compact h-7 min-w-[64px] rounded-lg border-[#363636] bg-white/5 px-2 text-[10px] text-[#fafafa] focus:border-[#3ecf8e]"
         />
       </div>
-
-      <div className="space-y-5">
+      <CardHeader className="space-y-2 pb-5 text-center">
+        <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#3ecf8e]">
+          Authentication
+        </div>
+        <CardTitle className="text-[24px] font-normal leading-[1.2] tracking-[-0.16px] text-[#fafafa]">
+          {title}
+        </CardTitle>
+        <p className="text-sm leading-relaxed text-[#898989]">{description}</p>
+      </CardHeader>
+      <div className="mx-6 h-px bg-[#2e2e2e]" />
+      <CardContent className="space-y-5 pt-5">
         {!props.verificationRequired && (
           <div className="flex justify-center">
             <div className="auth-switch grid w-full grid-cols-2 gap-1 p-1 bg-[#171717] border border-[#2e2e2e] rounded-full">
@@ -126,7 +121,7 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
                 className={cn(
                   "h-7 rounded-full px-3 font-mono text-[10px] uppercase tracking-wider transition-all",
                   !isRegisterMode 
-                    ? "bg-[#3ecf8e] text-[#0f0f0f] shadow-sm hover:bg-[#3ecf8e]/90" 
+                    ? "bg-[#3ecf8e] text-[#0f0f0f] hover:bg-[#3ecf8e]/90" 
                     : "text-[#898989] hover:text-[#fafafa] hover:bg-white/5",
                 )}
               >
@@ -141,7 +136,7 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
                 className={cn(
                   "h-7 rounded-full px-3 font-mono text-[10px] uppercase tracking-wider transition-all",
                   isRegisterMode 
-                    ? "bg-[#3ecf8e] text-[#0f0f0f] shadow-sm hover:bg-[#3ecf8e]/90" 
+                    ? "bg-[#3ecf8e] text-[#0f0f0f] hover:bg-[#3ecf8e]/90" 
                     : "text-[#898989] hover:text-[#fafafa] hover:bg-white/5",
                 )}
               >
@@ -238,8 +233,8 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
             />
           )}
         </form>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 

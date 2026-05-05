@@ -21,7 +21,6 @@ export function Modal({
   closeOnBackdrop = true,
   showCloseButton = true,
 }: ModalProps): React.JSX.Element | null {
-  // Handle ESC key
   useEffect(() => {
     if (!isOpen) {
       return;
@@ -37,7 +36,6 @@ export function Modal({
     return () => document.removeEventListener("keydown", handleEsc);
   }, [isOpen, onClose]);
 
-  // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -73,7 +71,6 @@ export function Modal({
         aria-modal="true"
         aria-labelledby="modal-title"
       >
-        {/* Header */}
         <div className="flex items-center justify-between border-b-[3px] border-theme p-4">
           <h2
             id="modal-title"
@@ -100,10 +97,8 @@ export function Modal({
           )}
         </div>
 
-        {/* Content */}
         <div className="p-6">{children}</div>
 
-        {/* Footer Actions */}
         {actions && (
           <div className="flex gap-3 border-t-[3px] border-theme p-4">
             {actions}
@@ -114,11 +109,7 @@ export function Modal({
   );
 }
 
-export function ModalActions({
-  children,
-}: {
-  children: React.ReactNode;
-}): React.JSX.Element {
+export function ModalActions({ children }: { children: React.ReactNode }): React.JSX.Element {
   return <div className="flex gap-3">{children}</div>;
 }
 
@@ -166,4 +157,3 @@ export function ConfirmModal({
     </Modal>
   );
 }
-

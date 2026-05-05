@@ -1,4 +1,3 @@
-import { Card } from "../ui/Card";
 import type { GameVersion } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
 import { cn } from "@/lib/utils";

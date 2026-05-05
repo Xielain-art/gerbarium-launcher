@@ -1,8 +1,5 @@
 ﻿import { Avatar } from "../game/Avatar";
-import {
-  Badge as ShadcnBadge,
-  Card as ShadcnCard,
-} from "@/components/shadcn/ui";
+import { Badge as ShadcnBadge } from "@/components/shadcn/ui";
 import { Settings, LogOut } from "lucide-react";
 import type { AuthUser } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";

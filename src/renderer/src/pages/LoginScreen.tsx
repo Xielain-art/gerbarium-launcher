@@ -23,7 +23,7 @@ export function LoginScreen(): React.JSX.Element {
   }
 
   return (
-    <div className="bg-[#121212] relative flex h-screen w-full items-center justify-center overflow-hidden px-4 py-4">
+    <div className="bg-[#171717] relative flex h-screen w-full items-center justify-center overflow-hidden px-4 py-4">
       <div className="absolute inset-0 bg-pattern opacity-[0.15]" />
       <div className="auth-grid-overlay opacity-[0.03]" />
 

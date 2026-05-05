@@ -7,52 +7,20 @@
 # Test info
 
 - Name: smoke.spec.ts >> Smoke Test - Full Auth Flow >> Full registration and login flow
-- Location: tests/smoke.spec.ts:36:7
+- Location: tests\smoke.spec.ts:36:7
 
 # Error details
 
 ```
-Error: Process failed to launch!
-```
-
-```
-Error: electron.launch: WebSocket error: connect ECONNREFUSED 127.0.0.1:51734
+Error: locator.waitFor: Target page, context or browser has been closed
 Call log:
-  - <launching> /mnt/c/Users/user/test/ggg/gerbarium-launcher/node_modules/electron/dist/electron.exe -r /mnt/c/Users/user/test/ggg/gerbarium-launcher/node_modules/playwright-core/lib/server/electron/loader.js --inspect=0 --remote-debugging-port=0 . --no-sandbox --user-data-dir=/mnt/c/Users/user/test/ggg/gerbarium-launcher/test-user-data
-  - <launched> pid=3532
-  - [pid=3532][out]
-  - [pid=3532][err] Debugger listening on ws://127.0.0.1:51734/a7fdf7df-c704-4e05-a9ae-7a9bfb4d5305
-  - [pid=3532][err] For help, see: https://nodejs.org/en/docs/inspector
-  - <ws connecting> ws://127.0.0.1:51734/a7fdf7df-c704-4e05-a9ae-7a9bfb4d5305
-  - <ws error> ws://127.0.0.1:51734/a7fdf7df-c704-4e05-a9ae-7a9bfb4d5305 error connect ECONNREFUSED 127.0.0.1:51734
-  - <ws connect error> ws://127.0.0.1:51734/a7fdf7df-c704-4e05-a9ae-7a9bfb4d5305 connect ECONNREFUSED 127.0.0.1:51734
-  - <ws disconnected> ws://127.0.0.1:51734/a7fdf7df-c704-4e05-a9ae-7a9bfb4d5305 code=1006 reason=
-  - [pid=3532] <kill>
-  - [pid=3532] <will force kill>
-  - [pid=3532] <process did exit: exitCode=null, signal=SIGKILL>
-  - [pid=3532] starting temporary directories cleanup
-  - [pid=3532] finished temporary directories cleanup
+  - waiting for locator('#email-code') to be visible
 
 ```
 
 # Test source
 
 ```ts
-  1   | import { test, expect, _electron as electron, type ElectronApplication, type Page } from '@playwright/test';
-  2   | import path from 'path';
-  3   | import fs from 'fs';
-  4   | 
-  5   | test.describe('Smoke Test - Full Auth Flow', () => {
-  6   |   let app: ElectronApplication;
-  7   |   let window: Page;
-  8   |   const userDataPath = path.join(process.cwd(), 'test-user-data');
-  9   | 
-  10  |   test.beforeAll(async () => {
-  11  |     if (fs.existsSync(userDataPath)) {
-  12  |       fs.rmSync(userDataPath, { recursive: true, force: true });
-  13  |     }
-> 14  |     app = await electron.launch({
-      |           ^ Error: electron.launch: WebSocket error: connect ECONNREFUSED 127.0.0.1:51734
   15  |       args: ['.', '--no-sandbox', `--user-data-dir=${userDataPath}`],
   16  |       env: {
   17  |         ...process.env,
@@ -96,7 +64,7 @@ Call log:
   55  |     await window.waitForTimeout(1000);
   56  | 
   57  |     console.log('📝 Switching to Register Mode...');
-  58  |     const registerModeButton = window.locator('.auth-switch__button').nth(1);
+  58  |     const registerModeButton = window.locator('.auth-switch button').nth(1);
   59  |     await registerModeButton.click();
   60  |     
   61  |     // Verify we are actually in Register mode
@@ -117,40 +85,119 @@ Call log:
   76  |     await window.waitForTimeout(500);
   77  |     
   78  |     console.log('🔘 Submitting Step 1...');
-  79  |     await usernameInput.press('Enter');
+  79  |     await window.locator('button[type="submit"]').click();
   80  | 
   81  |     console.log('🔑 Step 3: Filling passwords...');
   82  |     const passInput = window.locator('#auth-password');
   83  |     await expect(passInput).toBeVisible({ timeout: 15000 });
-  84  |     
-  85  |     await passInput.fill(password);
-  86  |     await window.locator('#auth-password-confirm').fill(password);
-  87  |     
-  88  |     console.log('📡 Submitting registration form...');
-  89  |     
-  90  |     // Set up a promise to catch the stdout code before clicking submit
-  91  |     const codePromise = new Promise<string>((resolve) => {
-  92  |       const onData = (data: Buffer) => {
-  93  |         const line = data.toString();
-  94  |         const match = line.match(/\[SMOKE_TEST_CODE\]:(\d{6})/);
-  95  |         if (match) {
-  96  |           app.process().stdout.off('data', onData);
-  97  |           resolve(match[1]);
-  98  |         }
-  99  |       };
-  100 |       app.process().stdout.on('data', onData);
-  101 |       
-  102 |       // Safety timeout
-  103 |       setTimeout(() => {
-  104 |         app.process().stdout.off('data', onData);
-  105 |         resolve('');
-  106 |       }, 15000);
-  107 |     });
-  108 | 
-  109 |     await window.locator('button[type="submit"]').click();
-  110 | 
-  111 |     console.log('📧 Waiting for Verification Screen...');
-  112 |     const codeInput = window.locator('#email-code');
-  113 |     try {
-  114 |       await codeInput.waitFor({ state: 'visible', timeout: 30000 });
+  84  |     await expect(window.locator('#auth-password-confirm')).toBeVisible({ timeout: 15000 });
+  85  |     
+  86  |     await passInput.fill(password);
+  87  |     await window.locator('#auth-password-confirm').fill(password);
+  88  |     
+  89  |     console.log('📡 Submitting registration form...');
+  90  |     
+  91  |     // Set up a promise to catch the stdout code before clicking submit
+  92  |     const codePromise = new Promise<string>((resolve) => {
+  93  |       const onData = (data: Buffer) => {
+  94  |         const line = data.toString();
+  95  |         const match = line.match(/\[SMOKE_TEST_CODE\]:(\d{6})/);
+  96  |         if (match) {
+  97  |           app.process().stdout.off('data', onData);
+  98  |           resolve(match[1]);
+  99  |         }
+  100 |       };
+  101 |       app.process().stdout.on('data', onData);
+  102 |       
+  103 |       // Safety timeout
+  104 |       setTimeout(() => {
+  105 |         app.process().stdout.off('data', onData);
+  106 |         resolve('');
+  107 |       }, 15000);
+  108 |     });
+  109 | 
+  110 |     await window.locator('button[type="submit"]').click();
+  111 | 
+  112 |     console.log('📧 Waiting for Verification Screen...');
+  113 |     const codeInput = window.locator('#email-code');
+  114 |     try {
+> 115 |       await codeInput.waitFor({ state: 'visible', timeout: 30000 });
+      |                       ^ Error: locator.waitFor: Target page, context or browser has been closed
+  116 |     } catch (e) {
+  117 |       console.error('Timeout waiting for email code input.');
+  118 |       const errorText = await window.locator('[role="alert"]').textContent().catch(() => null);
+  119 |       if (errorText) {
+  120 |         console.error(`UI Error Message: ${errorText}`);
+  121 |       } else {
+  122 |         console.error('No UI Error Message found.');
+  123 |       }
+  124 |       throw e;
+  125 |     }
+  126 | 
+  127 |     console.log('🔍 Waiting for intercepted test code...');
+  128 |     let finalVerificationCode = await codePromise;
+  129 | 
+  130 |     if (!finalVerificationCode) {
+  131 |       const badgeText = await window
+  132 |         .locator('text=/\\d{6}/')
+  133 |         .first()
+  134 |         .textContent()
+  135 |         .catch(() => null);
+  136 |       const badgeMatch = badgeText?.match(/(\d{6})/);
+  137 |       finalVerificationCode = badgeMatch?.[1] || '';
+  138 |     }
+  139 | 
+  140 |     if (!finalVerificationCode) {
+  141 |       finalVerificationCode = await window.evaluate(async () => {
+  142 |         const electronAPI = (window as unknown as {
+  143 |           electronAPI: {
+  144 |             auth: {
+  145 |               getEmailVerificationStatus: () => Promise<{
+  146 |                 success: boolean;
+  147 |                 emailVerification?: { developmentCode?: string };
+  148 |               }>;
+  149 |             };
+  150 |           };
+  151 |         }).electronAPI;
+  152 |         const status = await electronAPI.auth.getEmailVerificationStatus();
+  153 |         return status.emailVerification?.developmentCode || '';
+  154 |       });
+  155 |     }
+  156 | 
+  157 |     if (!finalVerificationCode) {
+  158 |       throw new Error('Could not resolve verification code.');
+  159 |     }
+  160 | 
+  161 |     console.log(`✅ Test user registered. Code: ${finalVerificationCode}`);
+  162 |     console.log(`🔘 Entering code: ${finalVerificationCode}`);
+  163 |     await codeInput.fill(finalVerificationCode);
+  164 |     await window.locator('button[type="submit"]').click();
+  165 | 
+  166 |     console.log('🏠 Waiting for Dashboard...');
+  167 |     await window.waitForSelector('main', { timeout: 20000 });
+  168 |     
+  169 |     const isDashboardVisible = await window.locator('main').isVisible();
+  170 |     expect(isDashboardVisible).toBe(true);
+  171 |     console.log('✨ SUCCESS: Dashboard reached!');
+  172 | 
+  173 |     // Cleanup
+  174 |     console.log(`🧹 Cleaning up test user...`);
+  175 |     const cleanupResult = await window.evaluate(async () => {
+  176 |       const electronAPI = (window as unknown as { electronAPI: { auth: { getSession: () => Promise<{ user: { id: string } }> }, admin: { deleteTestUser: (id: string) => Promise<{ success: boolean, error?: string }> } } }).electronAPI;
+  177 |       const session = await electronAPI.auth.getSession();
+  178 |       if (session.user?.id) {
+  179 |         return await electronAPI.admin.deleteTestUser(session.user.id);
+  180 |       }
+  181 |       return { success: false, error: 'No user ID found' };
+  182 |     });
+  183 | 
+  184 |     if (cleanupResult.success) {
+  185 |       console.log('✅ Test user deleted successfully.');
+  186 |     } else {
+  187 |       console.warn(`⚠️ Failed to delete test user: ${cleanupResult.error}`);
+  188 |     }
+  189 |   });
+  190 | });
+  191 | 
+  192 | 
 ```

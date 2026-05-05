@@ -5,7 +5,6 @@ import {
   SettingsHeader,
   SettingsTabNav,
 } from "../components/settings";
-import { cn } from "@/lib/utils";
 
 export function SettingsScreen(): React.JSX.Element {
   const vm = useSettingsScreen();

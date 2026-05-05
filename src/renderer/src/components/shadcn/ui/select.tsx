@@ -33,7 +33,7 @@ function Select({
         value={value}
         onChange={onChange}
         className={cn(
-          "flex h-9 w-full rounded-md border border-[var(--input)] bg-[var(--card)] px-3 py-1 text-sm text-theme shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--ring)]",
+          "flex h-9 w-full rounded-[6px] border border-[#2e2e2e] bg-[#0f0f0f] px-3 py-1 text-sm text-[#fafafa] focus-visible:border-[#3ecf8e] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#3ecf8e]/30",
           className,
         )}
         {...props}
@@ -42,7 +42,7 @@ function Select({
           <option
             key={option.value}
             value={option.value}
-            className="bg-[var(--card)] text-theme"
+            className="bg-[#171717] text-[#fafafa]"
           >
             {option.label}
           </option>

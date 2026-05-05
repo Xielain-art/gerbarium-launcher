@@ -45,8 +45,6 @@ export function ProfileSettingsTab({
   const displayMinecraftUsername = displayUsername;
   const displaySkinUrl = profile.skinUrl;
 
-  const rolesText = user?.roles?.map((role) => role.name).join(", ") || "user";
-
   const handleDeleteClick = async (): Promise<void> => {
     setIsRequestingCode(true);
     const result = await onRequestDeleteCode();

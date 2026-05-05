@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import type { ChangelogItem } from "../../types";
 import { renderMarkdownToSafeHtml } from "../../lib/markdown";
 import type { TranslationType } from "../../../../shared/constants/translations";
-import { Button } from "../shadcn/ui";
 
 interface ChangelogFeedProps {
   t: TranslationType;

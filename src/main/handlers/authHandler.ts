@@ -122,6 +122,7 @@ export default function authHandler(app: App): void {
         }
 
         let registerResult;
+        let smokeDevCode: string | undefined;
         if (process.env.SMOKE_TEST === "true") {
           registerResult = await testRegisterRequest({
             email: validatedPayload.email,
@@ -130,6 +131,7 @@ export default function authHandler(app: App): void {
           });
           if (registerResult.success && registerResult.data?.emailVerificationCode) {
             const devCode = registerResult.data.emailVerificationCode;
+            smokeDevCode = devCode;
             (global as Record<string, unknown>).lastDevelopmentCode = devCode;
             process.stdout.write(`[SMOKE_TEST_CODE]:${devCode}\n`);
             log.info(`[SMOKE_TEST] Intercepted dev code: ${devCode}`);
@@ -160,12 +162,22 @@ export default function authHandler(app: App): void {
         await writeStoredSession(secureDataPath, session);
 
         log.info(LOG_MESSAGES.AUTH_REGISTER_SUCCESS, session.user.username);
+        const mappedVerification = mapEmailVerification(
+          registerResult.data.emailVerification,
+        );
         return {
           success: true,
           user: session.user,
-          emailVerification: mapEmailVerification(
-            registerResult.data.emailVerification,
-          ),
+          emailVerification:
+            smokeDevCode && process.env.SMOKE_TEST === "true"
+              ? {
+                  emailVerified: false,
+                  resendAvailableInSeconds:
+                    mappedVerification?.resendAvailableInSeconds ?? 0,
+                  emailSent: mappedVerification?.emailSent ?? true,
+                  developmentCode: smokeDevCode,
+                }
+              : mappedVerification,
         };
       } catch (error) {
         log.error(LOG_MESSAGES.AUTH_REGISTER_FAILED, error);
