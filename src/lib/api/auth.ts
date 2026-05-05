@@ -27,6 +27,10 @@ export async function loginRequest(payload: ApiLoginDto): Promise<ApiResult<ApiA
   try {
     const { data, error, response } = await apiClient.POST("/api/auth/login", {
       body: payload,
+      headers: {
+        Cookie: "", // Prevent sending expired cookies
+        Authorization: "", // Prevent sending expired tokens
+      },
     });
     return buildApiResult<ApiAuthResponse>({
       response,
@@ -43,6 +47,10 @@ export async function registerRequest(payload: ApiRegisterDto): Promise<ApiResul
   try {
     const { data, error, response } = await apiClient.POST("/api/auth/register", {
       body: payload,
+      headers: {
+        Cookie: "", // Prevent sending expired cookies
+        Authorization: "", // Prevent sending expired tokens
+      },
     });
     
     // DEBUG LOG FOR SMOKE TESTS
@@ -207,6 +215,10 @@ export async function testRegisterRequest(
       "/api/test/auth/register",
       {
         body: payload,
+        headers: {
+          Cookie: "", // Prevent sending expired cookies
+          Authorization: "", // Prevent sending expired tokens
+        },
       },
     );
     return buildApiResult<ApiTestRegisterResponse>({
