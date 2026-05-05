@@ -91,11 +91,12 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
       : t.LOGIN.LOGIN_DESCRIPTION;
 
   return (
-    <Card className="auth-card w-full overflow-hidden border-white/10 shadow-2xl backdrop-blur-xl">
-      <div className="auth-card__glow" />
+    <Card className="w-full max-w-[420px] overflow-hidden rounded-xl border border-[#2e2e2e] bg-[#171717] shadow-none">
       <CardHeader className="space-y-2 p-3 pb-2 sm:p-3 sm:pb-2">
         <div className="flex items-center justify-between gap-3">
-          <span className="auth-card__eyebrow">{modeBadge}</span>
+          <span className="font-mono text-[12px] uppercase tracking-[1.2px] text-[#898989]">
+            {modeBadge}
+          </span>
           <div className="auth-language-shell auth-language-shell--inline self-center">
             <Select
               label={t.LOGIN.LANGUAGE_LABEL}
@@ -111,10 +112,10 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
         </div>
 
         <div className="space-y-1">
-          <CardTitle className="text-[1.45rem] font-semibold tracking-tight text-theme">
+          <CardTitle className="text-[32px] font-normal leading-[1.00] tracking-tight text-[#fafafa]">
             {title}
           </CardTitle>
-          <p className="max-w-[24rem] text-sm leading-5 text-theme-muted">
+          <p className="mt-3 max-w-[24rem] text-[16px] leading-[1.50] text-[#898989]">
             {description}
           </p>
         </div>
@@ -129,7 +130,7 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
                 onClick={() => props.onSwitchMode("login")}
                 disabled={props.isLoading}
                 className={cn(
-                  "auth-switch__button h-8 rounded-xl px-3 font-minecraft text-[10px] uppercase tracking-[0.16em]",
+                  "auth-switch__button h-8 rounded-full px-3 font-mono text-[12px] uppercase tracking-[1.2px]",
                   !isRegisterMode && "auth-switch__button--active",
                 )}
               >
@@ -142,7 +143,7 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
                 onClick={() => props.onSwitchMode("register")}
                 disabled={props.isLoading}
                 className={cn(
-                  "auth-switch__button h-8 rounded-xl px-3 font-minecraft text-[10px] uppercase tracking-[0.16em]",
+                  "auth-switch__button h-8 rounded-full px-3 font-mono text-[12px] uppercase tracking-[1.2px]",
                   isRegisterMode && "auth-switch__button--active",
                 )}
               >

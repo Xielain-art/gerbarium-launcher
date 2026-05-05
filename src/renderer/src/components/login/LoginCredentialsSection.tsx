@@ -39,7 +39,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
           <div className="space-y-1.5">
             <Label
               htmlFor="register-email"
-              className="text-[11px] font-semibold uppercase tracking-[0.22em] text-theme-muted"
+              className="text-[12px] font-mono uppercase tracking-[1.2px] text-[#898989]"
             >
               Email
             </Label>
@@ -52,14 +52,14 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
               placeholder={p.t.LOGIN.EMAIL_PLACEHOLDER}
               disabled={p.isLoading}
               autoComplete="email"
-              className="auth-input h-10 rounded-2xl border-white/12 bg-white/6"
+              className="auth-input h-10 rounded-md border-[#2e2e2e] bg-white/4 transition-all focus:border-[rgba(62,207,142,0.5)] focus:ring-[rgba(62,207,142,0.3)]"
               error={p.validations.email.error || undefined}
             />
           </div>
           <div className="space-y-1.5">
             <Label
               htmlFor="auth-username"
-              className="text-[11px] font-semibold uppercase tracking-[0.22em] text-theme-muted"
+              className="text-[12px] font-mono uppercase tracking-[1.2px] text-[#898989]"
             >
               Username
             </Label>
@@ -72,7 +72,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
               placeholder={p.t.LOGIN.REGISTER_USERNAME_PLACEHOLDER}
               disabled={p.isLoading}
               autoComplete="username"
-              className="auth-input h-10 rounded-2xl border-white/12 bg-white/6"
+              className="auth-input h-10 rounded-md border-[#2e2e2e] bg-white/4 transition-all focus:border-[rgba(62,207,142,0.5)] focus:ring-[rgba(62,207,142,0.3)]"
               error={p.validations.username.error || undefined}
             />
           </div>
@@ -82,7 +82,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
         <div className="space-y-1.5">
           <Label
             htmlFor="auth-username"
-            className="text-[11px] font-semibold uppercase tracking-[0.22em] text-theme-muted"
+            className="text-[12px] font-mono uppercase tracking-[1.2px] text-[#898989]"
           >
             {p.t.LOGIN.USERNAME_PLACEHOLDER}
           </Label>
@@ -95,7 +95,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
             placeholder={p.t.LOGIN.USERNAME_PLACEHOLDER}
             disabled={p.isLoading}
             autoComplete="username"
-            className="auth-input h-10 rounded-2xl border-white/12 bg-white/6"
+            className="auth-input h-10 rounded-md border-[#2e2e2e] bg-white/4 transition-all focus:border-[rgba(62,207,142,0.5)] focus:ring-[rgba(62,207,142,0.3)]"
             error={p.validations.username.error || undefined}
           />
         </div>
@@ -104,7 +104,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
         <div className="space-y-1.5">
           <Label
             htmlFor="auth-password"
-            className="text-[11px] font-semibold uppercase tracking-[0.22em] text-theme-muted"
+            className="text-[12px] font-mono uppercase tracking-[1.2px] text-[#898989]"
           >
             {p.t.LOGIN.PASSWORD_PLACEHOLDER}
           </Label>
@@ -117,7 +117,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
             placeholder={p.t.LOGIN.PASSWORD_PLACEHOLDER}
             disabled={p.isLoading}
             autoComplete={p.isRegisterMode ? "new-password" : "current-password"}
-            className="auth-input h-10 rounded-2xl border-white/12 bg-white/6"
+            className="auth-input h-10 rounded-md border-[#2e2e2e] bg-white/4 transition-all focus:border-[rgba(62,207,142,0.5)] focus:ring-[rgba(62,207,142,0.3)]"
             error={p.validations.password.error || undefined}
           />
         </div>
@@ -126,7 +126,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
         <div className="space-y-1.5">
           <Label
             htmlFor="auth-password-confirm"
-            className="text-[11px] font-semibold uppercase tracking-[0.22em] text-theme-muted"
+            className="text-[12px] font-mono uppercase tracking-[1.2px] text-[#898989]"
           >
             {p.t.LOGIN.CONFIRM_PASSWORD_PLACEHOLDER}
           </Label>
@@ -139,7 +139,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
             placeholder={p.t.LOGIN.CONFIRM_PASSWORD_PLACEHOLDER}
             disabled={p.isLoading}
             autoComplete="new-password"
-            className="auth-input h-10 rounded-2xl border-white/12 bg-white/6"
+            className="auth-input h-10 rounded-md border-[#2e2e2e] bg-white/4 transition-all focus:border-[rgba(62,207,142,0.5)] focus:ring-[rgba(62,207,142,0.3)]"
             error={p.validations.passwordConfirm.error || undefined}
           />
         </div>
@@ -154,7 +154,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
               variant="outline"
               disabled={p.isLoading}
               onClick={p.onRegisterStepBack}
-              className="h-10 flex-1 rounded-2xl border-white/12 bg-white/4 font-minecraft text-[11px] uppercase tracking-[0.16em] hover:bg-white/8"
+              className="h-10 flex-1 rounded-md border border-[#2e2e2e] bg-[#0f0f0f] text-[14px] font-medium hover:bg-[#171717]"
             >
               {p.t.LOGIN.REGISTER_BACK}
             </Button>
@@ -162,7 +162,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
           <Button
             type="submit"
             disabled={p.isLoading}
-            className="h-10 flex-1 rounded-2xl font-minecraft text-[11px] uppercase tracking-[0.16em] shadow-[0_18px_44px_rgba(0,0,0,0.24)]"
+            className="h-10 flex-1 rounded-full bg-[#fafafa] text-[14px] font-medium text-[#0f0f0f] hover:bg-[#efefef]"
           >
             {p.isRegisterAccountStep
               ? p.t.LOGIN.REGISTER_NEXT
@@ -173,7 +173,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
         <Button
           type="submit"
           disabled={p.isLoading}
-          className="h-10 w-full rounded-2xl font-minecraft text-[11px] uppercase tracking-[0.16em] shadow-[0_18px_44px_rgba(0,0,0,0.24)]"
+          className="h-10 w-full rounded-full bg-[#fafafa] text-[14px] font-medium text-[#0f0f0f] hover:bg-[#efefef]"
         >
           {p.t.LOGIN.SUBMIT_BUTTON}
         </Button>
