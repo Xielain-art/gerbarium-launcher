@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - '**'
-    tags:
-      - 'v*.*.*'
   pull_request:
   workflow_dispatch:
 
@@ -21,11 +19,6 @@ jobs:
           echo "ref=${{ github.ref }}"
           echo "ref_type=${{ github.ref_type }}"
           echo "ref_name=${{ github.ref_name }}"
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            echo "is_version_tag=true"
-          else
-            echo "is_version_tag=false"
-          fi
 
   ci:
     name: CI (${{ matrix.os }})
@@ -60,9 +53,6 @@ jobs:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
         run: npm run build
 
-      # ИСПРАВЛЕНИЕ 1: Ускоряем Playwright.
-      # Убираем --with-deps для Windows и Mac (там системные либы обычно уже есть), 
-      # но оставляем для Ubuntu, где они часто нужны для xvfb.
       - name: Install Playwright browsers
         shell: bash
         run: |
@@ -82,85 +72,3 @@ jobs:
             npm run test:smoke
           fi
         shell: bash
-
-  package:
-    name: Package (${{ matrix.os }})
-    needs: ci
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm install --prefer-offline --no-audit
-
-      - name: Build platform package
-        env:
-          API_BASE_URL: ${{ vars.API_BASE_URL }}
-          DISCORD_RPC_CLIENT_ID: ${{ vars.DISCORD_RPC_CLIENT_ID }}
-        run: |
-          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
-            npm run dist:linux
-          elif [ "${{ matrix.os }}" = "windows-latest" ]; then
-            npm run dist:win
-          else
-            npm run dist:mac
-          fi
-        shell: bash
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: gerbarium-${{ matrix.os }}
-          # ИСПРАВЛЕНИЕ 2: Ограничиваем время жизни артефакта, чтобы не забить квоту
-          retention-days: 3 
-          path: |
-            release/*.exe
-            release/*.AppImage
-            release/*.dmg
-            release/*.yml
-            release/*.yaml
-            release/*.blockmap
-          if-no-files-found: error
-
-  release:
-    name: Create Release
-    needs: package
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          pattern: gerbarium-*
-          merge-multiple: true
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          draft: true
-          repository: Xielain-art/gerbarium-releases
-          token: ${{ secrets.GH_TOKEN }}
-          files: |
-            artifacts/*.exe
-            artifacts/*.AppImage
-            artifacts/*.dmg
-            artifacts/*.yml
-            artifacts/*.yaml
-            artifacts/*.blockmap

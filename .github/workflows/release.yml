@@ -1,0 +1,85 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  package:
+    name: Package (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --prefer-offline --no-audit
+
+      - name: Build platform package
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+          DISCORD_RPC_CLIENT_ID: ${{ vars.DISCORD_RPC_CLIENT_ID }}
+        run: |
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            npm run dist:linux
+          elif [ "${{ matrix.os }}" = "windows-latest" ]; then
+            npm run dist:win
+          else
+            npm run dist:mac
+          fi
+        shell: bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gerbarium-${{ matrix.os }}
+          retention-days: 3
+          path: |
+            release/*.exe
+            release/*.AppImage
+            release/*.dmg
+            release/*.yml
+            release/*.yaml
+            release/*.blockmap
+          if-no-files-found: error
+
+  release:
+    name: Create Release
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: gerbarium-*
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          repository: Xielain-art/gerbarium-releases
+          token: ${{ secrets.GH_TOKEN }}
+          files: |
+            artifacts/*.exe
+            artifacts/*.AppImage
+            artifacts/*.dmg
+            artifacts/*.yml
+            artifacts/*.yaml
+            artifacts/*.blockmap
