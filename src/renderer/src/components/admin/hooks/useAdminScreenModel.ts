@@ -5,7 +5,7 @@ import { useAdminUsersSection } from "./sections/useAdminUsersSection";
 import { useAdminNewsSection } from "./sections/useAdminNewsSection";
 import { useAdminChangelogSection } from "./sections/useAdminChangelogSection";
 import type { UseQueryResult } from "@tanstack/react-query";
-import type { ApiAdminStats } from "../../../../lib/api/admin";
+import type { ApiAdminStats, ApiNews, ApiChangelog } from "../../../../../lib/api/admin";
 
 export type AdminTab = "users" | "news" | "changelog" | "stats";
 
@@ -40,6 +40,12 @@ export interface AdminScreenModel {
   handleConfirmUnban: () => Promise<void>;
   handleSaveRoles: () => Promise<void>;
   handleCreateRole: () => Promise<void>;
+  handleUpdateRole: () => Promise<void>;
+  editingRole: { id: string; name: string; description?: string } | null;
+  setEditingRole: (role: { id: string; name: string; description?: string } | null) => void;
+  currentPage: number;
+  totalPages: number;
+  setPage: (page: number) => void;
   newsTab: ReturnType<typeof useAdminNewsSection>["newsTab"];
   setNewsTab: ReturnType<typeof useAdminNewsSection>["setNewsTab"];
   newsSearch: string;
@@ -155,13 +161,14 @@ export function useAdminScreenModel(): AdminScreenModel {
       : null,
     isAdminApiBusy,
     ...users,
-    currentPage: users.currentPage,
-    totalPages: users.totalPages,
-    setPage: users.setPage,
     ...news,
     ...changelog,
     newsActionLoadingId: news.isNewsBusy ? "pending" : null,
     changelogActionLoadingId: changelog.isChangelogBusy ? "pending" : null,
   };
 }
+
+
+
+
 

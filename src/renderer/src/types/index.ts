@@ -93,15 +93,8 @@ export interface GameVersion {
 }
 
 // Download Progress Types
-export type DownloadStatus = 
-  | 'idle'
-  | 'checking'
-  | 'downloading'
-  | 'installing'
-  | 'verifying'
-  | 'completed'
-  | 'error'
-  | 'cancelled';
+import type { DownloadStatus } from "../../../shared/constants/ipc/models";
+export type { DownloadStatus };
 
 export interface DownloadProgress {
   status: DownloadStatus;
@@ -188,3 +181,4 @@ export interface RootState {
   serverStatus: ServerStatusState;
   ui: UIState;
 }
+

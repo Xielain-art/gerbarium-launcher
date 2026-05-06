@@ -327,10 +327,6 @@ export function useSettingsScreen(): SettingsScreenResult {
     onExportLogs,
     onDeleteAccount,
     onRequestDeleteCode,
-    supportNotice,
-    deletionNotice,
-    isExporting,
-    isDevMode,
   };
 }
 

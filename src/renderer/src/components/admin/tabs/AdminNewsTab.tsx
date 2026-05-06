@@ -20,13 +20,14 @@ export function AdminNewsTab(props: Props): React.JSX.Element {
     selectedNewsTagIds,
   } = props;
 
-  const hasUnsavedChanges =
+  const hasUnsavedChanges = Boolean(
     newsTab === "create" &&
     (newsTitle ||
       newsSlug ||
       newsImage ||
       newsContentHtml ||
-      selectedNewsTagIds.length > 0);
+      selectedNewsTagIds.length > 0)
+  );
 
   function handleTabSwitch(tab: "all" | "create" | "tags"): void {
     if (tab === "create" && newsTab !== "create") {
@@ -40,11 +41,11 @@ export function AdminNewsTab(props: Props): React.JSX.Element {
       <div className="mb-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-mono text-xl font-bold">
-            Управление новостями
+            Ð£Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ Ð½Ð¾Ð²Ð¾ÑÑ‚ÑÐ¼Ð¸
           </h2>
           {isApplyingNewsFilters ? (
             <span className="font-mono text-[10px] uppercase text-theme-muted">
-              Фильтрация...
+              Ð¤Ð¸Ð»ÑŒÑ‚Ñ€Ð°Ñ†Ð¸Ñ...
             </span>
           ) : null}
         </div>
@@ -53,18 +54,18 @@ export function AdminNewsTab(props: Props): React.JSX.Element {
           <ShadcnButton
             variant={newsTab === "all" ? "default" : "ghost"}
             onClick={() => handleTabSwitch("all")}
-            disabled={newsTab === "create" && hasUnsavedChanges}
+            disabled={hasUnsavedChanges}
             size="sm"
           >
-            Все новости
+            Ð’ÑÐµ Ð½Ð¾Ð²Ð¾ÑÑ‚Ð¸
           </ShadcnButton>
           <ShadcnButton
             variant={newsTab === "tags" ? "default" : "ghost"}
             onClick={() => handleTabSwitch("tags")}
-            disabled={newsTab === "create" && hasUnsavedChanges}
+            disabled={hasUnsavedChanges}
             size="sm"
           >
-            Теги
+            Ð¢ÐµÐ³Ð¸
           </ShadcnButton>
           <div className="ml-auto">
             <ShadcnButton
@@ -73,7 +74,7 @@ export function AdminNewsTab(props: Props): React.JSX.Element {
               size="sm"
               className="border-green-500/30 bg-green-500/10 hover:bg-green-500/20"
             >
-              {editingNews ? "Редактировать новость" : "Создать новость"}
+              {editingNews ? "Ð ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð½Ð¾Ð²Ð¾ÑÑ‚ÑŒ" : "Ð¡Ð¾Ð·Ð´Ð°Ñ‚ÑŒ Ð½Ð¾Ð²Ð¾ÑÑ‚ÑŒ"}
             </ShadcnButton>
           </div>
         </div>
@@ -87,3 +88,4 @@ export function AdminNewsTab(props: Props): React.JSX.Element {
     </ShadcnCard>
   );
 }
+

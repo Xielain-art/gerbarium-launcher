@@ -1,4 +1,4 @@
-import createClient from "openapi-fetch";
+﻿import createClient from "openapi-fetch";
 import { paths } from "./v1";
 
 const DEFAULT_API_BASE_URL = "https://gerbarium-api.vercel.app";
@@ -23,18 +23,9 @@ function getProcessEnvBaseUrl(): string | undefined {
   return process.env.API_BASE_URL;
 }
 
-interface ImportMetaEnv {
-  readonly VITE_API_BASE_URL?: string;
-  readonly API_BASE_URL?: string;
-}
-
-interface CustomImportMeta extends ImportMeta {
-  readonly env: ImportMetaEnv;
-}
-
 function getViteEnvBaseUrl(): string | undefined {
   try {
-    const env = (import.meta as unknown as CustomImportMeta).env;
+    const env = (import.meta as any).env;
     return env?.VITE_API_BASE_URL ?? env?.API_BASE_URL;
   } catch {
     return undefined;

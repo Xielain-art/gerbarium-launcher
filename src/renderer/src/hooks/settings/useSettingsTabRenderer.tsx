@@ -1,3 +1,5 @@
+﻿import { useCallback } from "react";
+import type { ReactNode } from "react";
 import { AdvancedSettingsTab } from "../../components/settings/AdvancedSettingsTab";
 import { GeneralSettingsTab } from "../../components/settings/GeneralSettingsTab";
 import { JavaSettingsTab } from "../../components/settings/JavaSettingsTab";

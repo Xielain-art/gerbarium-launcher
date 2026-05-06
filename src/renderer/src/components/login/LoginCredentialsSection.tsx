@@ -53,7 +53,6 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
               disabled={p.isLoading}
               autoComplete="email"
               className="bg-white/5 border border-[var(--theme-border-hi)] focus:border-[var(--mc-accent)] focus:ring-0 rounded-lg transition-all px-4 h-9 text-sm text-theme"
-              error={p.validations.email.error || undefined}
             />
           </div>
           <div className="space-y-1">
@@ -73,7 +72,6 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
               disabled={p.isLoading}
               autoComplete="username"
               className="bg-white/5 border border-[var(--theme-border-hi)] focus:border-[var(--mc-accent)] focus:ring-0 rounded-lg transition-all px-4 h-9 text-sm text-theme"
-              error={p.validations.username.error || undefined}
             />
           </div>
         </>
@@ -96,7 +94,6 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
             disabled={p.isLoading}
             autoComplete="username"
             className="bg-white/5 border border-[var(--theme-border-hi)] focus:border-[var(--mc-accent)] focus:ring-0 rounded-lg transition-all px-4 h-9 text-sm text-theme"
-            error={p.validations.username.error || undefined}
           />
         </div>
       )}
@@ -118,7 +115,6 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
             disabled={p.isLoading}
             autoComplete={p.isRegisterMode ? "new-password" : "current-password"}
             className="bg-white/5 border border-[var(--theme-border-hi)] focus:border-[var(--mc-accent)] focus:ring-0 rounded-lg transition-all px-4 h-9 text-sm text-theme"
-            error={p.validations.password.error || undefined}
           />
         </div>
       )}
@@ -140,7 +136,6 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
             disabled={p.isLoading}
             autoComplete="new-password"
             className="bg-white/5 border border-[var(--theme-border-hi)] focus:border-[var(--mc-accent)] focus:ring-0 rounded-lg transition-all px-4 h-9 text-sm text-theme"
-            error={p.validations.passwordConfirm.error || undefined}
           />
         </div>
       )}

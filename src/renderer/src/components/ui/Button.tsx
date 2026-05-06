@@ -1,7 +1,7 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+﻿import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-type ButtonVariant = "primary" | "secondary" | "danger" | "ghost" | "outline" | "minecraft";
+type ButtonVariant = "primary" | "secondary" | "danger" | "ghost" | "outline" | "minecraft" | "default";
 type ButtonSize = "sm" | "md" | "lg" | "xl";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -28,6 +28,7 @@ export function Button({
     danger: "rounded-md border border-[color:var(--destructive)]/35 bg-[color:var(--destructive)]/15 text-[color:var(--destructive)] hover:bg-[color:var(--destructive)]/22",
     ghost: "bg-transparent text-theme-muted hover:text-theme hover:bg-[var(--theme-surface)] rounded-md border border-transparent",
     minecraft: "mc-btn", // Legacy fallback
+    default: "bg-[var(--theme-surface)] text-theme hover:bg-[var(--theme-surface-soft)] border border-theme rounded-md",
   };
 
   const sizeStyles = {
@@ -77,3 +78,5 @@ export function Button({
     </button>
   );
 }
+
+

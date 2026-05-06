@@ -16,6 +16,7 @@ export function SettingsScreen(): React.JSX.Element {
           t={vm.t}
           activeTab={vm.activeTab}
           onChangeTab={vm.setActiveTab}
+          onLogout={vm.onLogout}
         />
 
         <div className="flex-1 overflow-y-auto bg-[var(--theme-bg)] transition-colors duration-300">

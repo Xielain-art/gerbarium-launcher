@@ -122,7 +122,7 @@ export default function setupLogHandler(app: App): void {
 
         await new Promise<void>((resolve, reject) => {
           const output = createWriteStream(filePath);
-          const archive = archiver(ARCHIVE_FORMATS.ZIP as archiver.FormatId, {
+          const archive = archiver(ARCHIVE_FORMATS.ZIP as archiver.Format, {
             zlib: { level: 9 },
           });
           output.on("close", resolve);

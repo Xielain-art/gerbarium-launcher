@@ -169,6 +169,7 @@ export interface IElectronAPI {
     ) => Promise<{ success: boolean; error?: string }>;
     getRoles: () => Promise<AdminRolesResponse>;
     createRole: (payload: { name: string; description?: string }) => Promise<AdminRoleMutationResponse>;
+    updateRole: (roleId: string, payload: { name?: string; description?: string }) => Promise<AdminRoleMutationResponse>;
     getStats: () => Promise<{ success: boolean; data?: ApiAdminStats; error?: string }>;
     getNews: (
       search?: string,

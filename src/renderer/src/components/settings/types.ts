@@ -1,4 +1,4 @@
-import type { SettingsGeneral, SettingsProfile } from "../../types";
+﻿import type { SettingsGeneral, SettingsProfile } from "../../types";
 import type { AuthUser } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
 import type { DownloadStatus } from "../../../../shared/constants/ipc-chanels";
@@ -18,6 +18,11 @@ export interface JavaInstallation {
 
 export interface SettingsBaseProps {
   t: TranslationType;
+}
+
+export interface SettingsHeaderProps extends SettingsBaseProps {
+  onBack: () => void;
+  onLogout: () => void;
 }
 
 export interface GeneralSettingsTabProps extends SettingsBaseProps {

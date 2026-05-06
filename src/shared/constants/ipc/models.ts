@@ -176,7 +176,14 @@ export type DownloadStatus =
   | "DOWNLOADING"
   | "EXTRACTING"
   | "VERIFYING"
-  | "DONE";
+  | "DONE"
+  | "checking"
+  | "downloading"
+  | "installing"
+  | "verifying"
+  | "completed"
+  | "cancelled"
+  | "idle";
 
 export interface JavaDownloadProgressPayload {
   status: DownloadStatus;

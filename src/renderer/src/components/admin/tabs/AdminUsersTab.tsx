@@ -13,6 +13,8 @@ interface AdminUsersTabProps {
   error: string | null;
   isLoading: boolean;
   isLoadingMore: boolean;
+  hasMore: boolean;
+  usersEndRef: React.RefObject<HTMLDivElement | null>;
   isApplyingUserFilters: boolean;
   isAdminApiBusy: boolean;
   userSearchInput: string;
@@ -315,7 +317,7 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
                 {user.username}
               </div>
               <div className="font-mono text-xs text-theme-muted">
-                {user.email} • {user.id.slice(0, 8)}
+                {user.email} ï¿½ {user.id.slice(0, 8)}
               </div>
             </div>
             <div className="flex gap-2">
@@ -391,6 +393,7 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
     </ShadcnCard>
   );
 }
+
 
 
 

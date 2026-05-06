@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+﻿import { apiClient } from "./client";
 import { buildApiResult, buildNetworkErrorResult } from "./result";
 import type {
   ApiAdminStats,
@@ -7,6 +7,8 @@ import type {
   ApiRole,
   ApiUpdateRoleDto,
   ApiUser,
+  ApiChangelog,
+  ApiNews,
 } from "./types";
 export type {
   ApiAdminStats,
@@ -15,6 +17,8 @@ export type {
   ApiRole,
   ApiUpdateRoleDto,
   ApiUser,
+  ApiChangelog,
+  ApiNews,
 } from "./types";
 
 export async function getUsersRequest(
