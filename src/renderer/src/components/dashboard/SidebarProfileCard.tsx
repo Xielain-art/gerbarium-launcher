@@ -34,7 +34,7 @@ export function SidebarProfileCard({
   const roleLabels = getRoleLabels(user);
 
   return (
-    <div className="rounded-xl border border-theme bg-[var(--theme-surface)] p-4 transition-all hover:border-[var(--theme-border-hi)]">
+    <div className="fantasy-card rounded-[1.25rem] p-4 transition-all hover:border-[var(--theme-border-hi)]">
       <div className="flex items-center gap-4">
         <div className="relative shrink-0">
           <Avatar username={user?.username} size="lg" />
@@ -47,7 +47,7 @@ export function SidebarProfileCard({
           >
             {user?.username || t.DASHBOARD.PLAYER_DEFAULT}
           </span>
-          <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-theme-muted">
+          <div className="fantasy-rune-label mt-0.5 text-[10px]">
             {t.DASHBOARD.PLAYER_ID_LABEL}{" "}
             {user?.id?.slice(0, 8) || t.DASHBOARD.PLAYER_ID_UNKNOWN}
           </div>
@@ -56,7 +56,7 @@ export function SidebarProfileCard({
               <ShadcnBadge
                 key={role}
                 variant="outline"
-                className="border-theme bg-[var(--theme-surface-soft)] px-2 py-0 font-sans text-[10px] font-medium text-[var(--mc-accent)]"
+                className="fantasy-chip border-theme px-2 py-0 font-sans text-[10px] font-medium text-[var(--mc-accent)]"
               >
                 {role}
               </ShadcnBadge>
@@ -65,10 +65,10 @@ export function SidebarProfileCard({
         </div>
       </div>
       
-      <div className="mt-4 flex gap-2 border-t border-theme pt-3">
+      <div className="mt-4 flex gap-2 border-t border-[var(--fantasy-border-soft)] pt-3">
         <button
           onClick={onOpenSettings}
-          className="flex h-8 flex-1 items-center justify-center gap-2 rounded-md border border-theme bg-transparent font-sans text-xs font-medium text-theme-muted transition-colors hover:border-[var(--theme-border-hi)] hover:bg-[var(--theme-surface-soft)] hover:text-theme"
+          className="fantasy-button flex h-8 flex-1 items-center justify-center gap-2 rounded-full font-sans text-xs font-medium text-theme-muted"
           title={t.DASHBOARD.SETTINGS_BUTTON}
         >
           <Settings className="h-3.5 w-3.5" />
@@ -76,7 +76,7 @@ export function SidebarProfileCard({
         </button>
         <button
           onClick={onLogout}
-          className="flex h-8 w-10 items-center justify-center rounded-md border border-theme bg-transparent text-theme-muted transition-colors hover:border-[color:var(--destructive)]/50 hover:bg-[color:var(--destructive)]/10 hover:text-[color:var(--destructive)]"
+          className="fantasy-button flex h-8 w-10 items-center justify-center rounded-full text-theme-muted transition-colors hover:text-[color:var(--destructive)]"
           title={t.DASHBOARD.LOGOUT_TOOLTIP}
         >
           <LogOut className="h-3.5 w-3.5" />

@@ -8,7 +8,9 @@ export function SettingsScreen(): React.JSX.Element {
   const vm = useSettingsScreen();
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-[var(--theme-sidebar)]">
+    <div className="fantasy-ui fantasy-shell flex h-screen w-full flex-col overflow-hidden bg-[var(--theme-sidebar)]">
+      <div className="fantasy-orb fantasy-orb--violet left-[-8rem] top-[-5rem] h-[22rem] w-[22rem]" />
+      <div className="fantasy-orb fantasy-orb--emerald right-[-7rem] bottom-[-8rem] h-[24rem] w-[24rem]" />
       <SettingsHeader t={vm.t} onBack={vm.onBack} onLogout={vm.onLogout} />
 
       <main className="flex flex-1 overflow-hidden">
@@ -22,7 +24,7 @@ export function SettingsScreen(): React.JSX.Element {
         <div className="flex-1 overflow-y-auto bg-[var(--theme-bg)] transition-colors duration-300">
           <div className="mx-auto max-w-5xl">
             {vm.error && (
-              <div className="mx-8 mt-8 flex items-center gap-3 rounded-md border border-[color:var(--destructive)]/20 bg-[color:var(--destructive)]/10 p-4 text-sm font-medium text-[color:var(--destructive)]">
+              <div className="mx-8 mt-8 flex items-center gap-3 rounded-[1rem] border border-[color:var(--destructive)]/20 bg-[color:var(--destructive)]/10 p-4 text-sm font-medium text-[color:var(--destructive)]">
                 {vm.error}
               </div>
             )}

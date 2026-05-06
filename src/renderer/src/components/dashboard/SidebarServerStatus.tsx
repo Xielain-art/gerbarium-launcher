@@ -16,7 +16,7 @@ export function SidebarServerStatus({
   }
 
   return (
-    <div className="mx-4 my-2 flex items-center justify-between rounded-lg border border-theme bg-[var(--theme-surface)] px-4 py-2.5">
+    <div className="fantasy-chip mx-4 my-2 flex items-center justify-between rounded-[1rem] px-4 py-2.5">
       <div className="flex items-center gap-2.5">
         <div className="relative flex h-2.5 w-2.5 items-center justify-center">
           <div
@@ -32,7 +32,7 @@ export function SidebarServerStatus({
             )}
           />
         </div>
-        <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-theme">
+        <span className="fantasy-rune-label text-[10px] font-bold">
           {serverStatus.online
             ? t.DASHBOARD.SERVER_ONLINE
             : t.DASHBOARD.SERVER_OFFLINE}

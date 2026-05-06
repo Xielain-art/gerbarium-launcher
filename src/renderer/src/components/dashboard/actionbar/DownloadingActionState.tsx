@@ -18,7 +18,7 @@ export function DownloadingActionState({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-theme-muted">
+          <div className="fantasy-rune-label text-[10px] font-bold">
             {progress?.status || t.COMMON.LOADING}
           </div>
           <div className="mt-1 font-mono text-[11px] text-[var(--mc-accent)]">
@@ -37,7 +37,7 @@ export function DownloadingActionState({
           onClick={onCancelDownload}
           variant="danger"
           size="md"
-          className="rounded-md border border-[color:var(--destructive)]/30 bg-transparent text-xs font-medium text-[color:var(--destructive)] hover:bg-[color:var(--destructive)]/10"
+          className="fantasy-button rounded-full text-xs font-medium text-[color:var(--destructive)]"
         >
           {t.COMMON.CANCEL}
         </Button>

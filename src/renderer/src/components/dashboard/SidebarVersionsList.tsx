@@ -28,7 +28,7 @@ export function SidebarVersionsList({
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <div className="px-5 py-4">
-        <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-theme-muted">
+        <h2 className="fantasy-rune-label text-[10px] font-bold">
           {t.DASHBOARD.VERSIONS_TITLE}
         </h2>
       </div>
@@ -41,9 +41,9 @@ export function SidebarVersionsList({
                 key={version.id}
                 onClick={() => onSelectVersion(version.id)}
                 className={cn(
-                  "group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-all",
+                  "group relative flex w-full items-center gap-3 rounded-[1rem] px-3 py-2 text-left transition-all",
                   isActive
-                    ? "bg-[var(--theme-surface-soft)] text-theme"
+                    ? "fantasy-chip text-theme"
                     : "text-theme-muted hover:bg-[var(--theme-surface-soft)] hover:text-theme",
                 )}
               >

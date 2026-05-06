@@ -18,7 +18,7 @@ export function ProgressBar({
   const clampedProgress = Math.min(100, Math.max(0, progress));
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("space-y-3", className)} data-slot="launcher-progress">
       <div className="h-[2px] w-full overflow-hidden bg-[var(--theme-border)]">
         <div
           className="h-full bg-[var(--mc-accent)] transition-all duration-500 ease-out"

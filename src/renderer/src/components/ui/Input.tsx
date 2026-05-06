@@ -49,6 +49,7 @@ export function Input({
         <input
           id={inputId}
           type={effectiveType}
+          data-slot="launcher-input"
           className={cn(
             "flex h-10 w-full rounded-md border border-theme bg-[var(--theme-surface)] px-3 py-2 text-sm text-theme transition-all placeholder:text-theme-muted focus:border-[var(--mc-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--mc-accent)] disabled:cursor-not-allowed disabled:opacity-50",
             isPassword && "pr-10",

@@ -100,7 +100,7 @@ export function ChangelogFeed({
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="h-10 w-10 animate-spin rounded-full border-2 border-[var(--mc-accent)] border-t-transparent" />
-          <span className="font-mono text-[10px] font-medium uppercase tracking-widest text-theme-muted">
+          <span className="fantasy-rune-label text-[10px] font-medium">
             {t.COMMON.LOADING}
           </span>
         </div>
@@ -124,15 +124,15 @@ export function ChangelogFeed({
   return (
     <div className="overflow-x-hidden px-6">
       <div className="mb-10">
-        <h2 className="font-sans text-xl font-medium tracking-tight text-theme">
+        <h2 className="fantasy-hero-title font-sans text-xl font-medium text-theme">
           Changelog
         </h2>
-        <p className="font-mono text-[10px] uppercase tracking-wider text-theme-muted">
+        <p className="fantasy-rune-label text-[10px]">
           Technical updates and release history.
         </p>
       </div>
 
-      <div className="relative space-y-12 before:absolute before:left-[11px] before:top-2 before:h-full before:w-[1px] before:bg-[var(--theme-border)]">
+      <div className="relative space-y-12 before:absolute before:left-[11px] before:top-2 before:h-full before:w-[1px] before:bg-[var(--fantasy-border-soft)]">
         {changelog.map((item) => {
           const { html, isTruncated } = getTruncatedMarkdown(item);
 
@@ -142,16 +142,16 @@ export function ChangelogFeed({
               
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <h3 className="font-mono text-lg font-bold text-theme">
+                  <h3 className="fantasy-rune-label text-lg font-bold text-theme">
                     v{item.version}
                   </h3>
                   {item.mandatory && (
-                    <span className="rounded border border-[color:var(--destructive)]/30 bg-[color:var(--destructive)]/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-[color:var(--destructive)]">
-                      Mandatory
-                    </span>
-                  )}
-                </div>
-                <time className="font-mono text-[10px] font-medium uppercase tracking-wider text-theme-muted">
+                  <span className="rounded border border-[color:var(--destructive)]/30 bg-[color:var(--destructive)]/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-[color:var(--destructive)]">
+                    Mandatory
+                  </span>
+                )}
+              </div>
+                <time className="fantasy-rune-label text-[10px] font-medium">
                   {new Date(item.releaseDate).toLocaleDateString("ru-RU", {
                     day: "numeric",
                     month: "long",
@@ -160,14 +160,14 @@ export function ChangelogFeed({
                 </time>
               </div>
 
-              <div className="rounded-xl border border-theme bg-[var(--theme-bg)] p-5">
+              <div className="fantasy-card rounded-[1.25rem] p-5">
                 <div
                   className="prose prose-sm mb-5 max-w-full font-sans text-xs leading-relaxed text-theme-muted [&_a]:text-[var(--mc-accent)] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
                   style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
                   dangerouslySetInnerHTML={{ __html: html }}
                 />
                 
-                <div className="flex flex-wrap items-center justify-between gap-4 border-t border-theme pt-4">
+                <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--fantasy-border-soft)] pt-4">
                   {isTruncated && (
                     <button
                       type="button"

@@ -6,11 +6,11 @@ export function WindowControls(): React.JSX.Element {
   const { t } = useTranslation();
 
   return (
-    <div className="flex -webkit-app-region-no-drag items-center gap-0 overflow-hidden rounded-md border border-theme bg-[var(--theme-surface)]">
+    <div className="fantasy-chip flex -webkit-app-region-no-drag items-center gap-0 overflow-hidden rounded-full">
       {/* Minimize Button */}
       <button
         onClick={minimize}
-        className="flex h-8 w-10 items-center justify-center text-theme-muted transition-colors hover:bg-[var(--theme-surface-soft)] hover:text-theme"
+        className="flex h-8 w-10 items-center justify-center text-theme-muted transition-colors hover:bg-white/5 hover:text-theme"
         title={t.WINDOW_CONTROLS.MINIMIZE}
       >
         <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
@@ -21,7 +21,7 @@ export function WindowControls(): React.JSX.Element {
       {/* Maximize/Restore Button */}
       <button
         onClick={maximize}
-        className="flex h-8 w-10 items-center justify-center text-theme-muted transition-colors hover:bg-[var(--theme-surface-soft)] hover:text-theme"
+        className="flex h-8 w-10 items-center justify-center text-theme-muted transition-colors hover:bg-white/5 hover:text-theme"
         title={isMaximized ? t.WINDOW_CONTROLS.RESTORE : t.WINDOW_CONTROLS.MAXIMIZE}
       >
         {isMaximized ? (

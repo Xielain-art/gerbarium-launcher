@@ -21,6 +21,7 @@ export function Checkbox({
         <input
           id={checkboxId}
           type="checkbox"
+          data-slot="launcher-checkbox"
           className="peer absolute h-full w-full cursor-pointer opacity-0"
           {...props}
         />

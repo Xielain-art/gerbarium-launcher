@@ -13,7 +13,7 @@ export function GeneralSettingsTab({
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-8">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-semibold tracking-tight text-theme">
+        <h2 className="fantasy-hero-title text-2xl font-semibold text-theme">
           {t.SETTINGS.GENERAL.TITLE}
         </h2>
         <p className="text-sm text-theme-muted">
@@ -22,10 +22,10 @@ export function GeneralSettingsTab({
       </div>
 
       <div className="grid gap-6">
-        <Card className="p-6">
+        <Card className="fantasy-card p-6">
           <div className="mb-6 flex items-center gap-2">
             <Globe size={16} className="text-theme-muted" />
-            <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-theme-muted">
+            <h3 className="fantasy-rune-label text-[11px] font-bold">
               Appearance & Localization
             </h3>
           </div>
@@ -35,14 +35,15 @@ export function GeneralSettingsTab({
               value={general.language}
               onChange={(e) => onUpdateGeneral({ language: e.target.value })}
               options={t.SETTINGS.GENERAL.LANGUAGE_OPTIONS}
+              className="w-full"
             />
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="fantasy-card p-6">
           <div className="mb-6 flex items-center gap-2">
             <Monitor size={16} className="text-theme-muted" />
-            <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-theme-muted">
+            <h3 className="fantasy-rune-label text-[11px] font-bold">
               Launcher Behavior
             </h3>
           </div>
@@ -70,16 +71,16 @@ export function GeneralSettingsTab({
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="fantasy-card p-6">
           <div className="mb-6 flex items-center gap-2">
             <Save size={16} className="text-theme-muted" />
-            <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-theme-muted">
+            <h3 className="fantasy-rune-label text-[11px] font-bold">
               Storage & Paths
             </h3>
           </div>
           <div className="space-y-6">
             <div className="flex flex-col gap-2">
-              <label className="font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-theme-muted">
+              <label className="fantasy-rune-label text-[10px] font-bold">
                 Game Files Path
               </label>
               <div className="flex gap-2">
@@ -88,12 +89,12 @@ export function GeneralSettingsTab({
                   value={general.gamePath || ""}
                   readOnly
                   placeholder="Default (~/.gerbarium)"
-                  className="flex-1 font-mono text-[13px]"
+                  className="fantasy-input-shell flex-1 font-mono text-[13px]"
                 />
                 <Button
                   onClick={() => void onSelectGameDirectory()}
                   variant="secondary"
-                  className="flex items-center gap-2 whitespace-nowrap"
+                  className="fantasy-button flex items-center gap-2 whitespace-nowrap"
                 >
                   <FolderOpen size={16} className="text-theme-muted" />
                   Browse

@@ -15,7 +15,10 @@ export function DashboardScreen(): React.JSX.Element {
   const vm = useDashboardScreen();
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[var(--theme-sidebar)]">
+    <div className="fantasy-ui fantasy-shell flex h-screen w-full overflow-hidden bg-[var(--theme-sidebar)]">
+      <div className="fantasy-orb fantasy-orb--violet left-[-9rem] top-[-6rem] h-[26rem] w-[26rem]" />
+      <div className="fantasy-orb fantasy-orb--emerald right-[-7rem] top-[14%] h-[24rem] w-[24rem]" />
+      <div className="fantasy-orb fantasy-orb--gold left-[30%] bottom-[-7rem] h-[18rem] w-[18rem]" />
       <DashboardSidebar
         t={vm.t}
         user={vm.user}
@@ -31,7 +34,7 @@ export function DashboardScreen(): React.JSX.Element {
       <main className="relative z-10 flex flex-1 flex-col overflow-hidden bg-[var(--theme-bg)]">
         <div className="absolute right-4 top-4 z-50 flex items-center gap-4">
           {vm.appVersion ? (
-            <div className="font-mono text-[10px] uppercase tracking-wider text-theme-muted">
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-theme-muted">
               {vm.t.DASHBOARD.VERSION_DISPLAY_LABEL} {vm.appVersion}
             </div>
           ) : null}
@@ -41,14 +44,14 @@ export function DashboardScreen(): React.JSX.Element {
 
         <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto pb-4 pt-20">
           {!vm.isLaunching ? (
-            <div className="mb-6 flex items-center gap-1 px-6">
+            <div className="mb-6 flex items-center gap-2 px-6">
               <button
                 type="button"
                 onClick={() => vm.setContentTab("news")}
                 className={cn(
-                  "rounded-[9999px] px-4 py-1.5 font-sans text-xs font-medium transition-all",
+                  "fantasy-button rounded-[9999px] px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] transition-all",
                   vm.contentTab === "news"
-                    ? "bg-[var(--theme-surface)] text-theme"
+                    ? "fantasy-button--primary text-[var(--theme-bg)]"
                     : "text-theme-muted hover:text-theme",
                 )}
               >
@@ -58,9 +61,9 @@ export function DashboardScreen(): React.JSX.Element {
                 type="button"
                 onClick={() => vm.setContentTab("changelog")}
                 className={cn(
-                  "rounded-[9999px] px-4 py-1.5 font-sans text-xs font-medium transition-all",
+                  "fantasy-button rounded-[9999px] px-4 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] transition-all",
                   vm.contentTab === "changelog"
-                    ? "bg-[var(--theme-surface)] text-theme"
+                    ? "fantasy-button--primary text-[var(--theme-bg)]"
                     : "text-theme-muted hover:text-theme",
                 )}
               >

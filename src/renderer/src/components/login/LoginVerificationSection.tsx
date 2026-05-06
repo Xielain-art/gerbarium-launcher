@@ -41,11 +41,11 @@ export function LoginVerificationSection({
     <>
       <div
         data-testid="verification-section"
-        className="flex flex-col items-center gap-3 p-4 bg-white/5 border border-theme rounded-xl"
+        className="fantasy-card flex flex-col items-center gap-3 rounded-2xl p-4"
       >
         <Label
           htmlFor="email-code"
-          className="text-[10px] font-mono uppercase tracking-[1.2px] text-theme-muted"
+          className="fantasy-rune-label text-[10px]"
         >
           {t.LOGIN.CODE_LABEL}
         </Label>
@@ -64,7 +64,7 @@ export function LoginVerificationSection({
                 key={i} 
                 index={i} 
                 hasError={!!validation.error} 
-                className="w-9 h-11 rounded-lg border-[var(--theme-border-hi)] bg-white/5 font-mono text-lg text-theme focus-visible:border-[var(--mc-accent)]"
+                className="fantasy-input h-11 w-9 rounded-lg font-mono text-lg text-theme focus-visible:border-[var(--mc-accent)]"
               />
             ))}
           </InputOTPGroup>
@@ -86,7 +86,7 @@ export function LoginVerificationSection({
             <Badge
               data-testid="dev-verification-code"
               variant="secondary"
-              className="rounded-full border border-[var(--theme-border-hi)] bg-[var(--theme-surface)] px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-[var(--mc-accent)]"
+              className="fantasy-chip rounded-full px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-[var(--mc-accent)]"
             >
               {t.LOGIN.DEV_CODE_LABEL}: {developmentCode}
             </Badge>
@@ -96,7 +96,7 @@ export function LoginVerificationSection({
           <Button
             type="submit"
             disabled={isLoading || verificationCode.length < 6}
-            className="h-9 flex-1 bg-[var(--mc-accent)] hover:bg-[var(--mc-accent)]/90 text-[var(--theme-bg)] font-medium rounded-full py-2 px-8 transition-colors"
+            className="fantasy-button fantasy-button--primary h-9 flex-1 rounded-full px-8 py-2 font-medium text-[var(--theme-bg)] transition-colors"
           >
             {t.LOGIN.VERIFY_BUTTON}
           </Button>
@@ -105,7 +105,7 @@ export function LoginVerificationSection({
             variant="outline"
             disabled={isLoading || resendCountdown > 0}
             onClick={() => void onResendCode()}
-            className="h-9 flex-1 rounded-full border border-theme bg-transparent hover:bg-white/5 font-medium text-[13px] text-theme transition-all"
+            className="fantasy-button h-9 flex-1 rounded-full font-medium text-[13px] text-theme transition-all"
           >
             {resendCountdown > 0
               ? t.LOGIN.RESEND_IN(resendCountdown)
@@ -117,7 +117,7 @@ export function LoginVerificationSection({
           variant="ghost"
           disabled={isLoading}
           onClick={() => void onUseAnotherAccount()}
-          className="h-8 justify-center rounded-full text-[12px] text-theme-muted hover:text-theme hover:bg-white/5 transition-all"
+          className="fantasy-button h-8 justify-center rounded-full text-[12px] text-theme-muted transition-all"
         >
           {t.LOGIN.USE_ANOTHER_ACCOUNT}
         </Button>

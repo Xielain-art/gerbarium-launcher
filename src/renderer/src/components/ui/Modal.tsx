@@ -62,10 +62,12 @@ export function Modal({
 
   return (
     <div
+      data-slot="launcher-modal"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
       onClick={handleBackdropClick}
     >
       <div
+        data-slot="launcher-modal-panel"
         className="relative mx-4 w-full max-w-md border-[4px] border-b-[var(--mc-panel-border-lo)] border-l-[var(--mc-panel-border-hi)] border-r-[var(--mc-panel-border-lo)] border-t-[var(--mc-panel-border-hi)] bg-[var(--mc-panel-bg)] shadow-2xl"
         role="dialog"
         aria-modal="true"

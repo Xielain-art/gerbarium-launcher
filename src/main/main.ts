@@ -46,6 +46,7 @@ const require = createRequire(__filename);
 
 const isSmokeTest = process.env.SMOKE_TEST === "true";
 const isDev = !app.isPackaged && !isSmokeTest;
+app.setAppUserModelId("gerbariumlauncher");
 const LangLoader = require(
   path.join(appRoot, "_legacy_app", "assets", "js", "langloader"),
 ) as LegacyLangLoader;
@@ -122,12 +123,21 @@ function getPlatformIcon(filename: string): string {
   );
 }
 
+function getAppIconPath(filename: string): string {
+  if (filename === "SealCircle" && process.platform === MAIN_CONSTANTS.PLATFORMS.WINDOWS) {
+    const root = app.isPackaged ? process.resourcesPath : appRoot;
+    return path.join(root, "build", "app-icon.ico");
+  }
+
+  return getPlatformIcon(filename);
+}
+
 /**
  * Gets a NativeImage icon, resizing it on Linux if it exceeds X11 request limits.
  * Large icons (e.g. 2048x2048) can cause X11 to crash with "Cannot send request of length...".
  */
 function getAppIcon(filename: string): NativeImage {
-  const iconPath = getPlatformIcon(filename);
+  const iconPath = getAppIconPath(filename);
   const icon = nativeImage.createFromPath(iconPath);
 
   // X11 has a limit on the length of a single request.
@@ -195,7 +205,7 @@ function createMenu(): void {
 function createTray(): void {
   if (tray) return;
 
-  tray = new Tray(getAppIcon("SealCircle"));
+  tray = new Tray(getAppIcon("SealCircle"), "gerbariumlauncher-tray");
   const contextMenu = Menu.buildFromTemplate([
     {
       label: "Show launcher",

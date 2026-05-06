@@ -10,6 +10,7 @@ export function Card({
   return (
     <div
       onClick={onClick}
+      data-slot="launcher-card"
       className={cn(
         "relative overflow-hidden rounded-lg border border-theme bg-[var(--theme-surface)] transition-all duration-200",
         active && "border-[var(--mc-accent)] ring-1 ring-[var(--mc-accent)]",

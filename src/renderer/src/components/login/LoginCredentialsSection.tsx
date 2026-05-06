@@ -52,7 +52,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
               placeholder={p.t.LOGIN.EMAIL_PLACEHOLDER}
               disabled={p.isLoading}
               autoComplete="email"
-              className="bg-white/5 border border-[var(--theme-border-hi)] focus:border-[var(--mc-accent)] focus:ring-0 rounded-lg transition-all px-4 h-9 text-sm text-theme"
+              className="fantasy-input rounded-lg px-4 h-9 text-sm text-theme"
             />
           </div>
           <div className="space-y-1">
@@ -71,7 +71,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
               placeholder={p.t.LOGIN.REGISTER_USERNAME_PLACEHOLDER}
               disabled={p.isLoading}
               autoComplete="username"
-              className="bg-white/5 border border-[var(--theme-border-hi)] focus:border-[var(--mc-accent)] focus:ring-0 rounded-lg transition-all px-4 h-9 text-sm text-theme"
+              className="fantasy-input rounded-lg px-4 h-9 text-sm text-theme"
             />
           </div>
         </>
@@ -93,7 +93,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
             placeholder={p.t.LOGIN.USERNAME_PLACEHOLDER}
             disabled={p.isLoading}
             autoComplete="username"
-            className="bg-white/5 border border-[var(--theme-border-hi)] focus:border-[var(--mc-accent)] focus:ring-0 rounded-lg transition-all px-4 h-9 text-sm text-theme"
+            className="fantasy-input rounded-lg px-4 h-9 text-sm text-theme"
           />
         </div>
       )}
@@ -114,7 +114,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
             placeholder={p.t.LOGIN.PASSWORD_PLACEHOLDER}
             disabled={p.isLoading}
             autoComplete={p.isRegisterMode ? "new-password" : "current-password"}
-            className="bg-white/5 border border-[var(--theme-border-hi)] focus:border-[var(--mc-accent)] focus:ring-0 rounded-lg transition-all px-4 h-9 text-sm text-theme"
+            className="fantasy-input rounded-lg px-4 h-9 text-sm text-theme"
           />
         </div>
       )}
@@ -135,7 +135,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
             placeholder={p.t.LOGIN.CONFIRM_PASSWORD_PLACEHOLDER}
             disabled={p.isLoading}
             autoComplete="new-password"
-            className="bg-white/5 border border-[var(--theme-border-hi)] focus:border-[var(--mc-accent)] focus:ring-0 rounded-lg transition-all px-4 h-9 text-sm text-theme"
+            className="fantasy-input rounded-lg px-4 h-9 text-sm text-theme"
           />
         </div>
       )}
@@ -149,7 +149,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
               variant="outline"
               disabled={p.isLoading}
               onClick={p.onRegisterStepBack}
-              className="h-9 flex-1 rounded-full border border-theme bg-transparent text-theme font-medium text-[13px] hover:bg-white/5 transition-colors"
+              className="fantasy-button h-9 flex-1 rounded-full text-theme font-medium text-[13px] transition-colors"
             >
               {p.t.LOGIN.REGISTER_BACK}
             </Button>
@@ -157,7 +157,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
           <Button
             type="submit"
             disabled={p.isLoading}
-            className="h-9 flex-1 bg-[var(--mc-accent)] hover:bg-[var(--mc-accent)]/90 text-[var(--theme-bg)] font-medium rounded-full py-2 px-8 transition-colors"
+            className="fantasy-button fantasy-button--primary h-9 flex-1 rounded-full px-8 py-2 font-medium text-[var(--theme-bg)] transition-colors"
           >
             {p.isRegisterAccountStep
               ? p.t.LOGIN.REGISTER_NEXT
@@ -169,7 +169,7 @@ export function LoginCredentialsSection(p: Props): React.JSX.Element {
           <Button
             type="submit"
             disabled={p.isLoading}
-            className="h-9 w-full bg-[var(--mc-accent)] hover:bg-[var(--mc-accent)]/90 text-[var(--theme-bg)] font-medium rounded-full py-2 px-8 transition-colors"
+            className="fantasy-button fantasy-button--primary h-9 w-full rounded-full px-8 py-2 font-medium text-[var(--theme-bg)] transition-colors"
           >
             {p.t.LOGIN.SUBMIT_BUTTON}
           </Button>

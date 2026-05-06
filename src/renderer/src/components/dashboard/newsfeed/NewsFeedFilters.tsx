@@ -21,10 +21,10 @@ export function NewsFeedFilters({
   return (
     <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
       <div>
-        <h2 className="font-sans text-xl font-medium tracking-tight text-theme">
+        <h2 className="fantasy-hero-title font-sans text-xl font-medium text-theme">
           {t.DASHBOARD.NEWS_TITLE}
         </h2>
-        <p className="font-mono text-[10px] uppercase tracking-wider text-theme-muted">
+        <p className="fantasy-rune-label text-[10px]">
           Stay updated with the latest changes and community news.
         </p>
       </div>
@@ -35,7 +35,7 @@ export function NewsFeedFilters({
             onChange={(e) =>
               onOrderChange(e.target.value === "oldest" ? "oldest" : "newest")
             }
-            className="h-9 rounded-md border-theme bg-[var(--theme-bg)] font-sans text-xs text-theme transition-colors hover:border-[var(--theme-border-hi)] focus:ring-0"
+            className="fantasy-input h-9 rounded-full font-sans text-xs text-theme transition-colors hover:border-[var(--theme-border-hi)] focus:ring-0"
             options={[
               { label: t.DASHBOARD.NEWS_FILTER_SORT_NEWEST, value: "newest" },
               { label: t.DASHBOARD.NEWS_FILTER_SORT_OLDEST, value: "oldest" },
@@ -46,7 +46,7 @@ export function NewsFeedFilters({
           <ShadcnSelect
             value={selectedTag}
             onChange={(e) => onTagChange(e.target.value)}
-            className="h-9 rounded-md border-theme bg-[var(--theme-bg)] font-sans text-xs text-theme transition-colors hover:border-[var(--theme-border-hi)] focus:ring-0"
+            className="fantasy-input h-9 rounded-full font-sans text-xs text-theme transition-colors hover:border-[var(--theme-border-hi)] focus:ring-0"
             options={[
               { label: t.DASHBOARD.NEWS_FILTER_TAG_ALL, value: "all" },
               ...availableTags.map((tag) => ({ label: tag.name, value: tag.id })),

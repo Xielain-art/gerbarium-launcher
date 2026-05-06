@@ -66,7 +66,7 @@ export function ProfileSettingsTab({
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-8">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-semibold tracking-tight text-theme">
+        <h2 className="fantasy-hero-title text-2xl font-semibold text-theme">
           {t.SETTINGS.PROFILE.TITLE}
         </h2>
         <p className="text-sm text-theme-muted">
@@ -75,7 +75,7 @@ export function ProfileSettingsTab({
       </div>
 
       <div className="grid gap-6">
-        <Card className="p-8">
+        <Card className="fantasy-card p-8">
           <div className="flex flex-col gap-10 md:flex-row md:items-start">
             <div className="flex shrink-0 flex-col items-center gap-4">
               <div className="relative group">
@@ -85,16 +85,16 @@ export function ProfileSettingsTab({
                   size="xl"
                   className="ring-2 ring-[var(--theme-border)] transition-all group-hover:ring-[var(--mc-accent)]/50"
                 />
-              <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full border-4 border-[var(--theme-bg)] bg-[var(--mc-accent)] shadow-[0_0_10px_rgba(62,207,142,0.4)]" />
+                <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full border-4 border-[var(--theme-bg)] bg-[var(--mc-accent)] shadow-[0_0_10px_rgba(62,207,142,0.4)]" />
               </div>
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-theme-muted">
+              <span className="fantasy-rune-label text-[10px] font-bold">
                 Avatar Preview
               </span>
             </div>
 
             <div className="grid flex-1 gap-x-12 gap-y-8 sm:grid-cols-2">
               <div className="space-y-2">
-                <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-theme-muted">
+                <div className="flex items-center gap-2 fantasy-rune-label text-[10px] font-bold">
                   <Mail size={12} className="text-[var(--mc-accent)]" />
                   Email Address
                 </div>
@@ -104,13 +104,13 @@ export function ProfileSettingsTab({
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-theme-muted">
+                <div className="flex items-center gap-2 fantasy-rune-label text-[10px] font-bold">
                   <ShieldCheck size={12} className="text-[var(--mc-accent)]" />
                   Global Roles
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {user?.roles?.map(role => (
-                    <span key={role.id} className="rounded border border-theme bg-[var(--theme-surface)] px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-theme-muted">
+                    <span key={role.id} className="fantasy-chip rounded border border-theme px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-theme-muted">
                       {role.name}
                     </span>
                   )) || <span className="text-sm font-medium text-theme">user</span>}
@@ -118,7 +118,7 @@ export function ProfileSettingsTab({
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-theme-muted">
+                <div className="flex items-center gap-2 fantasy-rune-label text-[10px] font-bold">
                   <UserIcon size={12} className="text-[var(--mc-accent)]" />
                   Minecraft Username
                 </div>
@@ -129,7 +129,7 @@ export function ProfileSettingsTab({
 
               {user?.isBanned && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-[color:var(--destructive)]">
+                  <div className="flex items-center gap-2 fantasy-rune-label text-[10px] font-bold text-[color:var(--destructive)]">
                     <Ban size={12} />
                     Account Status
                   </div>
@@ -142,10 +142,10 @@ export function ProfileSettingsTab({
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="fantasy-card p-6">
           <div className="mb-6 flex items-center gap-2">
             <Fingerprint size={16} className="text-theme-muted" />
-            <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-theme-muted">
+            <h3 className="fantasy-rune-label text-[11px] font-bold">
               Identity & Customization
             </h3>
           </div>
@@ -167,7 +167,7 @@ export function ProfileSettingsTab({
                   error={skinUrlError}
                   onChange={(e) => onUpdateProfile({ skinUrl: e.target.value })}
                   placeholder={t.SETTINGS.PROFILE.SKIN_URL_PLACEHOLDER}
-                  className="font-mono text-[13px]"
+                  className="fantasy-input-shell font-mono text-[13px]"
                 />
               </div>
 
@@ -179,14 +179,14 @@ export function ProfileSettingsTab({
                   error={capeUrlError}
                   onChange={(e) => onUpdateProfile({ capeUrl: e.target.value })}
                   placeholder={t.SETTINGS.PROFILE.CAPE_URL_PLACEHOLDER}
-                  className="font-mono text-[13px]"
+                  className="fantasy-input-shell font-mono text-[13px]"
                 />
               </div>
             </div>
           </div>
         </Card>
 
-          <Card className="border-[color:var(--destructive)]/40 bg-[color:var(--destructive)]/8 p-8">
+        <Card className="fantasy-card border-[color:var(--destructive)]/40 bg-[color:var(--destructive)]/8 p-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-6">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color:var(--destructive)]/15 text-[color:var(--destructive)] shadow-[0_0_20px_rgba(255,128,128,0.1)]">
               <ShieldAlert size={24} />
@@ -246,7 +246,7 @@ export function ProfileSettingsTab({
             onChange={(e) => setDeleteCode(e.target.value)}
             placeholder={t.LOGIN.CODE_PLACEHOLDER}
             maxLength={6}
-            className="font-mono text-center text-lg tracking-[0.5em]"
+            className="fantasy-input-shell font-mono text-center text-lg tracking-[0.5em]"
           />
           {deletionNotice && (
             <div

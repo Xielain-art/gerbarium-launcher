@@ -33,10 +33,10 @@ export function SettingsTabNav({
   ];
 
   return (
-    <div className="flex w-72 shrink-0 flex-col border-r border-theme bg-[var(--theme-sidebar)]">
+    <div className="fantasy-panel flex w-72 shrink-0 flex-col">
       <div className="flex-1 space-y-1 p-6">
         <div className="mb-8 px-2">
-          <h2 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-theme-muted">
+          <h2 className="fantasy-rune-label text-[11px] font-bold">
             Configuration
           </h2>
         </div>
@@ -51,9 +51,9 @@ export function SettingsTabNav({
                 key={tab.id}
                 onClick={() => onChangeTab(tab.id)}
                 className={cn(
-                  "group relative flex w-full items-center justify-between rounded-md px-3 py-2.5 text-sm transition-all duration-200",
+                  "group relative flex w-full items-center justify-between rounded-[1rem] px-3 py-2.5 text-sm transition-all duration-200",
                   isActive
-                    ? "bg-[var(--theme-surface)] text-[var(--mc-accent)]"
+                    ? "fantasy-chip text-[var(--mc-accent)]"
                     : "text-theme-muted hover:bg-[var(--theme-surface-soft)] hover:text-theme",
                 )}
               >
@@ -85,13 +85,13 @@ export function SettingsTabNav({
       </div>
 
       {/* Account Section at the bottom */}
-      <div className="border-t border-theme bg-[var(--theme-sidebar)] p-6">
+      <div className="border-t border-[var(--fantasy-border-soft)] p-6">
         <div className="flex items-center gap-4 px-2">
           <div className="relative">
             <Avatar 
               username={user?.username || "Player"} 
               size="sm" 
-              className="ring-1 ring-[var(--theme-border)] transition-all group-hover:ring-[var(--mc-accent)]"
+              className="ring-1 ring-[var(--fantasy-border-soft)] transition-all group-hover:ring-[var(--mc-accent)]"
             />
             <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--theme-sidebar)] bg-[var(--mc-accent)] shadow-[0_0_8px_rgba(62,207,142,0.5)]" />
           </div>

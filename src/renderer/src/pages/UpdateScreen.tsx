@@ -6,7 +6,9 @@ export function UpdateScreen(): React.JSX.Element {
   const vm = useUpdateScreen();
 
   return (
-    <div className="relative flex h-screen w-full flex-col bg-[var(--theme-surface)] overflow-hidden">
+    <div className="fantasy-ui fantasy-shell relative flex h-screen w-full flex-col overflow-hidden bg-[var(--theme-surface)]">
+      <div className="fantasy-orb fantasy-orb--violet left-[-7rem] top-[-5rem] h-[20rem] w-[20rem]" />
+      <div className="fantasy-orb fantasy-orb--emerald right-[-6rem] bottom-[-7rem] h-[22rem] w-[22rem]" />
       <div className="auth-grid-overlay opacity-[0.05]" />
 
       <div className="absolute right-4 top-4 z-50">

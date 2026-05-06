@@ -52,7 +52,7 @@ export function NewsCards({
         return (
           <article
             key={item.id}
-            className="group flex flex-col overflow-hidden rounded-xl border border-theme bg-[var(--theme-surface)] transition-all hover:border-[var(--theme-border-hi)]"
+            className="fantasy-card group flex flex-col overflow-hidden rounded-[1.25rem] transition-all hover:border-[var(--theme-border-hi)]"
           >
             <div className="relative h-44 w-full overflow-hidden">
               <img
@@ -68,8 +68,8 @@ export function NewsCards({
                   {(item.tags?.length ?? 0) > 0 ? (
                     item.tags!.map((tag) => (
                       <span
-                        key={`${item.id}-${tag}`}
-                        className="rounded border border-theme bg-[var(--theme-bg)] px-2 py-0.5 font-mono text-[9px] font-medium uppercase tracking-wider text-theme-muted"
+                      key={`${item.id}-${tag}`}
+                        className="fantasy-chip rounded border border-theme px-2 py-0.5 font-mono text-[9px] font-medium uppercase tracking-wider text-theme-muted"
                       >
                         {tag}
                       </span>
@@ -87,7 +87,7 @@ export function NewsCards({
                     </span>
                   )}
                 </div>
-                <span className="font-mono text-[10px] font-medium text-theme-muted">
+                <span className="fantasy-rune-label text-[10px] font-medium">
                   {new Date(item.date).toLocaleDateString("ru-RU", {
                     day: "numeric",
                     month: "short",

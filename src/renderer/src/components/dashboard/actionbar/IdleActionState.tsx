@@ -21,7 +21,7 @@ export function IdleActionState({
   return (
     <div className="flex items-center justify-between gap-8">
       <div className="min-w-0">
-        <div className="mb-1 font-mono text-[10px] font-bold uppercase tracking-widest text-theme-muted">
+        <div className="fantasy-rune-label mb-1 text-[10px] font-bold">
           {t.DASHBOARD.SELECTED_VERSION_LABEL}
         </div>
         <div className="truncate font-sans text-xl font-medium text-theme">
@@ -48,7 +48,7 @@ export function IdleActionState({
         variant="default"
         size="lg"
         className={cn(
-          "h-12 min-w-[240px] gap-3 rounded-[9999px] border border-theme bg-[var(--theme-bg)] px-10 font-sans text-sm font-medium text-theme transition-all hover:scale-[1.02] hover:bg-[var(--theme-surface)] active:scale-[0.98]",
+          "fantasy-button fantasy-button--primary h-12 min-w-[240px] gap-3 rounded-[9999px] px-10 font-sans text-sm font-medium transition-all hover:scale-[1.02] active:scale-[0.98]",
           isPlayBlocked && "cursor-not-allowed opacity-50 grayscale",
         )}
         disabled={isPlayBlocked}

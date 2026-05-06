@@ -11,10 +11,10 @@ export function LaunchConsole({
 }: LaunchConsoleProps): React.JSX.Element {
   return (
     <div className="flex h-full flex-col px-6">
-      <h2 className="mb-4 font-mono text-[10px] font-bold uppercase tracking-widest text-theme-muted">
+      <h2 className="fantasy-rune-label mb-4 text-[10px] font-bold">
         Console Output
       </h2>
-      <div className="flex-1 overflow-y-auto rounded-lg border border-theme bg-[var(--theme-bg)] p-4 font-mono text-[11px] leading-relaxed text-[var(--mc-accent)]">
+      <div className="fantasy-card flex-1 overflow-y-auto rounded-[1rem] p-4 font-mono text-[11px] leading-relaxed text-[var(--mc-accent)]">
         {logs.length === 0 && (
           <div className="text-theme-muted opacity-50">Waiting for process logs...</div>
         )}

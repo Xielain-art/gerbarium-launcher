@@ -25,7 +25,7 @@ export function Select({
       {label && (
         <label
           htmlFor={selectId}
-          className="text-[12px] font-medium uppercase tracking-wider text-theme-muted"
+          className="fantasy-rune-label text-[12px] font-medium"
         >
           {label}
         </label>
@@ -33,7 +33,8 @@ export function Select({
       <div className="relative">
         <select
           id={selectId}
-          className="flex h-10 w-full appearance-none rounded-md border border-theme bg-[var(--theme-surface)] px-3 py-2 text-sm text-theme transition-all focus:border-[var(--mc-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--mc-accent)] disabled:cursor-not-allowed disabled:opacity-50"
+          data-slot="launcher-select"
+          className="fantasy-input flex h-10 w-full appearance-none rounded-md px-3 py-2 text-sm text-theme transition-all focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           {...props}
         >
           {options.map((option) => (

@@ -22,7 +22,7 @@ export function NewsFeedState({
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="h-10 w-10 animate-spin rounded-full border-2 border-[var(--mc-accent)] border-t-transparent" />
-          <span className="font-mono text-[10px] font-medium uppercase tracking-widest text-theme-muted">
+          <span className="fantasy-rune-label text-[10px] font-medium">
             {loadingText}
           </span>
         </div>
@@ -37,7 +37,7 @@ export function NewsFeedState({
         <div className="max-w-md font-sans text-sm text-theme-muted">
           {newsError}
         </div>
-        <Button onClick={() => window.location.reload()} className="mt-2 border-theme bg-[var(--theme-surface-soft)] hover:bg-[var(--theme-surface)]">
+        <Button onClick={() => window.location.reload()} className="fantasy-button mt-2">
           {tryAgainText}
         </Button>
       </div>

@@ -25,9 +25,12 @@ files:
 
 extraResources:
   - 'libraries'
+  - from: 'build'
+    to: 'build'
 
 # Windows Configuration
 win: 
+  icon: 'build/app-icon.ico'
   target: 
     - target: 'nsis'
       arch: 'x64'
@@ -38,6 +41,9 @@ nsis:
   perMachine: false
   allowElevation: true
   allowToChangeInstallationDirectory: true
+  installerIcon: 'build/app-icon.ico'
+  uninstallerIcon: 'build/app-icon.ico'
+  installerHeaderIcon: 'build/app-icon.ico'
 
 # macOS Configuration
 mac:

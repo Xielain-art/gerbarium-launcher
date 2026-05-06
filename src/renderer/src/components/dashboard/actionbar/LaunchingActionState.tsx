@@ -50,7 +50,7 @@ export function LaunchingActionState({
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--mc-accent)] border-t-transparent" />
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex items-center justify-between">
-            <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--mc-accent)]">
+            <div className="fantasy-rune-label flex items-center gap-2 text-[10px] font-bold text-[var(--mc-accent)]">
               <span className="capitalize">{launchStatus || launchPhase}</span>
               {launchPercent === null ? <span className="animate-pulse">...</span> : null}
             </div>
@@ -73,7 +73,7 @@ export function LaunchingActionState({
         onClick={onToggleConsole}
         variant="secondary"
         size="md"
-        className="min-w-[140px] shrink-0 rounded-md border border-theme bg-[var(--theme-surface-soft)] font-sans text-xs font-medium text-theme hover:border-[var(--theme-border-hi)] hover:bg-[var(--theme-surface)]"
+        className="fantasy-button min-w-[140px] shrink-0 rounded-full font-sans text-xs font-medium text-theme"
       >
         {isConsoleVisible ? t.DASHBOARD.HIDE_CONSOLE : t.DASHBOARD.SHOW_CONSOLE}
       </Button>

@@ -85,7 +85,8 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
       : t.LOGIN.LOGIN_DESCRIPTION;
 
   return (
-    <Card className="relative z-10 w-full max-w-[420px] rounded-2xl border-theme bg-[var(--theme-surface)]/95 text-theme shadow-none backdrop-blur-sm">
+    <Card className="fantasy-card fantasy-card--hero relative z-10 w-full max-w-[420px] rounded-[1.5rem] border-theme bg-[var(--theme-surface)]/90 text-theme shadow-none backdrop-blur-sm">
+      <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,_rgba(62,207,142,0.18),_transparent_65%)]" />
       <div className="absolute top-4 right-4">
         <Select
           label={t.LOGIN.LANGUAGE_LABEL}
@@ -95,23 +96,23 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
             value: option.value,
             label: option.value.toUpperCase(),
           }))}
-          className="auth-language-select auth-language-select--compact h-7 min-w-[64px] rounded-lg border-[var(--theme-border-hi)] bg-white/5 px-2 text-[10px] text-theme focus:border-[var(--mc-accent)]"
+          className="auth-language-select auth-language-select--compact fantasy-input h-7 min-w-[64px] rounded-lg px-2 text-[10px] text-theme focus:border-[var(--mc-accent)]"
         />
       </div>
-      <CardHeader className="space-y-2 pb-5 text-center">
-        <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-[var(--mc-accent)]">
+      <CardHeader className="space-y-3 pb-5 text-center">
+        <div className="fantasy-rune-label text-[10px] text-[var(--mc-accent)]">
           Authentication
         </div>
-        <CardTitle className="text-[24px] font-normal leading-[1.2] tracking-[-0.16px] text-theme">
+        <CardTitle className="fantasy-hero-title text-[24px] font-normal text-theme">
           {title}
         </CardTitle>
         <p className="text-sm leading-relaxed text-theme-muted">{description}</p>
       </CardHeader>
-      <div className="mx-6 h-px bg-[var(--theme-border)]" />
+      <div className="mx-6 fantasy-divider" />
       <CardContent className="space-y-5 pt-5">
         {!props.verificationRequired && (
           <div className="flex justify-center">
-            <div className="auth-switch grid w-full grid-cols-2 gap-1 p-1 bg-[var(--theme-surface)] border border-theme rounded-full">
+            <div className="auth-switch fantasy-chip grid w-full grid-cols-2 gap-1 rounded-full p-1">
               <Button
                 type="button"
                 size="sm"
@@ -119,9 +120,9 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
                 onClick={() => props.onSwitchMode("login")}
                 disabled={props.isLoading}
                 className={cn(
-                  "h-7 rounded-full px-3 font-mono text-[10px] uppercase tracking-wider transition-all",
+                  "fantasy-button h-7 rounded-full px-3 font-mono text-[10px] uppercase tracking-[0.18em] transition-all",
                   !isRegisterMode 
-                    ? "bg-[var(--mc-accent)] text-[var(--theme-bg)] hover:bg-[var(--mc-accent)]/90" 
+                    ? "fantasy-button--primary text-[var(--theme-bg)] hover:bg-[var(--mc-accent)]/90" 
                     : "text-theme-muted hover:text-theme hover:bg-white/5",
                 )}
               >
@@ -134,9 +135,9 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
                 onClick={() => props.onSwitchMode("register")}
                 disabled={props.isLoading}
                 className={cn(
-                  "h-7 rounded-full px-3 font-mono text-[10px] uppercase tracking-wider transition-all",
+                  "fantasy-button h-7 rounded-full px-3 font-mono text-[10px] uppercase tracking-[0.18em] transition-all",
                   isRegisterMode 
-                    ? "bg-[var(--mc-accent)] text-[var(--theme-bg)] hover:bg-[var(--mc-accent)]/90" 
+                    ? "fantasy-button--primary text-[var(--theme-bg)] hover:bg-[var(--mc-accent)]/90" 
                     : "text-theme-muted hover:text-theme hover:bg-white/5",
                 )}
               >
@@ -150,7 +151,7 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
           <div className="auth-steps grid grid-cols-2 gap-2">
             <div
               className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] transition-all",
+                "fantasy-chip flex items-center gap-2 rounded-lg px-3 py-1.5 text-[11px] transition-all",
                 props.registerStep === 1 
                   ? "border-[var(--mc-accent)]/40 bg-[var(--mc-accent)]/10 text-theme"
                   : "border-theme bg-[var(--theme-surface)] text-theme-muted",
@@ -164,7 +165,7 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
             </div>
             <div
               className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] transition-all",
+                "fantasy-chip flex items-center gap-2 rounded-lg px-3 py-1.5 text-[11px] transition-all",
                 props.registerStep === 2 
                   ? "border-[var(--mc-accent)]/40 bg-[var(--mc-accent)]/10 text-theme"
                   : "border-theme bg-[var(--theme-surface)] text-theme-muted",
@@ -180,13 +181,13 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
         )}
 
         {props.verificationRequired && props.emailWasSent && (
-          <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-[11px] font-medium text-emerald-400 text-center">
+          <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-center text-[11px] font-medium text-emerald-400">
             {t.LOGIN.EMAIL_SENT_NOTICE}
           </div>
         )}
         {props.error && (
           <div
-            className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-[12px] leading-snug text-red-400 text-center"
+            className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-center text-[12px] leading-snug text-red-400"
             role="alert"
           >
             {props.error}

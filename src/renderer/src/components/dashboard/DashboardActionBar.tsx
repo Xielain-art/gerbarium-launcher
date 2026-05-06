@@ -36,9 +36,9 @@ export function DashboardActionBar({
   onToggleConsole,
 }: DashboardActionBarProps): React.JSX.Element {
   return (
-    <div className="relative shrink-0 border-t border-theme bg-[var(--theme-surface)] p-6">
+    <div className="fantasy-panel relative shrink-0 p-6">
       {(errorMessage || playBlockReason) && (
-        <div className="mb-4 flex items-center gap-3 rounded-lg border border-[color:var(--destructive)]/30 bg-[color:var(--destructive)]/10 px-4 py-3 font-mono text-[11px] font-medium text-[color:var(--destructive)]">
+        <div className="mb-4 flex items-center gap-3 rounded-[1rem] border border-[color:var(--destructive)]/30 bg-[color:var(--destructive)]/10 px-4 py-3 font-mono text-[11px] font-medium text-[color:var(--destructive)]">
           <span className="text-sm">⚠️</span>
           {playBlockReason || errorMessage}
         </div>

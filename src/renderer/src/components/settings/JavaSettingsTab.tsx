@@ -18,7 +18,7 @@ export function JavaSettingsTab(
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-8">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-semibold tracking-tight text-theme">
+        <h2 className="fantasy-hero-title text-2xl font-semibold text-theme">
           {props.t.SETTINGS.JAVA.TITLE}
         </h2>
         <p className="text-sm text-theme-muted">
