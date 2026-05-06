@@ -1,13 +1,14 @@
 import { ipcMain, type IpcMainInvokeEvent, BrowserWindow } from "electron";
+import type { ChildProcessWithoutNullStreams } from "node:child_process";
 import { Client, Authenticator } from "minecraft-launcher-core";
 import log from "electron-log";
 import fs from "node:fs/promises";
 import path from "node:path";
+import got from "got";
 import { IPC_CHANNELS, type GameLaunchOptions } from "../../../shared/constants/ipc-chanels";
 import { LOG_MESSAGES } from "../../../shared/constants/log-messages";
 import {
   createProgressSender,
-  DEFAULT_GAME_ROOT,
   getGameLog,
   parseMemoryGb,
   resolveRootPath,
@@ -23,8 +24,125 @@ function toErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
+let activeGameProcess: ChildProcessWithoutNullStreams | null = null;
+const ASSET_DEBUG_PREFIX = "[MCLC]: Attempting to download assets";
+
+type FabricLoaderEntry = {
+  loader: {
+    version: string;
+    stable: boolean;
+  };
+};
+
+type FabricProfile = {
+  id: string;
+};
+
+async function ensureForgeInstaller(
+  rootPath: string,
+  forgeInstallerUrl?: string,
+): Promise<string | undefined> {
+  const normalizedUrl = forgeInstallerUrl?.trim();
+  if (!normalizedUrl) {
+    return undefined;
+  }
+
+  const url = new URL(normalizedUrl);
+  if (url.protocol !== "https:") {
+    throw new Error("Forge installer URL must use https");
+  }
+
+  const fileName = path.basename(url.pathname);
+  if (!fileName.endsWith(".jar")) {
+    throw new Error("Forge installer URL must point to a jar file");
+  }
+
+  const forgeCachePath = path.join(rootPath, "cache", "forge");
+  const installerPath = path.join(forgeCachePath, fileName);
+
+  try {
+    await fs.access(installerPath);
+    return installerPath;
+  } catch {
+    await fs.mkdir(forgeCachePath, { recursive: true });
+    const buffer = await got(normalizedUrl, { timeout: { request: 120000 } }).buffer();
+    await fs.writeFile(installerPath, buffer);
+    return installerPath;
+  }
+}
+
+async function ensureFabricProfile(
+  rootPath: string,
+  minecraftVersion: string,
+  fabricLoaderVersion?: string,
+): Promise<string> {
+  const encodedMinecraftVersion = encodeURIComponent(minecraftVersion);
+  let loaderVersion = fabricLoaderVersion?.trim();
+
+  if (!loaderVersion) {
+    const loaders = await got(
+      `https://meta.fabricmc.net/v2/versions/loader/${encodedMinecraftVersion}`,
+      { timeout: { request: 30000 } },
+    ).json<FabricLoaderEntry[]>();
+    loaderVersion =
+      loaders.find((entry) => entry.loader.stable)?.loader.version ??
+      loaders[0]?.loader.version;
+  }
+
+  if (!loaderVersion) {
+    throw new Error(`Fabric loader not found for Minecraft ${minecraftVersion}`);
+  }
+
+  const encodedLoaderVersion = encodeURIComponent(loaderVersion);
+  const profile = await got(
+    `https://meta.fabricmc.net/v2/versions/loader/${encodedMinecraftVersion}/${encodedLoaderVersion}/profile/json`,
+    { timeout: { request: 30000 } },
+  ).json<FabricProfile>();
+
+  if (!profile.id?.trim()) {
+    throw new Error("Fabric profile response is missing version id");
+  }
+
+  const versionDir = path.join(rootPath, "versions", profile.id);
+  await fs.mkdir(versionDir, { recursive: true });
+  await fs.writeFile(
+    path.join(versionDir, `${profile.id}.json`),
+    JSON.stringify(profile, null, 2),
+    "utf8",
+  );
+
+  return profile.id;
+}
+
 export default function setupGameHandlers(mainWindow: BrowserWindow): void {
   const gameLog = getGameLog();
+
+  const clearActiveGameProcess = (): void => {
+    activeGameProcess = null;
+  };
+
+  ipcMain.handle(
+    IPC_CHANNELS.GAME.CLOSE,
+    async (): Promise<{ success: boolean; error?: string }> => {
+      try {
+        if (!activeGameProcess) {
+          return { success: false, error: "Game is not running." };
+        }
+
+        const processToStop = activeGameProcess;
+        if (!processToStop.killed) {
+          processToStop.kill();
+        }
+
+        clearActiveGameProcess();
+
+        return { success: true };
+      } catch (error: unknown) {
+        log.error(LOG_MESSAGES.GAME_LAUNCH_SETUP_FAILED, error);
+        return { success: false, error: toErrorMessage(error) };
+      }
+    },
+  );
 
   ipcMain.handle(
     IPC_CHANNELS.GAME.LAUNCH,
@@ -33,6 +151,13 @@ export default function setupGameHandlers(mainWindow: BrowserWindow): void {
       options: GameLaunchOptions,
     ): Promise<{ success: boolean; error?: string }> => {
       try {
+        if (activeGameProcess && !activeGameProcess.killed) {
+          return {
+            success: false,
+            error: "Game is already running.",
+          };
+        }
+
         const username = validateRequiredText(options.username, "username");
         const version = validateRequiredText(options.version, "version");
         const minMemory = validateMemoryValue(options.memory.min, "min");
@@ -48,6 +173,30 @@ export default function setupGameHandlers(mainWindow: BrowserWindow): void {
         const jvmArgs = sanitizeJvmArgs(options.jvmArgs);
         const auth = await Authenticator.getAuth(username);
         const emitProgress = createProgressSender(mainWindow);
+        if (options.loader === "forge") {
+          emitProgress({
+            type: "progress",
+            content: { percent: 8, status: "Preparing Forge installer..." },
+          });
+        }
+        const forge = await ensureForgeInstaller(
+          rootPath,
+          options.forgeInstallerUrl,
+        );
+        if (options.loader === "fabric") {
+          emitProgress({
+            type: "progress",
+            content: { percent: 8, status: "Preparing Fabric profile..." },
+          });
+        }
+        const customVersion =
+          options.loader === "fabric"
+            ? await ensureFabricProfile(
+                rootPath,
+                version,
+                options.fabricLoaderVersion,
+              )
+            : undefined;
 
         const opts = {
           authorization: auth,
@@ -55,7 +204,9 @@ export default function setupGameHandlers(mainWindow: BrowserWindow): void {
           version: {
             number: version,
             type: "release",
+            custom: customVersion,
           },
+          forge,
           memory: {
             max: maxMemory,
             min: minMemory,
@@ -70,6 +221,10 @@ export default function setupGameHandlers(mainWindow: BrowserWindow): void {
         const launcher = new Client();
 
         launcher.on("debug", (e) => {
+          if (String(e).includes(ASSET_DEBUG_PREFIX)) {
+            gameLog.debug("[MCLC]: Checking game assets");
+            return;
+          }
           gameLog.debug(e);
           emitProgress({ type: "data", content: String(e) });
         });
@@ -105,12 +260,23 @@ export default function setupGameHandlers(mainWindow: BrowserWindow): void {
 
         launcher.on("close", (e) => {
           gameLog.info(`Closed with code ${e}`);
+          clearActiveGameProcess();
           emitProgress({ type: "close", content: Number(e) || 0 });
         });
 
         const launchPromise = launcher.launch(
           opts as Parameters<Client["launch"]>[0],
         );
+        launchPromise.then((process) => {
+          if (process) {
+            activeGameProcess = process as ChildProcessWithoutNullStreams;
+            process.once("close", () => {
+              if (activeGameProcess === process) {
+                clearActiveGameProcess();
+              }
+            });
+          }
+        });
         launchPromise.catch((error) => {
           const errorMessage = toErrorMessage(error);
           log.error(LOG_MESSAGES.GAME_LAUNCH_ASYNC_FAILED, error);
@@ -122,6 +288,7 @@ export default function setupGameHandlers(mainWindow: BrowserWindow): void {
         return { success: true };
       } catch (error: unknown) {
         log.error(LOG_MESSAGES.GAME_LAUNCH_SETUP_FAILED, error);
+        clearActiveGameProcess();
         return { success: false, error: toErrorMessage(error) };
       }
     },
@@ -129,8 +296,8 @@ export default function setupGameHandlers(mainWindow: BrowserWindow): void {
 
   ipcMain.handle(
     IPC_CHANNELS.GAME.GET_INSTALLED_VERSIONS,
-    async (): Promise<string[]> => {
-      const versionsPath = path.join(DEFAULT_GAME_ROOT, "versions");
+    async (_event: IpcMainInvokeEvent, gamePath?: string): Promise<string[]> => {
+      const versionsPath = path.join(await resolveRootPath(gamePath), "versions");
       try {
         const folders = await fs.readdir(versionsPath);
         return folders;

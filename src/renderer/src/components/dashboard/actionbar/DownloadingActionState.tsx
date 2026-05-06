@@ -15,7 +15,7 @@ export function DownloadingActionState({
   onCancelDownload,
 }: Props): React.JSX.Element {
   return (
-    <div className="space-y-4">
+    <div className="flex h-full flex-col justify-center gap-4">
       <div className="flex items-center justify-between">
         <div>
           <div className="fantasy-rune-label text-[10px] font-bold">

@@ -2,62 +2,57 @@ import type { DownloadProgress, GameVersion } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
 import { DownloadingActionState } from "./actionbar/DownloadingActionState";
 import { IdleActionState } from "./actionbar/IdleActionState";
-import { LaunchingActionState } from "./actionbar/LaunchingActionState";
 
 interface DashboardActionBarProps {
   t: TranslationType;
   selectedVersion: GameVersion | undefined;
   isDownloading: boolean;
-  progress: DownloadProgress | null;
   isLaunching: boolean;
-  launchProgress: number | null;
+  isGameRunning: boolean;
   launchStatus: string;
-  isConsoleVisible: boolean;
+  launchProgress: number | null;
+  progress: DownloadProgress | null;
   errorMessage: string | null;
   playBlockReason?: string | null;
   onPlay: () => void;
+  onCloseGame: () => void;
   onCancelDownload: () => void;
-  onToggleConsole: () => void;
 }
 
 export function DashboardActionBar({
   t,
   selectedVersion,
   isDownloading,
-  progress,
   isLaunching,
-  launchProgress,
+  isGameRunning,
   launchStatus,
-  isConsoleVisible,
+  launchProgress,
+  progress,
   errorMessage,
   playBlockReason = null,
   onPlay,
+  onCloseGame,
   onCancelDownload,
-  onToggleConsole,
 }: DashboardActionBarProps): React.JSX.Element {
   return (
-    <div className="fantasy-panel relative shrink-0 p-6">
+    <div className="fantasy-panel relative h-24 overflow-visible p-5 shadow-2xl transition-none">
       {(errorMessage || playBlockReason) && (
-        <div className="mb-4 flex items-center gap-3 rounded-[1rem] border border-[color:var(--destructive)]/30 bg-[color:var(--destructive)]/10 px-4 py-3 font-mono text-[11px] font-medium text-[color:var(--destructive)]">
-          <span className="text-sm">⚠️</span>
+        <div className="absolute bottom-full left-0 right-0 mb-3 flex items-center gap-3 rounded-[1rem] border border-[color:var(--destructive)]/30 bg-[color:var(--destructive)]/10 px-4 py-3 font-mono text-[11px] font-medium text-[color:var(--destructive)] shadow-2xl backdrop-blur">
+          <span className="text-sm">!</span>
           {playBlockReason || errorMessage}
         </div>
       )}
-      {!isDownloading && !isLaunching ? (
+      {!isDownloading ? (
         <IdleActionState
           t={t}
           selectedVersion={selectedVersion}
+          isLaunching={isLaunching}
+          isGameRunning={isGameRunning}
+          launchStatus={launchStatus}
+          launchProgress={launchProgress}
           playBlockReason={playBlockReason}
           onPlay={onPlay}
-        />
-      ) : isLaunching ? (
-        <LaunchingActionState
-          t={t}
-          selectedVersion={selectedVersion}
-          launchProgress={launchProgress}
-          launchStatus={launchStatus}
-          isConsoleVisible={isConsoleVisible}
-          onToggleConsole={onToggleConsole}
+          onCloseGame={onCloseGame}
         />
       ) : (
         <DownloadingActionState

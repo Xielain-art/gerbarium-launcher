@@ -1,5 +1,5 @@
 import { IPC_CHANNELS } from "./channels";
-import type { ApiCreateChangelogDto, JavaDownloadProgressPayload, UpdateInfoPayload, AdminStatsResponse, ApiCreateNewsDto, AdminUserMutationResponse, AuthSessionUser, AdminNewsDeleteResponse, ApiUpdateNewsDto, AdminUsersResponse, ApiUpdateChangelogDto, GameLaunchOptions, AdminChangelogDeleteResponse, WindowState, AdminNewsListResponse, CrashReportPayload, AdminRolesResponse, AdminChangelogMutationResponse, GameProgressPayload, LauncherSettings, AdminRoleMutationResponse, AuthEmailVerificationStatus, AdminChangelogListResponse, AdminNewsMutationResponse, IntegrityCheckResult, AdminNewsTagMutationResponse, ApiCreateNewsTagDto, AdminNewsTagsResponse } from "./models";
+import type { ApiCreateChangelogDto, JavaDownloadProgressPayload, UpdateInfoPayload, AdminStatsResponse, ApiCreateNewsDto, AdminUserMutationResponse, AuthSessionUser, AdminNewsDeleteResponse, ApiUpdateNewsDto, AdminUsersResponse, ApiUpdateChangelogDto, GameLaunchOptions, GameUpdateOptions, GameUpdateResult, AdminChangelogDeleteResponse, WindowState, AdminNewsListResponse, CrashReportPayload, AdminRolesResponse, AdminChangelogMutationResponse, GameProgressPayload, LauncherSettings, AdminRoleMutationResponse, AuthEmailVerificationStatus, AdminChangelogListResponse, AdminNewsMutationResponse, IntegrityCheckResult, AdminNewsTagMutationResponse, ApiCreateNewsTagDto, AdminNewsTagsResponse } from "./models";
 
 export interface IpcChannelMap {
   [IPC_CHANNELS.WINDOW.MINIMIZE]: {
@@ -361,12 +361,24 @@ export interface IpcChannelMap {
     args: [GameLaunchOptions];
     return: { success: boolean; error?: string };
   };
+  [IPC_CHANNELS.GAME.CLOSE]: {
+    args: [];
+    return: { success: boolean; error?: string };
+  };
+  [IPC_CHANNELS.GAME.UPDATE]: {
+    args: [GameUpdateOptions?];
+    return: GameUpdateResult;
+  };
+  [IPC_CHANNELS.GAME.VERIFY]: {
+    args: [GameUpdateOptions?];
+    return: GameUpdateResult;
+  };
   [IPC_CHANNELS.GAME.PROGRESS]: {
     args: [GameProgressPayload];
     return: void;
   };
   [IPC_CHANNELS.GAME.GET_INSTALLED_VERSIONS]: {
-    args: [];
+    args: [gamePath?: string];
     return: string[];
   };
 }

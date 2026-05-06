@@ -14,6 +14,8 @@ import {
   AdminChangelogDeleteResponse,
   JavaDownloadProgressPayload,
   GameLaunchOptions,
+  GameUpdateOptions,
+  GameUpdateResult,
   GameProgressPayload,
   UpdateInfoPayload,
   IntegrityCheckResult,
@@ -242,8 +244,11 @@ export interface IElectronAPI {
     launch: (
       options: GameLaunchOptions,
     ) => Promise<{ success: boolean; error?: string }>;
+    close: () => Promise<{ success: boolean; error?: string }>;
+    update: (options?: GameUpdateOptions) => Promise<GameUpdateResult>;
+    verify: (options?: GameUpdateOptions) => Promise<GameUpdateResult>;
     onProgress: (callback: (data: GameProgressPayload) => void) => () => void;
-    getInstalledVersions: () => Promise<string[]>;
+    getInstalledVersions: (gamePath?: string) => Promise<string[]>;
   };
 
   // Logs export and report

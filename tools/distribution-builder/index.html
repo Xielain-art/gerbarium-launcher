@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gerbarium Distribution Builder</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <p class="eyebrow">Gerbarium tool</p>
+        <h1>Distribution Builder</h1>
+        <p>
+          Выбери идеальную сборку Minecraft. Tool посчитает SHA-256, назначит
+          sync/seed policy и соберёт distribution.json для лаунчера.
+        </p>
+      </section>
+
+      <section class="panel">
+        <div class="grid">
+          <label>
+            Pack ID
+            <input id="packId" value="gerbarium" />
+          </label>
+          <label>
+            Version
+            <input id="version" value="1.0.0" />
+          </label>
+          <label>
+            Channel
+            <input id="channel" value="stable" />
+          </label>
+          <label>
+            Minecraft
+            <input id="minecraftVersion" value="1.20.1" />
+          </label>
+          <label>
+            Loader
+            <select id="loader">
+              <option value="forge">forge</option>
+              <option value="fabric">fabric</option>
+              <option value="neoforge">neoforge</option>
+              <option value="vanilla">vanilla</option>
+            </select>
+          </label>
+          <label>
+            Loader version
+            <input id="loaderVersion" placeholder="47.3.0" />
+          </label>
+        </div>
+
+        <label>
+          CDN base URL
+          <input
+            id="baseUrl"
+            value="https://cdn.example.com/gerbarium/modpacks/main/files/1.0.0"
+          />
+        </label>
+
+        <div class="actions">
+          <button id="pickFolder">Выбрать папку сборки</button>
+          <button id="downloadJson" disabled>Скачать distribution.json</button>
+        </div>
+      </section>
+
+      <section class="stats">
+        <div>
+          <strong id="fileCount">0</strong>
+          <span>files</span>
+        </div>
+        <div>
+          <strong id="syncCount">0</strong>
+          <span>sync</span>
+        </div>
+        <div>
+          <strong id="seedCount">0</strong>
+          <span>seed</span>
+        </div>
+        <div>
+          <strong id="ignoredCount">0</strong>
+          <span>ignored</span>
+        </div>
+      </section>
+
+      <section class="panel output-panel">
+        <div class="output-head">
+          <h2>Preview</h2>
+          <p id="status">Папка не выбрана.</p>
+        </div>
+        <textarea id="output" spellcheck="false" readonly></textarea>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
+

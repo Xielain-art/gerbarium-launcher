@@ -91,6 +91,9 @@ export const IPC_CHANNELS = {
   },
   GAME: {
     LAUNCH: "game:launch",
+    CLOSE: "game:close",
+    UPDATE: "game:update",
+    VERIFY: "game:verify",
     PROGRESS: "game:progress",
     GET_INSTALLED_VERSIONS: "game:get-installed-versions",
   },

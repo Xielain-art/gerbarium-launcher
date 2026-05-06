@@ -9,6 +9,10 @@ import type {
   ApiCreateNewsTagDto,
 } from "../../../lib/api/news";
 import type {
+  GameUpdateOptions,
+  GameUpdateResult,
+} from "../../distribution/manifest";
+import type {
   ApiChangelog,
   ApiCreateChangelogDto,
   ApiUpdateChangelogDto,
@@ -19,12 +23,20 @@ import type {
 export interface GameLaunchOptions {
   username: string;
   version: string;
+  loader?: "fabric" | "forge";
+  fabricLoaderVersion?: string;
+  forgeInstallerUrl?: string;
   memory: { min: string; max: string };
   javaPath: string;
   gamePath?: string;
   fullscreen: boolean;
   jvmArgs: string[];
 }
+
+export type {
+  GameUpdateOptions,
+  GameUpdateResult,
+};
 
 export interface AuthSessionUser {
   id: string;

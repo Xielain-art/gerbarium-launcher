@@ -13,10 +13,10 @@ const appVersionQueryOptions = () =>
     staleTime: Infinity,
   });
 
-const installedVersionsQueryOptions = () =>
+const installedVersionsQueryOptions = (gamePath?: string) =>
   queryOptions({
-    queryKey: queryKeys.installedVersions(),
-    queryFn: () => window.electronAPI.game.getInstalledVersions(),
+    queryKey: queryKeys.installedVersions(gamePath),
+    queryFn: () => window.electronAPI.game.getInstalledVersions(gamePath),
     staleTime: 60_000,
   });
 
@@ -42,8 +42,8 @@ export function useAppVersionQuery() {
   return useQuery(appVersionQueryOptions());
 }
 
-export function useInstalledVersionsQuery() {
-  return useQuery(installedVersionsQueryOptions());
+export function useInstalledVersionsQuery(gamePath?: string) {
+  return useQuery(installedVersionsQueryOptions(gamePath));
 }
 
 export function useSystemMemoryQuery(enabled = true) {

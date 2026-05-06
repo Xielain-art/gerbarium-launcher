@@ -2,6 +2,8 @@ function toErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
+const LAUNCH_START_TIMEOUT_MS = 10 * 60 * 1000;
+
 export function waitForLaunchStart(
   launcher: import("minecraft-launcher-core").Client,
   launchPromise: Promise<unknown>,
@@ -51,6 +53,6 @@ export function waitForLaunchStart(
 
     timeoutId = setTimeout(() => {
       settle(() => reject(new Error("Game process did not start in time")));
-    }, 15_000);
+    }, LAUNCH_START_TIMEOUT_MS);
   });
 }

@@ -90,6 +90,9 @@ export interface GameVersion {
   icon?: string;
   isInstalled: boolean;
   version?: string;
+  loader?: "fabric" | "forge";
+  fabricLoaderVersion?: string;
+  forgeInstallerUrl?: string;
 }
 
 // Download Progress Types

@@ -40,12 +40,17 @@ export function LaunchingActionState({
   onToggleConsole,
 }: Props): React.JSX.Element {
   const launchPercent =
-    launchProgress !== null ? Math.max(0, Math.min(100, launchProgress)) : null;
+    launchProgress !== null &&
+    Number.isFinite(launchProgress) &&
+    launchProgress > 0 &&
+    launchProgress < 100
+      ? Math.max(0, Math.min(100, launchProgress))
+      : null;
 
   const launchPhase = getLaunchPhase(launchPercent);
 
   return (
-    <div className="flex items-center justify-between gap-6">
+    <div className="flex h-full items-center justify-between gap-5">
       <div className="flex min-w-0 flex-1 items-center gap-4">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--mc-accent)] border-t-transparent" />
         <div className="min-w-0 flex-1">

@@ -23,20 +23,24 @@ import {
   useInstalledVersionsQuery,
 } from "./queries/useSystemQueries";
 import { UI_STRINGS } from "../../../shared/constants/ui-strings";
+import { queryKeys } from "../lib/queryKeys";
+import { useQueryClient } from "@tanstack/react-query";
 
 
 // --- Main Hook ---
 
 import type { DashboardScreenResult } from "./dashboard/types";
-import { parseJvmArgs, toErrorMessage, logAction, toLauncherSettingsPatch, INITIAL_VERSIONS, CHANGELOG_PAGE_SIZE } from "./dashboard/utils";
+import { parseJvmArgs, selectBestJavaPath, toErrorMessage, logAction, toLauncherSettingsPatch, INITIAL_VERSIONS, CHANGELOG_PAGE_SIZE, isVersionInstalled } from "./dashboard/utils";
 
 export function useDashboardScreen(): DashboardScreenResult {
   const t = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Stores
   const { user, logout, isAuthenticated } = useAuthStore();
   const { isDownloading, progress, cancelDownload } = useDownloadStore();
+  const gamePath = useSettingsStore((state) => state.general.gamePath);
 
   // Local UI State
   const [newsOrder, setNewsOrder] = useState<"newest" | "oldest">("newest");
@@ -47,6 +51,7 @@ export function useDashboardScreen(): DashboardScreenResult {
   );
   const [logs, setLogs] = useState<string[]>([]);
   const [isLaunching, setIsLaunching] = useState(false);
+  const [isGameRunning, setIsGameRunning] = useState(false);
   const [launchProgress, setLaunchProgress] = useState<number | null>(null);
   const [launchStatus, setLaunchStatus] = useState("");
   const [launchError, setLaunchError] = useState<string | null>(null);
@@ -59,7 +64,7 @@ export function useDashboardScreen(): DashboardScreenResult {
 
   // Refs
   const closeOnLaunchRequestedRef = useRef(false);
-  const logsEndRef = useRef<HTMLDivElement>(null);
+  const consoleScrollRef = useRef<HTMLDivElement>(null);
 
   // Queries
   const newsQuery = usePublicNewsQuery({
@@ -70,7 +75,7 @@ export function useDashboardScreen(): DashboardScreenResult {
   const changelogQuery = usePublicChangelogQuery();
   const serverStatusQuery = useServerStatusQuery();
   const appVersionQuery = useAppVersionQuery();
-  const installedVersionsQuery = useInstalledVersionsQuery();
+  const installedVersionsQuery = useInstalledVersionsQuery(gamePath);
 
   // Derived Data
   const selectedVersion = versions.find(
@@ -131,16 +136,19 @@ export function useDashboardScreen(): DashboardScreenResult {
     setVersions((prev) =>
       prev.map((version) => ({
         ...version,
-        isInstalled: installedVersionsQuery.data.includes(
-          version.version || version.id,
-        ),
+        isInstalled: isVersionInstalled(version, installedVersionsQuery.data),
       })),
     );
   }, [installedVersionsQuery.data]);
 
-  // Scroll to bottom of logs
+  // Keep auto-scroll contained inside the console. scrollIntoView can move
+  // the whole Electron document and expose a black gap below the app shell.
   useEffect(() => {
-    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const consoleNode = consoleScrollRef.current;
+    if (!consoleNode) {
+      return;
+    }
+    consoleNode.scrollTop = consoleNode.scrollHeight;
   }, [logs]);
 
   // Handle Game Process IPC Events
@@ -170,22 +178,19 @@ export function useDashboardScreen(): DashboardScreenResult {
       }
 
       if (data.type === "state" && data.content.phase === "spawned") {
-        setLaunchProgress(100);
+        setIsLaunching(false);
+        setIsGameRunning(true);
+        setLaunchProgress(null);
         setLaunchStatus("Running...");
         logAction("GAME_PROCESS_SPAWNED", "Spawn event received");
 
-        if (closeOnLaunchRequestedRef.current) {
-          if (useSettingsStore.getState().general.minimizeToTray) {
-            void window.electronAPI.closeWindow();
-          } else {
-            void window.electronAPI.minimizeWindow();
-          }
-        }
+        closeOnLaunchRequestedRef.current = false;
         return;
       }
 
       if (data.type === "close") {
         setIsLaunching(false);
+        setIsGameRunning(false);
         setLaunchProgress(null);
         setLaunchStatus("");
         closeOnLaunchRequestedRef.current = false;
@@ -195,6 +200,7 @@ export function useDashboardScreen(): DashboardScreenResult {
 
       if (data.type === "error") {
         setIsLaunching(false);
+        setIsGameRunning(false);
         setLaunchProgress(null);
         setLaunchStatus("");
         setLaunchError(`Launch error: ${data.content}`);
@@ -232,6 +238,9 @@ export function useDashboardScreen(): DashboardScreenResult {
   // --- Handlers ---
 
   async function onPlay(): Promise<void> {
+    if (isLaunching) {
+      return;
+    }
     if (playBlockReason) {
       setLaunchError(playBlockReason);
       return;
@@ -247,18 +256,21 @@ export function useDashboardScreen(): DashboardScreenResult {
 
     setLaunchError(null);
     setIsLaunching(true);
-    setLaunchProgress(0);
+    setIsGameRunning(false);
+    setLaunchProgress(null);
     setLaunchStatus("Preparing...");
     setLogs([]);
     logAction("GAME_LAUNCH_START", selectedVersion.name);
 
     try {
+      const settings = useSettingsStore.getState().general;
       const installedJava = await window.electronAPI.java.getInstalledJava();
-      const bestJava =
-        installedJava.find((javaItem) => javaItem.version >= 17) ??
-        installedJava[0];
-
-      let javaPath: string | null | undefined = bestJava?.path;
+      const minecraftVersion = selectedVersion.version || selectedVersion.id;
+      let javaPath: string | null | undefined = selectBestJavaPath(
+        installedJava,
+        minecraftVersion,
+        settings.javaPath,
+      );
       if (!javaPath) {
         javaPath = await window.electronAPI.java.findSystemJava();
       }
@@ -267,13 +279,34 @@ export function useDashboardScreen(): DashboardScreenResult {
         throw new Error("Java not found. Install Java in settings.");
       }
 
-      const settings = useSettingsStore.getState().general;
-      closeOnLaunchRequestedRef.current = settings.closeOnLaunch;
-      setIsConsoleVisible(settings.showLaunchConsole);
+      closeOnLaunchRequestedRef.current = false;
+      setIsConsoleVisible(true);
+      setLaunchStatus("Checking modpack files...");
+
+      const updateResult = await window.electronAPI.game.update({
+        gamePath: settings.gamePath,
+      });
+
+      if (!updateResult.success) {
+        throw new Error(updateResult.error || "Game update failed.");
+      }
+
+      setLogs((prev) => [
+        ...prev,
+        `Distribution ready: ${updateResult.manifest?.version ?? "unknown"}`,
+        `Checked ${updateResult.checked}, downloaded ${updateResult.downloaded}, skipped ${updateResult.skipped}, deleted ${updateResult.deleted}`,
+      ]);
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.installedVersions(settings.gamePath),
+      });
+      setLaunchStatus("Starting Minecraft...");
 
       const result = await window.electronAPI.game.launch({
         username: user.username,
-        version: selectedVersion.version || selectedVersion.id,
+        version: minecraftVersion,
+        loader: selectedVersion.loader,
+        fabricLoaderVersion: selectedVersion.fabricLoaderVersion,
+        forgeInstallerUrl: selectedVersion.forgeInstallerUrl,
         memory: {
           min: `${Math.max(1, Math.floor(settings.ramAllocation / 2))}G`,
           max: `${Math.max(1, settings.ramAllocation)}G`,
@@ -288,17 +321,46 @@ export function useDashboardScreen(): DashboardScreenResult {
         throw new Error(result.error || "Game launch failed.");
       }
 
-      setLaunchStatus("Starting game process...");
-      setLaunchProgress(95);
+      setIsLaunching(false);
+      setIsGameRunning(true);
+      setLaunchStatus("Running...");
+      setLaunchProgress(null);
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.installedVersions(settings.gamePath),
+      });
       logAction("GAME_LAUNCH_REQUESTED", selectedVersion.name);
     } catch (error: unknown) {
       const message = toErrorMessage(error);
       setIsLaunching(false);
+      setIsGameRunning(false);
       setLaunchProgress(null);
       setLaunchStatus("");
       setLaunchError(`Launch error: ${message}`);
       closeOnLaunchRequestedRef.current = false;
       logAction("GAME_LAUNCH_ERROR", message);
+    }
+  }
+
+  async function onCloseGame(): Promise<void> {
+    if (!isGameRunning) {
+      return;
+    }
+
+    setLaunchError(null);
+    setLaunchStatus("Closing game...");
+    try {
+      const result = await window.electronAPI.game.close();
+      if (!result.success) {
+        setLaunchStatus("Running...");
+        throw new Error(result.error || "Game close failed.");
+      }
+
+      logAction("GAME_CLOSE_REQUESTED", selectedVersion?.name || "unknown");
+    } catch (error: unknown) {
+      const message = toErrorMessage(error);
+      setLaunchError(`Close error: ${message}`);
+      setLaunchStatus("Running...");
+      logAction("GAME_CLOSE_ERROR", message);
     }
   }
 
@@ -368,15 +430,17 @@ export function useDashboardScreen(): DashboardScreenResult {
     isDownloading,
     progress,
     isLaunching,
+    isGameRunning,
     launchProgress,
     launchStatus,
     launchError,
     isConsoleVisible,
     logs,
-    logsEndRef,
+    consoleScrollRef,
     playBlockReason,
     hasAdminAccess,
     onPlay,
+    onCloseGame,
     onCancelDownload: cancelDownload,
     onToggleConsole,
     onOpenSettings,
@@ -390,4 +454,3 @@ export function useDashboardScreen(): DashboardScreenResult {
     onCloseChangelog: () => setSelectedChangelog(null),
   };
 }
-

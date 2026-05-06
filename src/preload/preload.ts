@@ -4,6 +4,8 @@ import {
   IpcChannelMap,
   WindowState,
   GameLaunchOptions,
+  GameUpdateOptions,
+  GameUpdateResult,
   GameProgressPayload,
   UpdateInfoPayload,
   AuthSessionUser,
@@ -294,6 +296,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   game: {
     launch: (options: GameLaunchOptions) =>
       typedInvoke(IPC_CHANNELS.GAME.LAUNCH, options),
+    close: () => typedInvoke(IPC_CHANNELS.GAME.CLOSE),
+    update: (options?: GameUpdateOptions): Promise<GameUpdateResult> =>
+      typedInvoke(IPC_CHANNELS.GAME.UPDATE, options),
+    verify: (options?: GameUpdateOptions): Promise<GameUpdateResult> =>
+      typedInvoke(IPC_CHANNELS.GAME.VERIFY, options),
     onProgress: (callback: (data: GameProgressPayload) => void) => {
       const subscription = (_event: unknown, data: GameProgressPayload) => callback(data);
       ipcRenderer.on(IPC_CHANNELS.GAME.PROGRESS, subscription);
@@ -301,6 +308,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.removeListener(IPC_CHANNELS.GAME.PROGRESS, subscription);
       };
     },
-    getInstalledVersions: () => typedInvoke(IPC_CHANNELS.GAME.GET_INSTALLED_VERSIONS),
+    getInstalledVersions: (gamePath?: string) =>
+      typedInvoke(IPC_CHANNELS.GAME.GET_INSTALLED_VERSIONS, gamePath),
   },
 });

@@ -36,7 +36,8 @@ export const queryKeys = {
     order?: "ASC" | "DESC";
   }) => [...queryKeys.adminChangelogRoot(), filters] as const,
   appVersion: () => ["app-version"] as const,
-  installedVersions: () => ["installed-versions"] as const,
+  installedVersions: (gamePath?: string) =>
+    ["installed-versions", gamePath ?? "default"] as const,
   systemMemory: () => ["system-memory"] as const,
   crashReport: () => ["crash-report"] as const,
 };

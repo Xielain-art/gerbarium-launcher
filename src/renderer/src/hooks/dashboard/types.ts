@@ -42,15 +42,17 @@ export interface DashboardScreenResult {
   isDownloading: boolean;
   progress: DownloadProgress | null;
   isLaunching: boolean;
+  isGameRunning: boolean;
   launchProgress: number | null;
   launchStatus: string;
   launchError: string | null;
   isConsoleVisible: boolean;
   logs: string[];
-  logsEndRef: RefObject<HTMLDivElement | null>;
+  consoleScrollRef: RefObject<HTMLDivElement | null>;
   playBlockReason: string | null;
   hasAdminAccess: boolean;
   onPlay: () => Promise<void>;
+  onCloseGame: () => Promise<void>;
   onCancelDownload: () => void;
   onToggleConsole: () => void;
   onOpenSettings: () => void;

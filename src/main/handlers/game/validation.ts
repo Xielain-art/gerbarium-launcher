@@ -109,6 +109,20 @@ export function sanitizeJvmArgs(jvmArgs: string[]): string[] {
         throw new Error(`Blocked JVM argument: ${arg}`);
       }
 
+      if (
+        arg.startsWith("-XX:MaxGCPauseMillis=") &&
+        !/^-XX:MaxGCPauseMillis=\d+$/.test(arg)
+      ) {
+        throw new Error(`Invalid JVM argument: ${arg}`);
+      }
+
+      if (
+        (arg.startsWith("-Xmx") || arg.startsWith("-Xms")) &&
+        !/^-Xm[xs]\d+[MG]$/i.test(arg)
+      ) {
+        throw new Error(`Invalid JVM argument: ${arg}`);
+      }
+
       return arg;
     });
 }

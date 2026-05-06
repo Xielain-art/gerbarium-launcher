@@ -48,7 +48,14 @@ function isDevOrSmokeTest(): boolean {
 const rootRoute = createRootRoute({
   component: function RootLayout(): React.JSX.Element {
     return (
-      <div className="relative h-screen w-full bg-[var(--theme-bg)]">
+      <div
+        className="bg-[var(--theme-bg)]"
+        style={{
+          position: "fixed",
+          inset: 0,
+          overflow: "hidden",
+        }}
+      >
         <CrashNoticeBanner />
         <Outlet />
       </div>
@@ -156,4 +163,3 @@ declare module "@tanstack/react-router" {
     router: typeof router;
   }
 }
-

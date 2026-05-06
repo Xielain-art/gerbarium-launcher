@@ -123,6 +123,7 @@ export const LOG_MESSAGES = {
   GAME_PROGRESS_EMIT_FAILED: '[GAME] Failed to emit game progress event',
   GAME_LAUNCH_ASYNC_FAILED: '[GAME] Failed to launch game asynchronously',
   GAME_LAUNCH_SETUP_FAILED: '[GAME] Failed to setup/launch game',
+  GAME_DISTRIBUTION_UPDATE_FAILED: '[GAME] Distribution update failed',
 } as const;
 
 /**
