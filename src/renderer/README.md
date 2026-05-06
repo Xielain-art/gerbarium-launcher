@@ -73,3 +73,16 @@ export default defineConfig([
   },
 ])
 ```
+
+## React 19 forwardRef exceptions
+
+This renderer generally avoids `forwardRef` in local composition components.
+
+Known exceptions kept intentionally for third-party compatibility:
+
+- `src/components/shadcn/ui/tabs.tsx`:
+  Radix Tabs wrappers (`Root`, `List`, `Trigger`, `Content`) keep `forwardRef`
+  to preserve ref passthrough and compatibility with Radix primitive contracts.
+- `src/components/ui/InputOTP.tsx`:
+  `InputOTP` keeps `forwardRef` to preserve ref passthrough to `OTPInput`
+  from `input-otp`. Local wrapper-only parts were simplified to plain components.

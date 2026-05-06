@@ -18,24 +18,24 @@ const InputOTP = React.forwardRef<
 ))
 InputOTP.displayName = "InputOTP"
 
-const InputOTPGroup = React.forwardRef<
-  React.ElementRef<"div">,
-  React.ComponentPropsWithoutRef<"div">
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("flex items-center gap-1", className)} {...props} />
-))
-InputOTPGroup.displayName = "InputOTPGroup"
+function InputOTPGroup({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"div">) {
+  return <div className={cn("flex items-center gap-1", className)} {...props} />
+}
 
-const InputOTPSlot = React.forwardRef<
-  React.ElementRef<"div">,
-  React.ComponentPropsWithoutRef<"div"> & { index: number, hasError?: boolean }
->(({ index, className, hasError, ...props }, ref) => {
+function InputOTPSlot({
+  index,
+  className,
+  hasError,
+  ...props
+}: React.ComponentPropsWithoutRef<"div"> & { index: number; hasError?: boolean }) {
   const inputOTPContext = React.useContext(OTPInputContext)
   const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index]
 
   return (
     <div
-      ref={ref}
       className={cn(
         "relative flex h-12 w-10 items-center justify-center rounded-md border border-theme bg-[var(--theme-bg)] text-lg font-medium text-theme transition-all",
         isActive && "z-10 border-[rgba(62,207,142,0.5)] ring-1 ring-[rgba(62,207,142,0.3)]",
@@ -52,7 +52,6 @@ const InputOTPSlot = React.forwardRef<
       )}
     </div>
   )
-})
-InputOTPSlot.displayName = "InputOTPSlot"
+}
 
 export { InputOTP, InputOTPGroup, InputOTPSlot }

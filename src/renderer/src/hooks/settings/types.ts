@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { TranslationType } from "../../../../shared/constants/translations";
-import type { JavaInstallation, SettingsTab } from "../../components/settings";
+import type { JavaInstallation, SettingsTab } from "../../components/settings/types";
 import type { SettingsGeneral, SettingsProfile, AuthUser, DownloadStatus } from "../../types";
 
 export interface SettingsScreenResult {
@@ -41,3 +41,4 @@ export interface SettingsScreenResult {
   onDeleteAccount: (code?: string) => Promise<{ success: boolean; error?: string }>;
   onRequestDeleteCode: () => Promise<{ success: boolean; error?: string }>;
 }
+

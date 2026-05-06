@@ -8,8 +8,8 @@ export interface ModalProps {
   title: string;
   children: React.ReactNode;
   actions?: React.ReactNode;
-  closeOnBackdrop?: boolean;
-  showCloseButton?: boolean;
+  dismissBehavior?: "dismissible" | "static";
+  closeButton?: "visible" | "hidden";
 }
 
 export function Modal({
@@ -18,8 +18,8 @@ export function Modal({
   title,
   children,
   actions,
-  closeOnBackdrop = true,
-  showCloseButton = true,
+  dismissBehavior = "dismissible",
+  closeButton = "visible",
 }: ModalProps): React.JSX.Element | null {
   useEffect(() => {
     if (!isOpen) {
@@ -27,14 +27,14 @@ export function Modal({
     }
 
     function handleEsc(event: KeyboardEvent): void {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && dismissBehavior === "dismissible") {
         onClose();
       }
     }
 
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
-  }, [isOpen, onClose]);
+  }, [dismissBehavior, isOpen, onClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -49,11 +49,11 @@ export function Modal({
 
   const handleBackdropClick = useCallback(
     (event: React.MouseEvent) => {
-      if (closeOnBackdrop && event.target === event.currentTarget) {
+      if (dismissBehavior === "dismissible" && event.target === event.currentTarget) {
         onClose();
       }
     },
-    [closeOnBackdrop, onClose],
+    [dismissBehavior, onClose],
   );
 
   if (!isOpen) {
@@ -78,7 +78,7 @@ export function Modal({
           >
             {title}
           </h2>
-          {showCloseButton && (
+          {closeButton === "visible" ? (
             <button
               onClick={onClose}
               className="flex h-8 w-8 items-center justify-center text-theme-muted transition-colors hover:text-theme"
@@ -94,16 +94,16 @@ export function Modal({
                 <path strokeLinecap="square" d="M6 6l12 12M6 18L18 6" />
               </svg>
             </button>
-          )}
+          ) : null}
         </div>
 
         <div className="p-6">{children}</div>
 
-        {actions && (
+        {actions ? (
           <div className="flex gap-3 border-t-[3px] border-theme p-4">
             {actions}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

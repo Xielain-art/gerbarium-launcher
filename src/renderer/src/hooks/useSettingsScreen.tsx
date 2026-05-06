@@ -8,7 +8,7 @@ import { useSystemMemoryQuery } from "./queries/useSystemQueries";
 import { useDownloadStore } from "../stores/useDownloadStore";
 import { useTranslation } from "./useTranslation";
 import { ROUTES } from "../../../shared/constants/system";
-import { type JavaInstallation, type SettingsNotice, type SettingsTab } from "../components/settings";
+import type { JavaInstallation, SettingsNotice, SettingsTab } from "../components/settings/types";
 
 // --- Main Hook ---
 
@@ -333,4 +333,5 @@ export function useSettingsScreen(): SettingsScreenResult {
     isDevMode,
   };
 }
+
 

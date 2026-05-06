@@ -1,16 +1,10 @@
-import {
-  Button as ShadcnButton,
-  Card as ShadcnCard,
-
-
-
-} from "@/components/shadcn/ui";
+import { Button as ShadcnButton } from "@/components/shadcn/ui/button";
+import { Card as ShadcnCard } from "@/components/shadcn/ui/card";
 
 import type { AdminNewsTabProps as Props } from "./news/types";
 import { NewsListSubTab } from "./news/NewsListSubTab";
 import { NewsFormSubTab } from "./news/NewsFormSubTab";
 import { NewsTagsSubTab } from "./news/NewsTagsSubTab";
-
 
 export function AdminNewsTab(props: Props): React.JSX.Element {
   const {
@@ -23,7 +17,7 @@ export function AdminNewsTab(props: Props): React.JSX.Element {
     newsSlug,
     newsImage,
     newsContentHtml,
-    selectedNewsTagIds
+    selectedNewsTagIds,
   } = props;
 
   const hasUnsavedChanges =
@@ -48,11 +42,11 @@ export function AdminNewsTab(props: Props): React.JSX.Element {
           <h2 className="font-mono text-xl font-bold">
             Управление новостями
           </h2>
-          {isApplyingNewsFilters && (
+          {isApplyingNewsFilters ? (
             <span className="font-mono text-[10px] uppercase text-theme-muted">
               Фильтрация...
             </span>
-          )}
+          ) : null}
         </div>
 
         <div className="flex items-center gap-2 border-b border-white/10 pb-2">
@@ -85,12 +79,11 @@ export function AdminNewsTab(props: Props): React.JSX.Element {
         </div>
       </div>
 
-      {newsTab === "all" && <NewsListSubTab {...props} />}
+      {newsTab === "all" ? <NewsListSubTab {...props} /> : null}
 
-      {newsTab === "create" && <NewsFormSubTab {...props} />}
+      {newsTab === "create" ? <NewsFormSubTab {...props} /> : null}
 
-      {newsTab === "tags" && <NewsTagsSubTab {...props} />}
+      {newsTab === "tags" ? <NewsTagsSubTab {...props} /> : null}
     </ShadcnCard>
   );
 }
-

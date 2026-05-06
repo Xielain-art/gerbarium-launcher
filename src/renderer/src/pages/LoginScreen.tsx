@@ -1,6 +1,6 @@
-import { WindowControls } from "../components";
+import { WindowControls } from "../components/layout/WindowControls";
 import { useLoginScreen } from "../hooks/useLoginScreen";
-import { LoginFormCard } from "../components/login";
+import { LoginFormCard } from "../components/login/LoginFormCard";
 
 export function LoginScreen(): React.JSX.Element {
   const vm = useLoginScreen();
@@ -73,4 +73,5 @@ export function LoginScreen(): React.JSX.Element {
     </div>
   );
 }
+
 

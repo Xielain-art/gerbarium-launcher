@@ -1,9 +1,5 @@
-import {
-  Button as ShadcnButton,
-  Input as ShadcnInput,
-
-
-} from "@/components/shadcn/ui";
+import { Button as ShadcnButton } from "@/components/shadcn/ui/button";
+import { Input as ShadcnInput } from "@/components/shadcn/ui/input";
 
 
 import type { AdminNewsTabProps } from "./types";
@@ -78,3 +74,5 @@ export function NewsTagsSubTab(props: AdminNewsTabProps) {
 
   </>);
 }
+
+

@@ -1,4 +1,4 @@
-import { Button as ShadcnButton } from "@/components/shadcn/ui";
+import { Button as ShadcnButton } from "@/components/shadcn/ui/button";
 import { AdminDialogShell } from "./AdminDialogShell";
 
 interface Props {
@@ -49,4 +49,5 @@ export function UnbanUserDialog({
     </AdminDialogShell>
   );
 }
+
 

@@ -1,15 +1,23 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { queryKeys } from "../../../lib/queryKeys";
 import { ensureSuccess } from "../../../lib/queryHelpers";
 import type { AdminChangelogFilters } from "./types";
 import { getAdminChangelog } from "./utils";
 import type { ApiCreateChangelogDto, ApiUpdateChangelogDto } from "../../../../../lib/api/changelog";
 
-export function useAdminChangelogQuery(filters: AdminChangelogFilters) {
-  return useQuery({
+const adminChangelogQueryOptions = (filters: AdminChangelogFilters) =>
+  queryOptions({
     queryKey: queryKeys.adminChangelog(filters),
     queryFn: () => getAdminChangelog(filters),
   });
+
+export function useAdminChangelogQuery(filters: AdminChangelogFilters) {
+  return useQuery(adminChangelogQueryOptions(filters));
 }
 
 export function useAdminChangelogMutations(filters: AdminChangelogFilters) {

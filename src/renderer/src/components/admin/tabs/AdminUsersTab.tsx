@@ -1,16 +1,8 @@
-﻿import {
-  Button as ShadcnButton,
-  Card as ShadcnCard,
-  Input as ShadcnInput,
-  Select as ShadcnSelect,
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/shadcn/ui";
+import { Button as ShadcnButton } from "@/components/shadcn/ui/button";
+import { Card as ShadcnCard } from "@/components/shadcn/ui/card";
+import { Input as ShadcnInput } from "@/components/shadcn/ui/input";
+import { Select as ShadcnSelect } from "@/components/shadcn/ui/select";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/shadcn/ui/pagination";
 import type { TranslationType } from "../../../../../shared/constants/translations";
 import type { ApiUser } from "../../../../../lib/api/types";
 
@@ -323,7 +315,7 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
                 {user.username}
               </div>
               <div className="font-mono text-xs text-theme-muted">
-                {user.email} • {user.id.slice(0, 8)}
+                {user.email} � {user.id.slice(0, 8)}
               </div>
             </div>
             <div className="flex gap-2">
@@ -399,6 +391,8 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
     </ShadcnCard>
   );
 }
+
+
 
 
 

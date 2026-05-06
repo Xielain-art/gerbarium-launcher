@@ -1,7 +1,5 @@
-import {
-  Button as ShadcnButton,
-  Input as ShadcnInput,
-} from "@/components/shadcn/ui";
+import { Button as ShadcnButton } from "@/components/shadcn/ui/button";
+import { Input as ShadcnInput } from "@/components/shadcn/ui/input";
 import { AdminDialogShell } from "./AdminDialogShell";
 
 interface Props {
@@ -65,4 +63,6 @@ export function BanUserDialog({
     </AdminDialogShell>
   );
 }
+
+
 

@@ -1,12 +1,25 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { queryKeys } from "../../../lib/queryKeys";
 import { ensureSuccess } from "../../../lib/queryHelpers";
 import type { UserFilters } from "./types";
-import { ADMIN_USERS_PAGE_SIZE, normalizeUserListPayload, getRoles, getStats } from "./utils";
-import type { ApiCreateRoleDto, ApiUpdateRoleDto } from "../../../../../lib/api/admin";
+import {
+  ADMIN_USERS_PAGE_SIZE,
+  getRoles,
+  getStats,
+  normalizeUserListPayload,
+} from "./utils";
+import type {
+  ApiCreateRoleDto,
+  ApiUpdateRoleDto,
+} from "../../../../../lib/api/admin";
 
-export function useAdminUsersQuery(filters: UserFilters & { page: number }) {
-  return useQuery({
+const adminUsersQueryOptions = (filters: UserFilters & { page: number }) =>
+  queryOptions({
     queryKey: queryKeys.adminUsers(filters),
     queryFn: async () => {
       const result = await window.electronAPI.admin.getUsers(
@@ -23,33 +36,39 @@ export function useAdminUsersQuery(filters: UserFilters & { page: number }) {
         ADMIN_USERS_PAGE_SIZE,
       );
     },
-    // Keep data fresh for a bit to avoid constant reloading during navigation
     staleTime: 5000,
   });
-}
 
-
-
-export function useAdminRolesQuery() {
-  return useQuery({
+const adminRolesQueryOptions = () =>
+  queryOptions({
     queryKey: queryKeys.adminRoles(),
     queryFn: getRoles,
   });
-}
 
-export function useAdminStatsQuery() {
-  return useQuery({
+const adminStatsQueryOptions = () =>
+  queryOptions({
     queryKey: queryKeys.adminStats(),
     queryFn: getStats,
     refetchInterval: 30_000,
   });
+
+export function useAdminUsersQuery(filters: UserFilters & { page: number }) {
+  return useQuery(adminUsersQueryOptions(filters));
+}
+
+export function useAdminRolesQuery() {
+  return useQuery(adminRolesQueryOptions());
+}
+
+export function useAdminStatsQuery() {
+  return useQuery(adminStatsQueryOptions());
 }
 
 export function useAdminUserMutations(_filters: UserFilters) {
   const queryClient = useQueryClient();
   const invalidateUsers = async () => {
     await queryClient.invalidateQueries({
-      queryKey: ["admin-users"],
+      queryKey: queryKeys.adminUsersRoot(),
     });
   };
 

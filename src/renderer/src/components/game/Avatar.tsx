@@ -2,7 +2,7 @@ export interface AvatarProps {
   username?: string;
   skinUrl?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  showBody?: boolean;
+  variant?: "head" | "body";
   className?: string;
 }
 
@@ -21,7 +21,7 @@ export function Avatar({
   username, 
   skinUrl, 
   size = 'md', 
-  showBody = false,
+  variant = "head",
   className = '' 
 }: AvatarProps) {
   // Generate avatar URL from skin or initials
@@ -36,9 +36,11 @@ export function Avatar({
 
   const imageUrl = getAvatarUrl();
 
+  const isBodyVariant = variant === "body";
+
   return (
       <div className={`${sizeMap[size]} relative overflow-hidden rounded-lg flex items-center justify-center bg-[var(--theme-surface)] ${className}`}>
-      {showBody ? (
+      {isBodyVariant ? (
         // Full body render
         <img
           src={imageUrl}

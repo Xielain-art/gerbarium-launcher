@@ -1,6 +1,6 @@
-import { WindowControls } from "../components";
+import { WindowControls } from "../components/layout/WindowControls";
 import { useUpdateScreen } from "../hooks/useUpdateScreen";
-import { UpdateStatusCard } from "../components/update";
+import { UpdateStatusCard } from "../components/update/UpdateStatusCard";
 
 export function UpdateScreen(): React.JSX.Element {
   const vm = useUpdateScreen();
@@ -23,4 +23,5 @@ export function UpdateScreen(): React.JSX.Element {
     </div>
   );
 }
+
 

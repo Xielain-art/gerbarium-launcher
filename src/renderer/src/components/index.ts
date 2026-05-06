@@ -1,7 +1,17 @@
-export * from './ui';
-export * from './game';
-export * from './layout';
-export * from './settings';
-export * from './login';
-export * from './update';
-// export * from './shadcn'; // Commented out to avoid conflict with ./ui/Button
+export { Button } from "./ui/Button";
+export { Input } from "./ui/Input";
+export { ConfirmModal, Modal } from "./ui/Modal";
+export { Card } from "./ui/Card";
+export { Checkbox } from "./ui/Checkbox";
+export { ProgressBar } from "./ui/ProgressBar";
+export { Select } from "./ui/Select";
+export { InputOTP } from "./ui/InputOTP";
+export { Avatar } from "./game/Avatar";
+export { WindowControls } from "./layout/WindowControls";
+export { ThemeToggleButton } from "./layout/ThemeToggleButton";
+export { CrashNoticeBanner } from "./layout/CrashNoticeBanner";
+export { SettingsHeader } from "./settings/SettingsHeader";
+export { SettingsTabNav } from "./settings/SettingsTabNav";
+export { SettingsActionBar } from "./settings/SettingsActionBar";
+export { LoginFormCard } from "./login/LoginFormCard";
+export { UpdateStatusCard } from "./update/UpdateStatusCard";

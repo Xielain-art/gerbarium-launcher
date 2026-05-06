@@ -1,9 +1,6 @@
-import {
-  Button as ShadcnButton,
-  Input as ShadcnInput,
-  Select as ShadcnSelect,
-
-} from "@/components/shadcn/ui";
+import { Button as ShadcnButton } from "@/components/shadcn/ui/button";
+import { Input as ShadcnInput } from "@/components/shadcn/ui/input";
+import { Select as ShadcnSelect } from "@/components/shadcn/ui/select";
 
 
 import type { AdminNewsTabProps } from "./types";
@@ -130,3 +127,5 @@ export function NewsListSubTab(props: AdminNewsTabProps) {
 
   </>);
 }
+
+

@@ -14,7 +14,6 @@ interface DashboardActionBarProps {
   launchStatus: string;
   isConsoleVisible: boolean;
   errorMessage: string | null;
-  isPlayBlocked?: boolean;
   playBlockReason?: string | null;
   onPlay: () => void;
   onCancelDownload: () => void;
@@ -31,7 +30,6 @@ export function DashboardActionBar({
   launchStatus,
   isConsoleVisible,
   errorMessage,
-  isPlayBlocked = false,
   playBlockReason = null,
   onPlay,
   onCancelDownload,
@@ -49,7 +47,7 @@ export function DashboardActionBar({
         <IdleActionState
           t={t}
           selectedVersion={selectedVersion}
-          isPlayBlocked={isPlayBlocked}
+          playBlockReason={playBlockReason}
           onPlay={onPlay}
         />
       ) : isLaunching ? (

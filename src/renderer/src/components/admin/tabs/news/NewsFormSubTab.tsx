@@ -1,9 +1,6 @@
-import {
-  Button as ShadcnButton,
-  Input as ShadcnInput,
-
-  MultiSelect,
-} from "@/components/shadcn/ui";
+import { Button as ShadcnButton } from "@/components/shadcn/ui/button";
+import { Input as ShadcnInput } from "@/components/shadcn/ui/input";
+import { MultiSelect } from "@/components/shadcn/ui/multi-select";
 import MDEditor from "@uiw/react-md-editor";
 import { cn } from "@/lib/utils";
 import type { AdminNewsTabProps } from "./types";
@@ -174,3 +171,5 @@ export function NewsFormSubTab(props: AdminNewsTabProps) {
 
   </>);
 }
+
+

@@ -1,4 +1,5 @@
-import { ThemeToggleButton, WindowControls } from "../components";
+import { ThemeToggleButton } from "../components/layout/ThemeToggleButton";
+import { WindowControls } from "../components/layout/WindowControls";
 import { useDashboardScreen } from "../hooks/useDashboardScreen";
 import newsPlaceholder from "../assets/photo_2026-04-23_10-34-22.jpg";
 import { DashboardSidebar } from "../components/dashboard/DashboardSidebar";
@@ -29,17 +30,17 @@ export function DashboardScreen(): React.JSX.Element {
 
       <main className="relative z-10 flex flex-1 flex-col overflow-hidden bg-[var(--theme-bg)]">
         <div className="absolute right-4 top-4 z-50 flex items-center gap-4">
-          {vm.appVersion && (
+          {vm.appVersion ? (
             <div className="font-mono text-[10px] uppercase tracking-wider text-theme-muted">
               {vm.t.DASHBOARD.VERSION_DISPLAY_LABEL} {vm.appVersion}
             </div>
-          )}
+          ) : null}
           <ThemeToggleButton />
           <WindowControls />
         </div>
 
         <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto pb-4 pt-20">
-          {!vm.isLaunching && (
+          {!vm.isLaunching ? (
             <div className="mb-6 flex items-center gap-1 px-6">
               <button
                 type="button"
@@ -66,7 +67,7 @@ export function DashboardScreen(): React.JSX.Element {
                 {vm.t.DASHBOARD.TAB_CHANGELOG}
               </button>
             </div>
-          )}
+          ) : null}
 
           {vm.isLaunching && vm.isConsoleVisible ? (
             <LaunchConsole logs={vm.logs} logsEndRef={vm.logsEndRef} />
@@ -113,7 +114,6 @@ export function DashboardScreen(): React.JSX.Element {
           launchStatus={vm.launchStatus}
           isConsoleVisible={vm.isConsoleVisible}
           errorMessage={vm.launchError}
-          isPlayBlocked={Boolean(vm.playBlockReason)}
           playBlockReason={vm.playBlockReason}
           onPlay={vm.onPlay}
           onCancelDownload={vm.onCancelDownload}
@@ -135,3 +135,5 @@ export function DashboardScreen(): React.JSX.Element {
     </div>
   );
 }
+
+

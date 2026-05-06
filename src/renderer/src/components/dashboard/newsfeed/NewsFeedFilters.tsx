@@ -1,4 +1,4 @@
-import { Select as ShadcnSelect } from "@/components/shadcn/ui";
+import { Select as ShadcnSelect } from "@/components/shadcn/ui/select";
 import type { TranslationType } from "../../../../../shared/constants/translations";
 
 interface Props {
@@ -57,3 +57,4 @@ export function NewsFeedFilters({
     </div>
   );
 }
+

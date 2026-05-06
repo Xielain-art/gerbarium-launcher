@@ -1,10 +1,8 @@
 import { useSettingsScreen } from "../hooks/useSettingsScreen";
-import { ConfirmModal } from "../components";
-import {
-  SettingsActionBar,
-  SettingsHeader,
-  SettingsTabNav,
-} from "../components/settings";
+import { ConfirmModal } from "../components/ui/Modal";
+import { SettingsActionBar } from "../components/settings/SettingsActionBar";
+import { SettingsHeader } from "../components/settings/SettingsHeader";
+import { SettingsTabNav } from "../components/settings/SettingsTabNav";
 
 export function SettingsScreen(): React.JSX.Element {
   const vm = useSettingsScreen();
@@ -54,4 +52,6 @@ export function SettingsScreen(): React.JSX.Element {
     </div>
   );
 }
+
+
 

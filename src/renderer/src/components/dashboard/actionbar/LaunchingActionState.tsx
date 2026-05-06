@@ -52,7 +52,7 @@ export function LaunchingActionState({
           <div className="mb-1 flex items-center justify-between">
             <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--mc-accent)]">
               <span className="capitalize">{launchStatus || launchPhase}</span>
-              {launchPercent === null && <span className="animate-pulse">...</span>}
+              {launchPercent === null ? <span className="animate-pulse">...</span> : null}
             </div>
             {launchPercent !== null && (
               <div className="font-mono text-[11px] font-bold text-theme">

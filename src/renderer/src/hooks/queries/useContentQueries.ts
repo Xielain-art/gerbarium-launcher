@@ -1,4 +1,9 @@
-﻿import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  infiniteQueryOptions,
+  queryOptions,
+  useInfiniteQuery,
+  useQuery,
+} from "@tanstack/react-query";
 import {
   listNewsRequest,
   type ApiNews,
@@ -122,8 +127,8 @@ const mockServerStatus: ServerStatusData = {
   latency: 45,
 };
 
-export function usePublicNewsQuery(filters: PublicNewsFilters) {
-  return useInfiniteQuery({
+const publicNewsInfiniteQueryOptions = (filters: PublicNewsFilters) =>
+  infiniteQueryOptions({
     queryKey: queryKeys.publicNews(filters),
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
@@ -158,10 +163,9 @@ export function usePublicNewsQuery(filters: PublicNewsFilters) {
       };
     },
   });
-}
 
-export function usePublicChangelogQuery() {
-  return useQuery({
+const publicChangelogQueryOptions = () =>
+  queryOptions({
     queryKey: queryKeys.publicChangelog(),
     queryFn: async () => {
       const result = await listChangelogRequest({
@@ -178,6 +182,23 @@ export function usePublicChangelogQuery() {
       return result.data.map(mapApiChangelog);
     },
   });
+
+const serverStatusQueryOptions = () =>
+  queryOptions({
+    queryKey: queryKeys.serverStatus(),
+    queryFn: async () => {
+      await new Promise((resolve) => window.setTimeout(resolve, 300));
+      return mockServerStatus;
+    },
+    refetchInterval: 30_000,
+  });
+
+export function usePublicNewsQuery(filters: PublicNewsFilters) {
+  return useInfiniteQuery(publicNewsInfiniteQueryOptions(filters));
+}
+
+export function usePublicChangelogQuery() {
+  return useQuery(publicChangelogQueryOptions());
 }
 
 export function usePaginatedChangelog(changelog: ChangelogItem[]) {
@@ -192,14 +213,7 @@ export function usePaginatedChangelog(changelog: ChangelogItem[]) {
 }
 
 export function useServerStatusQuery() {
-  return useQuery({
-    queryKey: queryKeys.serverStatus(),
-    queryFn: async () => {
-      await new Promise((resolve) => window.setTimeout(resolve, 300));
-      return mockServerStatus;
-    },
-    refetchInterval: 30_000,
-  });
+  return useQuery(serverStatusQueryOptions());
 }
 
 export function toQueryErrorMessage(error: unknown, fallback: string): string {

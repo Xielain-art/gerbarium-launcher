@@ -6,16 +6,18 @@ import { cn } from "@/lib/utils";
 interface Props {
   t: TranslationType;
   selectedVersion: GameVersion | undefined;
-  isPlayBlocked?: boolean;
+  playBlockReason?: string | null;
   onPlay: () => void;
 }
 
 export function IdleActionState({
   t,
   selectedVersion,
-  isPlayBlocked,
+  playBlockReason,
   onPlay,
 }: Props): React.JSX.Element {
+  const isPlayBlocked = Boolean(playBlockReason);
+
   return (
     <div className="flex items-center justify-between gap-8">
       <div className="min-w-0">

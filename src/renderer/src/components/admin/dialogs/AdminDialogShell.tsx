@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Dialog as ShadcnDialog } from "@/components/shadcn/ui";
+import { Dialog as ShadcnDialog } from "@/components/shadcn/ui/dialog";
 
 type AdminDialogSize = "sm" | "md" | "lg";
 
@@ -38,4 +38,5 @@ export function AdminDialogShell({
     </ShadcnDialog>
   );
 }
+
 

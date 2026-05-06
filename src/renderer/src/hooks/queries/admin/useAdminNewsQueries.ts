@@ -1,19 +1,25 @@
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
+import {
+  infiniteQueryOptions,
+  queryOptions,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { queryKeys } from "../../../lib/queryKeys";
 import { ensureSuccess } from "../../../lib/queryHelpers";
 import type { AdminNewsFilters } from "./types";
 import { ADMIN_NEWS_PAGE_SIZE, normalizeNewsListPayload, getNewsTags } from "./utils";
 import type { ApiCreateNewsDto, ApiUpdateNewsDto } from "../../../../../lib/api/news";
 
-export function useAdminNewsTagsQuery() {
-  return useQuery({
+const adminNewsTagsQueryOptions = () =>
+  queryOptions({
     queryKey: queryKeys.adminNewsTags(),
     queryFn: getNewsTags,
   });
-}
 
-export function useAdminNewsQuery(filters: AdminNewsFilters) {
-  return useInfiniteQuery({
+const adminNewsInfiniteQueryOptions = (filters: AdminNewsFilters) =>
+  infiniteQueryOptions({
     queryKey: queryKeys.adminNews(filters),
     initialPageParam: 1,
     queryFn: async ({ pageParam }) => {
@@ -48,6 +54,13 @@ export function useAdminNewsQuery(filters: AdminNewsFilters) {
       items: data.pages.flatMap((page) => page?.items ?? []),
     }),
   });
+
+export function useAdminNewsTagsQuery() {
+  return useQuery(adminNewsTagsQueryOptions());
+}
+
+export function useAdminNewsQuery(filters: AdminNewsFilters) {
+  return useInfiniteQuery(adminNewsInfiniteQueryOptions(filters));
 }
 
 export function useAdminNewsMutations(_filters: AdminNewsFilters) {

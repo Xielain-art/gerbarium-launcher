@@ -1,4 +1,5 @@
-import { Button as ShadcnButton, Card as ShadcnCard } from "@/components/shadcn/ui";
+import { Button as ShadcnButton } from "@/components/shadcn/ui/button";
+import { Card as ShadcnCard } from "@/components/shadcn/ui/card";
 import type { ApiAdminStats } from "../../../../lib/api/admin";
 
 interface AdminStatsPanelProps {
@@ -90,5 +91,4 @@ export function AdminStatsPanel({
     </ShadcnCard>
   );
 }
-
 

@@ -1,8 +1,8 @@
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
-import { Button as ButtonShadcn } from "@/components/shadcn/ui";
+import { Button as ButtonShadcn } from "@/components/shadcn/ui/button";
 import { ROUTES } from "../../../shared/constants/system";
-import { WindowControls } from "../components";
+import { WindowControls } from "../components/layout/WindowControls";
 import { AdminStatsPanel } from "../components/admin/AdminStatsPanel";
 import { ChangelogPreviewModal } from "../components/admin/ChangelogPreviewModal";
 import { AdminDialogs } from "../components/admin/AdminDialogs";
@@ -361,4 +361,3 @@ export function AdminScreen(): React.JSX.Element {
     </div>
   );
 }
-

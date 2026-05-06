@@ -1,14 +1,9 @@
-import { useCallback, type ReactNode } from "react";
-import {
-  AdvancedSettingsTab,
-  GeneralSettingsTab,
-  JavaSettingsTab,
-  ProfileSettingsTab,
-  SupportSettingsTab,
-  type JavaInstallation,
-  type SettingsNotice,
-  type SettingsTab,
-} from "../../components/settings";
+import { AdvancedSettingsTab } from "../../components/settings/AdvancedSettingsTab";
+import { GeneralSettingsTab } from "../../components/settings/GeneralSettingsTab";
+import { JavaSettingsTab } from "../../components/settings/JavaSettingsTab";
+import { ProfileSettingsTab } from "../../components/settings/ProfileSettingsTab";
+import { SupportSettingsTab } from "../../components/settings/SupportSettingsTab";
+import type { JavaInstallation, SettingsNotice, SettingsTab } from "../../components/settings/types";
 import type { TranslationType } from "../../../../shared/constants/translations";
 import type { SettingsGeneral, SettingsProfile, AuthUser, DownloadStatus } from "../../types";
 
@@ -141,3 +136,5 @@ export function useSettingsTabRenderer(deps: {
     onExportLogs, isDevMode
   ]);
 }
+
+

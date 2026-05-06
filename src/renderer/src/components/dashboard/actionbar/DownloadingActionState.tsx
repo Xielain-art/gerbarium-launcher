@@ -22,15 +22,15 @@ export function DownloadingActionState({
             {progress?.status || t.COMMON.LOADING}
           </div>
           <div className="mt-1 font-mono text-[11px] text-[var(--mc-accent)]">
-            {progress?.speed && <span>{progress.speed}</span>}
-            {progress?.speed && progress?.eta && (
+            {progress?.speed ? <span>{progress.speed}</span> : null}
+            {progress?.speed && progress?.eta ? (
               <span className="mx-2 opacity-30">|</span>
-            )}
-            {progress?.eta && (
+            ) : null}
+            {progress?.eta ? (
               <span>
                 {t.DASHBOARD.TIME_REMAINING_LABEL} {progress.eta}
               </span>
-            )}
+            ) : null}
           </div>
         </div>
         <Button
@@ -49,4 +49,3 @@ export function DownloadingActionState({
     </div>
   );
 }
-

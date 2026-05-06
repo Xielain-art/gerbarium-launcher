@@ -28,11 +28,11 @@ export function ProgressBar({
 
       <div className="flex justify-between items-center font-mono text-[10px] uppercase tracking-wider text-theme-muted">
         <div className="flex gap-3">
-          {status && <span>{status}</span>}
-          {speed && <span className="text-[var(--mc-accent)]">{speed}</span>}
+          {status ? <span>{status}</span> : null}
+          {speed ? <span className="text-[var(--mc-accent)]">{speed}</span> : null}
         </div>
         <div className="flex gap-3">
-          {eta && <span>{eta}</span>}
+          {eta ? <span>{eta}</span> : null}
           <span>{clampedProgress}%</span>
         </div>
       </div>

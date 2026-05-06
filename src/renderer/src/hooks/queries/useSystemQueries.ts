@@ -1,33 +1,35 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { queryKeys } from "../../lib/queryKeys";
 
-export function useAppVersionQuery() {
-  return useQuery({
+const appVersionQueryOptions = () =>
+  queryOptions({
     queryKey: queryKeys.appVersion(),
     queryFn: () => window.electronAPI.getAppVersion(),
     staleTime: Infinity,
   });
-}
 
-export function useInstalledVersionsQuery() {
-  return useQuery({
+const installedVersionsQueryOptions = () =>
+  queryOptions({
     queryKey: queryKeys.installedVersions(),
     queryFn: () => window.electronAPI.game.getInstalledVersions(),
     staleTime: 60_000,
   });
-}
 
-export function useSystemMemoryQuery(enabled = true) {
-  return useQuery({
+const systemMemoryQueryOptions = (enabled: boolean) =>
+  queryOptions({
     queryKey: queryKeys.systemMemory(),
     queryFn: () => window.electronAPI.system.getMemory(),
     enabled,
     staleTime: 60_000,
   });
-}
 
-export function useCrashReportQuery() {
-  return useQuery({
+const crashReportQueryOptions = () =>
+  queryOptions({
     queryKey: queryKeys.crashReport(),
     queryFn: async () => {
       const response = await window.electronAPI.getLastCrashReport();
@@ -35,6 +37,21 @@ export function useCrashReportQuery() {
       return response.report ?? null;
     },
   });
+
+export function useAppVersionQuery() {
+  return useQuery(appVersionQueryOptions());
+}
+
+export function useInstalledVersionsQuery() {
+  return useQuery(installedVersionsQueryOptions());
+}
+
+export function useSystemMemoryQuery(enabled = true) {
+  return useQuery(systemMemoryQueryOptions(enabled));
+}
+
+export function useCrashReportQuery() {
+  return useQuery(crashReportQueryOptions());
 }
 
 export function useDismissCrashReportMutation() {

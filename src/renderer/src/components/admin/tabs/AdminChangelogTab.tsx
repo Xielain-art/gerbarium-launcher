@@ -1,10 +1,8 @@
-﻿import {
-  Button as ShadcnButton,
-  Card as ShadcnCard,
-  Checkbox as ShadcnCheckbox,
-  Input as ShadcnInput,
-  Select as ShadcnSelect,
-} from "@/components/shadcn/ui";
+import { Button as ShadcnButton } from "@/components/shadcn/ui/button";
+import { Card as ShadcnCard } from "@/components/shadcn/ui/card";
+import { Checkbox as ShadcnCheckbox } from "@/components/shadcn/ui/checkbox";
+import { Input as ShadcnInput } from "@/components/shadcn/ui/input";
+import { Select as ShadcnSelect } from "@/components/shadcn/ui/select";
 import type { ApiChangelog } from "../../../../../lib/api/changelog";
 import { stringifyChangelogChanges } from "../hooks/sections/useAdminChangelogSection";
 
@@ -204,7 +202,7 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
           <div className="mb-6 rounded-lg border-2 border-dashed border-theme/40 bg-gradient-to-r from-theme/10 via-theme/5 to-transparent p-5 shadow-lg">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-theme/30 shadow-md">
-                <span className="text-xl">{p.editingChangelog ? "✎" : "+"}</span>
+                <span className="text-xl">{p.editingChangelog ? "?" : "+"}</span>
               </div>
               <div className="flex-1">
                 <h3 className="font-mono text-base font-bold text-theme">
@@ -299,3 +297,5 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
     </ShadcnCard>
   );
 }
+
+
