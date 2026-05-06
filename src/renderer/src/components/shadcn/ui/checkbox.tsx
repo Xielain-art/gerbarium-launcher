@@ -24,7 +24,7 @@ function Checkbox({
         {...props}
       />
       {label && (
-        <span className="font-minecraft text-xs text-theme">{label}</span>
+        <span className="font-mono text-xs text-theme">{label}</span>
       )}
     </label>
   );

@@ -1,4 +1,3 @@
-import type { ThemeId } from "../lib/themes/themeRegistry";
 export type ThemeMode = "light" | "dark";
 
 // Auth Types
@@ -59,7 +58,6 @@ export interface SettingsGeneral {
   gamePath?: string;
   fullscreen: boolean;
   showLaunchConsole: boolean;
-  theme: ThemeId;
   themeMode: ThemeMode;
 }
 

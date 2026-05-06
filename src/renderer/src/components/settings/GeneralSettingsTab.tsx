@@ -1,7 +1,5 @@
 import { Checkbox, Select, Button, Input, Card } from "../ui";
 import type { GeneralSettingsTabProps } from "./types";
-import { THEME_REGISTRY } from "../../lib/themes/themeRegistry";
-import type { ThemeId } from "../../lib/themes/themeRegistry";
 import { FolderOpen, ExternalLink, Monitor, Globe, Box, Save } from "lucide-react";
 
 export function GeneralSettingsTab({
@@ -15,10 +13,10 @@ export function GeneralSettingsTab({
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-8">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-semibold tracking-tight text-[#fafafa]">
+        <h2 className="text-2xl font-semibold tracking-tight text-theme">
           {t.SETTINGS.GENERAL.TITLE}
         </h2>
-        <p className="text-sm text-[#898989]">
+        <p className="text-sm text-theme-muted">
           Manage your launcher preferences and appearance.
         </p>
       </div>
@@ -26,8 +24,8 @@ export function GeneralSettingsTab({
       <div className="grid gap-6">
         <Card className="p-6">
           <div className="mb-6 flex items-center gap-2">
-            <Globe size={16} className="text-[#4d4d4d]" />
-            <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
+            <Globe size={16} className="text-theme-muted" />
+            <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-theme-muted">
               Appearance & Localization
             </h3>
           </div>
@@ -38,26 +36,13 @@ export function GeneralSettingsTab({
               onChange={(e) => onUpdateGeneral({ language: e.target.value })}
               options={t.SETTINGS.GENERAL.LANGUAGE_OPTIONS}
             />
-
-            <Select
-              label={t.SETTINGS.GENERAL.THEME_LABEL}
-              value={general.theme}
-              onChange={(e) => onUpdateGeneral({ theme: e.target.value as ThemeId })}
-              options={THEME_REGISTRY.map((theme) => ({
-                value: theme.id,
-                label:
-                  t.SETTINGS.GENERAL.THEMES[
-                    theme.translationKey as keyof typeof t.SETTINGS.GENERAL.THEMES
-                  ] ?? theme.fallbackLabel,
-              }))}
-            />
           </div>
         </Card>
 
         <Card className="p-6">
           <div className="mb-6 flex items-center gap-2">
-            <Monitor size={16} className="text-[#4d4d4d]" />
-            <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
+            <Monitor size={16} className="text-theme-muted" />
+            <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-theme-muted">
               Launcher Behavior
             </h3>
           </div>
@@ -87,14 +72,14 @@ export function GeneralSettingsTab({
 
         <Card className="p-6">
           <div className="mb-6 flex items-center gap-2">
-            <Save size={16} className="text-[#4d4d4d]" />
-            <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
+            <Save size={16} className="text-theme-muted" />
+            <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-theme-muted">
               Storage & Paths
             </h3>
           </div>
           <div className="space-y-6">
             <div className="flex flex-col gap-2">
-              <label className="font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-[#898989]">
+              <label className="font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-theme-muted">
                 Game Files Path
               </label>
               <div className="flex gap-2">
@@ -110,27 +95,27 @@ export function GeneralSettingsTab({
                   variant="secondary"
                   className="flex items-center gap-2 whitespace-nowrap"
                 >
-                  <FolderOpen size={16} className="text-[#898989]" />
+                  <FolderOpen size={16} className="text-theme-muted" />
                   Browse
                 </Button>
               </div>
             </div>
             
-            <div className="flex items-center gap-6 pt-2 border-t border-[#1a1a1a]">
+            <div className="flex items-center gap-6 border-t border-theme pt-2">
               <button
                 onClick={onOpenGamePath}
-                className="group flex items-center gap-2 text-xs font-medium text-[#3ecf8e] transition-all hover:text-[#50e3a1]"
+                className="group flex items-center gap-2 text-xs font-medium text-[var(--mc-accent)] transition-all hover:text-[var(--mc-accent-hi)]"
               >
-                <div className="rounded bg-[#0b2b1a] p-1.5 transition-colors group-hover:bg-[#0e3a24]">
+                <div className="rounded bg-[var(--mc-accent)]/15 p-1.5 transition-colors group-hover:bg-[var(--mc-accent)]/25">
                   <Box size={14} />
                 </div>
                 Open game folder
               </button>
               <button
                 onClick={onOpenDataFolder}
-                className="group flex items-center gap-2 text-xs font-medium text-[#3ecf8e] transition-all hover:text-[#50e3a1]"
+                className="group flex items-center gap-2 text-xs font-medium text-[var(--mc-accent)] transition-all hover:text-[var(--mc-accent-hi)]"
               >
-                <div className="rounded bg-[#0b2b1a] p-1.5 transition-colors group-hover:bg-[#0e3a24]">
+                <div className="rounded bg-[var(--mc-accent)]/15 p-1.5 transition-colors group-hover:bg-[var(--mc-accent)]/25">
                   <ExternalLink size={14} />
                 </div>
                 Open launcher data
@@ -142,4 +127,3 @@ export function GeneralSettingsTab({
     </div>
   );
 }
-

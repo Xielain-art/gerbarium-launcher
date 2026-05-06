@@ -74,7 +74,7 @@ export function Modal({
         <div className="flex items-center justify-between border-b-[3px] border-theme p-4">
           <h2
             id="modal-title"
-            className="font-minecraft text-lg font-bold uppercase text-theme"
+            className="font-mono text-lg font-bold uppercase text-theme"
           >
             {title}
           </h2>
@@ -153,7 +153,7 @@ export function ConfirmModal({
         </>
       }
     >
-      <p className="font-minecraft text-sm text-theme">{message}</p>
+      <p className="font-mono text-sm text-theme">{message}</p>
     </Modal>
   );
 }

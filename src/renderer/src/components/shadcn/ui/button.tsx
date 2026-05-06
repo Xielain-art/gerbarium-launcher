@@ -8,16 +8,16 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "rounded-full border border-[#fafafa] bg-[#0f0f0f] text-[#fafafa] hover:bg-[#171717]",
+          "rounded-full border border-theme bg-[var(--theme-surface)] text-theme hover:bg-[var(--theme-surface-soft)]",
         destructive:
           "rounded-[6px] border border-[color:var(--destructive)]/30 bg-[color:var(--destructive)]/10 text-[color:var(--destructive)] hover:bg-[color:var(--destructive)]/20",
         outline:
-          "rounded-[6px] border border-[#2e2e2e] bg-transparent text-[#fafafa] hover:bg-[#171717]",
+          "rounded-[6px] border border-theme bg-transparent text-theme hover:bg-[var(--theme-surface)]",
         secondary:
-          "rounded-full border border-[#2e2e2e] bg-[#0f0f0f] text-[#fafafa]/90 hover:text-[#fafafa] hover:bg-[#171717]",
+          "rounded-full border border-theme bg-[var(--theme-surface)] text-theme/90 hover:text-theme hover:bg-[var(--theme-surface-soft)]",
         ghost:
-          "rounded-[6px] border border-transparent bg-transparent text-[#fafafa] hover:bg-[#171717]",
-        link: "text-[#00c573] underline-offset-4 hover:underline",
+          "rounded-[6px] border border-transparent bg-transparent text-theme hover:bg-[var(--theme-surface)]",
+        link: "text-[var(--mc-accent)] underline-offset-4 hover:text-[var(--mc-accent-hi)] hover:underline",
       },
       size: {
         default: "h-9 px-4 py-2",

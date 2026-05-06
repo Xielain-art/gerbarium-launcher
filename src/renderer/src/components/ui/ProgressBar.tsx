@@ -19,17 +19,17 @@ export function ProgressBar({
 
   return (
     <div className={cn("space-y-3", className)}>
-      <div className="h-[2px] w-full bg-[#2e2e2e] overflow-hidden">
+      <div className="h-[2px] w-full overflow-hidden bg-[var(--theme-border)]">
         <div
-          className="h-full bg-[#3ecf8e] transition-all duration-500 ease-out"
+          className="h-full bg-[var(--mc-accent)] transition-all duration-500 ease-out"
           style={{ width: `${clampedProgress}%` }}
         />
       </div>
 
-      <div className="flex justify-between items-center font-mono text-[10px] uppercase tracking-wider text-[#898989]">
+      <div className="flex justify-between items-center font-mono text-[10px] uppercase tracking-wider text-theme-muted">
         <div className="flex gap-3">
           {status && <span>{status}</span>}
-          {speed && <span className="text-[#3ecf8e]">{speed}</span>}
+          {speed && <span className="text-[var(--mc-accent)]">{speed}</span>}
         </div>
         <div className="flex gap-3">
           {eta && <span>{eta}</span>}

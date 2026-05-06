@@ -14,7 +14,7 @@ export function ThemeToggleButton(): React.JSX.Element {
     <button
       type="button"
       onClick={handleToggle}
-      className="flex h-8 w-8 items-center justify-center rounded-md border border-[#2e2e2e] bg-[#0f0f0f] text-[#898989] transition-colors hover:border-[#363636] hover:bg-[#242424] hover:text-[#fafafa]"
+      className="flex h-8 w-8 items-center justify-center rounded-md border border-theme bg-[var(--theme-bg)] text-theme-muted transition-colors hover:border-[var(--theme-border-hi)] hover:bg-[var(--theme-surface-soft)] hover:text-theme"
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >

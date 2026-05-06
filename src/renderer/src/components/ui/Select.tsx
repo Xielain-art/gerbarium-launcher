@@ -25,7 +25,7 @@ export function Select({
       {label && (
         <label
           htmlFor={selectId}
-          className="text-[12px] font-medium uppercase tracking-wider text-[#898989]"
+          className="text-[12px] font-medium uppercase tracking-wider text-theme-muted"
         >
           {label}
         </label>
@@ -33,21 +33,21 @@ export function Select({
       <div className="relative">
         <select
           id={selectId}
-          className="flex h-10 w-full appearance-none rounded-md border border-[#2e2e2e] bg-[#0f0f0f] px-3 py-2 text-sm text-[#fafafa] transition-all focus:border-[#3ecf8e] focus:outline-none focus:ring-1 focus:ring-[#3ecf8e] disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-10 w-full appearance-none rounded-md border border-theme bg-[var(--theme-surface)] px-3 py-2 text-sm text-theme transition-all focus:border-[var(--mc-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--mc-accent)] disabled:cursor-not-allowed disabled:opacity-50"
           {...props}
         >
           {options.map((option) => (
             <option
               key={option.value}
               value={option.value}
-              className="bg-[#171717] text-[#fafafa]"
+              className="bg-[var(--theme-surface)] text-theme"
             >
               {option.label}
             </option>
           ))}
         </select>
         {/* Custom Arrow */}
-        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#898989]">
+        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted">
           <svg
             width="12"
             height="12"
@@ -65,4 +65,3 @@ export function Select({
     </div>
   );
 }
-

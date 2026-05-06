@@ -57,7 +57,6 @@ const defaultSettings: SettingsStateType = {
     gamePath: "",
     fullscreen: false,
     showLaunchConsole: true,
-    theme: "violet-base",
     themeMode: "light",
   },
   mods: {
@@ -153,4 +152,3 @@ export const useSettingsStore = create<SettingsState>()(
     },
   ),
 );
-

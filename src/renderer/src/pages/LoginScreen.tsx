@@ -7,14 +7,14 @@ export function LoginScreen(): React.JSX.Element {
 
   if (vm.showSessionSpinner) {
     return (
-      <div className="bg-[#0f0f0f] relative flex h-screen w-full items-center justify-center overflow-hidden">
+      <div className="bg-[var(--theme-bg)] relative flex h-screen w-full items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-pattern opacity-[0.1]" />
         <div className="absolute right-4 top-4 z-50">
           <WindowControls />
         </div>
         <div className="relative z-10 flex flex-col items-center gap-4">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#3ecf8e]/20 border-t-[#3ecf8e]" />
-          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#898989]">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[var(--mc-accent)]/20 border-t-[var(--mc-accent)]" />
+          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-theme-muted">
             {vm.t.COMMON.LOADING}
           </div>
         </div>
@@ -23,7 +23,7 @@ export function LoginScreen(): React.JSX.Element {
   }
 
   return (
-    <div className="bg-[#171717] relative flex h-screen w-full items-center justify-center overflow-hidden px-4 py-4">
+    <div className="bg-[var(--theme-bg)] relative flex h-screen w-full items-center justify-center overflow-hidden px-4 py-4">
       <div className="absolute inset-0 bg-pattern opacity-[0.15]" />
       <div className="auth-grid-overlay opacity-[0.03]" />
 

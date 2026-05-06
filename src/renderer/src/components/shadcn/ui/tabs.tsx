@@ -16,12 +16,12 @@ const tabsVariants = cva("", {
 });
 
 const tabsListVariants = cva(
-  "inline-flex items-center justify-center text-[#898989]",
+  "inline-flex items-center justify-center text-theme-muted",
   {
     variants: {
       variant: {
         default: "mb-4 flex gap-2",
-        pill: "rounded-full border border-[#2e2e2e] bg-[#171717] p-1",
+        pill: "rounded-full border border-theme bg-[var(--theme-surface)] p-1",
       },
     },
     defaultVariants: {
@@ -36,9 +36,9 @@ const tabsTriggerVariants = cva(
     variants: {
       variant: {
         default:
-          "rounded-[6px] border border-transparent text-[#898989] hover:bg-[#242424] hover:text-[#fafafa] data-[state=active]:border-[#2e2e2e] data-[state=active]:bg-[#171717] data-[state=active]:text-[#fafafa]",
+          "rounded-[6px] border border-transparent text-theme-muted hover:bg-[var(--theme-surface-soft)] hover:text-theme data-[state=active]:border-theme data-[state=active]:bg-[var(--theme-surface)] data-[state=active]:text-theme",
         pill:
-          "rounded-full text-[11px] uppercase tracking-[0.08em] text-[#898989] hover:text-[#fafafa] data-[state=active]:bg-[#3ecf8e] data-[state=active]:text-[#0f0f0f]",
+          "rounded-full text-[11px] uppercase tracking-[0.08em] text-theme-muted hover:text-theme data-[state=active]:bg-[var(--mc-accent)] data-[state=active]:text-[var(--theme-bg)]",
       },
     },
     defaultVariants: {

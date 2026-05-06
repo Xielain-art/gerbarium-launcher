@@ -37,7 +37,7 @@ export function Avatar({
   const imageUrl = getAvatarUrl();
 
   return (
-    <div className={`${sizeMap[size]} relative overflow-hidden rounded-lg flex items-center justify-center bg-[#1a1a1a] ${className}`}>
+      <div className={`${sizeMap[size]} relative overflow-hidden rounded-lg flex items-center justify-center bg-[var(--theme-surface)] ${className}`}>
       {showBody ? (
         // Full body render
         <img

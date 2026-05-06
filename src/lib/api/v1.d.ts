@@ -311,6 +311,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/test/test-user-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a test user without auth, only if the user has test role. */
+        delete: operations["TestUsersController_deleteTestUser"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/servers": {
         parameters: {
             query?: never;
@@ -620,23 +637,6 @@ export interface paths {
         put: operations["AdminController_assignRoles"];
         post?: never;
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/admin/test-users/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete a test user without email confirmation. Admin only. */
-        delete: operations["AdminController_deleteTestUser"];
         options?: never;
         head?: never;
         patch?: never;
@@ -958,6 +958,10 @@ export interface components {
              * @example 123456
              */
             emailVerificationCode: string;
+        };
+        TestUserDeleteDto: {
+            /** @example 06b53cf3-f7f1-44e5-badf-50e01d8e7e83 */
+            userId: string;
         };
         GameServerResponseDto: {
             /** @example b3ab9f57-d124-463d-b1a7-6cbdeaf258a6 */
@@ -1689,6 +1693,29 @@ export interface operations {
             };
         };
     };
+    TestUsersController_deleteTestUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TestUserDeleteDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogoutResponseDto"];
+                };
+            };
+        };
+    };
     ServersController_list: {
         parameters: {
             query?: {
@@ -2275,30 +2302,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserResponseDto"];
-                };
-            };
-        };
-    };
-    AdminController_deleteTestUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example true */
-                        success?: boolean;
-                    };
                 };
             };
         };

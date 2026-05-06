@@ -51,7 +51,7 @@ export function ChangelogPreviewModal({
       <div className="space-y-4 p-5">
         <div className="flex items-center gap-3">
           {changelog.mandatory && (
-            <span className="rounded bg-[color:var(--destructive)]/20 px-2 py-1 font-minecraft text-[10px] uppercase text-[color:var(--destructive)]">
+            <span className="rounded bg-[color:var(--destructive)]/20 px-2 py-1 font-mono text-[10px] uppercase text-[color:var(--destructive)]">
               Mandatory
             </span>
           )}

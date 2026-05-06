@@ -145,13 +145,13 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
   return (
     <ShadcnCard className="p-6">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="font-minecraft text-xl font-bold">
+        <h2 className="font-mono text-xl font-bold">
           {t.ADMIN.USERS_TITLE}
         </h2>
         <div className="flex items-center gap-3">
           {isApplyingUserFilters && (
-            <div className="font-minecraft text-[10px] uppercase text-theme-muted">
-              Фильтрация...
+            <div className="font-mono text-[10px] uppercase text-theme-muted">
+              Applying filters...
             </div>
           )}
           <ShadcnButton variant="default" onClick={onRefresh} disabled={isLoading}>
@@ -162,13 +162,13 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
 
       <div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-3">
         <ShadcnInput
-          label="Поиск"
-          placeholder="Логин или Email..."
+          label="Search"
+          placeholder="Search by username or email..."
           value={userSearchInput}
           onChange={(e) => setUserSearchInput(e.target.value)}
         />
         <ShadcnSelect
-          label="Роль"
+          label="Role"
           value={userRoleFilter}
           onChange={(e) => {
             const val = typeof e === "string" ? e : e.target.value;
@@ -176,12 +176,12 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
             onSetUserFilters({ role: val === "all" ? undefined : val });
           }}
           options={[
-            { label: "Все роли", value: "all" },
+            { label: "All roles", value: "all" },
             ...availableRoles.map((r) => ({ label: r.name, value: r.id })),
           ]}
         />
         <ShadcnSelect
-          label="Статус"
+          label="Status"
           value={userBanFilter}
           onChange={(e) => {
             const val = (
@@ -193,24 +193,24 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
             });
           }}
           options={[
-            { label: "Все", value: "all" },
-            { label: "Забаненные", value: "banned" },
-            { label: "Активные", value: "active" },
+            { label: "All", value: "all" },
+            { label: "Banned", value: "banned" },
+            { label: "Active", value: "active" },
           ]}
         />
       </div>
 
       <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
         <ShadcnInput
-          label="Имя роли"
+          label="Role name"
           placeholder="role-name"
           value={editingRole ? editingRole.name : newRoleName}
           onChange={(e) => !editingRole && setNewRoleName(e.target.value)}
           disabled={!!editingRole}
         />
         <ShadcnInput
-          label="Описание"
-          placeholder="Описание (опционально)"
+          label="Description"
+          placeholder="Description (optional)"
           value={newRoleDescription}
           onChange={(e) => setNewRoleDescription(e.target.value)}
         />
@@ -223,7 +223,7 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
                 disabled={isAdminApiBusy}
                 className="flex-1"
               >
-                Сохранить
+                Update
               </ShadcnButton>
               <ShadcnButton
                 variant="secondary"
@@ -234,7 +234,7 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
                 }}
                 disabled={isAdminApiBusy}
               >
-                Отмена
+                Cancel
               </ShadcnButton>
             </>
           ) : (
@@ -244,7 +244,7 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
               disabled={isAdminApiBusy}
               className="w-full"
             >
-              Создать роль
+              Create role
             </ShadcnButton>
           )}
         </div>
@@ -252,8 +252,8 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
       
       {/* Roles List */}
       <div className="mb-8 rounded-lg border border-white/5 bg-black/10 p-4">
-        <h3 className="mb-4 font-minecraft text-sm font-bold uppercase text-theme-muted">
-          Существующие роли
+        <h3 className="mb-4 font-mono text-sm font-bold uppercase text-theme-muted">
+          Available roles
         </h3>
         <div className="flex flex-wrap gap-2">
           {availableRoles.map((role) => (
@@ -262,7 +262,7 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
               className="flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1.5"
             >
               <div className="flex flex-col">
-                <span className="font-minecraft text-sm font-bold text-theme">
+                <span className="font-mono text-sm font-bold text-theme">
                   {role.name}
                 </span>
                 {role.description && (
@@ -303,13 +303,13 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
       </div>
 
       {roleFormError && (
-        <div className="mb-4 font-minecraft text-xs text-red-500">
+        <div className="mb-4 font-mono text-xs text-red-500">
           {roleFormError}
         </div>
       )}
 
       {error && (
-        <div className="mb-4 font-minecraft text-sm text-red-500">{error}</div>
+        <div className="mb-4 font-mono text-sm text-red-500">{error}</div>
       )}
 
       <div className="grid gap-3">
@@ -319,10 +319,10 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
             className="flex items-center justify-between rounded border border-white/5 bg-black/20 p-4"
           >
             <div>
-              <div className="font-minecraft font-bold text-theme">
+              <div className="font-mono font-bold text-theme">
                 {user.username}
               </div>
-              <div className="font-minecraft text-xs text-theme-muted">
+              <div className="font-mono text-xs text-theme-muted">
                 {user.email} • {user.id.slice(0, 8)}
               </div>
             </div>
@@ -360,14 +360,14 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
       </div>
 
       {users.length === 0 && !isLoading && (
-        <div className="py-8 text-center font-minecraft text-theme-muted">
+        <div className="py-8 text-center font-mono text-theme-muted">
           {t.ADMIN.NO_USERS}
         </div>
       )}
 
       <div className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 sm:flex-row">
-        <div className="font-minecraft text-xs uppercase text-theme-muted">
-          Страница {currentPage} из {totalPages || 1}
+        <div className="font-mono text-xs uppercase text-theme-muted">
+          Page {currentPage} of {totalPages || 1}
         </div>
         
         <Pagination className="mx-0 w-auto">
@@ -392,13 +392,14 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
       </div>
 
       {isLoadingMore && (
-        <div className="mt-2 text-center font-minecraft text-[10px] uppercase text-theme-muted">
-          Обновление...
+        <div className="mt-2 text-center font-mono text-[10px] uppercase text-theme-muted">
+          Applying filters...
         </div>
       )}
     </ShadcnCard>
   );
 }
+
 
 
 

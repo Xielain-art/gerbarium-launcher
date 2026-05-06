@@ -24,9 +24,9 @@ export function Checkbox({
           className="peer absolute h-full w-full cursor-pointer opacity-0"
           {...props}
         />
-        <div className="flex h-5 w-5 items-center justify-center rounded border border-[#363636] bg-[#0f0f0f] transition-all peer-checked:border-[#3ecf8e] peer-checked:bg-[#3ecf8e] peer-focus-visible:ring-2 peer-focus-visible:ring-[#3ecf8e] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#171717] group-hover:border-[#4d4d4d] peer-checked:group-hover:border-[#50e3a1]">
+        <div className="flex h-5 w-5 items-center justify-center rounded border border-theme bg-[var(--theme-bg)] transition-all peer-checked:border-[var(--mc-accent)] peer-checked:bg-[var(--mc-accent)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--mc-accent)] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[var(--theme-surface)] group-hover:border-[var(--theme-border-hi)] peer-checked:group-hover:border-[var(--mc-accent-hi)]">
           <svg
-            className="h-3.5 w-3.5 text-[#0f0f0f] opacity-0 transition-opacity peer-checked:opacity-100"
+            className="h-3.5 w-3.5 text-[var(--theme-bg)] opacity-0 transition-opacity peer-checked:opacity-100"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -36,10 +36,9 @@ export function Checkbox({
           </svg>
         </div>
       </div>
-      <span className="text-sm font-medium text-[#fafafa] transition-colors group-hover:text-white">
+      <span className="text-sm font-medium text-theme transition-colors group-hover:text-theme">
         {label}
       </span>
     </label>
   );
 }
-

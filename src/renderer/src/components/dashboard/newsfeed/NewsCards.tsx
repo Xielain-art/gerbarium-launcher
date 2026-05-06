@@ -52,7 +52,7 @@ export function NewsCards({
         return (
           <article
             key={item.id}
-            className="group flex flex-col overflow-hidden rounded-xl border border-[#2e2e2e] bg-[#171717] transition-all hover:border-[#363636]"
+            className="group flex flex-col overflow-hidden rounded-xl border border-theme bg-[var(--theme-surface)] transition-all hover:border-[var(--theme-border-hi)]"
           >
             <div className="relative h-44 w-full overflow-hidden">
               <img
@@ -60,7 +60,7 @@ export function NewsCards({
                 alt={item.title}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#171717]/80 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
             </div>
             <div className="flex flex-1 flex-col p-5">
               <div className="mb-3 flex items-center justify-between gap-3">
@@ -69,7 +69,7 @@ export function NewsCards({
                     item.tags!.map((tag) => (
                       <span
                         key={`${item.id}-${tag}`}
-                        className="rounded border border-[#2e2e2e] bg-[#0f0f0f] px-2 py-0.5 font-mono text-[9px] font-medium uppercase tracking-wider text-[#898989]"
+                        className="rounded border border-theme bg-[var(--theme-bg)] px-2 py-0.5 font-mono text-[9px] font-medium uppercase tracking-wider text-theme-muted"
                       >
                         {tag}
                       </span>
@@ -87,24 +87,24 @@ export function NewsCards({
                     </span>
                   )}
                 </div>
-                <span className="font-mono text-[10px] font-medium text-[#898989]">
+                <span className="font-mono text-[10px] font-medium text-theme-muted">
                   {new Date(item.date).toLocaleDateString("ru-RU", {
                     day: "numeric",
                     month: "short",
                   })}
                 </span>
               </div>
-              <h3 className="mb-2 line-clamp-2 font-sans text-base font-medium text-[#fafafa]">
+              <h3 className="mb-2 line-clamp-2 font-sans text-base font-medium text-theme">
                 {item.title}
               </h3>
-              <p className="mb-4 line-clamp-3 flex-1 font-sans text-xs leading-relaxed text-[#898989]">
+              <p className="mb-4 line-clamp-3 flex-1 font-sans text-xs leading-relaxed text-theme-muted">
                 {preview}
               </p>
               <div className="mt-auto">
                 <button
                   type="button"
                   onClick={() => onSelectNews(item)}
-                  className="inline-flex items-center gap-2 font-sans text-xs font-medium text-[#3ecf8e] transition-all hover:gap-3 hover:text-[#00c573]"
+                  className="inline-flex items-center gap-2 font-sans text-xs font-medium text-[var(--mc-accent)] transition-all hover:gap-3 hover:text-[var(--mc-accent-hi)]"
                 >
                   {t.DASHBOARD.READ_MORE}
                   <span className="text-lg leading-none">→</span>

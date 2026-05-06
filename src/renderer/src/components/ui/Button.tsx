@@ -22,11 +22,11 @@ export function Button({
   ...props
 }: ButtonProps): React.JSX.Element {
   const variantStyles = {
-    primary: "bg-[#3ecf8e] text-[#0f0f0f] hover:bg-[#50e3a1] rounded-full border border-transparent shadow-[0_1px_2px_rgba(0,0,0,0.1)]",
-    secondary: "bg-[#171717] text-[#fafafa] hover:bg-[#1c1c1c] border border-[#2e2e2e] rounded-md",
-    outline: "bg-transparent text-[#fafafa] hover:bg-[#171717] border border-[#2e2e2e] rounded-md",
-    danger: "bg-[#451212] text-[#ff8080] hover:bg-[#5a1818] border border-[#802020] rounded-md",
-    ghost: "bg-transparent text-[#898989] hover:text-[#fafafa] hover:bg-[#171717] rounded-md border border-transparent",
+    primary: "bg-[var(--mc-accent)] text-[var(--theme-bg)] hover:bg-[var(--mc-accent-hi)] rounded-full border border-transparent shadow-[0_1px_2px_rgba(0,0,0,0.1)]",
+    secondary: "bg-[var(--theme-surface)] text-theme hover:bg-[var(--theme-surface-soft)] border border-theme rounded-md",
+    outline: "bg-transparent text-theme hover:bg-[var(--theme-surface)] border border-theme rounded-md",
+    danger: "rounded-md border border-[color:var(--destructive)]/35 bg-[color:var(--destructive)]/15 text-[color:var(--destructive)] hover:bg-[color:var(--destructive)]/22",
+    ghost: "bg-transparent text-theme-muted hover:text-theme hover:bg-[var(--theme-surface)] rounded-md border border-transparent",
     minecraft: "mc-btn", // Legacy fallback
   };
 
@@ -77,4 +77,3 @@ export function Button({
     </button>
   );
 }
-

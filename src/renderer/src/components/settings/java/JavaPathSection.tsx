@@ -49,8 +49,8 @@ export function JavaPathSection(p: Props): React.JSX.Element {
   return (
     <Card className="p-6">
       <div className="mb-6 flex items-center gap-2">
-        <Terminal size={16} className="text-[#4d4d4d]" />
-        <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
+        <Terminal size={16} className="text-theme-muted" />
+        <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-theme-muted">
           {p.t.SETTINGS.JAVA.PATH_LABEL}
         </h3>
       </div>
@@ -69,7 +69,7 @@ export function JavaPathSection(p: Props): React.JSX.Element {
             onClick={() => void p.onSelectJava()}
             className="flex items-center gap-2 whitespace-nowrap"
           >
-            <FolderOpen size={16} className="text-[#898989]" />
+            <FolderOpen size={16} className="text-theme-muted" />
             {p.t.SETTINGS.JAVA.BROWSE_BUTTON}
           </Button>
           <Button
@@ -77,7 +77,7 @@ export function JavaPathSection(p: Props): React.JSX.Element {
             onClick={() => void p.onFindJava()}
             className="flex items-center gap-2 whitespace-nowrap"
           >
-            <Search size={16} className="text-[#898989]" />
+            <Search size={16} className="text-theme-muted" />
             Auto
           </Button>
         </div>
@@ -85,24 +85,24 @@ export function JavaPathSection(p: Props): React.JSX.Element {
         {showStatus && (
           <div className={cn(
             "flex items-center gap-2 rounded-md px-3 py-2 text-[12px] font-medium transition-all",
-            p.javaError ? "bg-[#451212]/50 text-[#ff8080]" : "bg-[#111111] text-[#898989]"
+            p.javaError ? "bg-[color:var(--destructive)]/15 text-[color:var(--destructive)]" : "bg-[var(--theme-surface-soft)] text-theme-muted"
           )}>
-            {p.javaError ? <AlertCircle size={14} /> : <Terminal size={14} className="text-[#3ecf8e]" />}
+            {p.javaError ? <AlertCircle size={14} /> : <Terminal size={14} className="text-[var(--mc-accent)]" />}
             <span className={cn(!p.javaError && "font-mono")}>{getStatusText()}</span>
           </div>
         )}
 
         {p.isDownloadingJava && (
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#111111] border border-[#2e2e2e]">
+          <div className="h-1.5 w-full overflow-hidden rounded-full border border-theme bg-[var(--theme-surface-soft)]">
             <div
-              className="h-full bg-[#3ecf8e] shadow-[0_0_8px_rgba(62,207,142,0.4)] transition-all duration-300"
+              className="h-full bg-[var(--mc-accent)] shadow-[0_0_8px_rgba(62,207,142,0.4)] transition-all duration-300"
               style={{ width: `${p.javaProgress}%` }}
             />
           </div>
         )}
 
         {!p.javaLoading && !p.isDownloadingJava && (
-          <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-[#1a1a1a]">
+          <div className="flex flex-wrap items-center gap-3 border-t border-theme pt-4">
             <div className="relative">
               <select
                 value={p.downloadJavaVersion}
@@ -111,7 +111,7 @@ export function JavaPathSection(p: Props): React.JSX.Element {
                     Number(e.target.value) as 8 | 17 | 21,
                   )
                 }
-                className="flex h-10 w-32 appearance-none rounded-md border border-[#2e2e2e] bg-[#0f0f0f] px-3 py-2 font-mono text-sm text-[#fafafa] transition-all focus:border-[#3ecf8e] focus:outline-none focus:ring-1 focus:ring-[#3ecf8e]"
+                className="flex h-10 w-32 appearance-none rounded-md border border-theme bg-[var(--theme-bg)] px-3 py-2 font-mono text-sm text-theme transition-all focus:border-[var(--mc-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--mc-accent)]"
               >
                 {p.javaVersions.map((v) => (
                   <option key={v} value={v}>
@@ -119,7 +119,7 @@ export function JavaPathSection(p: Props): React.JSX.Element {
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#4d4d4d]">
+              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M6 9l6 6 6-6"/></svg>
               </div>
             </div>
@@ -140,4 +140,3 @@ export function JavaPathSection(p: Props): React.JSX.Element {
     </Card>
   );
 }
-

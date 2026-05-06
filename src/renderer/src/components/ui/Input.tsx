@@ -40,7 +40,7 @@ export function Input({
       {label && (
         <label
           htmlFor={inputId}
-          className="text-[12px] font-medium uppercase tracking-wider text-[#898989]"
+          className="text-[12px] font-medium uppercase tracking-wider text-theme-muted"
         >
           {label}
         </label>
@@ -50,7 +50,7 @@ export function Input({
           id={inputId}
           type={effectiveType}
           className={cn(
-            "flex h-10 w-full rounded-md border border-[#2e2e2e] bg-[#0f0f0f] px-3 py-2 text-sm text-[#fafafa] transition-all placeholder:text-[#4d4d4d] focus:border-[#3ecf8e] focus:outline-none focus:ring-1 focus:ring-[#3ecf8e] disabled:cursor-not-allowed disabled:opacity-50",
+            "flex h-10 w-full rounded-md border border-theme bg-[var(--theme-surface)] px-3 py-2 text-sm text-theme transition-all placeholder:text-theme-muted focus:border-[var(--mc-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--mc-accent)] disabled:cursor-not-allowed disabled:opacity-50",
             isPassword && "pr-10",
           )}
           {...props}
@@ -61,7 +61,7 @@ export function Input({
           <button
             type="button"
             onClick={togglePassword}
-            className="absolute right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center text-[#898989] transition-colors hover:text-[#fafafa] focus:outline-none"
+            className="absolute right-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center text-theme-muted transition-colors hover:text-theme focus:outline-none"
             title={showPassword ? t.LOGIN.PASSWORD_HIDE : t.LOGIN.PASSWORD_SHOW}
           >
             {showPassword ? (
@@ -103,11 +103,10 @@ export function Input({
         )}
       </div>
       {error && (
-        <span className="mt-1 text-[11px] text-[#ff8080]">
+        <span className="mt-1 text-[11px] text-[color:var(--destructive)]">
           {error}
         </span>
       )}
     </div>
   );
 }
-

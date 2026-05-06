@@ -11,9 +11,9 @@ export function Card({
     <div
       onClick={onClick}
       className={cn(
-        "relative overflow-hidden rounded-lg border border-[#2e2e2e] bg-[#111111] transition-all duration-200",
-        active && "border-[#3ecf8e] ring-1 ring-[#3ecf8e]",
-        onClick && "cursor-pointer hover:border-[#363636] hover:bg-[#141414] active:scale-[0.99]",
+        "relative overflow-hidden rounded-lg border border-theme bg-[var(--theme-surface)] transition-all duration-200",
+        active && "border-[var(--mc-accent)] ring-1 ring-[var(--mc-accent)]",
+        onClick && "cursor-pointer hover:border-[var(--theme-border-hi)] hover:bg-[var(--theme-surface-soft)] active:scale-[0.99]",
         className,
       )}
     >
@@ -21,4 +21,3 @@ export function Card({
     </div>
   );
 }
-

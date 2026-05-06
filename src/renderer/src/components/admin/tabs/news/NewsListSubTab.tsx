@@ -70,7 +70,7 @@ export function NewsListSubTab(props: AdminNewsTabProps) {
             />
           </div>
           {isLoadingNews && (
-            <div className="font-minecraft text-xs text-theme-muted">
+            <div className="font-mono text-xs text-theme-muted">
               Загрузка новостей...
             </div>
           )}
@@ -81,10 +81,10 @@ export function NewsListSubTab(props: AdminNewsTabProps) {
                 className="flex items-start justify-between rounded border border-white/10 bg-black/20 p-3"
               >
                 <div className="flex-1">
-                  <div className="mb-1 font-minecraft text-sm font-bold">
+                  <div className="mb-1 font-mono text-sm font-bold">
                     {item.title}
                   </div>
-                  <div className="font-minecraft text-[10px] text-theme-muted">
+                  <div className="font-mono text-[10px] text-theme-muted">
                     {item.slug}
                   </div>
                   {item.tags && item.tags.length > 0 && (
@@ -92,7 +92,7 @@ export function NewsListSubTab(props: AdminNewsTabProps) {
                       {item.tags.map((tag: { id: string; name: string }) => (
                         <span
                           key={tag.id}
-                          className="rounded bg-theme/20 px-1 py-0.5 font-minecraft text-[9px]"
+                          className="rounded bg-theme/20 px-1 py-0.5 font-mono text-[9px]"
                         >
                           {tag.name}
                         </span>
@@ -121,7 +121,7 @@ export function NewsListSubTab(props: AdminNewsTabProps) {
             ))}
             <div ref={newsEndRef} className="h-4" />
             {isLoadingMoreNews && (
-              <div className="font-minecraft text-xs text-theme-muted">
+              <div className="font-mono text-xs text-theme-muted">
                 Загрузка...
               </div>
             )}

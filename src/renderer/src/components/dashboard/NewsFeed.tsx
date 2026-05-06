@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { NewsItem } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
 import { NewsCards } from "./newsfeed/NewsCards";

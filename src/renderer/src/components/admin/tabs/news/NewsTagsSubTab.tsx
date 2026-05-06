@@ -24,12 +24,12 @@ export function NewsTagsSubTab(props: AdminNewsTabProps) {
             </ShadcnButton>
           </div>
           {newsTagFormError && (
-            <div className="font-minecraft text-xs text-red-500">
+            <div className="font-mono text-xs text-red-500">
               {newsTagFormError}
             </div>
           )}
           {isLoadingNewsTags && (
-            <div className="font-minecraft text-xs text-theme-muted">
+            <div className="font-mono text-xs text-theme-muted">
               Загрузка тегов...
             </div>
           )}

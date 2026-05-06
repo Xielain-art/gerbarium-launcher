@@ -13,7 +13,7 @@
     "PLAYER_DEFAULT": "Игрок", "LOGOUT_TOOLTIP": "Выйти", "SERVER_ONLINE": "ОНЛАЙН", "SERVER_OFFLINE": "ОФФЛАЙН", "VERSIONS_TITLE": "Версии", "VERSION_INSTALLED": "Установлено", "VERSION_NOT_INSTALLED": "Не установлено",
     "SETTINGS_BUTTON": "Настройки", "NEWS_TITLE": "Новости проекта", "NEWS_FILTER_SORT_LABEL": "Сортировка", "NEWS_FILTER_SORT_NEWEST": "Сначала новые", "NEWS_FILTER_SORT_OLDEST": "Сначала старые", "NEWS_FILTER_TAG_LABEL": "Тег", "NEWS_FILTER_TAG_ALL": "Все теги",
     "PLAY_BUTTON": "ИГРАТЬ", "SELECTED_VERSION_LABEL": "Выбранная версия", "VERSION_NOT_SELECTED": "Не выбрана", "READY_TO_PLAY": "Готово к запуску", "NEEDS_INSTALLATION": "Требуется установка", "VERSION_DISPLAY_LABEL": "Версия:",
-    "PLAY_ICON": "▶", "CANCEL_ICON": "✖", "SELECT_VERSION_ALERT": "Выберите версию для запуска!", "PLAYER_ID_LABEL": "ID:", "PLAYER_ID_UNKNOWN": "???", "PLAY_ARROW_ICON": "▶", "TIME_REMAINING_LABEL": "Осталось:",
+    "PLAY_ICON": "▶", "CANCEL_ICON": "✖", "SELECT_VERSION_ALERT": "Выберите версию для запуска!", "PLAYER_ID_LABEL": "ID:", "PLAYER_ID_UNKNOWN": "—", "PLAY_ARROW_ICON": "▶", "TIME_REMAINING_LABEL": "Осталось:",
     "ADMIN_PANEL": "Админ-панель", "READ_MORE": "Подробнее", "LOADING_MORE_NEWS": "Загрузка новостей...", "NO_MORE_NEWS": "Больше новостей нет.", "FAILED_TO_LOAD_NEWS": "Не удалось загрузить новости", "TRY_AGAIN": "Повторить", "CLOSE": "Закрыть", "DOWNLOAD_RELEASE": "Скачать релиз", "TAB_NEWS": "Новости", "TAB_CHANGELOG": "Changelog", "HIDE_CONSOLE": "Скрыть консоль", "SHOW_CONSOLE": "Показать консоль"
   },
   "SETTINGS": {

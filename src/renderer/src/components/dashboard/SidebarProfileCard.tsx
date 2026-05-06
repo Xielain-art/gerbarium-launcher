@@ -1,4 +1,4 @@
-﻿import { Avatar } from "../game/Avatar";
+import { Avatar } from "../game/Avatar";
 import { Badge as ShadcnBadge } from "@/components/shadcn/ui";
 import { Settings, LogOut } from "lucide-react";
 import type { AuthUser } from "../../types";
@@ -34,20 +34,20 @@ export function SidebarProfileCard({
   const roleLabels = getRoleLabels(user);
 
   return (
-    <div className="rounded-xl border border-[#2e2e2e] bg-[#171717] p-4 transition-all hover:border-[#363636]">
+    <div className="rounded-xl border border-theme bg-[var(--theme-surface)] p-4 transition-all hover:border-[var(--theme-border-hi)]">
       <div className="flex items-center gap-4">
         <div className="relative shrink-0">
           <Avatar username={user?.username} size="lg" />
-          <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-[#171717] bg-[#3ecf8e]" />
+          <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-[var(--theme-surface)] bg-[var(--mc-accent)]" />
         </div>
         <div className="min-w-0 flex-1">
           <span
-            className="block truncate font-sans text-sm font-medium text-[#fafafa]"
+            className="block truncate font-sans text-sm font-medium text-theme"
             title={user?.username || ""}
           >
             {user?.username || t.DASHBOARD.PLAYER_DEFAULT}
           </span>
-          <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-[#898989]">
+          <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-theme-muted">
             {t.DASHBOARD.PLAYER_ID_LABEL}{" "}
             {user?.id?.slice(0, 8) || t.DASHBOARD.PLAYER_ID_UNKNOWN}
           </div>
@@ -56,7 +56,7 @@ export function SidebarProfileCard({
               <ShadcnBadge
                 key={role}
                 variant="outline"
-                className="border-[#2e2e2e] bg-[#2e2e2e]/30 px-2 py-0 font-sans text-[10px] font-medium text-[#3ecf8e]"
+                className="border-theme bg-[var(--theme-surface-soft)] px-2 py-0 font-sans text-[10px] font-medium text-[var(--mc-accent)]"
               >
                 {role}
               </ShadcnBadge>
@@ -65,10 +65,10 @@ export function SidebarProfileCard({
         </div>
       </div>
       
-      <div className="mt-4 flex gap-2 border-t border-[#2e2e2e] pt-3">
+      <div className="mt-4 flex gap-2 border-t border-theme pt-3">
         <button
           onClick={onOpenSettings}
-          className="flex h-8 flex-1 items-center justify-center gap-2 rounded-md border border-[#2e2e2e] bg-transparent font-sans text-xs font-medium text-[#898989] transition-colors hover:border-[#363636] hover:bg-[#242424] hover:text-[#fafafa]"
+          className="flex h-8 flex-1 items-center justify-center gap-2 rounded-md border border-theme bg-transparent font-sans text-xs font-medium text-theme-muted transition-colors hover:border-[var(--theme-border-hi)] hover:bg-[var(--theme-surface-soft)] hover:text-theme"
           title={t.DASHBOARD.SETTINGS_BUTTON}
         >
           <Settings className="h-3.5 w-3.5" />
@@ -76,7 +76,7 @@ export function SidebarProfileCard({
         </button>
         <button
           onClick={onLogout}
-          className="flex h-8 w-10 items-center justify-center rounded-md border border-[#2e2e2e] bg-transparent text-[#898989] transition-colors hover:border-[#destructive]/50 hover:bg-[color:var(--destructive)]/10 hover:text-[color:var(--destructive)]"
+          className="flex h-8 w-10 items-center justify-center rounded-md border border-theme bg-transparent text-theme-muted transition-colors hover:border-[color:var(--destructive)]/50 hover:bg-[color:var(--destructive)]/10 hover:text-[color:var(--destructive)]"
           title={t.DASHBOARD.LOGOUT_TOOLTIP}
         >
           <LogOut className="h-3.5 w-3.5" />

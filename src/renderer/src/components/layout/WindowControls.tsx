@@ -6,11 +6,11 @@ export function WindowControls(): React.JSX.Element {
   const { t } = useTranslation();
 
   return (
-    <div className="flex -webkit-app-region-no-drag items-center gap-0 overflow-hidden rounded-md border border-[#2e2e2e] bg-[#0f0f0f]">
+    <div className="flex -webkit-app-region-no-drag items-center gap-0 overflow-hidden rounded-md border border-theme bg-[var(--theme-surface)]">
       {/* Minimize Button */}
       <button
         onClick={minimize}
-        className="flex h-8 w-10 items-center justify-center text-[#898989] transition-colors hover:bg-[#2e2e2e] hover:text-[#fafafa]"
+        className="flex h-8 w-10 items-center justify-center text-theme-muted transition-colors hover:bg-[var(--theme-surface-soft)] hover:text-theme"
         title={t.WINDOW_CONTROLS.MINIMIZE}
       >
         <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
@@ -21,7 +21,7 @@ export function WindowControls(): React.JSX.Element {
       {/* Maximize/Restore Button */}
       <button
         onClick={maximize}
-        className="flex h-8 w-10 items-center justify-center text-[#898989] transition-colors hover:bg-[#2e2e2e] hover:text-[#fafafa]"
+        className="flex h-8 w-10 items-center justify-center text-theme-muted transition-colors hover:bg-[var(--theme-surface-soft)] hover:text-theme"
         title={isMaximized ? t.WINDOW_CONTROLS.RESTORE : t.WINDOW_CONTROLS.MAXIMIZE}
       >
         {isMaximized ? (
@@ -38,7 +38,7 @@ export function WindowControls(): React.JSX.Element {
       {/* Close Button */}
       <button
         onClick={close}
-        className="flex h-8 w-10 items-center justify-center text-[#898989] transition-colors hover:bg-[#e11d48]/20 hover:text-[#fb7185]"
+        className="flex h-8 w-10 items-center justify-center text-theme-muted transition-colors hover:bg-[color:var(--destructive)]/15 hover:text-[color:var(--destructive)]"
         title={t.WINDOW_CONTROLS.CLOSE}
       >
         <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
@@ -48,4 +48,3 @@ export function WindowControls(): React.JSX.Element {
     </div>
   );
 }
-

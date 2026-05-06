@@ -16,23 +16,23 @@ export function SidebarServerStatus({
   }
 
   return (
-    <div className="mx-4 my-2 flex items-center justify-between rounded-lg border border-[#2e2e2e] bg-[#171717] px-4 py-2.5">
+    <div className="mx-4 my-2 flex items-center justify-between rounded-lg border border-theme bg-[var(--theme-surface)] px-4 py-2.5">
       <div className="flex items-center gap-2.5">
         <div className="relative flex h-2.5 w-2.5 items-center justify-center">
           <div
             className={cn(
               "absolute h-full w-full rounded-full opacity-40",
-              serverStatus.online ? "animate-ping bg-[#3ecf8e]" : "bg-[color:var(--destructive)]",
+              serverStatus.online ? "animate-ping bg-[var(--mc-accent)]" : "bg-[color:var(--destructive)]",
             )}
           />
           <div
             className={cn(
               "relative h-2 w-2 rounded-full",
-              serverStatus.online ? "bg-[#3ecf8e]" : "bg-[color:var(--destructive)]",
+              serverStatus.online ? "bg-[var(--mc-accent)]" : "bg-[color:var(--destructive)]",
             )}
           />
         </div>
-        <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#fafafa]">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-theme">
           {serverStatus.online
             ? t.DASHBOARD.SERVER_ONLINE
             : t.DASHBOARD.SERVER_OFFLINE}
@@ -40,11 +40,11 @@ export function SidebarServerStatus({
       </div>
       {serverStatus.online && (
         <div className="flex items-baseline gap-1 font-mono text-[11px]">
-          <span className="font-bold text-[#3ecf8e]">
+          <span className="font-bold text-[var(--mc-accent)]">
             {serverStatus.players.online}
           </span>
-          <span className="text-[10px] text-[#898989]">/</span>
-          <span className="text-[#898989]">
+          <span className="text-[10px] text-theme-muted">/</span>
+          <span className="text-theme-muted">
             {serverStatus.players.max}
           </span>
         </div>
@@ -52,4 +52,3 @@ export function SidebarServerStatus({
     </div>
   );
 }
-

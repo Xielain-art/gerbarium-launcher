@@ -14,7 +14,7 @@ export function DashboardScreen(): React.JSX.Element {
   const vm = useDashboardScreen();
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#0f0f0f]">
+    <div className="flex h-screen w-full overflow-hidden bg-[var(--theme-sidebar)]">
       <DashboardSidebar
         t={vm.t}
         user={vm.user}
@@ -27,10 +27,10 @@ export function DashboardScreen(): React.JSX.Element {
         onOpenAdminPanel={vm.onOpenAdminPanel}
       />
 
-      <main className="relative z-10 flex flex-1 flex-col overflow-hidden bg-[#171717]">
+      <main className="relative z-10 flex flex-1 flex-col overflow-hidden bg-[var(--theme-bg)]">
         <div className="absolute right-4 top-4 z-50 flex items-center gap-4">
           {vm.appVersion && (
-            <div className="font-mono text-[10px] uppercase tracking-wider text-[#898989]">
+            <div className="font-mono text-[10px] uppercase tracking-wider text-theme-muted">
               {vm.t.DASHBOARD.VERSION_DISPLAY_LABEL} {vm.appVersion}
             </div>
           )}
@@ -47,8 +47,8 @@ export function DashboardScreen(): React.JSX.Element {
                 className={cn(
                   "rounded-[9999px] px-4 py-1.5 font-sans text-xs font-medium transition-all",
                   vm.contentTab === "news"
-                    ? "bg-[#2e2e2e] text-[#fafafa]"
-                    : "text-[#898989] hover:text-[#fafafa]",
+                    ? "bg-[var(--theme-surface)] text-theme"
+                    : "text-theme-muted hover:text-theme",
                 )}
               >
                 {vm.t.DASHBOARD.TAB_NEWS}
@@ -59,8 +59,8 @@ export function DashboardScreen(): React.JSX.Element {
                 className={cn(
                   "rounded-[9999px] px-4 py-1.5 font-sans text-xs font-medium transition-all",
                   vm.contentTab === "changelog"
-                    ? "bg-[#2e2e2e] text-[#fafafa]"
-                    : "text-[#898989] hover:text-[#fafafa]",
+                    ? "bg-[var(--theme-surface)] text-theme"
+                    : "text-theme-muted hover:text-theme",
                 )}
               >
                 {vm.t.DASHBOARD.TAB_CHANGELOG}
@@ -135,4 +135,3 @@ export function DashboardScreen(): React.JSX.Element {
     </div>
   );
 }
-

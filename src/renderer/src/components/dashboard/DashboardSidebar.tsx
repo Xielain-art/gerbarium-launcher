@@ -1,4 +1,4 @@
-﻿import { Button } from "../ui/Button";
+import { Button } from "../ui/Button";
 import type { AuthUser, GameVersion, ServerStatusData } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
 import { useRouteContext } from "@tanstack/react-router";
@@ -32,7 +32,7 @@ export function DashboardSidebar({
   const { isAdmin } = useRouteContext({ from: "/dashboard" });
 
   return (
-    <aside className="relative z-40 flex h-full w-72 flex-col border-r border-[#2e2e2e] bg-[#171717]">
+    <aside className="relative z-40 flex h-full w-72 flex-col border-r border-theme bg-[var(--theme-surface)]">
       <div className="p-4 pt-6">
         <SidebarProfileCard
           t={t}
@@ -44,7 +44,7 @@ export function DashboardSidebar({
 
       <SidebarServerStatus t={t} serverStatus={serverStatus} />
       
-      <div className="my-4 h-[1px] w-full bg-[#2e2e2e]" />
+      <div className="my-4 h-[1px] w-full bg-[var(--theme-border)]" />
 
       <SidebarVersionsList
         t={t}
@@ -54,10 +54,10 @@ export function DashboardSidebar({
       />
 
       {(isAdmin && onOpenAdminPanel) && (
-        <div className="mt-auto border-t border-[#2e2e2e] p-4">
+        <div className="mt-auto border-t border-theme p-4">
           <Button
             onClick={onOpenAdminPanel}
-            className="w-full justify-center gap-2 rounded-md bg-[#3ecf8e] font-mono text-[10px] font-bold uppercase tracking-wider text-[#0f0f0f] hover:bg-[#3ecf8e]/90"
+            className="w-full justify-center gap-2 rounded-md bg-[var(--mc-accent)] font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--theme-bg)] hover:bg-[var(--mc-accent-hi)]"
             variant="default"
             size="md"
           >
@@ -68,4 +68,3 @@ export function DashboardSidebar({
     </aside>
   );
 }
-

@@ -53,8 +53,8 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
       {/* Header with tabs */}
       <div className="mb-6">
         <div className="mb-4">
-          <h2 className="font-minecraft text-xl font-bold">
-            Управление changelog
+          <h2 className="font-mono text-xl font-bold">
+            Manage changelog
           </h2>
         </div>
 
@@ -65,7 +65,7 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
             onClick={() => p.setChangelogTab("all")}
             size="sm"
           >
-            📋 Все версии
+            All entries
           </ShadcnButton>
           <div className="ml-auto">
             <ShadcnButton
@@ -75,14 +75,14 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
               className="border-green-500/30 bg-green-500/10 hover:bg-green-500/20"
             >
               {p.editingChangelog
-                ? "✏️ Редактировать версию"
-                : "➕ Создать версию"}
+                ? "Edit selected entry"
+                : "Create new entry"}
             </ShadcnButton>
           </div>
         </div>
       </div>
       {p.changelogError && (
-        <div className="mb-3 font-minecraft text-xs text-red-500">
+        <div className="mb-3 font-mono text-xs text-red-500">
           {p.changelogError}
         </div>
       )}
@@ -90,19 +90,19 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
         <>
           <div className="mb-3 grid grid-cols-1 gap-3 md:grid-cols-3">
             <ShadcnInput
-              label="От даты"
+              label="From date"
               type="datetime-local"
               value={p.changelogFromDate}
               onChange={(e) => p.setChangelogFromDate(e.target.value)}
             />
             <ShadcnInput
-              label="До даты"
+              label="From date"
               type="datetime-local"
               value={p.changelogToDate}
               onChange={(e) => p.setChangelogToDate(e.target.value)}
             />
             <ShadcnSelect
-              label="Тип"
+              label="Type"
               value={p.changelogMandatoryDraft}
               onChange={(e) =>
                 p.setChangelogMandatoryDraft(
@@ -113,7 +113,7 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
                 )
               }
               options={[
-                { label: "Все", value: "all" },
+                { label: "All", value: "all" },
                 { label: "Mandatory", value: "mandatory" },
                 { label: "Optional", value: "optional" },
               ]}
@@ -121,7 +121,7 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
           </div>
           <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
             <ShadcnSelect
-              label="Сортировка"
+              label="Sort by"
               value={p.changelogSortDraft}
               onChange={(e) =>
                 p.setChangelogSortDraft(
@@ -135,7 +135,7 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
               ]}
             />
             <ShadcnSelect
-              label="Порядок"
+              label="Order"
               value={p.changelogOrderDraft}
               onChange={(e) =>
                 p.setChangelogOrderDraft(
@@ -143,8 +143,8 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
                 )
               }
               options={[
-                { label: "Новые", value: "DESC" },
-                { label: "Старые", value: "ASC" },
+                { label: "DESC", value: "DESC" },
+                { label: "ASC", value: "ASC" },
               ]}
             />
             <div />
@@ -156,10 +156,10 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
                 className="flex items-center justify-between rounded border border-white/10 bg-black/20 p-3"
               >
                 <div>
-                  <div className="font-minecraft text-sm text-theme">
+                  <div className="font-mono text-sm text-theme">
                     v{item.version}
                   </div>
-                  <div className="font-minecraft text-[10px] text-theme-muted">
+                  <div className="font-mono text-[10px] text-theme-muted">
                     {new Date(item.releaseDate).toLocaleDateString()}
                   </div>
                 </div>
@@ -192,8 +192,8 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
             ))}
           </div>
           {p.changelog.length === 0 && !p.isLoadingChangelog && (
-            <div className="py-8 text-center font-minecraft text-theme-muted">
-              Changelog записи не найдены.
+            <div className="py-8 text-center font-mono text-theme-muted">
+              Changelog entries not found.
             </div>
           )}
         </>
@@ -204,18 +204,18 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
           <div className="mb-6 rounded-lg border-2 border-dashed border-theme/40 bg-gradient-to-r from-theme/10 via-theme/5 to-transparent p-5 shadow-lg">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-theme/30 shadow-md">
-                <span className="text-xl">{p.editingChangelog ? "✏️" : "➕"}</span>
+                <span className="text-xl">{p.editingChangelog ? "✎" : "+"}</span>
               </div>
               <div className="flex-1">
-                <h3 className="font-minecraft text-base font-bold text-theme">
+                <h3 className="font-mono text-base font-bold text-theme">
                   {p.editingChangelog
-                    ? `Режим редактирования: v${p.editingChangelog.version}`
-                    : "Режим создания версии"}
+                    ? `Editing entry: v${p.editingChangelog.version}`
+                    : "Create changelog entry"}
                 </h3>
-                <p className="mt-1 font-minecraft text-xs text-theme-muted">
+                <p className="mt-1 font-mono text-xs text-theme-muted">
                   {p.editingChangelog
-                    ? "Внесите изменения в форму ниже и нажмите кнопку 'Обновить' в конце страницы"
-                    : "Заполните все необходимые поля и нажмите кнопку 'Создать' в конце страницы"}
+                    ? "Update fields and click 'Update entry' to save."
+                    : "Fill required fields and click 'Create entry' to publish."}
                 </p>
               </div>
               <ShadcnButton
@@ -224,19 +224,19 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
                 onClick={() => p.setChangelogTab("all")}
                 className="shrink-0"
               >
-                ✕ Закрыть
+                Back
               </ShadcnButton>
             </div>
           </div>
 
           {/* Form Container */}
           <div className="space-y-4 rounded-lg border border-white/10 bg-black/10 p-6">
-            <h4 className="font-minecraft text-sm font-bold uppercase tracking-wide text-theme/70">
-              Данные версии
+            <h4 className="font-mono text-sm font-bold uppercase tracking-wide text-theme/70">
+              Entry form
             </h4>
 
             <ShadcnInput
-              placeholder="Версия"
+              placeholder="Version"
               value={p.changelogVersion}
               onChange={(e) => p.setChangelogVersion(e.target.value)}
             />
@@ -262,7 +262,7 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
               placeholder={stringifyChangelogChanges(["- change 1"])}
             />
             {p.changelogFormError && (
-              <div className="font-minecraft text-xs text-red-500">
+              <div className="font-mono text-xs text-red-500">
                 {p.changelogFormError}
               </div>
             )}
@@ -277,7 +277,7 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
                 }}
                 size="default"
               >
-                ✕ Отмена
+                Cancel
               </ShadcnButton>
               <ShadcnButton
                 variant="default"
@@ -290,7 +290,7 @@ export function AdminChangelogTab(p: Props): React.JSX.Element {
                 size="default"
                 className="min-w-[160px] bg-green-600 font-bold hover:bg-green-700"
               >
-                {p.editingChangelog ? "💾 Обновить версию" : "✅ Создать версию"}
+                {p.editingChangelog ? "Update entry" : "Create new entry"}
               </ShadcnButton>
             </div>
           </div>

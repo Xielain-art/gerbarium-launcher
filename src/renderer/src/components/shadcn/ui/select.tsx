@@ -25,7 +25,7 @@ function Select({
   return (
     <div className="space-y-1.5">
       {label && (
-        <Label className="font-minecraft text-[10px] uppercase text-theme-muted">
+        <Label className="font-mono text-[10px] uppercase text-theme-muted">
           {label}
         </Label>
       )}
@@ -33,7 +33,7 @@ function Select({
         value={value}
         onChange={onChange}
         className={cn(
-          "flex h-9 w-full rounded-[6px] border border-[#2e2e2e] bg-[#0f0f0f] px-3 py-1 text-sm text-[#fafafa] focus-visible:border-[#3ecf8e] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#3ecf8e]/30",
+          "flex h-9 w-full rounded-[6px] border border-theme bg-[var(--theme-surface)] px-3 py-1 text-sm text-theme focus-visible:border-[var(--mc-accent)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--mc-accent)]/30",
           className,
         )}
         {...props}
@@ -42,7 +42,7 @@ function Select({
           <option
             key={option.value}
             value={option.value}
-            className="bg-[#171717] text-[#fafafa]"
+            className="bg-[var(--theme-surface)] text-theme"
           >
             {option.label}
           </option>

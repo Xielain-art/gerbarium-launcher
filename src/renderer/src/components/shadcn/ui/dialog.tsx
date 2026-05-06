@@ -42,28 +42,28 @@ function Dialog({
   return (
     <div
       className={cn(
-        "fixed inset-0 z-[10000] flex items-center justify-center bg-[#0f0f0f]/80 p-4 backdrop-blur-sm",
+        "fixed inset-0 z-[10000] flex items-center justify-center bg-[var(--theme-bg)]/80 p-4 backdrop-blur-sm",
         overlayClassName,
       )}
       onClick={() => onOpenChange(false)}
     >
       <div
         className={cn(
-          "w-full max-w-lg rounded-xl border border-[#2e2e2e] bg-[#171717] p-4 text-[#fafafa]",
+          "w-full max-w-lg rounded-xl border border-theme bg-[var(--theme-surface)] p-4 text-theme",
           contentClassName,
         )}
         onClick={(event) => event.stopPropagation()}
       >
         <div
           className={cn(
-            "mb-3 flex items-start justify-between gap-3 border-b border-[#2e2e2e] pb-3",
+            "mb-3 flex items-start justify-between gap-3 border-b border-theme pb-3",
             headerClassName,
           )}
         >
           <div className="min-w-0">
             <h3
               className={cn(
-                "text-lg font-normal tracking-[-0.16px] text-[#fafafa]",
+                "text-lg font-normal tracking-[-0.16px] text-theme",
                 titleClassName,
               )}
             >
@@ -72,7 +72,7 @@ function Dialog({
             {subtitle && (
               <div
                 className={cn(
-                  "mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[#898989]",
+                  "mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-theme-muted",
                   subtitleClassName,
                 )}
               >
@@ -88,7 +88,7 @@ function Dialog({
             title="Close dialog"
             type="button"
             className={cn(
-              "shrink-0 self-start rounded-[6px] border border-[#2e2e2e] bg-[#171717] text-[#898989] hover:bg-[#242424] hover:text-[#fafafa]",
+              "shrink-0 self-start rounded-[6px] border border-theme bg-[var(--theme-surface)] text-theme-muted hover:bg-[var(--theme-surface-soft)] hover:text-theme",
               closeButtonClassName,
             )}
           >

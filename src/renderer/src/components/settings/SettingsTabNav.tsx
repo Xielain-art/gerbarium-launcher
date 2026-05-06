@@ -33,10 +33,10 @@ export function SettingsTabNav({
   ];
 
   return (
-    <div className="flex w-72 shrink-0 flex-col border-r border-[#2e2e2e] bg-[#0f0f0f]">
+    <div className="flex w-72 shrink-0 flex-col border-r border-theme bg-[var(--theme-sidebar)]">
       <div className="flex-1 space-y-1 p-6">
         <div className="mb-8 px-2">
-          <h2 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
+          <h2 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-theme-muted">
             Configuration
           </h2>
         </div>
@@ -53,8 +53,8 @@ export function SettingsTabNav({
                 className={cn(
                   "group relative flex w-full items-center justify-between rounded-md px-3 py-2.5 text-sm transition-all duration-200",
                   isActive
-                    ? "bg-[#171717] text-[#3ecf8e]"
-                    : "text-[#898989] hover:bg-[#111111] hover:text-[#fafafa]",
+                    ? "bg-[var(--theme-surface)] text-[var(--mc-accent)]"
+                    : "text-theme-muted hover:bg-[var(--theme-surface-soft)] hover:text-theme",
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -62,21 +62,21 @@ export function SettingsTabNav({
                     size={18} 
                     className={cn(
                       "transition-colors duration-200",
-                      isActive ? "text-[#3ecf8e]" : "text-[#4d4d4d] group-hover:text-[#898989]"
+                      isActive ? "text-[var(--mc-accent)]" : "text-theme-muted group-hover:text-theme"
                     )} 
                   />
                   <span className={cn(
                     "font-medium tracking-wide",
-                    isActive ? "text-[#fafafa]" : "text-[#898989] group-hover:text-[#fafafa]"
+                    isActive ? "text-theme" : "text-theme-muted group-hover:text-theme"
                   )}>
                     {tab.label}
                   </span>
                 </div>
                 {isActive && (
-                  <ChevronRight size={14} className="text-[#3ecf8e]" />
+                  <ChevronRight size={14} className="text-[var(--mc-accent)]" />
                 )}
                 {isActive && (
-                  <div className="absolute left-0 top-2 h-[calc(100%-16px)] w-[2px] rounded-full bg-[#3ecf8e]" />
+                  <div className="absolute left-0 top-2 h-[calc(100%-16px)] w-[2px] rounded-full bg-[var(--mc-accent)]" />
                 )}
               </button>
             );
@@ -85,21 +85,21 @@ export function SettingsTabNav({
       </div>
 
       {/* Account Section at the bottom */}
-      <div className="border-t border-[#2e2e2e] bg-[#0c0c0c] p-6">
+      <div className="border-t border-theme bg-[var(--theme-sidebar)] p-6">
         <div className="flex items-center gap-4 px-2">
           <div className="relative">
             <Avatar 
               username={user?.username || "Player"} 
               size="sm" 
-              className="ring-1 ring-[#2e2e2e] transition-all group-hover:ring-[#3ecf8e]"
+              className="ring-1 ring-[var(--theme-border)] transition-all group-hover:ring-[var(--mc-accent)]"
             />
-            <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#0c0c0c] bg-[#3ecf8e] shadow-[0_0_8px_rgba(62,207,142,0.5)]" />
+            <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--theme-sidebar)] bg-[var(--mc-accent)] shadow-[0_0_8px_rgba(62,207,142,0.5)]" />
           </div>
           <div className="flex flex-1 flex-col min-w-0">
-            <span className="truncate text-sm font-semibold text-[#fafafa]">
+            <span className="truncate text-sm font-semibold text-theme">
               {user?.username || "Player"}
             </span>
-            <span className="font-mono truncate text-[10px] font-medium uppercase tracking-wider text-[#4d4d4d]">
+            <span className="font-mono truncate text-[10px] font-medium uppercase tracking-wider text-theme-muted">
               {user?.email || "Local Player"}
             </span>
           </div>
@@ -108,4 +108,3 @@ export function SettingsTabNav({
     </div>
   );
 }
-

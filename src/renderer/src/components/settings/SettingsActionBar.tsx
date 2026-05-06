@@ -22,7 +22,7 @@ export function SettingsActionBar({
         onClick={onReset} 
         variant="danger" 
         size="md" 
-        className="flex items-center gap-2 border-[#ff8080]/20 bg-[#451212]/20 font-semibold text-[#ff8080] hover:bg-[#451212]/40"
+        className="flex items-center gap-2 border-[color:var(--destructive)]/20 bg-[color:var(--destructive)]/10 font-semibold text-[color:var(--destructive)] hover:bg-[color:var(--destructive)]/15/40"
       >
         <RotateCcw size={16} />
         <span className="font-mono text-[11px] uppercase tracking-wider">{t.SETTINGS.ACTIONS.RESET_BUTTON}</span>

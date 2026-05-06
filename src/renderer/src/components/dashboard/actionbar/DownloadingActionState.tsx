@@ -18,10 +18,10 @@ export function DownloadingActionState({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-[#898989]">
+          <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-theme-muted">
             {progress?.status || t.COMMON.LOADING}
           </div>
-          <div className="mt-1 font-mono text-[11px] text-[#3ecf8e]">
+          <div className="mt-1 font-mono text-[11px] text-[var(--mc-accent)]">
             {progress?.speed && <span>{progress.speed}</span>}
             {progress?.speed && progress?.eta && (
               <span className="mx-2 opacity-30">|</span>

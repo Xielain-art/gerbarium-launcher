@@ -74,7 +74,7 @@ export function RolesDialog({
             value={roleSearchQuery}
             onChange={(e) => setRoleSearchQuery(e.target.value)}
           />
-          <div className="mt-2 font-minecraft text-[10px] uppercase text-theme-muted">
+          <div className="mt-2 font-mono text-[10px] uppercase text-theme-muted">
             Выбрано ролей: {selectedRolesCount}
           </div>
         </div>
@@ -94,12 +94,12 @@ export function RolesDialog({
                 )}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <div className="font-minecraft text-xs uppercase text-theme">
+                  <div className="font-mono text-xs uppercase text-theme">
                     {role.name}
                   </div>
                   <div
                     className={cn(
-                      "font-minecraft text-[10px] uppercase",
+                      "font-mono text-[10px] uppercase",
                       isSelected ? "text-theme" : "text-theme-muted",
                     )}
                   >
@@ -113,7 +113,7 @@ export function RolesDialog({
             );
           })}
           {filteredAvailableRoles.length === 0 && (
-            <div className="rounded border border-white/10 bg-black/20 px-3 py-4 text-center font-minecraft text-xs text-theme-muted">
+            <div className="rounded border border-white/10 bg-black/20 px-3 py-4 text-center font-mono text-xs text-theme-muted">
               Роли не найдены
             </div>
           )}

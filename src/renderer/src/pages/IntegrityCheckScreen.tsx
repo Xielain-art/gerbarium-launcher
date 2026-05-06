@@ -6,19 +6,19 @@ export function IntegrityCheckScreen(): React.JSX.Element {
   const vm = useIntegrityCheckScreen();
 
   return (
-    <div className="relative flex h-screen w-full items-center justify-center bg-[#171717] overflow-hidden">
+    <div className="relative flex h-screen w-full items-center justify-center bg-[var(--theme-surface)] overflow-hidden">
       <div className="auth-grid-overlay opacity-[0.05]" />
       
-      <div className="relative w-full max-w-md p-8 border border-[#2e2e2e] bg-[#0f0f0f] rounded-lg">
+      <div className="relative w-full max-w-md p-8 border border-theme bg-[var(--theme-bg)] rounded-lg">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded bg-[#3ecf8e]/10">
-            <ShieldCheck size={20} className="text-[#3ecf8e]" />
+          <div className="p-2 rounded bg-[var(--mc-accent)]/10">
+            <ShieldCheck size={20} className="text-[var(--mc-accent)]" />
           </div>
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#3ecf8e]">
+            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--mc-accent)]">
               Security Preflight
             </div>
-            <h1 className="font-sans text-lg font-medium text-[#fafafa] leading-tight">
+            <h1 className="font-sans text-lg font-medium text-theme leading-tight">
               Verifying Integrity
             </h1>
           </div>
@@ -30,7 +30,7 @@ export function IntegrityCheckScreen(): React.JSX.Element {
           className="mb-4"
         />
 
-        <div className="font-mono text-[9px] text-[#4d4d4d] leading-relaxed">
+        <div className="font-mono text-[9px] text-theme-muted leading-relaxed">
           {vm.statusMessage}
         </div>
       </div>

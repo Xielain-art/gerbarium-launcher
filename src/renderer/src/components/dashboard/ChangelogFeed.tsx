@@ -99,8 +99,8 @@ export function ChangelogFeed({
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#3ecf8e] border-t-transparent" />
-          <span className="font-mono text-[10px] font-medium uppercase tracking-widest text-[#898989]">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[var(--mc-accent)] border-t-transparent" />
+          <span className="font-mono text-[10px] font-medium uppercase tracking-widest text-theme-muted">
             {t.COMMON.LOADING}
           </span>
         </div>
@@ -114,7 +114,7 @@ export function ChangelogFeed({
         <div className="font-sans text-lg font-medium text-[color:var(--destructive)]">
           {t.DASHBOARD.FAILED_TO_LOAD_NEWS}
         </div>
-        <div className="max-w-md font-sans text-sm text-[#898989]">
+        <div className="max-w-md font-sans text-sm text-theme-muted">
           {error}
         </div>
       </div>
@@ -124,25 +124,25 @@ export function ChangelogFeed({
   return (
     <div className="overflow-x-hidden px-6">
       <div className="mb-10">
-        <h2 className="font-sans text-xl font-medium tracking-tight text-[#fafafa]">
+        <h2 className="font-sans text-xl font-medium tracking-tight text-theme">
           Changelog
         </h2>
-        <p className="font-mono text-[10px] uppercase tracking-wider text-[#898989]">
+        <p className="font-mono text-[10px] uppercase tracking-wider text-theme-muted">
           Technical updates and release history.
         </p>
       </div>
 
-      <div className="relative space-y-12 before:absolute before:left-[11px] before:top-2 before:h-full before:w-[1px] before:bg-[#2e2e2e]">
+      <div className="relative space-y-12 before:absolute before:left-[11px] before:top-2 before:h-full before:w-[1px] before:bg-[var(--theme-border)]">
         {changelog.map((item) => {
           const { html, isTruncated } = getTruncatedMarkdown(item);
 
           return (
             <article key={item.id} className="relative pl-10">
-              <div className="absolute left-0 top-1.5 h-[23px] w-[23px] rounded-full border-4 border-[#171717] bg-[#3ecf8e]" />
+              <div className="absolute left-0 top-1.5 h-[23px] w-[23px] rounded-full border-4 border-[var(--theme-bg)] bg-[var(--mc-accent)]" />
               
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <h3 className="font-mono text-lg font-bold text-[#fafafa]">
+                  <h3 className="font-mono text-lg font-bold text-theme">
                     v{item.version}
                   </h3>
                   {item.mandatory && (
@@ -151,7 +151,7 @@ export function ChangelogFeed({
                     </span>
                   )}
                 </div>
-                <time className="font-mono text-[10px] font-medium uppercase tracking-wider text-[#898989]">
+                <time className="font-mono text-[10px] font-medium uppercase tracking-wider text-theme-muted">
                   {new Date(item.releaseDate).toLocaleDateString("ru-RU", {
                     day: "numeric",
                     month: "long",
@@ -160,26 +160,26 @@ export function ChangelogFeed({
                 </time>
               </div>
 
-              <div className="rounded-xl border border-[#2e2e2e] bg-[#0f0f0f] p-5">
+              <div className="rounded-xl border border-theme bg-[var(--theme-bg)] p-5">
                 <div
-                  className="prose prose-sm prose-invert mb-5 max-w-full font-sans text-xs leading-relaxed text-[#b4b4b4] [&_a]:text-[#3ecf8e] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
+                  className="prose prose-sm mb-5 max-w-full font-sans text-xs leading-relaxed text-theme-muted [&_a]:text-[var(--mc-accent)] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
                   style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
                   dangerouslySetInnerHTML={{ __html: html }}
                 />
                 
-                <div className="flex flex-wrap items-center justify-between gap-4 border-t border-[#2e2e2e] pt-4">
+                <div className="flex flex-wrap items-center justify-between gap-4 border-t border-theme pt-4">
                   {isTruncated && (
                     <button
                       type="button"
                       onClick={() => onSelectChangelog(item)}
-                      className="font-sans text-xs font-medium text-[#3ecf8e] hover:text-[#00c573]"
+                      className="font-sans text-xs font-medium text-[var(--mc-accent)] hover:text-[var(--mc-accent-hi)]"
                     >
                       {t.DASHBOARD.READ_MORE}
                     </button>
                   )}
                   <a
                     href={item.downloadUrl}
-                    className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-widest text-[#898989] transition-colors hover:text-[#fafafa]"
+                    className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-widest text-theme-muted transition-colors hover:text-theme"
                     onClick={(e) => {
                       e.preventDefault();
                       void window.electronAPI.system.openExternal(
@@ -196,7 +196,7 @@ export function ChangelogFeed({
           );
         })}
         {changelog.length === 0 && (
-          <div className="py-10 text-center font-sans text-sm text-[#898989]">
+          <div className="py-10 text-center font-sans text-sm text-theme-muted">
             {t.DASHBOARD.NO_MORE_NEWS}
           </div>
         )}
@@ -204,12 +204,12 @@ export function ChangelogFeed({
 
       <div ref={loadMoreRef} className="h-6 w-full" />
       {isLoadingMore && (
-        <div className="py-3 text-center font-mono text-[10px] uppercase tracking-wider text-[#898989]">
+        <div className="py-3 text-center font-mono text-[10px] uppercase tracking-wider text-theme-muted">
           {t.DASHBOARD.LOADING_MORE_NEWS}
         </div>
       )}
       {!hasMore && changelog.length > 0 && (
-        <div className="py-3 text-center font-mono text-[10px] uppercase tracking-wider text-[#898989]">
+        <div className="py-3 text-center font-mono text-[10px] uppercase tracking-wider text-theme-muted">
           {t.DASHBOARD.NO_MORE_NEWS}
         </div>
       )}

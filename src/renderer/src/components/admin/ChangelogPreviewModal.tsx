@@ -40,7 +40,7 @@ export function ChangelogPreviewModal({
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-6 backdrop-blur-md">
       <div className="mc-card max-h-[85vh] w-full max-w-3xl overflow-y-auto overflow-x-hidden p-0">
         <div className="flex items-center justify-between border-b-[3px] border-theme p-4">
-          <h3 className="font-minecraft text-lg text-theme">
+          <h3 className="font-mono text-lg text-theme">
             Changelog v{changelog.version}
           </h3>
           <button type="button" className="mc-btn mc-btn-sm" onClick={onClose}>
@@ -50,16 +50,16 @@ export function ChangelogPreviewModal({
         <div className="space-y-4 p-5">
           <div className="flex items-center gap-3">
             {changelog.mandatory && (
-              <span className="rounded bg-red-500/20 px-2 py-1 font-minecraft text-[10px] uppercase text-red-400">
+              <span className="rounded bg-red-500/20 px-2 py-1 font-mono text-[10px] uppercase text-red-400">
                 Mandatory
               </span>
             )}
-            <span className="font-minecraft text-xs text-theme-muted">
+            <span className="font-mono text-xs text-theme-muted">
               {new Date(changelog.releaseDate).toLocaleDateString("ru-RU")}
             </span>
           </div>
           <div
-            className="max-w-full font-minecraft text-sm leading-relaxed text-theme-muted [&_a]:text-[var(--mc-accent)] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
+            className="max-w-full font-mono text-sm leading-relaxed text-theme-muted [&_a]:text-[var(--mc-accent)] [&_a]:underline [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5"
             style={{
               overflowWrap: "anywhere",
               wordBreak: "break-word",

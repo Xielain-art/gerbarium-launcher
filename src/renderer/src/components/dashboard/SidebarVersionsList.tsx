@@ -28,7 +28,7 @@ export function SidebarVersionsList({
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <div className="px-5 py-4">
-        <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#898989]">
+        <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-theme-muted">
           {t.DASHBOARD.VERSIONS_TITLE}
         </h2>
       </div>
@@ -43,16 +43,16 @@ export function SidebarVersionsList({
                 className={cn(
                   "group relative flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-all",
                   isActive
-                    ? "bg-[#2e2e2e] text-[#fafafa]"
-                    : "text-[#898989] hover:bg-[#242424] hover:text-[#fafafa]",
+                    ? "bg-[var(--theme-surface-soft)] text-theme"
+                    : "text-theme-muted hover:bg-[var(--theme-surface-soft)] hover:text-theme",
                 )}
               >
                 <div
                   className={cn(
                     "flex h-8 w-8 shrink-0 items-center justify-center rounded border font-mono text-[10px] font-bold transition-colors",
                     isActive
-                      ? "border-[#3ecf8e]/30 bg-[#3ecf8e]/10 text-[#3ecf8e]"
-                      : "border-[#2e2e2e] bg-[#0f0f0f] group-hover:border-[#363636]",
+                      ? "border-[var(--mc-accent)]/30 bg-[var(--mc-accent)]/10 text-[var(--mc-accent)]"
+                      : "border-theme bg-[var(--theme-bg)] group-hover:border-[var(--theme-border-hi)]",
                   )}
                 >
                   {getVersionIcon(version.type)}
@@ -64,7 +64,7 @@ export function SidebarVersionsList({
                   <div
                     className={cn(
                       "font-mono text-[9px] uppercase tracking-tighter",
-                      version.isInstalled ? "text-[#3ecf8e]" : "text-[#898989]/60",
+                      version.isInstalled ? "text-[var(--mc-accent)]" : "text-theme-muted/60",
                     )}
                   >
                     {version.isInstalled
@@ -73,7 +73,7 @@ export function SidebarVersionsList({
                   </div>
                 </div>
                 {isActive && (
-                  <div className="flex h-1.5 w-1.5 rounded-full bg-[#3ecf8e]" />
+                  <div className="flex h-1.5 w-1.5 rounded-full bg-[var(--mc-accent)]" />
                 )}
               </button>
             );

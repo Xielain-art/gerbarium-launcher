@@ -383,17 +383,31 @@ export default function authHandler(app: App): void {
         };
       }
 
+      const smokeCode =
+        process.env.SMOKE_TEST === "true"
+          ? ((global as Record<string, unknown>).lastDevelopmentCode as
+              | string
+              | undefined)
+          : undefined;
+      const statusWithSmokeCode =
+        process.env.SMOKE_TEST === "true" &&
+        smokeCode &&
+        statusResult.data &&
+        !statusResult.data.developmentCode
+          ? { ...statusResult.data, developmentCode: smokeCode }
+          : statusResult.data;
+
       const updatedSession: AuthSessionPayload = {
         ...session,
-        user: applyEmailVerificationToUser(session.user, statusResult.data),
+        user: applyEmailVerificationToUser(session.user, statusWithSmokeCode),
       };
       await writeStoredSession(secureDataPath, updatedSession);
 
-      interceptSmokeTestCode(statusResult.data);
+      interceptSmokeTestCode(statusWithSmokeCode);
 
       return {
         success: true,
-        emailVerification: mapEmailVerification(statusResult.data),
+        emailVerification: mapEmailVerification(statusWithSmokeCode),
       };
     } catch (error) {
       log.error(LOG_MESSAGES.AUTH_EMAIL_STATUS_FAILED, error);
@@ -426,17 +440,31 @@ export default function authHandler(app: App): void {
         };
       }
 
+      const smokeCode =
+        process.env.SMOKE_TEST === "true"
+          ? ((global as Record<string, unknown>).lastDevelopmentCode as
+              | string
+              | undefined)
+          : undefined;
+      const resendWithSmokeCode =
+        process.env.SMOKE_TEST === "true" &&
+        smokeCode &&
+        resendResult.data &&
+        !resendResult.data.developmentCode
+          ? { ...resendResult.data, developmentCode: smokeCode }
+          : resendResult.data;
+
       const updatedSession: AuthSessionPayload = {
         ...session,
-        user: applyEmailVerificationToUser(session.user, resendResult.data),
+        user: applyEmailVerificationToUser(session.user, resendWithSmokeCode),
       };
       await writeStoredSession(secureDataPath, updatedSession);
 
-      interceptSmokeTestCode(resendResult.data);
+      interceptSmokeTestCode(resendWithSmokeCode);
 
       return {
         success: true,
-        emailVerification: mapEmailVerification(resendResult.data),
+        emailVerification: mapEmailVerification(resendWithSmokeCode),
       };
     } catch (error) {
       log.error(LOG_MESSAGES.AUTH_RESEND_EMAIL_FAILED, error);

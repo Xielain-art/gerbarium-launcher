@@ -14,7 +14,7 @@ export function NewsFormSubTab(props: AdminNewsTabProps) {
 
         <div className="space-y-4">
           <div className="rounded border border-white/10 bg-black/10 p-4">
-            <h3 className="mb-4 font-minecraft text-sm font-bold">
+            <h3 className="mb-4 font-mono text-sm font-bold">
               {editingNews ? "Редактирование новости" : "Создание новости"}
             </h3>
 
@@ -33,7 +33,7 @@ export function NewsFormSubTab(props: AdminNewsTabProps) {
               />
               {newsFormValidation.titleValidation.touched &&
                 newsFormValidation.titleValidation.error && (
-                  <p className="mt-1 font-minecraft text-xs text-red-500">
+                  <p className="mt-1 font-mono text-xs text-red-500">
                     {newsFormValidation.titleValidation.error}
                   </p>
                 )}
@@ -54,7 +54,7 @@ export function NewsFormSubTab(props: AdminNewsTabProps) {
               />
               {newsFormValidation.slugValidation.touched &&
                 newsFormValidation.slugValidation.error && (
-                  <p className="mt-1 font-minecraft text-xs text-red-500">
+                  <p className="mt-1 font-mono text-xs text-red-500">
                     {newsFormValidation.slugValidation.error}
                   </p>
                 )}
@@ -75,7 +75,7 @@ export function NewsFormSubTab(props: AdminNewsTabProps) {
               />
               {newsFormValidation.imageValidation.touched &&
                 newsFormValidation.imageValidation.error && (
-                  <p className="mt-1 font-minecraft text-xs text-red-500">
+                  <p className="mt-1 font-mono text-xs text-red-500">
                     {newsFormValidation.imageValidation.error}
                   </p>
                 )}
@@ -115,14 +115,14 @@ export function NewsFormSubTab(props: AdminNewsTabProps) {
                 </ShadcnButton>
               </div>
               {newsTagValidation.touched && newsTagValidation.error && (
-                <p className="mt-1 font-minecraft text-xs text-red-500">
+                <p className="mt-1 font-mono text-xs text-red-500">
                   {newsTagValidation.error}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <label className="font-minecraft text-sm text-theme">
+              <label className="font-mono text-sm text-theme">
                 Содержание (Markdown)
               </label>
               <div data-color-mode="dark">
@@ -137,14 +137,14 @@ export function NewsFormSubTab(props: AdminNewsTabProps) {
               </div>
               {newsFormValidation.contentValidation.touched &&
                 newsFormValidation.contentValidation.error && (
-                  <p className="mt-1 font-minecraft text-xs text-red-500">
+                  <p className="mt-1 font-mono text-xs text-red-500">
                     {newsFormValidation.contentValidation.error}
                   </p>
                 )}
             </div>
 
             {newsFormError && (
-              <div className="font-minecraft text-xs text-red-500">
+              <div className="font-mono text-xs text-red-500">
                 {newsFormError}
               </div>
             )}

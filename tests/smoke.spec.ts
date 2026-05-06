@@ -88,31 +88,14 @@ test.describe('Smoke Test - Full Auth Flow', () => {
     
     console.log('📡 Submitting registration form...');
     
-    // Set up a promise to catch the stdout code before clicking submit
-    const codePromise = new Promise<string>((resolve) => {
-      const onData = (data: Buffer) => {
-        const line = data.toString();
-        const match = line.match(/\[SMOKE_TEST_CODE\]:(\d{6})/);
-        if (match) {
-          app.process().stdout.off('data', onData);
-          resolve(match[1]);
-        }
-      };
-      app.process().stdout.on('data', onData);
-      
-      // Safety timeout
-      setTimeout(() => {
-        app.process().stdout.off('data', onData);
-        resolve('');
-      }, 15000);
-    });
-
     await window.locator('button[type="submit"]').click();
 
     console.log('📧 Waiting for Verification Screen...');
-    const codeInput = window.locator('#email-code');
+    const verificationSection = window.locator('[data-testid="verification-section"]');
+    const codeInput = window.locator('input[data-input-otp]');
     try {
-      await codeInput.waitFor({ state: 'visible', timeout: 30000 });
+      await verificationSection.waitFor({ state: 'visible', timeout: 30000 });
+      await codeInput.waitFor({ state: 'attached', timeout: 30000 });
     } catch (e) {
       console.error('Timeout waiting for email code input.');
       const errorText = await window.locator('[role="alert"]').textContent().catch(() => null);
@@ -125,33 +108,38 @@ test.describe('Smoke Test - Full Auth Flow', () => {
     }
 
     console.log('🔍 Waiting for intercepted test code...');
-    let finalVerificationCode = await codePromise;
+    let finalVerificationCode = '';
 
     if (!finalVerificationCode) {
-      const badgeText = await window
-        .locator('text=/\\d{6}/')
+      const devCodeText = await window
+        .locator('[data-testid="dev-verification-code"]')
         .first()
         .textContent()
         .catch(() => null);
-      const badgeMatch = badgeText?.match(/(\d{6})/);
-      finalVerificationCode = badgeMatch?.[1] || '';
+      const devCodeMatch = devCodeText?.match(/(\d{6})/);
+      finalVerificationCode = devCodeMatch?.[1] || '';
     }
 
     if (!finalVerificationCode) {
-      finalVerificationCode = await window.evaluate(async () => {
-        const electronAPI = (window as unknown as {
-          electronAPI: {
-            auth: {
-              getEmailVerificationStatus: () => Promise<{
-                success: boolean;
-                emailVerification?: { developmentCode?: string };
-              }>;
+      for (let attempt = 0; attempt < 8 && !finalVerificationCode; attempt += 1) {
+        finalVerificationCode = await window.evaluate(async () => {
+          const electronAPI = (window as unknown as {
+            electronAPI: {
+              auth: {
+                getEmailVerificationStatus: () => Promise<{
+                  success: boolean;
+                  emailVerification?: { developmentCode?: string };
+                }>;
+              };
             };
-          };
-        }).electronAPI;
-        const status = await electronAPI.auth.getEmailVerificationStatus();
-        return status.emailVerification?.developmentCode || '';
-      });
+          }).electronAPI;
+          const status = await electronAPI.auth.getEmailVerificationStatus();
+          return status.emailVerification?.developmentCode || '';
+        });
+        if (!finalVerificationCode) {
+          await window.waitForTimeout(1000);
+        }
+      }
     }
 
     if (!finalVerificationCode) {

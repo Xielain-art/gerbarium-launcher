@@ -27,8 +27,8 @@ export function JavaInstalledList({
   return (
     <Card className="p-6">
       <div className="mb-6 flex items-center gap-2">
-        <Cpu size={16} className="text-[#4d4d4d]" />
-        <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
+        <Cpu size={16} className="text-theme-muted" />
+        <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-theme-muted">
           {t.SETTINGS.JAVA.INSTALLED_VERSIONS}
         </h3>
       </div>
@@ -42,8 +42,8 @@ export function JavaInstalledList({
               className={cn(
                 "group flex items-center justify-between rounded-lg border p-3 transition-all duration-200",
                 isSelected 
-                  ? "border-[#3ecf8e]/40 bg-[#0b2b1a]/20 shadow-[0_0_12px_rgba(62,207,142,0.05)]" 
-                  : "border-[#1a1a1a] bg-[#0c0c0c] hover:border-[#2e2e2e] hover:bg-[#111111]"
+                  ? "border-[var(--mc-accent)]/40 bg-[var(--mc-accent)]/10 shadow-[0_0_12px_rgba(62,207,142,0.05)]" 
+                  : "border-theme bg-[var(--theme-surface)] hover:border-[var(--theme-border-hi)] hover:bg-[var(--theme-surface-soft)]"
               )}
             >
               <button
@@ -53,19 +53,19 @@ export function JavaInstalledList({
                 <div className={cn(
                   "flex h-10 w-10 items-center justify-center rounded-md transition-all",
                   isSelected 
-                    ? "bg-[#3ecf8e] text-[#0f0f0f] shadow-[0_0_10px_rgba(62,207,142,0.3)]" 
-                    : "bg-[#171717] text-[#4d4d4d] group-hover:bg-[#1c1c1c] group-hover:text-[#898989]"
+                    ? "bg-[var(--mc-accent)] text-[var(--theme-bg)] shadow-[0_0_10px_rgba(62,207,142,0.3)]" 
+                    : "bg-[var(--theme-bg)] text-theme-muted group-hover:bg-[var(--theme-surface-soft)] group-hover:text-theme"
                 )}>
                   <Cpu size={20} />
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className={cn(
                     "text-sm font-semibold transition-colors",
-                    isSelected ? "text-[#fafafa]" : "text-[#898989] group-hover:text-[#fafafa]"
+                    isSelected ? "text-theme" : "text-theme-muted group-hover:text-theme"
                   )}>
                     Java {java.version}
                   </span>
-                  <span className="font-mono truncate text-[10px] font-medium uppercase tracking-wider text-[#4d4d4d] max-w-[300px]">
+                  <span className="max-w-[300px] truncate font-mono text-[10px] font-medium uppercase tracking-wider text-theme-muted">
                     {java.path}
                   </span>
                 </div>
@@ -73,7 +73,7 @@ export function JavaInstalledList({
               
               <div className="flex items-center gap-4">
                 {isSelected && (
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[1.2px] text-[#3ecf8e]">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[1.2px] text-[var(--mc-accent)]">
                     <Check size={12} strokeWidth={3} />
                     Active
                   </div>
@@ -82,7 +82,7 @@ export function JavaInstalledList({
                   variant="ghost"
                   size="sm"
                   onClick={() => void onRemoveJava(java.version)}
-                  className="h-8 w-8 p-0 text-[#4d4d4d] hover:bg-[#451212]/20 hover:text-[#ff8080]"
+                  className="h-8 w-8 p-0 text-theme-muted hover:bg-[color:var(--destructive)]/15 hover:text-[color:var(--destructive)]"
                   title={t.WINDOW_CONTROLS.CLOSE}
                 >
                   <Trash2 size={16} />
@@ -95,4 +95,3 @@ export function JavaInstalledList({
     </Card>
   );
 }
-

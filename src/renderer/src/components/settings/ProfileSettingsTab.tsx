@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Button, Input, Modal, ModalActions, Card } from "../ui";
 import { Avatar } from "../game/Avatar";
 import type { ProfileSettingsTabProps } from "./types";
@@ -66,10 +66,10 @@ export function ProfileSettingsTab({
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-8">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-semibold tracking-tight text-[#fafafa]">
+        <h2 className="text-2xl font-semibold tracking-tight text-theme">
           {t.SETTINGS.PROFILE.TITLE}
         </h2>
-        <p className="text-sm text-[#898989]">
+        <p className="text-sm text-theme-muted">
           Manage your account profile and Minecraft appearance.
         </p>
       </div>
@@ -83,57 +83,57 @@ export function ProfileSettingsTab({
                   username={displayMinecraftUsername}
                   skinUrl={displaySkinUrl}
                   size="xl"
-                  className="ring-2 ring-[#2e2e2e] transition-all group-hover:ring-[#3ecf8e]/50"
+                  className="ring-2 ring-[var(--theme-border)] transition-all group-hover:ring-[var(--mc-accent)]/50"
                 />
-                <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full border-4 border-[#111111] bg-[#3ecf8e] shadow-[0_0_10px_rgba(62,207,142,0.4)]" />
+              <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full border-4 border-[var(--theme-bg)] bg-[var(--mc-accent)] shadow-[0_0_10px_rgba(62,207,142,0.4)]" />
               </div>
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-theme-muted">
                 Avatar Preview
               </span>
             </div>
 
             <div className="grid flex-1 gap-x-12 gap-y-8 sm:grid-cols-2">
               <div className="space-y-2">
-                <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
-                  <Mail size={12} className="text-[#3ecf8e]" />
+                <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-theme-muted">
+                  <Mail size={12} className="text-[var(--mc-accent)]" />
                   Email Address
                 </div>
-                <div className="text-sm font-medium text-[#fafafa]">
+                <div className="text-sm font-medium text-theme">
                   {user?.email || "Offline Account"}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
-                  <ShieldCheck size={12} className="text-[#3ecf8e]" />
+                <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-theme-muted">
+                  <ShieldCheck size={12} className="text-[var(--mc-accent)]" />
                   Global Roles
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {user?.roles?.map(role => (
-                    <span key={role.id} className="rounded bg-[#1a1a1a] px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[#898989] border border-[#2e2e2e]">
+                    <span key={role.id} className="rounded border border-theme bg-[var(--theme-surface)] px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-theme-muted">
                       {role.name}
                     </span>
-                  )) || <span className="text-sm font-medium text-[#fafafa]">user</span>}
+                  )) || <span className="text-sm font-medium text-theme">user</span>}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
-                  <UserIcon size={12} className="text-[#3ecf8e]" />
+                <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-theme-muted">
+                  <UserIcon size={12} className="text-[var(--mc-accent)]" />
                   Minecraft Username
                 </div>
-                <div className="text-sm font-medium text-[#fafafa]">
+                <div className="text-sm font-medium text-theme">
                   {displayMinecraftUsername || "—"}
                 </div>
               </div>
 
               {user?.isBanned && (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-[#ff8080]">
+                  <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-[color:var(--destructive)]">
                     <Ban size={12} />
                     Account Status
                   </div>
-                  <div className="rounded-md bg-[#451212]/20 px-3 py-2 text-xs font-medium text-[#ff8080] border border-[#ff8080]/10">
+                  <div className="rounded-md bg-[color:var(--destructive)]/10 px-3 py-2 text-xs font-medium text-[color:var(--destructive)] border border-[color:var(--destructive)]/20">
                     Banned: {user?.banReason || "No reason provided"}
                   </div>
                 </div>
@@ -144,8 +144,8 @@ export function ProfileSettingsTab({
 
         <Card className="p-6">
           <div className="mb-6 flex items-center gap-2">
-            <Fingerprint size={16} className="text-[#4d4d4d]" />
-            <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
+            <Fingerprint size={16} className="text-theme-muted" />
+            <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-theme-muted">
               Identity & Customization
             </h3>
           </div>
@@ -186,17 +186,17 @@ export function ProfileSettingsTab({
           </div>
         </Card>
 
-        <Card className="border-[#451212]/40 bg-[#1a0f0f] p-8">
+          <Card className="border-[color:var(--destructive)]/40 bg-[color:var(--destructive)]/8 p-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-6">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#451212] text-[#ff8080] shadow-[0_0_20px_rgba(255,128,128,0.1)]">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color:var(--destructive)]/15 text-[color:var(--destructive)] shadow-[0_0_20px_rgba(255,128,128,0.1)]">
               <ShieldAlert size={24} />
             </div>
             <div className="flex-1 space-y-4">
               <div className="space-y-1">
-                <h3 className="text-base font-semibold text-[#fafafa]">
+                <h3 className="text-base font-semibold text-theme">
                   {t.SETTINGS.PROFILE.DELETE_ACCOUNT_TITLE}
                 </h3>
-                <p className="text-sm leading-relaxed text-[#ff8080]/70">
+                <p className="text-sm leading-relaxed text-[color:var(--destructive)]/70">
                   {t.SETTINGS.PROFILE.DELETE_ACCOUNT_DESCRIPTION}
                 </p>
               </div>
@@ -237,7 +237,7 @@ export function ProfileSettingsTab({
         }
       >
         <div className="space-y-6">
-          <p className="text-sm leading-relaxed text-[#898989]">
+          <p className="text-sm leading-relaxed text-theme-muted">
             {t.SETTINGS.PROFILE.DELETE_ACCOUNT_MODAL_TEXT}
           </p>
           <Input
@@ -253,8 +253,8 @@ export function ProfileSettingsTab({
               className={cn(
                 "flex items-start gap-3 rounded-md p-4 text-xs font-medium border",
                 deletionNotice.type === "error" 
-                  ? "bg-[#451212]/20 text-[#ff8080] border-[#ff8080]/10" 
-                  : "bg-[#0b2b1a]/20 text-[#3ecf8e] border-[#3ecf8e]/10"
+                  ? "bg-[color:var(--destructive)]/10 text-[color:var(--destructive)] border-[color:var(--destructive)]/20" 
+                : "border-[var(--mc-accent)]/20 bg-[var(--mc-accent)]/10 text-[var(--mc-accent)]"
               )}
             >
               {deletionNotice.type === "error" ? <ShieldAlert size={14} className="shrink-0" /> : <ShieldCheck size={14} className="shrink-0" />}
@@ -266,4 +266,5 @@ export function ProfileSettingsTab({
     </div>
   );
 }
+
 

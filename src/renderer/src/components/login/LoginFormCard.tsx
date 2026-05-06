@@ -85,7 +85,7 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
       : t.LOGIN.LOGIN_DESCRIPTION;
 
   return (
-    <Card className="relative z-10 w-full max-w-[420px] rounded-2xl border-[#2e2e2e] bg-[#171717]/95 text-[#fafafa] shadow-none backdrop-blur-sm">
+    <Card className="relative z-10 w-full max-w-[420px] rounded-2xl border-theme bg-[var(--theme-surface)]/95 text-theme shadow-none backdrop-blur-sm">
       <div className="absolute top-4 right-4">
         <Select
           label={t.LOGIN.LANGUAGE_LABEL}
@@ -95,23 +95,23 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
             value: option.value,
             label: option.value.toUpperCase(),
           }))}
-          className="auth-language-select auth-language-select--compact h-7 min-w-[64px] rounded-lg border-[#363636] bg-white/5 px-2 text-[10px] text-[#fafafa] focus:border-[#3ecf8e]"
+          className="auth-language-select auth-language-select--compact h-7 min-w-[64px] rounded-lg border-[var(--theme-border-hi)] bg-white/5 px-2 text-[10px] text-theme focus:border-[var(--mc-accent)]"
         />
       </div>
       <CardHeader className="space-y-2 pb-5 text-center">
-        <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#3ecf8e]">
+        <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-[var(--mc-accent)]">
           Authentication
         </div>
-        <CardTitle className="text-[24px] font-normal leading-[1.2] tracking-[-0.16px] text-[#fafafa]">
+        <CardTitle className="text-[24px] font-normal leading-[1.2] tracking-[-0.16px] text-theme">
           {title}
         </CardTitle>
-        <p className="text-sm leading-relaxed text-[#898989]">{description}</p>
+        <p className="text-sm leading-relaxed text-theme-muted">{description}</p>
       </CardHeader>
-      <div className="mx-6 h-px bg-[#2e2e2e]" />
+      <div className="mx-6 h-px bg-[var(--theme-border)]" />
       <CardContent className="space-y-5 pt-5">
         {!props.verificationRequired && (
           <div className="flex justify-center">
-            <div className="auth-switch grid w-full grid-cols-2 gap-1 p-1 bg-[#171717] border border-[#2e2e2e] rounded-full">
+            <div className="auth-switch grid w-full grid-cols-2 gap-1 p-1 bg-[var(--theme-surface)] border border-theme rounded-full">
               <Button
                 type="button"
                 size="sm"
@@ -121,8 +121,8 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
                 className={cn(
                   "h-7 rounded-full px-3 font-mono text-[10px] uppercase tracking-wider transition-all",
                   !isRegisterMode 
-                    ? "bg-[#3ecf8e] text-[#0f0f0f] hover:bg-[#3ecf8e]/90" 
-                    : "text-[#898989] hover:text-[#fafafa] hover:bg-white/5",
+                    ? "bg-[var(--mc-accent)] text-[var(--theme-bg)] hover:bg-[var(--mc-accent)]/90" 
+                    : "text-theme-muted hover:text-theme hover:bg-white/5",
                 )}
               >
                 {t.LOGIN.SWITCH_TO_LOGIN}
@@ -136,8 +136,8 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
                 className={cn(
                   "h-7 rounded-full px-3 font-mono text-[10px] uppercase tracking-wider transition-all",
                   isRegisterMode 
-                    ? "bg-[#3ecf8e] text-[#0f0f0f] hover:bg-[#3ecf8e]/90" 
-                    : "text-[#898989] hover:text-[#fafafa] hover:bg-white/5",
+                    ? "bg-[var(--mc-accent)] text-[var(--theme-bg)] hover:bg-[var(--mc-accent)]/90" 
+                    : "text-theme-muted hover:text-theme hover:bg-white/5",
                 )}
               >
                 {t.LOGIN.CREATE_ACCOUNT}
@@ -152,13 +152,13 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
               className={cn(
                 "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] transition-all",
                 props.registerStep === 1 
-                  ? "border-[#3ecf8e]/40 bg-[#3ecf8e]/10 text-[#fafafa]" 
-                  : "border-[#2e2e2e] bg-[#171717] text-[#898989]",
+                  ? "border-[var(--mc-accent)]/40 bg-[var(--mc-accent)]/10 text-theme"
+                  : "border-theme bg-[var(--theme-surface)] text-theme-muted",
               )}
             >
               <span className={cn(
                 "flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold",
-                props.registerStep === 1 ? "bg-[#3ecf8e] text-[#0f0f0f]" : "bg-[#2e2e2e] text-[#898989]"
+                props.registerStep === 1 ? "bg-[var(--mc-accent)] text-[var(--theme-bg)]" : "bg-[var(--theme-border)] text-theme-muted"
               )}>1</span>
               <span>{t.LOGIN.REGISTER_STEP_ACCOUNT}</span>
             </div>
@@ -166,13 +166,13 @@ export function LoginFormCard(props: LoginFormCardProps): React.JSX.Element {
               className={cn(
                 "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] transition-all",
                 props.registerStep === 2 
-                  ? "border-[#3ecf8e]/40 bg-[#3ecf8e]/10 text-[#fafafa]" 
-                  : "border-[#2e2e2e] bg-[#171717] text-[#898989]",
+                  ? "border-[var(--mc-accent)]/40 bg-[var(--mc-accent)]/10 text-theme"
+                  : "border-theme bg-[var(--theme-surface)] text-theme-muted",
               )}
             >
               <span className={cn(
                 "flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold",
-                props.registerStep === 2 ? "bg-[#3ecf8e] text-[#0f0f0f]" : "bg-[#2e2e2e] text-[#898989]"
+                props.registerStep === 2 ? "bg-[var(--mc-accent)] text-[var(--theme-bg)]" : "bg-[var(--theme-border)] text-theme-muted"
               )}>2</span>
               <span>{t.LOGIN.REGISTER_STEP_PASSWORD}</span>
             </div>

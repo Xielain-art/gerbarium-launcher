@@ -5,31 +5,26 @@
   --animate-spin-slow: spin 3s linear infinite;
 }
 
-/* Minecraft font */
-@font-face {
-  font-family: 'Minecraft';
-  src: url('./assets/Minecraft.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* Global styles */
 * {
   box-sizing: border-box;
 }
 
 :root {
-  /* Supabase-inspired tokens */
-  --supabase-bg-deep: #0f0f0f;
-  --supabase-bg-main: #171717;
   --supabase-green: #3ecf8e;
   --supabase-green-link: #00c573;
+  --supabase-border-accent: rgba(62, 207, 142, 0.3);
+  --font-mono: 'Source Code Pro', 'Office Code Pro', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+html.theme-dark,
+body.theme-dark {
+  --supabase-bg-deep: #0f0f0f;
+  --supabase-bg-main: #171717;
   --supabase-border-subtle: #242424;
   --supabase-border-standard: #2e2e2e;
   --supabase-border-prominent: #363636;
-  --supabase-border-accent: rgba(62, 207, 142, 0.3);
-  
+
   --theme-bg: var(--supabase-bg-main);
   --theme-bg-gradient-a: #0f0f0f;
   --theme-bg-gradient-b: #171717;
@@ -40,11 +35,9 @@
   --theme-text-muted: #898989;
   --theme-border: var(--supabase-border-standard);
   --theme-border-hi: var(--supabase-border-prominent);
-  
+
   --mc-accent: var(--supabase-green);
   --mc-accent-hi: #50e3a1;
-
-  --font-mono: 'Source Code Pro', 'Office Code Pro', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 
   /* Legacy and shadcn fallback tokens */
   --background: 240 10% 3.9%;
@@ -66,6 +59,53 @@
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
   --ring: 153 60% 53%;
+}
+
+html.theme-light,
+body.theme-light {
+  --supabase-bg-deep: #eff3f2;
+  --supabase-bg-main: #f6f8f7;
+  --supabase-border-subtle: #dce3e0;
+  --supabase-border-standard: #ced8d3;
+  --supabase-border-prominent: #b7c7c0;
+
+  --theme-bg: #f6f8f7;
+  --theme-bg-gradient-a: #ffffff;
+  --theme-bg-gradient-b: #e9efec;
+  --theme-surface: #ffffff;
+  --theme-surface-soft: #f0f4f2;
+  --theme-sidebar: #e8efeb;
+  --theme-text: #18211d;
+  --theme-text-muted: #5a6c64;
+  --theme-border: #ced8d3;
+  --theme-border-hi: #aebcb5;
+
+  --mc-accent: #1f9965;
+  --mc-accent-hi: #31b77d;
+
+  /* Legacy and shadcn fallback tokens */
+  --background: 140 16% 97%;
+  --foreground: 156 20% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 156 20% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 156 20% 12%;
+  --primary: 153 66% 36%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 145 16% 92%;
+  --secondary-foreground: 156 20% 16%;
+  --muted: 145 14% 92%;
+  --muted-foreground: 156 12% 40%;
+  --accent: 145 22% 90%;
+  --accent-foreground: 156 20% 16%;
+  --destructive: 0 64% 46%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 145 13% 82%;
+  --input: 145 13% 82%;
+  --ring: 153 66% 36%;
+}
+
+:root {
   --radius: 0.5rem;
 }
 
@@ -348,11 +388,6 @@ body,
   -webkit-app-region: no-drag;
 }
 
-/* Minecraft font utility */
-.font-minecraft {
-  font-family: 'Minecraft', 'Press Start 2P', monospace;
-}
-
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
@@ -423,7 +458,7 @@ a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Minecraft', 'Press Start 2P', monospace;
+    font-family: var(--font-mono);
     font-weight: bold;
     text-transform: uppercase;
     transition: all 0.075s;
@@ -543,7 +578,7 @@ a {
     border-bottom-color: var(--mc-panel-border-hi);
     border-right-color: var(--mc-panel-border-hi);
     color: var(--mc-input-text);
-    font-family: 'Minecraft', 'Press Start 2P', monospace;
+    font-family: var(--font-mono);
     font-size: 1rem;
     box-shadow: inset 2px 2px 0px var(--mc-panel-border-lo), inset -2px -2px 0px var(--mc-panel-border-hi);
   }
@@ -619,7 +654,7 @@ a {
     border-bottom-color: var(--mc-panel-border-hi);
     border-right-color: var(--mc-panel-border-hi);
     color: var(--mc-input-text);
-    font-family: 'Minecraft', 'Press Start 2P', monospace;
+    font-family: var(--font-mono);
     font-size: 1rem;
     box-shadow: inset 2px 2px 0px var(--mc-panel-border-lo), inset -2px -2px 0px var(--mc-panel-border-hi);
     cursor: pointer;
@@ -662,7 +697,7 @@ a {
     background-color: var(--mc-error-bg);
     padding: 0.875rem 1rem;
     color: var(--mc-error-text);
-    font-family: 'Minecraft', 'Press Start 2P', monospace;
+    font-family: var(--font-mono);
     font-size: 0.875rem;
     animation: shake 0.3s ease-in-out;
   }

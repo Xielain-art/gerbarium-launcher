@@ -10,7 +10,7 @@ export function SettingsScreen(): React.JSX.Element {
   const vm = useSettingsScreen();
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-[#0c0c0c]">
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-[var(--theme-sidebar)]">
       <SettingsHeader t={vm.t} onBack={vm.onBack} onLogout={vm.onLogout} />
 
       <main className="flex flex-1 overflow-hidden">
@@ -20,10 +20,10 @@ export function SettingsScreen(): React.JSX.Element {
           onChangeTab={vm.setActiveTab}
         />
 
-        <div className="flex-1 overflow-y-auto bg-[#171717] transition-colors duration-300">
+        <div className="flex-1 overflow-y-auto bg-[var(--theme-bg)] transition-colors duration-300">
           <div className="mx-auto max-w-5xl">
             {vm.error && (
-              <div className="mx-8 mt-8 flex items-center gap-3 rounded-md border border-[#ff8080]/20 bg-[#451212]/20 p-4 text-sm font-medium text-[#ff8080]">
+              <div className="mx-8 mt-8 flex items-center gap-3 rounded-md border border-[color:var(--destructive)]/20 bg-[color:var(--destructive)]/10 p-4 text-sm font-medium text-[color:var(--destructive)]">
                 {vm.error}
               </div>
             )}

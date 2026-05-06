@@ -1,4 +1,4 @@
-﻿import * as React from "react";
+import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Label } from "./label";
 import { X } from "lucide-react";
@@ -58,7 +58,7 @@ export function MultiSelect({
   return (
     <div className="space-y-1.5" ref={dropdownRef}>
       {label && (
-        <Label className="font-minecraft text-[10px] uppercase text-theme-muted">
+        <Label className="font-mono text-[10px] uppercase text-theme-muted">
           {label}
         </Label>
       )}

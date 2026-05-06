@@ -195,9 +195,9 @@ export async function deleteTestUserRequest(
 ): Promise<ApiResult<{ success: boolean }>> {
   try {
     const { data, error, response } = await apiClient.DELETE(
-      "/api/admin/test-users/{id}",
+      "/api/test/test-user-delete",
       {
-        params: { path: { id: userId } },
+        body: { userId },
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

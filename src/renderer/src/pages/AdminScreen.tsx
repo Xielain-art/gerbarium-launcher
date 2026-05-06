@@ -142,7 +142,7 @@ export function AdminScreen(): React.JSX.Element {
           >
             <ArrowLeft className="h-6 w-6" />
           </ButtonShadcn>
-          <h1 className="font-minecraft text-2xl font-bold tracking-tighter">
+          <h1 className="font-mono text-2xl font-bold tracking-tighter">
             {vm.t.ADMIN.TITLE}
           </h1>
         </div>
@@ -154,28 +154,28 @@ export function AdminScreen(): React.JSX.Element {
           <ButtonShadcn
             variant={activeTab === "users" ? "default" : "secondary"}
             onClick={() => setActiveTab("users")}
-            className="font-minecraft uppercase tracking-wider"
+            className="font-mono uppercase tracking-wider"
           >
             {vm.t.ADMIN.TAB_USERS}
           </ButtonShadcn>
           <ButtonShadcn
             variant={activeTab === "news" ? "default" : "secondary"}
             onClick={() => setActiveTab("news")}
-            className="font-minecraft uppercase tracking-wider"
+            className="font-mono uppercase tracking-wider"
           >
             {vm.t.ADMIN.TAB_NEWS}
           </ButtonShadcn>
           <ButtonShadcn
             variant={activeTab === "changelog" ? "default" : "secondary"}
             onClick={() => setActiveTab("changelog")}
-            className="font-minecraft uppercase tracking-wider"
+            className="font-mono uppercase tracking-wider"
           >
             Changelog
           </ButtonShadcn>
           <ButtonShadcn
             variant={activeTab === "stats" ? "default" : "secondary"}
             onClick={() => setActiveTab("stats")}
-            className="font-minecraft uppercase tracking-wider"
+            className="font-mono uppercase tracking-wider"
           >
             Stats
           </ButtonShadcn>

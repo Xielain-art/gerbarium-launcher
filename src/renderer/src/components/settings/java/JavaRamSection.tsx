@@ -33,16 +33,16 @@ export function JavaRamSection({
     <Card className="p-6">
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Cpu size={16} className="text-[#4d4d4d]" />
-          <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
+          <Cpu size={16} className="text-theme-muted" />
+          <h3 className="font-mono text-[11px] font-bold uppercase tracking-[1.2px] text-theme-muted">
             {t.SETTINGS.JAVA.RAM_LABEL}
           </h3>
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] font-medium uppercase tracking-wider text-[#4d4d4d]">
+          <span className="font-mono text-[10px] font-medium uppercase tracking-wider text-theme-muted">
             Allocation
           </span>
-          <span className="rounded-md bg-[#0b2b1a] px-3 py-1 font-mono text-sm font-bold text-[#3ecf8e] border border-[#3ecf8e]/20 shadow-[0_0_12px_rgba(62,207,142,0.1)]">
+          <span className="rounded-md border border-[var(--mc-accent)]/20 bg-[var(--mc-accent)]/10 px-3 py-1 font-mono text-sm font-bold text-[var(--mc-accent)] shadow-[0_0_12px_rgba(62,207,142,0.1)]">
             {localRamAllocation} {t.COMMON.GB}
           </span>
         </div>
@@ -62,14 +62,14 @@ export function JavaRamSection({
             onMouseUp={commitRamAllocation}
             onTouchEnd={commitRamAllocation}
             onKeyUp={commitRamAllocation}
-            className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-[#111111] border border-[#2e2e2e] focus:outline-none focus:ring-2 focus:ring-[#3ecf8e]/20
-              [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[#0f0f0f] [&::-webkit-slider-thumb]:bg-[#3ecf8e] [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(62,207,142,0.4)] [&::-webkit-slider-thumb]:transition-all hover:[&::-webkit-slider-thumb]:scale-125 hover:[&::-webkit-slider-thumb]:bg-[#50e3a1]"
+            className="h-1.5 w-full cursor-pointer appearance-none rounded-full border border-theme bg-[var(--theme-surface-soft)] focus:outline-none focus:ring-2 focus:ring-[var(--mc-accent)]/20
+              [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-[var(--theme-bg)] [&::-webkit-slider-thumb]:bg-[var(--mc-accent)] [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(62,207,142,0.4)] [&::-webkit-slider-thumb]:transition-all hover:[&::-webkit-slider-thumb]:scale-125 hover:[&::-webkit-slider-thumb]:bg-[var(--mc-accent-hi)]"
             style={{
-              background: `linear-gradient(to right, #3ecf8e 0%, #3ecf8e ${(localRamAllocation / maxRamGb) * 100}%, #111111 ${(localRamAllocation / maxRamGb) * 100}%, #111111 100%)`
+              background: `linear-gradient(to right, var(--mc-accent) 0%, var(--mc-accent) ${(localRamAllocation / maxRamGb) * 100}%, var(--theme-surface-soft) ${(localRamAllocation / maxRamGb) * 100}%, var(--theme-surface-soft) 100%)`
             }}
           />
         </div>
-        <div className="flex justify-between font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-[#4d4d4d]">
+        <div className="flex justify-between font-mono text-[10px] font-bold uppercase tracking-[1.2px] text-theme-muted">
           <span>
             1 {t.COMMON.GB}
           </span>
@@ -81,4 +81,3 @@ export function JavaRamSection({
     </Card>
   );
 }
-

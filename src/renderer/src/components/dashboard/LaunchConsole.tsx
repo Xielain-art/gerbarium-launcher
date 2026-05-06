@@ -11,12 +11,12 @@ export function LaunchConsole({
 }: LaunchConsoleProps): React.JSX.Element {
   return (
     <div className="flex h-full flex-col px-6">
-      <h2 className="mb-4 font-mono text-[10px] font-bold uppercase tracking-widest text-[#898989]">
+      <h2 className="mb-4 font-mono text-[10px] font-bold uppercase tracking-widest text-theme-muted">
         Console Output
       </h2>
-      <div className="flex-1 overflow-y-auto rounded-lg border border-[#2e2e2e] bg-[#0f0f0f] p-4 font-mono text-[11px] leading-relaxed text-[#3ecf8e]">
+      <div className="flex-1 overflow-y-auto rounded-lg border border-theme bg-[var(--theme-bg)] p-4 font-mono text-[11px] leading-relaxed text-[var(--mc-accent)]">
         {logs.length === 0 && (
-          <div className="text-[#898989] opacity-50">Waiting for process logs...</div>
+          <div className="text-theme-muted opacity-50">Waiting for process logs...</div>
         )}
         {logs.map((log, index) => (
           <div
@@ -32,4 +32,3 @@ export function LaunchConsole({
     </div>
   );
 }
-

@@ -45,11 +45,11 @@ export function AdminNewsTab(props: Props): React.JSX.Element {
     <ShadcnCard className="p-6">
       <div className="mb-6">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-minecraft text-xl font-bold">
+          <h2 className="font-mono text-xl font-bold">
             Управление новостями
           </h2>
           {isApplyingNewsFilters && (
-            <span className="font-minecraft text-[10px] uppercase text-theme-muted">
+            <span className="font-mono text-[10px] uppercase text-theme-muted">
               Фильтрация...
             </span>
           )}

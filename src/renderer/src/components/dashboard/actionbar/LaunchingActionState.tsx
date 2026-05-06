@@ -1,4 +1,4 @@
-﻿import { Button } from "../../ui/Button";
+import { Button } from "../../ui/Button";
 import { ProgressBar } from "../../ui/ProgressBar";
 import type { GameVersion } from "../../../types";
 import type { TranslationType } from "../../../../../shared/constants/translations";
@@ -47,20 +47,20 @@ export function LaunchingActionState({
   return (
     <div className="flex items-center justify-between gap-6">
       <div className="flex min-w-0 flex-1 items-center gap-4">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#3ecf8e] border-t-transparent" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--mc-accent)] border-t-transparent" />
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex items-center justify-between">
-            <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-widest text-[#3ecf8e]">
+            <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--mc-accent)]">
               <span className="capitalize">{launchStatus || launchPhase}</span>
               {launchPercent === null && <span className="animate-pulse">...</span>}
             </div>
             {launchPercent !== null && (
-              <div className="font-mono text-[11px] font-bold text-[#fafafa]">
+              <div className="font-mono text-[11px] font-bold text-theme">
                 {launchPercent}%
               </div>
             )}
           </div>
-          <div className="truncate font-sans text-sm font-medium text-[#fafafa]">
+          <div className="truncate font-sans text-sm font-medium text-theme">
             {selectedVersion?.name || "Minecraft"}
           </div>
           <ProgressBar
@@ -73,11 +73,10 @@ export function LaunchingActionState({
         onClick={onToggleConsole}
         variant="secondary"
         size="md"
-        className="min-w-[140px] shrink-0 rounded-md border border-[#2e2e2e] bg-[#242424] font-sans text-xs font-medium text-[#fafafa] hover:border-[#363636] hover:bg-[#2e2e2e]"
+        className="min-w-[140px] shrink-0 rounded-md border border-theme bg-[var(--theme-surface-soft)] font-sans text-xs font-medium text-theme hover:border-[var(--theme-border-hi)] hover:bg-[var(--theme-surface)]"
       >
         {isConsoleVisible ? t.DASHBOARD.HIDE_CONSOLE : t.DASHBOARD.SHOW_CONSOLE}
       </Button>
     </div>
   );
 }
-
