@@ -5,7 +5,7 @@ import {
   verifyEmailRequest,
   profileRequest,
 } from "../src/lib/api/auth";
-import { deleteTestUserRequest } from "../src/lib/api/admin";
+import { deleteTestUserRequest } from "../src/lib/api/test";
 
 describe("Authentication Flow", () => {
   const testUser = {

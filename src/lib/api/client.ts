@@ -3,6 +3,11 @@ import { paths } from "./v1";
 
 const DEFAULT_API_BASE_URL = "https://gerbarium-api.vercel.app";
 
+type ViteEnv = {
+  VITE_API_BASE_URL?: string;
+  API_BASE_URL?: string;
+};
+
 function normalizeBaseUrl(value: string): string {
   return value.trim().replace(/\/+$/, "");
 }
@@ -25,7 +30,7 @@ function getProcessEnvBaseUrl(): string | undefined {
 
 function getViteEnvBaseUrl(): string | undefined {
   try {
-    const env = (import.meta as any).env;
+    const env = (import.meta as ImportMeta & { env?: ViteEnv }).env;
     return env?.VITE_API_BASE_URL ?? env?.API_BASE_URL;
   } catch {
     return undefined;

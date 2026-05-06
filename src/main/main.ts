@@ -1,24 +1,15 @@
 import {
   app,
   BrowserWindow,
-  Menu,
-  Tray,
-  ipcMain,
-  nativeImage,
-  type MenuItemConstructorOptions,
-  type NativeImage,
+  type Tray,
 } from "electron";
 import { createRequire } from "node:module";
 import path from "node:path";
 import log from "electron-log";
 import { MAIN_CONSTANTS } from "./main-constants";
-import {
-  IPC_CHANNELS,
-  type LauncherSettings,
-  type CrashReportPayload,
+import type {
+  LauncherSettings,
 } from "../shared/constants/ipc-chanels";
-import { ERROR_CODES } from "../shared/constants/errors";
-import { LOG_MESSAGES } from "../shared/constants/log-messages";
 import { getDateFolder } from "./utils/dateFolder";
 import setupLogHandler from "./handlers/logHandler";
 import windowControlsHandler from "./handlers/windowControlsHandler";
@@ -29,13 +20,14 @@ import javaHandler from "./handlers/javaHandlerWrapper";
 import systemHandler from "./handlers/systemHandler";
 import gameHandler from "./handlers/gameHandler";
 import { createDiscordRpcService } from "./services/discordRpcService";
-import { verifyAsarIntegrity } from "./utils/integrity";
+import { registerCrashHandlers } from "./runtime/crash";
 import {
-  writeCrashReport,
-  readCrashReport,
-  clearCrashReport,
-} from "./utils/crashReport";
-import { sanitizeSettingsPatch } from "./utils/settings";
+  createMainWindow,
+  createAppMenu,
+  bindMainWindowLifecycle,
+} from "./runtime/window";
+import { syncTrayState, type TrayState } from "./runtime/tray";
+import { registerMainIpcHandlers } from "./runtime/ipc";
 
 type LegacyLangLoader = {
   setupLanguage: () => void;
@@ -52,13 +44,14 @@ const LangLoader = require(
 ) as LegacyLangLoader;
 
 const dateFolder = getDateFolder();
-let isHandlingFatalError = false;
-let mainWindow: BrowserWindow | null = null;
-let tray: Tray | null = null;
-let isQuiting = false;
-let settings: LauncherSettings = {
-  minimizeToTray: false,
-  discordRPC: true,
+const trayState: TrayState = { tray: null };
+const appState = {
+  mainWindow: null as BrowserWindow | null,
+  isQuiting: false,
+  settings: {
+    minimizeToTray: false,
+    discordRPC: true,
+  } as LauncherSettings,
 };
 
 const discordRpcService = createDiscordRpcService();
@@ -67,294 +60,77 @@ log.transports.file.level = "info";
 log.transports.console.level = "debug";
 log.transports.file.fileName = MAIN_CONSTANTS.LOG_FILE_NAMES.MAIN;
 
-function getMainLogPath(): string {
-  return path.join(
+log.transports.file.resolvePathFn = (): string =>
+  path.join(
     app.getPath(MAIN_CONSTANTS.DIRECTORIES.USER_DATA),
     MAIN_CONSTANTS.DIRECTORIES.LOGS,
     dateFolder,
     MAIN_CONSTANTS.LOG_FILE_NAMES.MAIN,
   );
-}
 
-log.transports.file.resolvePathFn = getMainLogPath;
+registerCrashHandlers();
 
-function handleFatalError(title: string, details: unknown): void {
-  if (isHandlingFatalError) {
-    return;
-  }
-  isHandlingFatalError = true;
-
-  const message =
-    details instanceof Error
-      ? details.stack || details.message
-      : String(details);
-
-  log.error(title, details);
-  void writeCrashReport({
-    title,
-    message,
-    timestamp: new Date().toISOString(),
-  })
-    .catch((error) => {
-      log.error(LOG_MESSAGES.APP_CRASH_REPORT_WRITE_FAILED, error);
-    })
-    .finally(() => {
-      app.exit(1);
-    });
-}
-
-process.on("uncaughtException", (error) => {
-  handleFatalError(MAIN_CONSTANTS.LOG_MESSAGES.APP_UNCAUGHT_EXCEPTION, error);
-});
-
-process.on("unhandledRejection", (reason) => {
-  handleFatalError(MAIN_CONSTANTS.LOG_MESSAGES.APP_UNHANDLED_REJECTION, reason);
-});
-
-function getPlatformIcon(filename: string): string {
-  const ext =
-    process.platform === MAIN_CONSTANTS.PLATFORMS.WINDOWS ? "ico" : "png";
-  return path.join(
-    appRoot,
-    "_legacy_app",
-    "assets",
-    "images",
-    `${filename}.${ext}`,
-  );
-}
-
-function getAppIconPath(filename: string): string {
-  if (filename === "SealCircle" && process.platform === MAIN_CONSTANTS.PLATFORMS.WINDOWS) {
-    const root = app.isPackaged ? process.resourcesPath : appRoot;
-    return path.join(root, "build", "app-icon.ico");
-  }
-
-  return getPlatformIcon(filename);
-}
-
-/**
- * Gets a NativeImage icon, resizing it on Linux if it exceeds X11 request limits.
- * Large icons (e.g. 2048x2048) can cause X11 to crash with "Cannot send request of length...".
- */
-function getAppIcon(filename: string): NativeImage {
-  const iconPath = getAppIconPath(filename);
-  const icon = nativeImage.createFromPath(iconPath);
-
-  // X11 has a limit on the length of a single request.
-  // 2048x2048 RGBA is ~16MB, which often exceeds this.
-  if (process.platform === "linux") {
-    const size = icon.getSize();
-    if (size.width > 512 || size.height > 512) {
-      return icon.resize({ width: 256, height: 256 });
-    }
-  }
-  return icon;
-}
-
-function createWindow(): BrowserWindow {
-  const window = new BrowserWindow({
-    width: MAIN_CONSTANTS.WINDOW_CONFIG.WIDTH,
-    height: MAIN_CONSTANTS.WINDOW_CONFIG.HEIGHT,
-    icon: getAppIcon("SealCircle"),
-    frame: false,
-    webPreferences: {
-      preload: path.join(appRoot, "dist", "preload", "preload.js"),
-      nodeIntegration: false,
-      contextIsolation: true,
-    },
-    backgroundColor: MAIN_CONSTANTS.APP_CONFIG.BG_COLOR,
-  });
-
-  log.info("MAIN_WINDOW_CREATED");
-
-  if (isDev) {
-    log.info(LOG_MESSAGES.APP_DEV_MODE);
-    window.loadURL(MAIN_CONSTANTS.APP_CONFIG.DEV_URL);
-    window.webContents.once("did-finish-load", () => {
-      window.webContents.openDevTools({ mode: "detach" });
-    });
-  } else {
-    window.loadFile(path.join(appRoot, MAIN_CONSTANTS.APP_CONFIG.PROD_INDEX));
-  }
-
-  window.removeMenu();
-  window.resizable = true;
-
-  window.on("closed", () => {
-    mainWindow = null;
-  });
-
-  return window;
-}
-
-function createMenu(): void {
-  if (process.platform !== MAIN_CONSTANTS.PLATFORMS.MACOS) {
-    return;
-  }
-
-  const menuTemplate: MenuItemConstructorOptions[] = [
-    { role: "appMenu" },
-    { role: "editMenu" },
-    { role: "viewMenu" },
-    { role: "windowMenu" },
-  ];
-
-  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
-}
-
-function createTray(): void {
-  if (tray) return;
-
-  tray = new Tray(getAppIcon("SealCircle"), "gerbariumlauncher-tray");
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: "Show launcher",
-      click: () => {
-        if (!mainWindow) return;
-        mainWindow.show();
-        if (mainWindow.isMinimized()) {
-          mainWindow.restore();
-        }
-        mainWindow.focus();
+registerMainIpcHandlers({
+  isDev,
+  getSettings: () => appState.settings,
+  setSettings: (nextSettings) => {
+    appState.settings = nextSettings;
+  },
+  syncTrayState: () =>
+    syncTrayState(
+      appState.settings.minimizeToTray,
+      trayState,
+      () => appState.mainWindow,
+      () => {
+        appState.isQuiting = true;
       },
-    },
-    { type: "separator" },
-    {
-      label: "Quit",
-      click: () => {
-        isQuiting = true;
-        app.quit();
-      },
-    },
-  ]);
-
-  tray.setToolTip("Gerbarium Launcher");
-  tray.setContextMenu(contextMenu);
-  tray.on("double-click", () => {
-    if (!mainWindow) return;
-    mainWindow.show();
-    if (mainWindow.isMinimized()) {
-      mainWindow.restore();
-    }
-    mainWindow.focus();
-  });
-}
-
-function destroyTray(): void {
-  if (!tray) {
-    return;
-  }
-
-  tray.removeAllListeners();
-  tray.destroy();
-  tray = null;
-}
-
-function syncTrayState(): void {
-  if (settings.minimizeToTray) {
-    createTray();
-    return;
-  }
-  destroyTray();
-}
-
-ipcMain.on(IPC_CHANNELS.SYSTEM.UI_READY, (): void => {
-  log.info("RENDERER_READY");
+      appRoot,
+    ),
+  discordRpcService,
+  appRoot,
 });
-
-ipcMain.on(IPC_CHANNELS.SYSTEM.SMOKE_TEST_PASSED, (): void => {
-  log.info("SMOKE_TEST_PASSED");
-});
-
-ipcMain.on(
-  IPC_CHANNELS.SYSTEM.SETTINGS_UPDATED,
-  (_event, newSettings: unknown): void => {
-    const safePatch = sanitizeSettingsPatch(newSettings);
-    settings = { ...settings, ...safePatch };
-    syncTrayState();
-    if (typeof safePatch.discordRPC === "boolean") {
-      discordRpcService.setEnabled(safePatch.discordRPC);
-    }
-  },
-);
-
-ipcMain.handle(
-  IPC_CHANNELS.APP.VERIFY_INTEGRITY,
-  async (): Promise<unknown> => {
-    return await verifyAsarIntegrity(isDev, process.resourcesPath);
-  },
-);
-
-ipcMain.handle(
-  IPC_CHANNELS.APP.GET_LAST_CRASH_REPORT,
-  async (): Promise<{
-    success: boolean;
-    report?: CrashReportPayload | null;
-    error?: string;
-  }> => {
-    try {
-      const report = await readCrashReport();
-      return { success: true, report };
-    } catch (error) {
-      log.error(LOG_MESSAGES.APP_CRASH_REPORT_READ_FAILED, error);
-      return { success: false, error: ERROR_CODES.APP_CRASH_REPORT_READ_FAILED };
-    }
-  },
-);
-
-ipcMain.handle(
-  IPC_CHANNELS.APP.CLEAR_LAST_CRASH_REPORT,
-  async (): Promise<{ success: boolean; error?: string }> => {
-    try {
-      await clearCrashReport();
-      return { success: true };
-    } catch (error) {
-      log.error(LOG_MESSAGES.APP_CRASH_REPORT_CLEAR_FAILED, error);
-      return {
-        success: false,
-        error: ERROR_CODES.APP_CRASH_REPORT_CLEAR_FAILED,
-      };
-    }
-  },
-);
 
 app.on("before-quit", (): void => {
-  isQuiting = true;
+  appState.isQuiting = true;
   discordRpcService.shutdown();
 });
 
 app.whenReady().then((): void => {
   LangLoader.setupLanguage();
-  mainWindow = createWindow();
-  createMenu();
+  appState.mainWindow = createMainWindow(appRoot, isDev);
+  createAppMenu();
 
   windowControlsHandler(app);
   authHandler(app);
   adminHandler(app);
   updateHandler(app);
   javaHandler();
-  systemHandler(app, () => settings);
-  gameHandler(mainWindow);
+  systemHandler(app, () => appState.settings);
+  gameHandler(appState.mainWindow);
   setupLogHandler(app);
-  discordRpcService.setEnabled(settings.discordRPC !== false);
+  discordRpcService.setEnabled(appState.settings.discordRPC !== false);
 
-  const currentWindow = mainWindow;
+  const currentWindow = appState.mainWindow;
   if (!currentWindow) {
     return;
   }
 
-  currentWindow.on("minimize", (): void => {
-    if (!settings.minimizeToTray) return;
-    currentWindow.hide();
-  });
+  bindMainWindowLifecycle(currentWindow, {
+    onClosed: (): void => {
+      appState.mainWindow = null;
+    },
+    onMinimize: (): void => {
+      if (!appState.settings.minimizeToTray) return;
+      currentWindow.hide();
+    },
+    onClose: (event: Electron.Event): void => {
+      if (appState.isQuiting || !appState.settings.minimizeToTray) {
+        return;
+      }
 
-  currentWindow.on("close", (event: Electron.Event): void => {
-    if (isQuiting || !settings.minimizeToTray) {
-      return;
-    }
-
-    event.preventDefault();
-    currentWindow.hide();
+      event.preventDefault();
+      currentWindow.hide();
+    },
   });
 });
 
@@ -363,13 +139,30 @@ app.on("window-all-closed", (): void => {
     return;
   }
 
-  if (!settings.minimizeToTray) {
+  if (!appState.settings.minimizeToTray) {
     app.quit();
   }
 });
 
 app.on("activate", (): void => {
-  if (mainWindow === null) {
-    mainWindow = createWindow();
+  if (appState.mainWindow === null) {
+    appState.mainWindow = createMainWindow(appRoot, isDev);
+    bindMainWindowLifecycle(appState.mainWindow, {
+      onClosed: (): void => {
+        appState.mainWindow = null;
+      },
+      onMinimize: (): void => {
+        if (!appState.settings.minimizeToTray) return;
+        appState.mainWindow?.hide();
+      },
+      onClose: (event: Electron.Event): void => {
+        if (appState.isQuiting || !appState.settings.minimizeToTray) {
+          return;
+        }
+
+        event.preventDefault();
+        appState.mainWindow?.hide();
+      },
+    });
   }
 });
