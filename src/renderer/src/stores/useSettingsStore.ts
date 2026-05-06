@@ -25,6 +25,7 @@ function toLauncherSettingsPatch(
     minimizeToTray: settings.minimizeToTray,
     gamePath: settings.gamePath,
     discordRPC: settings.discordRPC,
+    distributionUrl: settings.distributionUrl,
   };
 }
 
@@ -55,6 +56,7 @@ const defaultSettings: SettingsStateType = {
     discordRPC: true,
     jvmArgs: DEFAULT_SETTINGS.JVM_ARGS,
     gamePath: "",
+    distributionUrl: "",
     fullscreen: false,
     showLaunchConsole: true,
     themeMode: "dark",

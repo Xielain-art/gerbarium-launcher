@@ -101,6 +101,24 @@ export function GeneralSettingsTab({
                 </Button>
               </div>
             </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="fantasy-rune-label text-[10px] font-bold">
+                Mod Distribution Manifest URL
+              </label>
+              <Input
+                type="url"
+                value={general.distributionUrl || ""}
+                onChange={(e) =>
+                  onUpdateGeneral({ distributionUrl: e.target.value })
+                }
+                placeholder="https://<project>.supabase.co/storage/v1/object/public/gerbarium/..."
+                className="fantasy-input-shell flex-1 font-mono text-[13px]"
+              />
+              <p className="text-[11px] text-theme-muted">
+                Point this at public `stable.json` or channel manifest in Supabase Storage.
+              </p>
+            </div>
             
             <div className="flex items-center gap-6 border-t border-theme pt-2">
               <button

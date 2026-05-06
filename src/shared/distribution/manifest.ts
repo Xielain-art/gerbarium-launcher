@@ -29,6 +29,7 @@ export interface DistributionManifest {
 
 export interface GameUpdateOptions {
   gamePath?: string;
+  minecraftVersion?: string;
   manifestUrl?: string;
 }
 
@@ -46,4 +47,3 @@ export interface GameUpdateResult {
   deleted: number;
   error?: string;
 }
-

@@ -1,7 +1,6 @@
 import {
   app,
   BrowserWindow,
-  type Tray,
 } from "electron";
 import { createRequire } from "node:module";
 import path from "node:path";
@@ -51,6 +50,7 @@ const appState = {
   settings: {
     minimizeToTray: false,
     discordRPC: true,
+    distributionUrl: "",
   } as LauncherSettings,
 };
 

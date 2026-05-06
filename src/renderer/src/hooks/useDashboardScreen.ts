@@ -285,6 +285,8 @@ export function useDashboardScreen(): DashboardScreenResult {
 
       const updateResult = await window.electronAPI.game.update({
         gamePath: settings.gamePath,
+        minecraftVersion: selectedVersion.version || selectedVersion.id,
+        manifestUrl: settings.distributionUrl?.trim() || undefined,
       });
 
       if (!updateResult.success) {
@@ -304,6 +306,7 @@ export function useDashboardScreen(): DashboardScreenResult {
       const result = await window.electronAPI.game.launch({
         username: user.username,
         version: minecraftVersion,
+        minecraftVersion,
         loader: selectedVersion.loader,
         fabricLoaderVersion: selectedVersion.fabricLoaderVersion,
         forgeInstallerUrl: selectedVersion.forgeInstallerUrl,

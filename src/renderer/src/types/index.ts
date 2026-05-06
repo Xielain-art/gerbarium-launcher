@@ -56,6 +56,7 @@ export interface SettingsGeneral {
   discordRPC: boolean;
   jvmArgs: string;
   gamePath?: string;
+  distributionUrl?: string;
   fullscreen: boolean;
   showLaunchConsole: boolean;
   themeMode: ThemeMode;

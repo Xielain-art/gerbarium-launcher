@@ -11,6 +11,7 @@ import {
   createProgressSender,
   getGameLog,
   parseMemoryGb,
+  resolveInstanceRootPath,
   resolveRootPath,
   sanitizeJvmArgs,
   validateJavaCompatibility,
@@ -167,7 +168,9 @@ export default function setupGameHandlers(mainWindow: BrowserWindow): void {
           throw new Error("memory.min cannot be greater than memory.max");
         }
 
-        const rootPath = await resolveRootPath(options.gamePath);
+        const rootPath = options.minecraftVersion?.trim()
+          ? await resolveInstanceRootPath(options.gamePath, options.minecraftVersion)
+          : await resolveInstanceRootPath(options.gamePath, version);
         const javaPath = await validateJavaPath(options.javaPath);
         await validateJavaCompatibility(javaPath, version);
         const jvmArgs = sanitizeJvmArgs(options.jvmArgs);
@@ -297,10 +300,31 @@ export default function setupGameHandlers(mainWindow: BrowserWindow): void {
   ipcMain.handle(
     IPC_CHANNELS.GAME.GET_INSTALLED_VERSIONS,
     async (_event: IpcMainInvokeEvent, gamePath?: string): Promise<string[]> => {
-      const versionsPath = path.join(await resolveRootPath(gamePath), "versions");
       try {
-        const folders = await fs.readdir(versionsPath);
-        return folders;
+        const baseRoot = await resolveRootPath(gamePath);
+        const instancesRoot = path.join(baseRoot, "instances");
+        const instanceFolders = await fs.readdir(instancesRoot);
+        const installedVersions = new Set<string>();
+
+        await Promise.all(
+          instanceFolders.map(async (instanceFolder) => {
+            const versionsPath = path.join(
+              instancesRoot,
+              instanceFolder,
+              "versions",
+            );
+            try {
+              const folders = await fs.readdir(versionsPath);
+              for (const folder of folders) {
+                installedVersions.add(folder);
+              }
+            } catch {
+              // No versions folder in this instance yet.
+            }
+          }),
+        );
+
+        return Array.from(installedVersions);
       } catch {
         return [];
       }

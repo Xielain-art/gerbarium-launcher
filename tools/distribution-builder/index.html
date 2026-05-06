@@ -58,10 +58,50 @@
           />
         </label>
 
+        <div class="supabase-grid">
+          <label>
+            Supabase URL
+            <input
+              id="supabaseUrl"
+              value="https://<project-ref>.supabase.co"
+              placeholder="https://<project-ref>.supabase.co"
+            />
+          </label>
+          <label>
+            Service role key
+            <input
+              id="serviceKey"
+              type="password"
+              placeholder="Paste service_role key here"
+            />
+          </label>
+          <label>
+            Bucket
+            <input id="bucket" value="gerbarium" />
+          </label>
+          <label>
+            Storage prefix
+            <input
+              id="storagePrefix"
+              value="gerbarium/modpacks/main/files/1.0.0"
+            />
+          </label>
+          <label>
+            Manifest path
+            <input
+              id="manifestPath"
+              value="gerbarium/modpacks/main/channels/stable.json"
+            />
+          </label>
+        </div>
+
         <div class="actions">
           <button id="pickFolder">Выбрать папку сборки</button>
+          <button id="scanOnly">Scan only allowed files</button>
           <button id="downloadJson" disabled>Скачать distribution.json</button>
+          <button id="uploadSupabase" disabled>Build & Upload to Supabase</button>
         </div>
+        <div id="warning" class="warning" hidden></div>
       </section>
 
       <section class="stats">
@@ -95,4 +135,3 @@
     <script src="./app.js"></script>
   </body>
 </html>
-

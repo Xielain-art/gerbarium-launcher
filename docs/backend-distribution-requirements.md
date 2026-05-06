@@ -16,6 +16,24 @@ gerbarium/modpacks/main/files/1.0.0/mods/example.jar
 gerbarium/modpacks/main/files/1.0.0/config/example.toml
 ```
 
+## Supabase Layout
+
+For Supabase Storage, use one public bucket for launcher distribution.
+
+Recommended bucket:
+
+```text
+gerbarium
+```
+
+Recommended manifest URL:
+
+```text
+https://<project-ref>.supabase.co/storage/v1/object/public/gerbarium/gerbarium/modpacks/main/channels/stable.json
+```
+
+The launcher can use that URL directly through `GERBARIUM_DISTRIBUTION_URL` or the in-app distribution URL setting.
+
 ## API
 
 Required public endpoints:
@@ -35,6 +53,8 @@ GERBARIUM_DISTRIBUTION_URL=https://api.example.com/launcher/packs/gerbarium/chan
 ```
 
 If `GERBARIUM_DISTRIBUTION_URL` is absent, the current launcher skips modpack update and keeps normal Minecraft launch working.
+
+For Supabase, point it at a public object URL in the `gerbarium` bucket.
 
 Optional admin endpoints:
 
@@ -57,6 +77,9 @@ Each managed file must include:
 ## Config Rules
 
 Use an ideal local modpack folder as source.
+
+Do not point the builder at full `.gerbarium` root or game runtime folder.
+Use a clean pack folder containing only the files you actually want to distribute.
 
 Recommended actions:
 
@@ -82,5 +105,42 @@ Never manage:
 3. Select the ideal modpack folder.
 4. Set CDN base URL and version.
 5. Export `distribution.json`.
-6. Upload files and manifest to storage.
-7. Promote `channels/stable.json` to the new manifest.
+6. Upload files and manifest to Supabase Storage.
+7. Copy `distribution.json` to `gerbarium/modpacks/main/channels/stable.json`.
+
+## Testing
+
+Test in this order:
+
+1. Open the manifest URL in browser.
+   - Expect raw JSON.
+   - Example:
+
+```text
+https://<project-ref>.supabase.co/storage/v1/object/public/gerbarium/gerbarium/modpacks/main/channels/stable.json
+```
+
+2. Open one file URL from the manifest.
+   - Expect the raw file or a browser download.
+   - Example:
+
+```text
+https://<project-ref>.supabase.co/storage/v1/object/public/gerbarium/gerbarium/modpacks/main/files/1.0.0/mods/example.jar
+```
+
+3. Paste the manifest URL into launcher settings.
+   - Field: `Mod Distribution Manifest URL`
+
+4. Start launcher and watch update screen.
+   - If manifest is valid, it will fetch file list and compare hashes.
+   - If no files differ, it should report distribution ready and continue to login.
+
+5. Run a real game launch.
+   - Launcher should call update first, then launch Minecraft.
+
+## Common Failures
+
+- 404 on manifest URL: wrong bucket path or object key.
+- 403 on file URL: bucket not public or URL points to private object path.
+- Hash mismatch: file in bucket does not match `sha256` in manifest.
+- Launcher skips update: `Mod Distribution Manifest URL` is empty or malformed.

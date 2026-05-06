@@ -102,11 +102,13 @@ export function toLauncherSettingsPatch(settings: {
   minimizeToTray: boolean;
   gamePath?: string;
   discordRPC: boolean;
+  distributionUrl?: string;
 }): Partial<LauncherSettings> {
   return {
     minimizeToTray: settings.minimizeToTray,
     gamePath: settings.gamePath,
     discordRPC: settings.discordRPC,
+    distributionUrl: settings.distributionUrl,
   };
 }
 

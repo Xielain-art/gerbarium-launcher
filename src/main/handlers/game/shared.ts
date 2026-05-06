@@ -5,6 +5,7 @@ export {
   validateAbsolutePath,
   validateJavaPath,
   resolveRootPath,
+  resolveInstanceRootPath,
   sanitizeJvmArgs,
   parseJavaMajor,
   validateJavaCompatibility,

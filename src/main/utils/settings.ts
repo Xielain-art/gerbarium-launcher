@@ -26,5 +26,9 @@ export function sanitizeSettingsPatch(
     safePatch.discordRPC = patch.discordRPC;
   }
 
+  if (typeof patch.distributionUrl === "string") {
+    safePatch.distributionUrl = patch.distributionUrl.trim();
+  }
+
   return safePatch;
 }

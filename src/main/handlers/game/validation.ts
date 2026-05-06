@@ -82,6 +82,31 @@ export async function resolveRootPath(gamePath?: string): Promise<string> {
   return resolvedPath;
 }
 
+export function sanitizeInstanceKey(value: string): string {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) {
+    throw new Error("minecraftVersion is required");
+  }
+
+  const safe = normalized.replace(/[^a-z0-9._-]+/g, "_");
+  if (safe === "." || safe === "..") {
+    throw new Error("minecraftVersion is invalid");
+  }
+
+  return safe;
+}
+
+export async function resolveInstanceRootPath(
+  gamePath: string | undefined,
+  minecraftVersion: string,
+): Promise<string> {
+  const baseRoot = await resolveRootPath(gamePath);
+  const instanceKey = sanitizeInstanceKey(minecraftVersion);
+  const instanceRoot = path.join(baseRoot, "instances", instanceKey);
+  await fs.mkdir(instanceRoot, { recursive: true });
+  return instanceRoot;
+}
+
 export function sanitizeJvmArgs(jvmArgs: string[]): string[] {
   if (!Array.isArray(jvmArgs)) {
     throw new Error("jvmArgs must be an array");

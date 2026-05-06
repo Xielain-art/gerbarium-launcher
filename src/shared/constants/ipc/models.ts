@@ -23,6 +23,7 @@ import type {
 export interface GameLaunchOptions {
   username: string;
   version: string;
+  minecraftVersion?: string;
   loader?: "fabric" | "forge";
   fabricLoaderVersion?: string;
   forgeInstallerUrl?: string;
@@ -152,6 +153,7 @@ export interface LauncherSettings {
   minimizeToTray: boolean;
   gamePath?: string;
   discordRPC?: boolean;
+  distributionUrl?: string;
 }
 
 export interface UpdateInfoPayload {

@@ -7,7 +7,11 @@ import {
 } from "../../../shared/constants/ipc-chanels";
 import { LOG_MESSAGES } from "../../../shared/constants/log-messages";
 import { runDistributionUpdate } from "../../services/gameDistributionUpdater";
-import { resolveRootPath, sendProgress } from "./shared";
+import {
+  resolveRootPath,
+  resolveInstanceRootPath,
+  sendProgress,
+} from "./shared";
 
 function toErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error";
@@ -31,8 +35,11 @@ async function handleDistributionUpdate(
 ): Promise<GameUpdateResult> {
   try {
     const gameRoot = await resolveRootPath(options?.gamePath);
+    const instanceRoot = options?.minecraftVersion?.trim()
+      ? await resolveInstanceRootPath(options?.gamePath, options.minecraftVersion)
+      : gameRoot;
     const result = await runDistributionUpdate({
-      gameRoot,
+      gameRoot: instanceRoot,
       manifestUrl: options?.manifestUrl,
       verifyOnly,
       reportProgress: (progress) =>
@@ -71,4 +78,3 @@ export default function setupGameUpdateHandlers(mainWindow: BrowserWindow): void
       handleDistributionUpdate(mainWindow, options, true),
   );
 }
-
