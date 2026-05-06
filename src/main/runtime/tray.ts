@@ -1,6 +1,8 @@
 import { app, BrowserWindow, Menu, Tray } from "electron";
 import { getAppIcon } from "./icons";
 
+const TRAY_GUID = "b7b0b7f1-2d10-4e5c-9f4b-2c0d1b3a1c61";
+
 export type TrayState = {
   tray: Tray | null;
 };
@@ -17,7 +19,7 @@ export function createTray(
 
   state.tray = new Tray(
     getAppIcon(appRoot, "SealCircle"),
-    "gerbariumlauncher-tray",
+    TRAY_GUID,
   );
   const contextMenu = Menu.buildFromTemplate([
     {
