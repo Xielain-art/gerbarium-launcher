@@ -57,7 +57,7 @@ const defaultSettings: SettingsStateType = {
     gamePath: "",
     fullscreen: false,
     showLaunchConsole: true,
-    themeMode: "light",
+    themeMode: "dark",
   },
   mods: {
     enabledMods: [],
@@ -71,6 +71,10 @@ const defaultSettings: SettingsStateType = {
   isLoading: false,
   error: null,
 };
+
+function normalizeThemeMode(value: unknown): "light" | "dark" {
+  return value === "light" || value === "dark" ? value : "dark";
+}
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
@@ -144,11 +148,33 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: STORAGE_KEYS.SETTINGS,
+      version: 1,
       partialize: (state) => ({
         general: state.general,
         mods: state.mods,
         profile: state.profile,
       }),
+      migrate: (persistedState) => {
+        const raw = persistedState as Partial<SettingsStateType> | undefined;
+
+        return {
+          ...defaultSettings,
+          ...raw,
+          general: {
+            ...defaultSettings.general,
+            ...raw?.general,
+            themeMode: normalizeThemeMode(raw?.general?.themeMode),
+          },
+          mods: {
+            ...defaultSettings.mods,
+            ...raw?.mods,
+          },
+          profile: {
+            ...defaultSettings.profile,
+            ...raw?.profile,
+          },
+        };
+      },
     },
   ),
 );

@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ROUTES } from "../../../shared/constants/system";
+import { UI_STRINGS } from "../../../shared/constants/ui-strings";
 import type { IntegrityCheckResult } from "../../../shared/constants/ipc-chanels";
+import { useStartupGateStore } from "../stores/useStartupGateStore";
 
 const PHASES = [
   "Initializing security checks...",
@@ -9,10 +11,6 @@ const PHASES = [
   "Calculating local hash...",
   "Verifying launcher integrity...",
 ] as const;
-
-function getNextRoute(isDevMode: boolean, isSmokeTest: boolean): string {
-  return isDevMode || isSmokeTest ? ROUTES.LOGIN : ROUTES.UPDATE;
-}
 
 function getSplashNode(id: string): HTMLElement | null {
   return document.getElementById(id);
@@ -26,18 +24,19 @@ function setSplashText(id: string, value: string): void {
 }
 
 function setSplashProgress(percent: number): void {
+  const clamped = Math.max(0, Math.min(100, Math.round(percent)));
   const fill = getSplashNode("bootstrap-splash__progress-fill");
   const label = getSplashNode("bootstrap-splash__progress-label");
   const value = getSplashNode("bootstrap-splash__progress-percent");
 
   if (fill) {
-    fill.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+    fill.style.width = `${clamped}%`;
   }
   if (value) {
-    value.textContent = `${Math.round(Math.max(0, Math.min(100, percent)))}%`;
+    value.textContent = `${clamped}%`;
   }
   if (label) {
-    label.textContent = percent < 100 ? "Checking hash" : "Integrity verified";
+    label.textContent = clamped < 100 ? "Checking hash" : "Integrity verified";
   }
 }
 
@@ -49,16 +48,23 @@ function setSplashHint(value: string): void {
   setSplashText("bootstrap-splash__hint", value);
 }
 
+function setSplashSubtitle(value: string): void {
+  setSplashText("bootstrap-splash__subtitle", value);
+}
+
 function fadeAndRemoveSplash(): void {
   const splash = getSplashNode("bootstrap-splash");
   if (!splash) {
     return;
   }
-
   splash.style.transition = "opacity 240ms ease, transform 240ms ease";
   splash.style.opacity = "0";
   splash.style.transform = "scale(1.01)";
   window.setTimeout(() => splash.remove(), 260);
+}
+
+function isUpdateNoneMessage(message: string): boolean {
+  return message === UI_STRINGS.UPDATE_SCREEN.NONE;
 }
 
 export function useIntegrityCheckScreen(): {
@@ -67,7 +73,9 @@ export function useIntegrityCheckScreen(): {
   statusMessage: string;
 } {
   const navigate = useNavigate();
-  const isDevMode = import.meta.env.DEV;
+  const setUpdateGatePassed = useStartupGateStore(
+    (state) => state.setUpdateGatePassed,
+  );
   const isSmokeTest =
     window.electronAPI?.getSmokeTestConfig?.()?.isSmokeTest ?? false;
   const [progress, setProgress] = useState(0);
@@ -92,15 +100,20 @@ export function useIntegrityCheckScreen(): {
       window.clearInterval(splashTimers.progressTimer);
     }
 
+    setUpdateGatePassed(false);
+
     let isActive = true;
     let progressValue = 0;
     let minimumDelayPassed = false;
-    let integrityFinished = false;
+    let startupFinished = false;
     let finalRoute: string | null = null;
     let videoFinished = false;
     let minDelayTimer = 0;
     let videoReadyProbeTimer = 0;
-    let videoPlaybackFailed = false;
+    let updateFlowTimer = 0;
+    let updateUnsubMessage: (() => void) | undefined;
+    let updateUnsubInfo: (() => void) | undefined;
+    let updateUnsubProgress: (() => void) | undefined;
 
     const updateBootProgress = (percent: number): void => {
       setProgress(percent);
@@ -108,35 +121,135 @@ export function useIntegrityCheckScreen(): {
     };
 
     const maybeExit = (): void => {
-      if (!isActive || !integrityFinished || !minimumDelayPassed || !videoFinished) {
+      if (!isActive || !startupFinished || !minimumDelayPassed || !videoFinished) {
         return;
       }
-
       fadeAndRemoveSplash();
-      const route = finalRoute ?? getNextRoute(isDevMode, isSmokeTest);
-      void navigate({ to: route });
-    };
-
-    setSplashText("bootstrap-splash__subtitle", "Verifying integrity before launch");
-    setSplashHint("Loading crystal intro");
-    setSplashPhase(PHASES[0]);
-    updateBootProgress(0);
-
-    const video = getSplashNode("bootstrap-splash__video") as HTMLVideoElement | null;
-    const clearMinimumDelay = (): void => {
-      if (minDelayTimer) {
-        window.clearTimeout(minDelayTimer);
-        minDelayTimer = 0;
+      if (finalRoute) {
+        void navigate({ to: finalRoute });
       }
     };
+
     const armMinimumDelay = (ms: number): void => {
-      clearMinimumDelay();
+      if (minDelayTimer) {
+        window.clearTimeout(minDelayTimer);
+      }
       minDelayTimer = window.setTimeout(() => {
         minimumDelayPassed = true;
         maybeExit();
       }, ms);
     };
 
+    const completeToLogin = (message: string): void => {
+      setStatusMessage(message);
+      setSplashHint(message);
+      setSplashPhase("Launcher ready");
+      updateBootProgress(100);
+      setUpdateGatePassed(true);
+      finalRoute = ROUTES.LOGIN;
+      startupFinished = true;
+      maybeExit();
+    };
+
+    const cleanupUpdateListeners = (): void => {
+      updateUnsubMessage?.();
+      updateUnsubInfo?.();
+      updateUnsubProgress?.();
+      updateUnsubMessage = undefined;
+      updateUnsubInfo = undefined;
+      updateUnsubProgress = undefined;
+      if (updateFlowTimer) {
+        window.clearTimeout(updateFlowTimer);
+        updateFlowTimer = 0;
+      }
+    };
+
+    const startUpdateFlow = (): void => {
+      if (!window.electronAPI?.initUpdate || !window.electronAPI?.startUpdateCheck) {
+        completeToLogin("Update API unavailable. Starting launcher...");
+        return;
+      }
+
+      setSplashSubtitle("Checking launcher version and updates");
+      setSplashPhase("Checking launcher version...");
+      setSplashHint("Version check in progress...");
+      updateBootProgress(Math.max(progressValue, 92));
+
+      updateUnsubMessage = window.electronAPI.onUpdateMessage((message) => {
+        if (!isActive) {
+          return;
+        }
+        setStatusMessage(message);
+
+        if (message === UI_STRINGS.UPDATE_SCREEN.SEARCHING) {
+          setSplashPhase("Checking launcher version...");
+          setSplashHint("Version check in progress...");
+          return;
+        }
+
+        if (message === UI_STRINGS.UPDATE_SCREEN.FOUND) {
+          setSplashPhase("Update found. Downloading...");
+          setSplashHint("Downloading update in background...");
+          return;
+        }
+
+        if (message === UI_STRINGS.UPDATE_SCREEN.DOWNLOADED) {
+          setSplashPhase("Update downloaded");
+          setSplashHint("Restarting launcher...");
+          updateBootProgress(100);
+          // App should restart from main process; keep splash visible.
+          return;
+        }
+
+        if (isUpdateNoneMessage(message)) {
+          cleanupUpdateListeners();
+          completeToLogin(UI_STRINGS.UPDATE_SCREEN.STARTING_LAUNCHER);
+          return;
+        }
+
+        if (message.startsWith(UI_STRINGS.UPDATE_SCREEN.ERROR_PREFIX)) {
+          cleanupUpdateListeners();
+          completeToLogin("Update check failed. Starting launcher...");
+        }
+      });
+
+      updateUnsubInfo = window.electronAPI.onUpdateInfo((info) => {
+        if (!isActive || !info) {
+          return;
+        }
+        setSplashPhase(`Update found: ${info.version}`);
+        setSplashHint("Downloading update in background...");
+      });
+
+      updateUnsubProgress = window.electronAPI.onUpdateProgress((progress) => {
+        if (!isActive) {
+          return;
+        }
+        const percent = Number.isFinite(progress.percent) ? progress.percent : 0;
+        const mapped = 92 + percent * 0.08;
+        updateBootProgress(mapped);
+        setSplashPhase("Downloading update...");
+        setSplashHint(`Update download: ${Math.round(percent)}%`);
+      });
+
+      window.electronAPI.initUpdate();
+      window.electronAPI.startUpdateCheck();
+
+      updateFlowTimer = window.setTimeout(() => {
+        if (!isActive || startupFinished) {
+          return;
+        }
+        cleanupUpdateListeners();
+        completeToLogin("Update timeout. Starting launcher...");
+      }, 120_000);
+    };
+
+    setSplashSubtitle("Verifying integrity before launch");
+    setSplashHint("Loading crystal intro");
+    setSplashPhase(PHASES[0]);
+    updateBootProgress(0);
+
+    const video = getSplashNode("bootstrap-splash__video") as HTMLVideoElement | null;
     const onVideoEnded = (): void => {
       videoFinished = true;
       maybeExit();
@@ -149,7 +262,6 @@ export function useIntegrityCheckScreen(): {
         Number.isFinite(video.duration) && video.duration > 0
           ? Math.round(video.duration * 1000)
           : 2000;
-      // Never earlier than 2s, but if video is longer we wait for full video.
       armMinimumDelay(Math.max(2000, durationMs));
     };
     const onVideoPlaying = (): void => {
@@ -157,7 +269,6 @@ export function useIntegrityCheckScreen(): {
       setSplashHint("Crystal intro active");
     };
     const onVideoError = (): void => {
-      videoPlaybackFailed = true;
       videoFinished = true;
       setSplashHint("Crystal intro unavailable");
       armMinimumDelay(2000);
@@ -175,13 +286,11 @@ export function useIntegrityCheckScreen(): {
       armMinimumDelay(2000);
 
       videoReadyProbeTimer = window.setTimeout(() => {
-        if (videoPlaybackFailed || videoFinished) {
+        if (videoFinished) {
           return;
         }
-        // Decoder/autoplay can silently fail in Electron on some mp4 codecs.
         const hasFrame = video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA;
         if (!hasFrame) {
-          videoPlaybackFailed = true;
           videoFinished = true;
           setSplashHint("Crystal intro unavailable");
           maybeExit();
@@ -193,6 +302,7 @@ export function useIntegrityCheckScreen(): {
           // Autoplay/decode may be blocked; fallback keeps startup unblocked.
         });
       }
+
       if (videoFinished) {
         maybeExit();
       }
@@ -217,26 +327,20 @@ export function useIntegrityCheckScreen(): {
         return;
       }
       progressValue = Math.min(90, progressValue + Math.random() * 9 + 2);
-      const nextProgress = Math.round(progressValue);
-      updateBootProgress(nextProgress);
+      updateBootProgress(progressValue);
     }, 180);
 
-    function finalizeWithStatus(message: string, route?: string | null): void {
-      setStatusMessage(message);
-      finalRoute = route ?? finalRoute;
-      integrityFinished = true;
-      updateBootProgress(100);
-      setSplashPhase("Integrity verified");
-      setSplashHint(message);
-      maybeExit();
-    }
+    const startPostIntegrityFlow = (): void => {
+      if (isSmokeTest) {
+        completeToLogin("Starting launcher...");
+        return;
+      }
+      startUpdateFlow();
+    };
 
     async function runCheck(): Promise<void> {
       if (!window.electronAPI?.verifyIntegrity) {
-        finalizeWithStatus(
-          "Integrity API is unavailable, continuing startup...",
-          getNextRoute(isDevMode, isSmokeTest),
-        );
+        startPostIntegrityFlow();
         return;
       }
 
@@ -246,10 +350,9 @@ export function useIntegrityCheckScreen(): {
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Integrity check failed";
-        finalizeWithStatus(
-          `Integrity check error: ${message}`,
-          getNextRoute(isDevMode, isSmokeTest),
-        );
+        setStatusMessage(`Integrity check error: ${message}`);
+        setSplashHint("Integrity check failed. Continuing...");
+        startPostIntegrityFlow();
         return;
       }
 
@@ -263,28 +366,19 @@ export function useIntegrityCheckScreen(): {
       );
 
       if (result.status === "mismatch") {
-        setSplashHint("Recovery update required");
-        finalizeWithStatus(
-          "Integrity mismatch detected. Recovery update started...",
-          ROUTES.UPDATE,
-        );
-        return;
-      }
-
-      if (result.status === "offline") {
+        setSplashHint("Integrity mismatch. Starting recovery update...");
+      } else if (result.status === "offline") {
         setSplashHint("Offline integrity mode");
-        finalizeWithStatus(
-          "Offline integrity mode: remote hash unavailable. Continuing...",
-          getNextRoute(isDevMode, isSmokeTest),
-        );
-        return;
+      } else {
+        setSplashHint("Integrity verified");
       }
 
-      setSplashHint("Integrity verified");
-      finalizeWithStatus(
-        result.message || "Integrity check completed.",
-        getNextRoute(isDevMode, isSmokeTest),
-      );
+      setStatusMessage(result.message || "Integrity check completed.");
+      setSplashPhase("Integrity check completed");
+      updateBootProgress(Math.max(progressValue, 91));
+      window.clearInterval(progressTimer);
+      window.clearInterval(phaseTimer);
+      startPostIntegrityFlow();
     }
 
     void runCheck();
@@ -295,6 +389,7 @@ export function useIntegrityCheckScreen(): {
       window.clearInterval(phaseTimer);
       window.clearTimeout(minDelayTimer);
       window.clearTimeout(videoReadyProbeTimer);
+      cleanupUpdateListeners();
       if (video) {
         video.removeEventListener("ended", onVideoEnded);
         video.removeEventListener("canplay", onVideoCanPlay);
@@ -303,7 +398,7 @@ export function useIntegrityCheckScreen(): {
         video.removeEventListener("error", onVideoError);
       }
     };
-  }, [navigate, isDevMode, isSmokeTest]);
+  }, [navigate, isSmokeTest, setUpdateGatePassed]);
 
   return { progress, phaseText, statusMessage };
 }
