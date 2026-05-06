@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (for example v3.0.3)"
+        required: true
+        type: string
 
 jobs:
   package:
@@ -17,6 +23,8 @@ jobs:
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -61,6 +69,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
 
     steps:
       - name: Download all artifacts
@@ -76,6 +86,7 @@ jobs:
           draft: true
           repository: Xielain-art/gerbarium-releases
           token: ${{ secrets.GH_TOKEN }}
+          tag_name: ${{ env.RELEASE_TAG }}
           files: |
             artifacts/*.exe
             artifacts/*.AppImage
