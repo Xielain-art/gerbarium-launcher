@@ -7,7 +7,8 @@ export const queryKeys = {
     order?: "ASC" | "DESC";
   }) => [...queryKeys.publicNewsRoot(), filters] as const,
   publicChangelog: () => ["public-changelog"] as const,
-  serverStatus: () => ["server-status"] as const,
+  serverStatus: (address?: string, password?: string) =>
+    ["server-status", address ?? "default", password ?? ""] as const,
   adminUsersRoot: () => ["admin-users"] as const,
   adminUsers: (filters: {
     search?: string;

@@ -1,6 +1,7 @@
 ﻿import { useCallback } from "react";
 import type { ReactNode } from "react";
 import { AdvancedSettingsTab } from "../../components/settings/AdvancedSettingsTab";
+import { DevelopmentSettingsTab } from "../../components/settings/DevelopmentSettingsTab";
 import { GeneralSettingsTab } from "../../components/settings/GeneralSettingsTab";
 import { JavaSettingsTab } from "../../components/settings/JavaSettingsTab";
 import { ProfileSettingsTab } from "../../components/settings/ProfileSettingsTab";
@@ -124,6 +125,14 @@ export function useSettingsTabRenderer(deps: {
             }
             showDevToolsButton={isDevMode}
             onOpenDevTools={() => window.electronAPI.openDevTools()}
+          />
+        );
+      case "development":
+        return (
+          <DevelopmentSettingsTab
+            t={t}
+            general={general}
+            onUpdateGeneral={updateGeneral}
           />
         );
       default:

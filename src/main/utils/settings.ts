@@ -30,5 +30,17 @@ export function sanitizeSettingsPatch(
     safePatch.distributionUrl = patch.distributionUrl.trim();
   }
 
+  if (typeof patch.devServerAddress === "string") {
+    safePatch.devServerAddress = patch.devServerAddress.trim();
+  }
+
+  if (typeof patch.devServerPassword === "string") {
+    safePatch.devServerPassword = patch.devServerPassword;
+  }
+
+  if (typeof patch.gameServerAddress === "string") {
+    safePatch.gameServerAddress = patch.gameServerAddress.trim();
+  }
+
   return safePatch;
 }

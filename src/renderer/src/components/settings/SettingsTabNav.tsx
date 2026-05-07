@@ -6,7 +6,8 @@ import {
   User, 
   Sliders, 
   HelpCircle,
-  ChevronRight
+  ChevronRight,
+  Wrench
 } from "lucide-react";
 import { Avatar } from "../game/Avatar";
 import { useAuthStore } from "../../stores/useAuthStore";
@@ -29,6 +30,7 @@ export function SettingsTabNav({
     { id: "java", label: t.SETTINGS.TABS.java, icon: Cpu },
     { id: "profile", label: t.SETTINGS.TABS.profile, icon: User },
     { id: "advanced", label: t.SETTINGS.TABS.advanced, icon: Sliders },
+    { id: "development", label: t.SETTINGS.TABS.development, icon: Wrench },
     { id: "support", label: t.SETTINGS.TABS.support, icon: HelpCircle },
   ];
 

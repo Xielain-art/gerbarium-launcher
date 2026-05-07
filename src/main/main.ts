@@ -51,6 +51,9 @@ const appState = {
     minimizeToTray: false,
     discordRPC: true,
     distributionUrl: "",
+    devServerAddress: "",
+    devServerPassword: "",
+    gameServerAddress: "",
   } as LauncherSettings,
 };
 

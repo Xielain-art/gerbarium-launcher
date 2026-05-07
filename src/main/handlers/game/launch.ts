@@ -25,6 +25,31 @@ function toErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
+function parseAutoConnectAddress(rawAddress: string): {
+  host: string;
+  port: number;
+} {
+  const trimmed = rawAddress.trim();
+  if (!trimmed) {
+    throw new Error("Auto-connect address is empty.");
+  }
+
+  const normalized = trimmed.includes("://") ? trimmed : `http://${trimmed}`;
+  const parsed = new URL(normalized);
+  const host = parsed.hostname.trim();
+  const port = parsed.port ? Number(parsed.port) : 25565;
+
+  if (!host) {
+    throw new Error("Auto-connect host is invalid.");
+  }
+
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error("Auto-connect port is invalid.");
+  }
+
+  return { host, port };
+}
+
 let activeGameProcess: ChildProcessWithoutNullStreams | null = null;
 const ASSET_DEBUG_PREFIX = "[MCLC]: Attempting to download assets";
 
@@ -200,6 +225,9 @@ export default function setupGameHandlers(mainWindow: BrowserWindow): void {
                 options.fabricLoaderVersion,
               )
             : undefined;
+        const autoConnect = options.autoConnect?.address
+          ? parseAutoConnectAddress(options.autoConnect.address)
+          : null;
 
         const opts = {
           authorization: auth,
@@ -219,6 +247,12 @@ export default function setupGameHandlers(mainWindow: BrowserWindow): void {
           window: {
             fullscreen: options.fullscreen || false,
           },
+          quickPlay: autoConnect
+            ? {
+                type: "multiplayer" as const,
+                identifier: `${autoConnect.host}:${autoConnect.port}`,
+              }
+            : undefined,
         };
 
         const launcher = new Client();

@@ -57,6 +57,9 @@ export interface SettingsGeneral {
   jvmArgs: string;
   gamePath?: string;
   distributionUrl?: string;
+  devServerAddress?: string;
+  devServerPassword?: string;
+  gameServerAddress?: string;
   fullscreen: boolean;
   showLaunchConsole: boolean;
   themeMode: ThemeMode;
@@ -156,6 +159,7 @@ export interface ServerStatusData {
     online: number;
     max: number;
   };
+  servers?: Record<string, number>;
   version?: string;
   motd?: string;
   latency?: number;

@@ -32,6 +32,10 @@ export interface GameLaunchOptions {
   gamePath?: string;
   fullscreen: boolean;
   jvmArgs: string[];
+  autoConnect?: {
+    address: string;
+    password?: string;
+  };
 }
 
 export type {
@@ -154,6 +158,9 @@ export interface LauncherSettings {
   gamePath?: string;
   discordRPC?: boolean;
   distributionUrl?: string;
+  devServerAddress?: string;
+  devServerPassword?: string;
+  gameServerAddress?: string;
 }
 
 export interface UpdateInfoPayload {

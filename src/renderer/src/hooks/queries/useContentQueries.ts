@@ -17,6 +17,11 @@ import { UI_STRINGS } from "../../../../shared/constants/ui-strings";
 import type { ChangelogItem, NewsItem, ServerStatusData } from "../../types";
 import { getErrorMessage } from "../../lib/queryHelpers";
 import { queryKeys } from "../../lib/queryKeys";
+import { useSettingsStore } from "../../stores/useSettingsStore";
+import {
+  fetchVelocityOnlineCount,
+  fetchVelocityServers,
+} from "../../../../lib/api/velocity";
 
 type PublicNewsFilters = {
   searchQuery?: string;
@@ -116,17 +121,6 @@ function mapApiChangelog(item: ApiChangelog): ChangelogItem {
   };
 }
 
-const mockServerStatus: ServerStatusData = {
-  online: true,
-  players: {
-    online: 142,
-    max: 500,
-  },
-  version: "1.20.1",
-  motd: UI_STRINGS.DASHBOARD.SERVER_MOTD,
-  latency: 45,
-};
-
 const publicNewsInfiniteQueryOptions = (filters: PublicNewsFilters) =>
   infiniteQueryOptions({
     queryKey: queryKeys.publicNews(filters),
@@ -183,14 +177,27 @@ const publicChangelogQueryOptions = () =>
     },
   });
 
-const serverStatusQueryOptions = () =>
+const serverStatusQueryOptions = (address: string, password?: string) =>
   queryOptions({
-    queryKey: queryKeys.serverStatus(),
+    queryKey: queryKeys.serverStatus(address, password),
     queryFn: async () => {
-      await new Promise((resolve) => window.setTimeout(resolve, 300));
-      return mockServerStatus;
+      const [onlineCount, servers] = await Promise.all([
+        fetchVelocityOnlineCount(address, password),
+        fetchVelocityServers(address, password),
+      ]);
+      const status: ServerStatusData = {
+        online: true,
+        players: {
+          online: onlineCount,
+          max: 0,
+        },
+        servers,
+        motd: UI_STRINGS.DASHBOARD.SERVER_MOTD,
+      };
+      return status;
     },
     refetchInterval: 30_000,
+    retry: false,
   });
 
 export function usePublicNewsQuery(filters: PublicNewsFilters) {
@@ -213,7 +220,12 @@ export function usePaginatedChangelog(changelog: ChangelogItem[]) {
 }
 
 export function useServerStatusQuery() {
-  return useQuery(serverStatusQueryOptions());
+  const address = useSettingsStore((state) => state.general.devServerAddress || "");
+  const password = useSettingsStore((state) => state.general.devServerPassword || "");
+  return useQuery({
+    ...serverStatusQueryOptions(address, password),
+    enabled: address.trim().length > 0,
+  });
 }
 
 export function toQueryErrorMessage(error: unknown, fallback: string): string {

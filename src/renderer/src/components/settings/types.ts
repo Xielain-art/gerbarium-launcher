@@ -3,7 +3,13 @@ import type { AuthUser } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
 import type { DownloadStatus } from "../../../../shared/constants/ipc-chanels";
 
-export type SettingsTab = "general" | "java" | "profile" | "advanced" | "support";
+export type SettingsTab =
+  | "general"
+  | "java"
+  | "profile"
+  | "advanced"
+  | "development"
+  | "support";
 
 export interface SettingsNotice {
   type: "success" | "error";
@@ -75,4 +81,9 @@ export interface SupportSettingsTabProps extends SettingsBaseProps {
   onOpenGithub: () => void;
   showDevToolsButton: boolean;
   onOpenDevTools: () => Promise<void>;
+}
+
+export interface DevelopmentSettingsTabProps extends SettingsBaseProps {
+  general: SettingsGeneral;
+  onUpdateGeneral: (updates: Partial<SettingsGeneral>) => void;
 }

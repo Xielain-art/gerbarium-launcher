@@ -26,6 +26,9 @@ function toLauncherSettingsPatch(
     gamePath: settings.gamePath,
     discordRPC: settings.discordRPC,
     distributionUrl: settings.distributionUrl,
+    devServerAddress: settings.devServerAddress,
+    devServerPassword: settings.devServerPassword,
+    gameServerAddress: settings.gameServerAddress,
   };
 }
 
@@ -57,6 +60,9 @@ const defaultSettings: SettingsStateType = {
     jvmArgs: DEFAULT_SETTINGS.JVM_ARGS,
     gamePath: "",
     distributionUrl: "",
+    devServerAddress: "",
+    devServerPassword: "",
+    gameServerAddress: "",
     fullscreen: false,
     showLaunchConsole: true,
     themeMode: "dark",

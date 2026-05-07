@@ -102,12 +102,35 @@ export function toLauncherSettingsPatch(settings: {
   gamePath?: string;
   discordRPC: boolean;
   distributionUrl?: string;
+  devServerAddress?: string;
+  devServerPassword?: string;
+  gameServerAddress?: string;
 }): Partial<LauncherSettings> {
   return {
     minimizeToTray: settings.minimizeToTray,
     gamePath: settings.gamePath,
     discordRPC: settings.discordRPC,
     distributionUrl: settings.distributionUrl,
+    devServerAddress: settings.devServerAddress,
+    devServerPassword: settings.devServerPassword,
+    gameServerAddress: settings.gameServerAddress,
+  };
+}
+
+export function toAutoConnectConfig(settings: {
+  devServerAddress?: string;
+  gameServerAddress?: string;
+  devServerPassword?: string;
+}): { address: string; password?: string } | undefined {
+  const rawAddress =
+    settings.gameServerAddress?.trim() || settings.devServerAddress?.trim();
+  if (!rawAddress) {
+    return undefined;
+  }
+
+  return {
+    address: rawAddress,
+    password: settings.devServerPassword?.trim() || undefined,
   };
 }
 

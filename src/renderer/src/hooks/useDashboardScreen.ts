@@ -30,7 +30,7 @@ import { useQueryClient } from "@tanstack/react-query";
 // --- Main Hook ---
 
 import type { DashboardScreenResult } from "./dashboard/types";
-import { parseJvmArgs, selectBestJavaPath, toErrorMessage, logAction, toLauncherSettingsPatch, INITIAL_VERSIONS, CHANGELOG_PAGE_SIZE, isVersionInstalled } from "./dashboard/utils";
+import { parseJvmArgs, selectBestJavaPath, toErrorMessage, logAction, toLauncherSettingsPatch, INITIAL_VERSIONS, CHANGELOG_PAGE_SIZE, isVersionInstalled, toAutoConnectConfig } from "./dashboard/utils";
 
 export function useDashboardScreen(): DashboardScreenResult {
   const t = useTranslation();
@@ -318,6 +318,7 @@ export function useDashboardScreen(): DashboardScreenResult {
         gamePath: settings.gamePath,
         fullscreen: settings.fullscreen,
         jvmArgs: parseJvmArgs(settings.jvmArgs),
+        autoConnect: toAutoConnectConfig(settings),
       });
 
       if (!result.success) {

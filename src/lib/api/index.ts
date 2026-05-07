@@ -5,3 +5,4 @@ export * from "./auth/index";
 export * from "./admin/index";
 export * from "./news/index";
 export * from "./changelog/index";
+export * from "./velocity";
