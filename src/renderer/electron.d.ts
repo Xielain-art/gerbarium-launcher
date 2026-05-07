@@ -71,11 +71,8 @@ export interface IElectronAPI {
   ) => () => void;
   startUpdateCheck: () => void;
 
-  // Update control
-  initUpdate: () => void;
+  // Update details
   onUpdateInfo: (callback: (info: UpdateInfoPayload) => void) => () => void;
-  downloadUpdate: () => Promise<{ success: boolean; error?: string }>;
-  installUpdateAndRestart: () => void;
 
   // Auth session API
   auth: {

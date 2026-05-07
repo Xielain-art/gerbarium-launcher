@@ -125,6 +125,7 @@ export function DashboardScreen(): React.JSX.Element {
             isLaunching={vm.isLaunching}
             isGameRunning={vm.isGameRunning}
             launchStatus={vm.launchStatus}
+            launchPhase={vm.launchPhase}
             launchProgress={vm.launchProgress}
             progress={vm.progress}
             errorMessage={vm.launchError}

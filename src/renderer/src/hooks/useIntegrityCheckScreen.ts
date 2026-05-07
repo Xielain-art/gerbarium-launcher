@@ -165,7 +165,7 @@ export function useIntegrityCheckScreen(): {
     };
 
     const startUpdateFlow = (): void => {
-      if (!window.electronAPI?.initUpdate || !window.electronAPI?.startUpdateCheck) {
+      if (!window.electronAPI?.startUpdateCheck) {
         completeToLogin("Update API unavailable. Starting launcher...");
         return;
       }
@@ -232,7 +232,6 @@ export function useIntegrityCheckScreen(): {
         setSplashHint(`Update download: ${Math.round(percent)}%`);
       });
 
-      window.electronAPI.initUpdate();
       window.electronAPI.startUpdateCheck();
 
       updateFlowTimer = window.setTimeout(() => {

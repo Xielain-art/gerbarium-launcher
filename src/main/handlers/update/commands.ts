@@ -33,26 +33,4 @@ export function bindUpdateCommands(state: UpdateWindowState): void {
         }
       });
   });
-
-  ipcMain.handle(
-    IPC_CHANNELS.UPDATE.DOWNLOAD,
-    async (): Promise<{ success: boolean; error?: string }> => {
-      log.info(LOG_MESSAGES.UPDATE_DOWNLOADING);
-      try {
-        await autoUpdater.downloadUpdate();
-        log.info(LOG_MESSAGES.UPDATE_DOWNLOAD_COMPLETE);
-        return { success: true };
-      } catch (err) {
-        const errorMsg =
-          err instanceof Error ? err.message : LOG_MESSAGES.UPDATE_DOWNLOAD_FAILED;
-        log.error(LOG_MESSAGES.UPDATE_DOWNLOAD_FAILED, errorMsg);
-        return { success: false, error: errorMsg };
-      }
-    },
-  );
-
-  ipcMain.on(IPC_CHANNELS.UPDATE.INSTALL_AND_RESTART, (): void => {
-    log.info(LOG_MESSAGES.UPDATE_INSTALLING);
-    autoUpdater.quitAndInstall();
-  });
 }

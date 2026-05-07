@@ -45,20 +45,8 @@ export interface IpcChannelMap {
     args: [];
     return: void;
   };
-  [IPC_CHANNELS.UPDATE.INIT]: {
-    args: [];
-    return: void;
-  };
   [IPC_CHANNELS.UPDATE.INFO]: {
     args: [info: UpdateInfoPayload];
-    return: void;
-  };
-  [IPC_CHANNELS.UPDATE.DOWNLOAD]: {
-    args: [];
-    return: { success: boolean; error?: string };
-  };
-  [IPC_CHANNELS.UPDATE.INSTALL_AND_RESTART]: {
-    args: [];
     return: void;
   };
   [IPC_CHANNELS.SECURE_STORAGE.SET]: {

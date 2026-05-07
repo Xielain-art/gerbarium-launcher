@@ -41,8 +41,6 @@ export function useUpdateScreen(): {
       return;
     }
 
-    window.electronAPI.initUpdate();
-
     const unsubMessage = window.electronAPI.onUpdateMessage((message) => {
       setUpdateMessage(message);
       if (message === UI_STRINGS.UPDATE_SCREEN.NONE) {
@@ -88,4 +86,3 @@ export function useUpdateScreen(): {
     updateProgress,
   };
 }
-

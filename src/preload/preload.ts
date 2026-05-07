@@ -121,18 +121,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     };
   },
 
-  // Initialize update system
-  initUpdate: () => typedSend(IPC_CHANNELS.UPDATE.INIT),
-
   // Start update check
   startUpdateCheck: () => typedSend(IPC_CHANNELS.UPDATE.START_CHECK),
-
-  // Download update
-  downloadUpdate: () => typedInvoke(IPC_CHANNELS.UPDATE.DOWNLOAD),
-
-  // Install update and restart
-  installUpdateAndRestart: () =>
-    typedSend(IPC_CHANNELS.UPDATE.INSTALL_AND_RESTART),
 
   // Auth API
   auth: {

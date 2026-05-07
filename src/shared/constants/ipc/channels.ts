@@ -11,10 +11,7 @@ export const IPC_CHANNELS = {
     MESSAGE: "update-message",
     PROGRESS: "update-progress",
     START_CHECK: "start-update-check",
-    INIT: "update-init",
     INFO: "update-info",
-    DOWNLOAD: "update-download",
-    INSTALL_AND_RESTART: "update-install-and-restart",
   },
   SECURE_STORAGE: {
     SET: "secure-storage:set",

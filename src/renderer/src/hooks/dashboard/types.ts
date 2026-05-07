@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 import type { TranslationType } from "../../../../shared/constants/translations";
+import type { LaunchPhase } from "./useGameLaunchFlow";
 import type {
   ChangelogItem,
   GameVersion,
@@ -42,6 +43,7 @@ export interface DashboardScreenResult {
   isGameRunning: boolean;
   launchProgress: number | null;
   launchStatus: string;
+  launchPhase: LaunchPhase;
   launchError: string | null;
   isConsoleVisible: boolean;
   logs: string[];

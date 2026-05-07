@@ -317,7 +317,7 @@ export function AdminUsersTab(props: AdminUsersTabProps): React.JSX.Element {
                 {user.username}
               </div>
               <div className="font-mono text-xs text-theme-muted">
-                {user.email} � {user.id.slice(0, 8)}
+                {user.email} - {user.id.slice(0, 8)}
               </div>
             </div>
             <div className="flex gap-2">
