@@ -17,8 +17,8 @@ interface Props {
   javaProgress: number;
   javaStatus: string | null;
   javaVersions: number[];
-  downloadJavaVersion: 8 | 17 | 21;
-  onSetDownloadJavaVersion: (v: 8 | 17 | 21) => void;
+  downloadJavaVersion: number;
+  onSetDownloadJavaVersion: (v: number) => void;
   onDownloadJava: () => void;
   isInstalled: (version: number) => boolean;
 }
@@ -107,9 +107,7 @@ export function JavaPathSection(p: Props): React.JSX.Element {
               <select
                 value={p.downloadJavaVersion}
                 onChange={(e) =>
-                  p.onSetDownloadJavaVersion(
-                    Number(e.target.value) as 8 | 17 | 21,
-                  )
+                  p.onSetDownloadJavaVersion(Number(e.target.value))
                 }
                 className="flex h-10 w-32 appearance-none rounded-md border border-theme bg-[var(--theme-bg)] px-3 py-2 font-mono text-sm text-theme transition-all focus:border-[var(--mc-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--mc-accent)]"
               >

@@ -99,7 +99,7 @@ export function ProfileSettingsTab({
                   Email Address
                 </div>
                 <div className="text-sm font-medium text-theme">
-                  {user?.email || "Offline Account"}
+                  {user?.email || "—"}
                 </div>
               </div>
 

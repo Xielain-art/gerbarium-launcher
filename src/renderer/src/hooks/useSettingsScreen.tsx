@@ -57,9 +57,7 @@ export function useSettingsScreen(): SettingsScreenResult {
 
   // Java & System State
   const [javaVersion, setJavaVersion] = useState<string | null>(null);
-  const [downloadJavaVersion, setDownloadJavaVersion] = useState<8 | 17 | 21>(
-    17,
-  );
+  const [downloadJavaVersion, setDownloadJavaVersion] = useState<number>(21);
   const [installedJava, setInstalledJava] = useState<JavaInstallation[]>([]);
   const [javaVersions, setJavaVersions] = useState<number[]>([]);
   const [maxRamGb, setMaxRamGb] = useState(16);
@@ -104,7 +102,8 @@ export function useSettingsScreen(): SettingsScreenResult {
       ]);
 
       setInstalledJava(installed);
-      setJavaVersions(versions);
+      const supportedVersions = versions.filter((version) => version >= 21);
+      setJavaVersions(supportedVersions.length > 0 ? supportedVersions : [21]);
       setJavaVersion(currentVersion);
     }
 

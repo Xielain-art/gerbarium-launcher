@@ -10,9 +10,8 @@ interface DashboardSidebarProps {
   t: TranslationType;
   user: AuthUser | null;
   serverStatus: ServerStatusData | null;
-  versions: GameVersion[];
-  selectedVersionId: string | null;
-  onSelectVersion: (versionId: string) => void;
+  selectedVersion: GameVersion | undefined;
+  onOpenVersionDescription: () => void;
   onLogout: () => void;
   onOpenSettings: () => void;
   onOpenAdminPanel?: () => void;
@@ -22,9 +21,8 @@ export function DashboardSidebar({
   t,
   user,
   serverStatus,
-  versions,
-  selectedVersionId,
-  onSelectVersion,
+  selectedVersion,
+  onOpenVersionDescription,
   onLogout,
   onOpenSettings,
   onOpenAdminPanel,
@@ -43,14 +41,11 @@ export function DashboardSidebar({
       </div>
 
       <SidebarServerStatus t={t} serverStatus={serverStatus} />
-      
-      <div className="my-4 fantasy-divider" />
 
       <SidebarVersionsList
         t={t}
-        versions={versions}
-        selectedVersionId={selectedVersionId}
-        onSelectVersion={onSelectVersion}
+        version={selectedVersion}
+        onOpenDescription={onOpenVersionDescription}
       />
 
       {(isAdmin && onOpenAdminPanel) && (

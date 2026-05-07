@@ -23,9 +23,9 @@ export function useSettingsTabRenderer(deps: {
   javaProgress: number;
   javaStatus: DownloadStatus | null;
   javaVersions: number[];
-  downloadJavaVersion: 8 | 17 | 21;
+  downloadJavaVersion: number;
   installedJava: JavaInstallation[];
-  setDownloadJavaVersion: (v: 8 | 17 | 21) => void;
+  setDownloadJavaVersion: (v: number) => void;
   onSelectJava: () => Promise<void>;
   onFindJava: () => Promise<void>;
   onDownloadJava: () => Promise<void>;

@@ -29,9 +29,8 @@ export function DashboardScreen(): React.JSX.Element {
         t={vm.t}
         user={vm.user}
         serverStatus={vm.serverStatus}
-        versions={vm.versions}
-        selectedVersionId={vm.selectedVersionId}
-        onSelectVersion={vm.setSelectedVersionId}
+        selectedVersion={vm.selectedVersion}
+        onOpenVersionDescription={() => vm.setContentTab("changelog")}
         onLogout={vm.onLogout}
         onOpenSettings={vm.onOpenSettings}
         onOpenAdminPanel={vm.onOpenAdminPanel}

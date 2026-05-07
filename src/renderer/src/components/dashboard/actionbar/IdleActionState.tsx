@@ -45,7 +45,7 @@ export function IdleActionState({
   const buttonLabel = isLaunching
     ? "Launching..."
     : isGameRunning
-      ? t.CLOSE
+      ? t.DASHBOARD.CLOSE
       : t.DASHBOARD.PLAY_BUTTON;
 
   return (

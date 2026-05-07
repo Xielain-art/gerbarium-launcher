@@ -13,9 +13,6 @@ export interface DashboardScreenResult {
   t: TranslationType;
   user: AuthUser | null;
   serverStatus: ServerStatusData | null;
-  versions: GameVersion[];
-  selectedVersionId: string | null;
-  setSelectedVersionId: (id: string | null) => void;
   selectedVersion: GameVersion | undefined;
   appVersion: string;
   news: NewsItem[];

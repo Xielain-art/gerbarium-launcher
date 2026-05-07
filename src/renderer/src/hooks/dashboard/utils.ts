@@ -26,16 +26,15 @@ export function parseJvmArgs(jvmArgsText: string): string[] {
 export function getRequiredJavaMajor(minecraftVersion: string): number {
   const match = minecraftVersion.match(/1\.(\d+)(?:\.(\d+))?/);
   if (!match?.[1]) {
-    return 17;
+    return 21;
   }
 
   const minor = Number.parseInt(match[1], 10);
-  const patch = match[2] ? Number.parseInt(match[2], 10) : 0;
+  if (minor >= 20) {
+    return 21;
+  }
 
-  if (minor < 17) return 8;
-  if (minor === 20 && patch >= 5) return 21;
-  if (minor >= 21) return 21;
-  return 17;
+  return 21;
 }
 
 export function selectBestJavaPath(
@@ -115,21 +114,11 @@ export function toLauncherSettingsPatch(settings: {
 export const INITIAL_VERSIONS = [
   {
     id: "fabric-1.20.1",
-    name: "Fabric 1.20.1",
+    name: "Minecraft 1.20.1",
     type: "fabric",
     isInstalled: false,
     version: "1.20.1",
     loader: "fabric",
-  },
-  {
-    id: "forge-1.20.1",
-    name: "Forge 1.20.1",
-    type: "forge",
-    isInstalled: false,
-    version: "1.20.1",
-    loader: "forge",
-    forgeInstallerUrl:
-      "https://maven.minecraftforge.net/net/minecraftforge/forge/1.20.1-47.3.0/forge-1.20.1-47.3.0-installer.jar",
   },
 ] as GameVersion[];
 

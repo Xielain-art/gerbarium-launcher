@@ -56,15 +56,11 @@ export const JAVA_RELEASE_CONFIGS: Record<JavaVersion, JavaReleaseConfig> = {
  */
 export function getRequiredJavaVersion(minecraftVersion: string): JavaVersion {
   const match = minecraftVersion.match(/1\.(\d+)(?:\.(\d+))?/);
-  if (!match) return 17;
+  if (!match) return 21;
 
   const minor = parseInt(match[1], 10);
-  const patch = match[2] ? parseInt(match[2], 10) : 0;
-
-  if (minor < 17) return 8;
-  if (minor === 20 && patch >= 5) return 21;
-  if (minor >= 21) return 21;
-  return 17;
+  if (minor >= 20) return 21;
+  return 21;
 }
 
 export function getJavaDownloadUrl(javaVersion: JavaVersion): string {

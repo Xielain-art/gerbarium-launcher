@@ -43,9 +43,9 @@ export interface JavaSettingsTabProps extends SettingsBaseProps {
   javaProgress: number;
   javaStatus: DownloadStatus | null;
   javaVersions: number[];
-  downloadJavaVersion: 8 | 17 | 21;
+  downloadJavaVersion: number;
   installedJava: JavaInstallation[];
-  onSetDownloadJavaVersion: (version: 8 | 17 | 21) => void;
+  onSetDownloadJavaVersion: (version: number) => void;
   onUpdateGeneral: (updates: Partial<SettingsGeneral>) => void;
   onSelectJava: () => Promise<void>;
   onFindJava: () => Promise<void>;
