@@ -7,24 +7,48 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag to publish (for example v3.0.3)"
+        description: "Release tag to publish, for example v3.0.3"
         required: true
         type: string
 
 jobs:
+  create-release:
+    name: Create Draft Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+    steps:
+      - name: Create or update draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          repository: Xielain-art/gerbarium-releases
+          token: ${{ secrets.GH_TOKEN }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: ${{ env.RELEASE_TAG }}
+          fail_on_unmatched_files: false
+
   package:
-    name: Package (${{ matrix.os }})
+    name: Package and Upload (${{ matrix.os }})
+    needs: create-release
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -39,6 +63,7 @@ jobs:
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
           DISCORD_RPC_CLIENT_ID: ${{ vars.DISCORD_RPC_CLIENT_ID }}
+        shell: bash
         run: |
           if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
             npm run dist:linux
@@ -47,40 +72,8 @@ jobs:
           else
             npm run dist:mac
           fi
-        shell: bash
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: gerbarium-${{ matrix.os }}
-          retention-days: 3
-          path: |
-            release/*.exe
-            release/*.AppImage
-            release/*.dmg
-            release/*.yml
-            release/*.yaml
-            release/*.blockmap
-          if-no-files-found: error
-
-  release:
-    name: Create Release
-    needs: package
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    env:
-      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
-
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          pattern: gerbarium-*
-          merge-multiple: true
-
-      - name: Create GitHub Release
+      - name: Upload files directly to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           draft: true
@@ -88,9 +81,10 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           tag_name: ${{ env.RELEASE_TAG }}
           files: |
-            artifacts/*.exe
-            artifacts/*.AppImage
-            artifacts/*.dmg
-            artifacts/*.yml
-            artifacts/*.yaml
-            artifacts/*.blockmap
+            release/*.exe
+            release/*.AppImage
+            release/*.dmg
+            release/*.yml
+            release/*.yaml
+            release/*.blockmap
+          fail_on_unmatched_files: false
