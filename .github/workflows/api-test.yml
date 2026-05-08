@@ -28,4 +28,6 @@ jobs:
         env:
           NODE_ENV: development
           API_BASE_URL: ${{ vars.API_BASE_URL }}
+          BASE_PACKWIZ_URL: ${{ secrets.BASE_PACKWIZ_URL != '' && secrets.BASE_PACKWIZ_URL || vars.BASE_PACKWIZ_URL }}
+          VITE_BASE_PACKWIZ_URL: ${{ secrets.VITE_BASE_PACKWIZ_URL != '' && secrets.VITE_BASE_PACKWIZ_URL || vars.VITE_BASE_PACKWIZ_URL }}
         run: npm run test:auth
