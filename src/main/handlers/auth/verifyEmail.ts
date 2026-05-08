@@ -8,7 +8,6 @@ import { authVerifyEmailSchema } from "../../../shared/validation/authValidation
 import { logApiFailure } from "../../utils/apiHandlerUtils";
 import type { AuthHandlerContext } from "./context";
 import {
-  applyEmailVerificationToUser,
   mapApiUserToSessionUser,
   mapVerifyEmailFailureCode,
   parseOrNull,

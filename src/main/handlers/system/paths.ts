@@ -2,8 +2,6 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { shell, dialog, type App } from "electron";
-import log from "electron-log";
-import { LOG_MESSAGES } from "../../../shared/constants/log-messages";
 
 const DEFAULT_GAME_ROOT = path.join(os.homedir(), ".gerbarium");
 

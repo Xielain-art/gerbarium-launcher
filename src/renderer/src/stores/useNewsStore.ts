@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { listNewsRequest, type ApiNews } from "../../../lib/api/news";
 import type { NewsItem } from "../types";
-import { UI_STRINGS } from "../../../shared/constants/ui-strings";
+import { tStoreError } from "../lib/i18nFallback";
 
 interface NewsState {
   items: NewsItem[];
@@ -117,7 +117,7 @@ export const useNewsStore = create<NewsState>((set, get) => ({
       });
       if (!result.success || !result.data) {
         set({
-          error: result.errorMessage ?? UI_STRINGS.STORE_ERRORS.NEWS_LOAD,
+          error: result.errorMessage ?? tStoreError("NEWS_LOAD"),
           isLoading: false,
           isInitialLoaded: true,
         });
@@ -132,7 +132,7 @@ export const useNewsStore = create<NewsState>((set, get) => ({
       });
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.NEWS_LOAD;
+        err instanceof Error ? err.message : tStoreError("NEWS_LOAD");
       set({
         error: errorMessage,
         isLoading: false,
@@ -162,7 +162,7 @@ export const useNewsStore = create<NewsState>((set, get) => ({
       if (!result.success || !result.data) {
         set({
           isLoadingMore: false,
-          error: result.errorMessage ?? UI_STRINGS.STORE_ERRORS.NEWS_LOAD,
+          error: result.errorMessage ?? tStoreError("NEWS_LOAD"),
         });
         return;
       }
@@ -176,7 +176,7 @@ export const useNewsStore = create<NewsState>((set, get) => ({
       }));
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.NEWS_LOAD;
+        err instanceof Error ? err.message : tStoreError("NEWS_LOAD");
       set({ error: errorMessage, isLoadingMore: false });
     }
   },

@@ -1,9 +1,9 @@
 import type { AuthCredentials, AuthRegisterCredentials } from "../types";
 import { LOG_ACTIONS } from "../../../shared/constants/system";
-import { UI_STRINGS } from "../../../shared/constants/ui-strings";
 import { ERROR_CODES } from "../../../shared/constants/errors";
 import { buildAuthUser, buildEmailVerificationState } from "./authStoreHelpers";
 import type { GetState, SetState } from "./authStoreActionTypes";
+import { tStoreError } from "../lib/i18nFallback";
 
 function logAction(action: string, details?: string): void {
   window.electronAPI.system.logAction(action, details);
@@ -22,7 +22,7 @@ export function createAuthStoreAccountActions(set: SetState, _get: GetState) {
         }
         const authResult = await window.electronAPI.auth.login(credentials);
         if (!authResult.success || !authResult.user) {
-          const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_LOGIN;
+          const errorMsg = authResult.error || tStoreError("AUTH_LOGIN");
           set({ isLoading: false, error: errorMsg });
           return { success: false, error: errorMsg };
         }
@@ -53,7 +53,7 @@ export function createAuthStoreAccountActions(set: SetState, _get: GetState) {
         }
         const authResult = await window.electronAPI.auth.register(payload);
         if (!authResult.success || !authResult.user) {
-          const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_REGISTER;
+          const errorMsg = authResult.error || tStoreError("AUTH_REGISTER");
           set({ isLoading: false, error: errorMsg });
           return { success: false, error: errorMsg };
         }
@@ -84,7 +84,7 @@ export function createAuthStoreAccountActions(set: SetState, _get: GetState) {
         }
         const authResult = await window.electronAPI.auth.loginOffline({ username });
         if (!authResult.success || !authResult.user) {
-          const errorMsg = authResult.error || UI_STRINGS.STORE_ERRORS.AUTH_OFFLINE;
+          const errorMsg = authResult.error || tStoreError("AUTH_OFFLINE");
           set({ isLoading: false, error: errorMsg });
           return { success: false, error: errorMsg };
         }

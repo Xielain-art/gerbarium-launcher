@@ -1,5 +1,3 @@
-import { UI_STRINGS } from "../../../shared/constants/ui-strings";
-
 /**
  * Extracts error message from various error formats including API responses
  */
@@ -54,6 +52,6 @@ export function getStoreFallbackError(
     | "SERVER_STATUS"
     | "SETTINGS_SAVE",
 ): string {
-  return UI_STRINGS.STORE_ERRORS[key];
+  return tStoreError(key);
 }
-
+import { tStoreError } from "./i18nFallback";

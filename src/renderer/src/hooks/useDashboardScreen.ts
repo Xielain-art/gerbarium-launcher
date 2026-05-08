@@ -20,7 +20,6 @@ import {
   useAppVersionQuery,
   useInstalledVersionsQuery,
 } from "./queries/useSystemQueries";
-import { UI_STRINGS } from "../../../shared/constants/ui-strings";
 
 
 // --- Main Hook ---
@@ -107,12 +106,12 @@ export function useDashboardScreen(): DashboardScreenResult {
   const hasMoreChangelog = changelog.length < changelogItems.length;
 
   const newsError = newsQuery.isError
-    ? toQueryErrorMessage(newsQuery.error, UI_STRINGS.STORE_ERRORS.NEWS_LOAD)
+    ? toQueryErrorMessage(newsQuery.error, t.STORE_ERRORS.NEWS_LOAD)
     : null;
   const changelogError = changelogQuery.isError
     ? toQueryErrorMessage(
         changelogQuery.error,
-        UI_STRINGS.STORE_ERRORS.NEWS_LOAD,
+        t.STORE_ERRORS.NEWS_LOAD,
       )
     : null;
 

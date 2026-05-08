@@ -15,9 +15,6 @@ import { deleteTestUserRequest } from "../../../lib/api/test";
 import type { AdminHandlerContext } from "./context";
 import { withAdminAuth } from "./shared";
 
-type NewsSortBy = "createdAt" | "updatedAt" | "title";
-type NewsOrder = "ASC" | "DESC";
-
 export function registerAdminUserHandlers({ app }: AdminHandlerContext): void {
   ipcMain.handle(
     IPC_CHANNELS.ADMIN.GET_USERS,

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ROUTES } from "../../../shared/constants/system";
-import { UI_STRINGS } from "../../../shared/constants/ui-strings";
 import type { IntegrityCheckResult } from "../../../shared/constants/ipc-chanels";
 import { useStartupGateStore } from "../stores/useStartupGateStore";
 
@@ -64,7 +63,7 @@ function fadeAndRemoveSplash(): void {
 }
 
 function isUpdateNoneMessage(message: string): boolean {
-  return message === UI_STRINGS.UPDATE_SCREEN.NONE;
+  return message === UPDATE_NONE_MESSAGE;
 }
 
 export function useIntegrityCheckScreen(): {
@@ -181,19 +180,19 @@ export function useIntegrityCheckScreen(): {
         }
         setStatusMessage(message);
 
-        if (message === UI_STRINGS.UPDATE_SCREEN.SEARCHING) {
+        if (message === UPDATE_SEARCHING_MESSAGE) {
           setSplashPhase("Checking launcher version...");
           setSplashHint("Version check in progress...");
           return;
         }
 
-        if (message === UI_STRINGS.UPDATE_SCREEN.FOUND) {
+        if (message === UPDATE_FOUND_MESSAGE) {
           setSplashPhase("Update found. Downloading...");
           setSplashHint("Downloading update in background...");
           return;
         }
 
-        if (message === UI_STRINGS.UPDATE_SCREEN.DOWNLOADED) {
+        if (message === UPDATE_DOWNLOADED_MESSAGE) {
           setSplashPhase("Update downloaded");
           setSplashHint("Restarting launcher...");
           updateBootProgress(100);
@@ -203,11 +202,11 @@ export function useIntegrityCheckScreen(): {
 
         if (isUpdateNoneMessage(message)) {
           cleanupUpdateListeners();
-          completeToLogin(UI_STRINGS.UPDATE_SCREEN.STARTING_LAUNCHER);
+          completeToLogin(UPDATE_STARTING_MESSAGE);
           return;
         }
 
-        if (message.startsWith(UI_STRINGS.UPDATE_SCREEN.ERROR_PREFIX)) {
+        if (message.startsWith(UPDATE_ERROR_PREFIX)) {
           cleanupUpdateListeners();
           completeToLogin("Update check failed. Starting launcher...");
         }
@@ -401,3 +400,9 @@ export function useIntegrityCheckScreen(): {
 
   return { progress, phaseText, statusMessage };
 }
+const UPDATE_NONE_MESSAGE = "update-not-available";
+const UPDATE_SEARCHING_MESSAGE = "Searching for updates...";
+const UPDATE_FOUND_MESSAGE = "Update found";
+const UPDATE_DOWNLOADED_MESSAGE = "Update downloaded. Restarting...";
+const UPDATE_STARTING_MESSAGE = "Starting launcher...";
+const UPDATE_ERROR_PREFIX = "Error:";

@@ -2,11 +2,7 @@ import { apiClient } from "../client";
 import { buildNetworkErrorResult } from "../result";
 import type {
   ApiNews,
-  ApiNewsTag,
   ApiResult,
-  ApiCreateNewsDto,
-  ApiCreateNewsTagDto,
-  ApiUpdateNewsDto,
 } from "../types";
 
 export interface ApiPaginationMeta {

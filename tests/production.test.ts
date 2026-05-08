@@ -38,8 +38,16 @@ describe("Production Release Verification", () => {
            console.log(`[OK] Valid SHA256 found for ${platform.name}: ${hash}`);
         }
         
-      } catch (error: any) {
-        if (error.response?.statusCode === 404) {
+      } catch (error: unknown) {
+        const statusCode =
+          typeof error === "object" &&
+          error !== null &&
+          "response" in error &&
+          typeof (error as { response?: { statusCode?: number } }).response
+            ?.statusCode === "number"
+            ? (error as { response: { statusCode: number } }).response.statusCode
+            : undefined;
+        if (statusCode === 404) {
           console.warn(`[SKIP] ${platform.file} not found (404). Maybe this platform hasn't been released yet?`);
           return;
         }

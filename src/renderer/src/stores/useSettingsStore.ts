@@ -11,8 +11,8 @@ import {
   LOG_ACTIONS,
   DEFAULT_SETTINGS,
 } from "../../../shared/constants/system";
-import { UI_STRINGS } from "../../../shared/constants/ui-strings";
 import type { LauncherSettings } from "../../../shared/constants/ipc-chanels";
+import { tStoreError } from "../lib/i18nFallback";
 
 function logAction(action: string, details?: string): void {
   void window.electronAPI?.system.logAction(action, details);
@@ -147,7 +147,7 @@ export const useSettingsStore = create<SettingsState>()(
           const errorMessage =
             err instanceof Error
               ? err.message
-              : UI_STRINGS.STORE_ERRORS.SETTINGS_SAVE;
+              : tStoreError("SETTINGS_SAVE");
           set({ isLoading: false, error: errorMessage });
           logAction(LOG_ACTIONS.SAVE_SETTINGS_ERROR, errorMessage);
           return { success: false, error: errorMessage };

@@ -1,5 +1,4 @@
 import { RefreshCw } from "lucide-react";
-import { UI_STRINGS } from "../../../../shared/constants/ui-strings";
 import { ProgressBar } from "../ui/ProgressBar";
 
 interface UpdateStatusCardProps {
@@ -37,14 +36,14 @@ export function UpdateStatusCard({
 
         {appVersion && (
           <div className="flex items-center justify-between border-t border-[var(--fantasy-border-soft)] pt-4 font-mono text-[10px] uppercase tracking-wider text-theme-muted">
-            <span>{UI_STRINGS.COMMON.VERSION}</span>
+            <span>Version</span>
             <span>{appVersion}</span>
           </div>
         )}
       </div>
 
       <p className="mt-8 text-center font-mono text-[9px] uppercase tracking-widest text-theme-muted/60">
-        {UI_STRINGS.UPDATE_SCREEN.COPYRIGHT}
+        © 2026 Gerbarium. Radmir Klimau.
       </p>
     </div>
   );

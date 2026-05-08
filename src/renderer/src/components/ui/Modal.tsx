@@ -1,6 +1,5 @@
 import { useEffect, useCallback } from "react";
 import { Button } from "./Button";
-import { UI_STRINGS } from "../../../../shared/constants/ui-strings";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -84,7 +83,7 @@ export function Modal({
             <button
               onClick={onClose}
               className="flex h-8 w-8 items-center justify-center text-theme-muted transition-colors hover:text-theme"
-              aria-label={UI_STRINGS.WINDOW_CONTROLS.CLOSE}
+              aria-label="Close"
             >
               <svg
                 className="h-5 w-5"
@@ -121,8 +120,8 @@ export function ConfirmModal({
   onConfirm,
   title,
   message,
-  confirmText = UI_STRINGS.COMMON.CONFIRM,
-  cancelText = UI_STRINGS.COMMON.CANCEL,
+  confirmText = "Confirm",
+  cancelText = "Cancel",
   variant = "primary",
 }: {
   isOpen: boolean;

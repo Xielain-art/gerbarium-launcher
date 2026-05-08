@@ -13,11 +13,11 @@ import {
   listChangelogRequest,
   type ApiChangelog,
 } from "../../../../lib/api/changelog";
-import { UI_STRINGS } from "../../../../shared/constants/ui-strings";
 import type { ChangelogItem, NewsItem, ServerStatusData } from "../../types";
 import { getErrorMessage } from "../../lib/queryHelpers";
 import { queryKeys } from "../../lib/queryKeys";
 import { useSettingsStore } from "../../stores/useSettingsStore";
+import { tStoreError } from "../../lib/i18nFallback";
 import {
   fetchVelocityOnlineCount,
   fetchVelocityServers,
@@ -137,7 +137,7 @@ const publicNewsInfiniteQueryOptions = (filters: PublicNewsFilters) =>
 
       if (!result.success || !result.data) {
         throw new Error(
-          result.errorMessage ?? UI_STRINGS.STORE_ERRORS.NEWS_LOAD,
+          result.errorMessage ?? tStoreError("NEWS_LOAD"),
         );
       }
 
@@ -169,7 +169,7 @@ const publicChangelogQueryOptions = () =>
 
       if (!result.success || !result.data) {
         throw new Error(
-          result.errorMessage ?? UI_STRINGS.STORE_ERRORS.NEWS_LOAD,
+          result.errorMessage ?? tStoreError("NEWS_LOAD"),
         );
       }
 
@@ -192,7 +192,7 @@ const serverStatusQueryOptions = (address: string, password?: string) =>
           max: 0,
         },
         servers,
-        motd: UI_STRINGS.DASHBOARD.SERVER_MOTD,
+        motd: DEFAULT_SERVER_MOTD,
       };
       return status;
     },
@@ -231,3 +231,4 @@ export function useServerStatusQuery() {
 export function toQueryErrorMessage(error: unknown, fallback: string): string {
   return getErrorMessage(error, fallback);
 }
+const DEFAULT_SERVER_MOTD = "Gerbarium Network";

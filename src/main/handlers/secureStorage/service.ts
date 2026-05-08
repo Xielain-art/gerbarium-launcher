@@ -2,7 +2,6 @@ import { safeStorage } from "electron";
 import fs from "node:fs/promises";
 import path from "node:path";
 import log from "electron-log";
-import { ERROR_CODES } from "../../../shared/constants/errors";
 import { secureStorageLock } from "../../utils/secureStorageLock";
 
 type SecureData = Record<string, string>;

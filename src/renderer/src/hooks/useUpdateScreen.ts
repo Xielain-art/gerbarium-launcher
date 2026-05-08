@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { UI_STRINGS } from "../../../shared/constants/ui-strings";
 import { ROUTES } from "../../../shared/constants/system";
 import type { UpdateInfoPayload } from "../../../shared/constants/ipc-chanels";
 import { useStartupGateStore } from "../stores/useStartupGateStore";
 import { useAppVersionQuery } from "./queries/useSystemQueries";
+
+const UPDATE_SEARCHING_MESSAGE = "Searching for updates...";
+const UPDATE_NONE_MESSAGE = "update-not-available";
+const UPDATE_STARTING_MESSAGE = "Starting launcher...";
+const UPDATE_FOUND_MESSAGE = "Update found";
 
 export function useUpdateScreen(): {
   appVersion: string;
@@ -18,7 +22,7 @@ export function useUpdateScreen(): {
   );
   const appVersionQuery = useAppVersionQuery();
   const [updateMessage, setUpdateMessage] = useState<string>(
-    UI_STRINGS.UPDATE_SCREEN.SEARCHING,
+    UPDATE_SEARCHING_MESSAGE,
   );
   const [updateProgress, setUpdateProgress] = useState<number>(0);
   const [updateInfo, setUpdateInfo] = useState<UpdateInfoPayload | null>(null);
@@ -43,9 +47,9 @@ export function useUpdateScreen(): {
 
     const unsubMessage = window.electronAPI.onUpdateMessage((message) => {
       setUpdateMessage(message);
-      if (message === UI_STRINGS.UPDATE_SCREEN.NONE) {
+      if (message === UPDATE_NONE_MESSAGE) {
         setUpdateGatePassed(true);
-        setUpdateMessage(UI_STRINGS.UPDATE_SCREEN.STARTING_LAUNCHER);
+        setUpdateMessage(UPDATE_STARTING_MESSAGE);
         setTimeout(() => navigate({ to: ROUTES.LOGIN }), 1500);
       }
     });
@@ -75,7 +79,7 @@ export function useUpdateScreen(): {
   useEffect(() => {
     if (updateInfo && !downloadStarted) {
       setUpdateMessage(
-        `${UI_STRINGS.UPDATE_SCREEN.FOUND} (${updateInfo.version})`,
+        `${UPDATE_FOUND_MESSAGE} (${updateInfo.version})`,
       );
     }
   }, [updateInfo, downloadStarted]);

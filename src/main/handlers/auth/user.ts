@@ -1,8 +1,9 @@
+import crypto from "node:crypto";
 import type { ApiUser } from "../../../lib/api/types";
 import type { AuthSessionUser } from "../../../shared/constants/ipc-chanels";
 
 export function createOfflineUser(login: string): AuthSessionUser {
-  const digest = require("node:crypto")
+  const digest = crypto
     .createHash("md5")
     .update(`OfflinePlayer:${login}`)
     .digest();

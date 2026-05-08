@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { listChangelogRequest, type ApiChangelog } from "../../../lib/api/changelog";
 import type { ChangelogItem } from "../types";
-import { UI_STRINGS } from "../../../shared/constants/ui-strings";
+import { tStoreError } from "../lib/i18nFallback";
 
 interface ChangelogState {
   allItems: ChangelogItem[];
@@ -71,7 +71,7 @@ export const useChangelogStore = create<ChangelogState>((set, get) => ({
         set({
           isLoading: false,
           isInitialLoaded: true,
-          error: result.errorMessage ?? UI_STRINGS.STORE_ERRORS.NEWS_LOAD,
+          error: result.errorMessage ?? tStoreError("NEWS_LOAD"),
         });
         return;
       }
@@ -88,7 +88,7 @@ export const useChangelogStore = create<ChangelogState>((set, get) => ({
       set({
         isLoading: false,
         isInitialLoaded: true,
-        error: error instanceof Error ? error.message : UI_STRINGS.STORE_ERRORS.NEWS_LOAD,
+        error: error instanceof Error ? error.message : tStoreError("NEWS_LOAD"),
       });
     } 
   },

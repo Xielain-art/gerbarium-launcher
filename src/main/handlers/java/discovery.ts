@@ -3,7 +3,6 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { exec } from "node:child_process";
 import util from "node:util";
-import { constants } from "node:fs";
 import { DIRECTORIES, FILENAMES, COMMANDS, REGEX, JAVA_CONSTANTS, PLATFORMS } from "../../../shared/constants/system";
 import type { JavaVersion } from "../../config/javaConfig";
 import log from "electron-log";

@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
 import log from "electron-log";
-import { getEmailVerificationStatusRequest, resendEmailVerificationRequest } from "../../../lib/api/auth";
+import { getEmailVerificationStatusRequest } from "../../../lib/api/auth";
 import { IPC_CHANNELS } from "../../../shared/constants/ipc-chanels";
 import { ERROR_CODES } from "../../../shared/constants/errors";
 import { LOG_MESSAGES } from "../../../shared/constants/log-messages";

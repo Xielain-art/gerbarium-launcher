@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { ServerStatusData } from '../types';
-import { UI_STRINGS } from '../../../shared/constants/ui-strings';
+import { tStoreError } from "../lib/i18nFallback";
 
 interface ServerStatusState {
   // State
@@ -22,7 +22,7 @@ const mockServerStatus: ServerStatusData = {
     max: 500,
   },
   version: '1.20.1',
-  motd: UI_STRINGS.DASHBOARD.SERVER_MOTD,
+  motd: 'Gerbarium Network',
   latency: 45,
 };
 
@@ -43,7 +43,7 @@ export const useServerStatusStore = create<ServerStatusState>((set, get) => ({
         isLoading: false 
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : UI_STRINGS.STORE_ERRORS.SERVER_STATUS;
+      const errorMessage = err instanceof Error ? err.message : tStoreError("SERVER_STATUS");
       set({ 
         error: errorMessage, 
         isLoading: false 

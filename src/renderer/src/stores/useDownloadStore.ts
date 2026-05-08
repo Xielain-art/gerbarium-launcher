@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { DownloadProgress, DownloadStatus } from '../types';
-import { UI_STRINGS } from '../../../shared/constants/ui-strings';
+import { tDownload } from "../lib/i18nFallback";
 
 interface DownloadState {
   // State
@@ -20,7 +20,7 @@ const defaultProgress: DownloadProgress = {
   status: 'idle',
   progress: 0,
   speed: '0 MB/s',
-  eta: UI_STRINGS.DOWNLOAD.CALCULATING,
+  eta: tDownload("CALCULATING"),
 };
 
 export const useDownloadStore = create<DownloadState>((set, get) => ({
@@ -43,12 +43,12 @@ export const useDownloadStore = create<DownloadState>((set, get) => ({
       eta?: string;
       currentFile?: string;
     }> = [
-      { status: 'checking', progress: 5, currentFile: UI_STRINGS.DOWNLOAD.CHECKING },
+      { status: 'checking', progress: 5, currentFile: tDownload("CHECKING") },
       { status: 'downloading', progress: 15, speed: '2.5 MB/s', eta: '~45 sec', currentFile: 'minecraft.jar' },
       { status: 'downloading', progress: 35, speed: '3.2 MB/s', eta: '~30 sec', currentFile: 'libraries' },
       { status: 'downloading', progress: 60, speed: '4.1 MB/s', eta: '~15 sec', currentFile: 'assets' },
-      { status: 'installing', progress: 80, currentFile: UI_STRINGS.DOWNLOAD.INSTALLING },
-      { status: 'verifying', progress: 95, currentFile: UI_STRINGS.DOWNLOAD.VERIFYING },
+      { status: 'installing', progress: 80, currentFile: tDownload("INSTALLING") },
+      { status: 'verifying', progress: 95, currentFile: tDownload("VERIFYING") },
       { status: 'completed', progress: 100 },
     ];
     
