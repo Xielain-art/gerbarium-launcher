@@ -19,7 +19,6 @@ export default defineConfig(
       "**/.claude/**",
       "**/.github/**",
       "**/graphify-out/**",
-      "**/_legacy_app/**",
       "index.js",
       "node_modules",
       "eslint.config.mjs",

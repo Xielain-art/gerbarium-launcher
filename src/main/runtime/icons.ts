@@ -7,10 +7,8 @@ function getPlatformIcon(appRoot: string, filename: string): string {
     process.platform === MAIN_CONSTANTS.PLATFORMS.WINDOWS ? "ico" : "png";
   return path.join(
     appRoot,
-    "_legacy_app",
-    "assets",
-    "images",
-    `${filename}.${ext}`,
+    "build",
+    `icon.${ext}`,
   );
 }
 

@@ -14,7 +14,6 @@ Strict adherence to architectural boundaries, type safety, and project-specific 
   - `v1.d.ts` — **The Full API Structure.** This is the primary source of truth for all API-related types and schemas.
 - `src/shared/` — Shared files, types, and constants (IPC channels, error codes).
 - `dist/` — Build artifacts. **Do not edit directly.**
-- `_legacy_app/` — DEPRECATED. Use only as a reference; do not modify or extract patterns from here.
 
 ## 🛠 Build & Development Commands
 

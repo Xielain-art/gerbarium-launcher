@@ -19,7 +19,6 @@ electronFuses:
 files:
   - 'dist/**/*'
   - 'package.json'
-  - '_legacy_app/**/*'
   - 'libraries/**/*'
   - '!{release,.gitignore,.vscode,docs,dev-app-update.yml,.nvmrc,eslint.config.mjs,node_modules}'
 

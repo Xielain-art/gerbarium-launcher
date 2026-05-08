@@ -28,19 +28,12 @@ import {
 import { syncTrayState, type TrayState } from "./runtime/tray";
 import { registerMainIpcHandlers } from "./runtime/ipc";
 
-type LegacyLangLoader = {
-  setupLanguage: () => void;
-};
-
 const appRoot = path.resolve(__dirname, "..", "..");
 const require = createRequire(__filename);
 
 const isSmokeTest = process.env.SMOKE_TEST === "true";
 const isDev = !app.isPackaged && !isSmokeTest;
 app.setAppUserModelId("gerbariumlauncher");
-const LangLoader = require(
-  path.join(appRoot, "_legacy_app", "assets", "js", "langloader"),
-) as LegacyLangLoader;
 
 const dateFolder = getDateFolder();
 const trayState: TrayState = { tray: null };
@@ -99,7 +92,6 @@ app.on("before-quit", (): void => {
 });
 
 app.whenReady().then((): void => {
-  LangLoader.setupLanguage();
   appState.mainWindow = createMainWindow(appRoot, isDev);
   createAppMenu();
 
