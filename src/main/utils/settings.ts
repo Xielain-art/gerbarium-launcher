@@ -26,6 +26,21 @@ export function sanitizeSettingsPatch(
     safePatch.discordRPC = patch.discordRPC;
   }
 
+  if (typeof patch.packwizPackUrl === "string") {
+    safePatch.packwizPackUrl = patch.packwizPackUrl.trim();
+  }
+
+  if (typeof patch.cleanUnknownMods === "boolean") {
+    safePatch.cleanUnknownMods = patch.cleanUnknownMods;
+  }
+
+  if (
+    typeof patch.packwizDownloadConcurrency === "number" &&
+    Number.isFinite(patch.packwizDownloadConcurrency)
+  ) {
+    safePatch.packwizDownloadConcurrency = patch.packwizDownloadConcurrency;
+  }
+
   if (typeof patch.distributionUrl === "string") {
     safePatch.distributionUrl = patch.distributionUrl.trim();
   }

@@ -17,6 +17,7 @@ function pickPackUrl(manifestUrl?: string): string | null {
   }
 
   const envCandidates = [
+    process.env.BASE_PACKWIZ_URL,
     process.env.PACKWIZ_PACK_URL,
     process.env.GERBARIUM_PACKWIZ_PACK_URL,
     process.env.GERBARIUM_DISTRIBUTION_URL,
