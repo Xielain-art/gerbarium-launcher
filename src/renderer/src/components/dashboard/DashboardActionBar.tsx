@@ -39,8 +39,8 @@ export function DashboardActionBar({
 }: DashboardActionBarProps): React.JSX.Element {
   const phaseLabelMap: Record<LaunchPhase, string> = {
     idle: "idle",
-    precheck: "precheck",
-    updating: "updating",
+    precheck: "preflight",
+    updating: "packwiz-update",
     launching: "launching",
     running: "running",
     error: "error",
@@ -61,7 +61,8 @@ export function DashboardActionBar({
         <div
           className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] ${phaseToneMap[launchPhase]}`}
         >
-          phase: {phaseLabelMap[launchPhase]}
+          {phaseLabelMap[launchPhase]}
+          {launchStatus?.trim() ? ` • ${launchStatus.trim()}` : ""}
         </div>
       </div>
       {(errorMessage || playBlockReason) && (

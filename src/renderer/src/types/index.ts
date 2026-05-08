@@ -56,6 +56,9 @@ export interface SettingsGeneral {
   discordRPC: boolean;
   jvmArgs: string;
   gamePath?: string;
+  packwizPackUrl?: string;
+  cleanUnknownMods?: boolean;
+  packwizDownloadConcurrency?: number;
   distributionUrl?: string;
   devServerAddress?: string;
   devServerPassword?: string;

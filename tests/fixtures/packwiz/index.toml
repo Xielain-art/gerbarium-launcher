@@ -1,0 +1,27 @@
+hash-format = "sha256"
+
+[[files]]
+file = "mods/fabric-api.pw.toml"
+hash = "1111111111111111111111111111111111111111111111111111111111111111"
+metafile = true
+
+[[files]]
+file = "mods/sodium.pw.toml"
+hash = "2222222222222222222222222222222222222222222222222222222222222222"
+metafile = true
+
+[[files]]
+file = "mods/chunky-server-only.pw.toml"
+hash = "3333333333333333333333333333333333333333333333333333333333333333"
+metafile = true
+
+[[files]]
+file = "mods/gerbarium-custom.pw.toml"
+hash = "4444444444444444444444444444444444444444444444444444444444444444"
+metafile = true
+
+[[files]]
+file = "config/example.json"
+hash = "93a05f74766925f462ed1b59b81c9a95212ebca5bedf6aeebf150a92fa2ee50f"
+metafile = false
+

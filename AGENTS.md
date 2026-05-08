@@ -59,3 +59,12 @@ Strict adherence to architectural boundaries, type safety, and project-specific 
 ## 📦 Dependencies Notes
 - **Archiving:** For log exporting or zipping, rely on `archiver` + `@types/archiver`. Do not use synchronous zipper libraries.
 - **Server State:** For server state management, always use `@tanstack/react-query`. Strictly follow the `queryOptions` factory pattern and ensure all fetchers are located in `src/lib/api/`.
+
+## 📦 Packwiz Modpack Policy
+- Launcher client modpack updates MUST use **packwiz** (`pack.toml` + `index.toml` + `*.pw.toml`) as source of truth.
+- CurseForge manifest is **not** the primary runtime format for launcher updates.
+- Custom/private Gerbarium mods must be supported via direct HTTPS URLs in packwiz metadata.
+- Hash verification is mandatory for downloaded files (minimum `sha256` support).
+- Server-only mods (`side = "server"`) must never be installed into client instance.
+- Stale cleanup must be conservative (no blind full-folder deletion).
+- Documentation for packwiz flow must be kept up to date in `docs/packwiz-launcher-updates.md`.

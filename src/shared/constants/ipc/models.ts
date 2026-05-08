@@ -156,6 +156,9 @@ export type GameProgressPayload =
 export interface LauncherSettings {
   minimizeToTray: boolean;
   gamePath?: string;
+  packwizPackUrl?: string;
+  cleanUnknownMods?: boolean;
+  packwizDownloadConcurrency?: number;
   discordRPC?: boolean;
   distributionUrl?: string;
   devServerAddress?: string;

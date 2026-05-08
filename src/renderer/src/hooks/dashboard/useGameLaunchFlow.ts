@@ -170,7 +170,10 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
       setPhase("updating");
       await runPrelaunchModpackUpdate({
         gamePath: settings.gamePath,
+        packwizPackUrl: settings.packwizPackUrl,
         distributionUrl: settings.distributionUrl,
+        cleanUnknownMods: settings.cleanUnknownMods,
+        packwizDownloadConcurrency: settings.packwizDownloadConcurrency,
         selectedVersion: options.selectedVersion,
         setLaunchStatus,
         appendLog: (message) => setLogs((prev) => [...prev, message]),
@@ -273,4 +276,3 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
     onToggleConsole,
   };
 }
-

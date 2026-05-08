@@ -1,0 +1,9 @@
+name = "Gerbarium Core"
+filename = "gerbarium-core-1.0.0.jar"
+side = "both"
+
+[download]
+url = "https://cdn.gerbarium.local/mods/gerbarium-core-1.0.0.jar"
+hash-format = "sha256"
+hash = "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+mode = "url"

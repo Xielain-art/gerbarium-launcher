@@ -40,8 +40,10 @@ async function handleDistributionUpdate(
       : gameRoot;
     const result = await runDistributionUpdate({
       gameRoot: instanceRoot,
-      manifestUrl: options?.manifestUrl,
+      manifestUrl: options?.packwizPackUrl ?? options?.manifestUrl,
       verifyOnly,
+      cleanUnknownMods: options?.cleanUnknownMods,
+      downloadConcurrency: options?.downloadConcurrency,
       reportProgress: (progress) =>
         emitUpdateProgress(mainWindow, progress.percent, progress.status),
     });

@@ -30,7 +30,10 @@ export interface DistributionManifest {
 export interface GameUpdateOptions {
   gamePath?: string;
   minecraftVersion?: string;
+  packwizPackUrl?: string;
   manifestUrl?: string;
+  cleanUnknownMods?: boolean;
+  downloadConcurrency?: number;
 }
 
 export interface GameUpdateResult {

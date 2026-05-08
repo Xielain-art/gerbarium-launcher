@@ -185,6 +185,15 @@ For instructions on setting up Microsoft Authentication, see https://github.com/
 
 ---
 
+## Обновление модов лаунчером через packwiz
+
+Лаунчер использует packwiz как source of truth для клиентского модпака.  
+Перед запуском игры он загружает метаданные пака, скачивает отсутствующие/измененные файлы и проверяет их хэши.
+
+Подробная документация: [docs/packwiz-launcher-updates.md](docs/packwiz-launcher-updates.md)
+
+---
+
 ## Resources
 
 * [Wiki][wiki]
