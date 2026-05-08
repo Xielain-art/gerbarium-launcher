@@ -1,11 +1,15 @@
 import * as esbuild from "esbuild";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const isWatch = process.argv.includes("--watch");
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const buildOptions = {
   bundle: true,
   platform: "node",
   target: "node20",
-  entryPoints: ["src/preload/preload.ts"],
+  absWorkingDir: projectRoot,
+  entryPoints: ["././src/preload/preload.ts"],
   outfile: "dist/preload/preload.js",
   external: ["electron"],
 };

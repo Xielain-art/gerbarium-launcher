@@ -14,7 +14,7 @@ import {
 import type { LauncherSettings } from "../../../shared/constants/ipc-chanels";
 import { tStoreError } from "../lib/i18nFallback";
 
-const DEFAULT_PACKWIZ_URL = import.meta.env.VITE_BASE_PACKWIZ_URL?.trim() || "";
+const ENV_PACKWIZ_URL = import.meta.env.VITE_BASE_PACKWIZ_URL?.trim() || "";
 
 function logAction(action: string, details?: string): void {
   void window.electronAPI?.system.logAction(action, details);
@@ -65,7 +65,7 @@ const defaultSettings: SettingsStateType = {
     jvmArgs: DEFAULT_SETTINGS.JVM_ARGS,
     gamePath: "",
     distributionUrl: "",
-    packwizPackUrl: DEFAULT_PACKWIZ_URL,
+    packwizPackUrl: ENV_PACKWIZ_URL,
     cleanUnknownMods: false,
     packwizDownloadConcurrency: 4,
     devServerAddress: "",
@@ -170,9 +170,14 @@ export const useSettingsStore = create<SettingsState>()(
         mods: state.mods,
         profile: state.profile,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (!state || !ENV_PACKWIZ_URL) {
+          return;
+        }
+        state.updateGeneral({ packwizPackUrl: ENV_PACKWIZ_URL });
+      },
       migrate: (persistedState) => {
         const raw = persistedState as Partial<SettingsStateType> | undefined;
-        const savedPackwizUrl = raw?.general?.packwizPackUrl?.trim();
 
         return {
           ...defaultSettings,
@@ -180,7 +185,8 @@ export const useSettingsStore = create<SettingsState>()(
           general: {
             ...defaultSettings.general,
             ...raw?.general,
-            packwizPackUrl: savedPackwizUrl || DEFAULT_PACKWIZ_URL,
+            // Env value must be authoritative for rollout consistency.
+            packwizPackUrl: ENV_PACKWIZ_URL || raw?.general?.packwizPackUrl || "",
             themeMode: normalizeThemeMode(raw?.general?.themeMode),
           },
           mods: {
