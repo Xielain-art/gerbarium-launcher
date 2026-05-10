@@ -4,7 +4,7 @@ import log from "electron-log";
 import type { GameUpdateResult } from "../../../shared/distribution/manifest";
 import { LOG_MESSAGES } from "../../../shared/constants/log-messages";
 import { assertSupportedHashFormat, computeFileHash, normalizeHash } from "./hash";
-import { downloadToFile, fetchText } from "./downloader";
+import { downloadToFile, fetchJson, fetchText } from "./downloader";
 import { parseIndexToml, parseModMetafileToml, parsePackToml } from "./parser";
 import type { PackwizIndexFile, PackwizResolvedFile } from "./types";
 
@@ -47,6 +47,61 @@ function resolveUrl(base: string, relativeOrAbsolute: string): string {
   return new URL(relativeOrAbsolute, base).toString();
 }
 
+type CurseForgeDownloadUrlResponse = {
+  data?: string;
+};
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+  return value as Record<string, unknown>;
+}
+
+function readNumber(source: Record<string, unknown>, key: string): number | null {
+  const value = source[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+async function resolveMetafileDownloadUrl(
+  metaUrl: string,
+  entryPath: string,
+  meta: ReturnType<typeof parseModMetafileToml>,
+): Promise<string> {
+  const directUrl = meta.download?.url?.trim();
+  if (directUrl) {
+    return resolveUrl(metaUrl, directUrl);
+  }
+
+  if (meta.download?.mode !== "metadata:curseforge") {
+    throw new Error(`Metafile ${entryPath} missing download.url`);
+  }
+
+  const curseforge = asRecord(asRecord(meta.update)?.curseforge);
+  const projectId = curseforge ? readNumber(curseforge, "project-id") : null;
+  const fileId = curseforge ? readNumber(curseforge, "file-id") : null;
+  if (!projectId || !fileId) {
+    throw new Error(`Metafile ${entryPath} missing update.curseforge project-id/file-id`);
+  }
+
+  const apiKey = process.env.CURSEFORGE_API_KEY?.trim();
+  if (!apiKey) {
+    throw new Error("CurseForge metadata downloads require CURSEFORGE_API_KEY or direct download.url");
+  }
+
+  log.info(`[PACKWIZ] Resolving CurseForge metadata project-id=${projectId}, file-id=${fileId}`);
+  const endpoint = `https://api.curseforge.com/v1/mods/${projectId}/files/${fileId}/download-url`;
+  const response = await fetchJson<CurseForgeDownloadUrlResponse>(endpoint, {
+    Accept: "application/json",
+    "x-api-key": apiKey,
+  });
+  const resolvedUrl = response.data?.trim();
+  if (!resolvedUrl) {
+    throw new Error(`CurseForge API returned empty download URL for project-id=${projectId}, file-id=${fileId}`);
+  }
+  return resolvedUrl;
+}
+
 async function resolveExpectedFile(
   indexFile: PackwizIndexFile,
   packBaseUrl: string,
@@ -80,21 +135,18 @@ async function resolveExpectedFile(
   if (!filename) {
     throw new Error(`Metafile ${entryPath} missing filename`);
   }
-  const downloadUrl = meta.download?.url?.trim();
   const hash = meta.download?.hash?.trim();
-  if (!downloadUrl) {
-    throw new Error(`Metafile ${entryPath} missing download.url`);
-  }
   if (!hash) {
     throw new Error(`Metafile ${entryPath} missing download.hash`);
   }
 
+  const downloadUrl = await resolveMetafileDownloadUrl(metaUrl, entryPath, meta);
   const hashFormat = assertSupportedHashFormat(meta.download?.hashFormat ?? "sha256");
   const localPath = normalizeRelativePath(path.posix.join(path.posix.dirname(entryPath), filename));
   return {
     localPath,
     displayPath: filename,
-    downloadUrl: resolveUrl(metaUrl, downloadUrl),
+    downloadUrl,
     hash: normalizeHash(hash),
     hashFormat,
     source: "metafile",

@@ -88,6 +88,20 @@ export async function fetchText(url: string): Promise<string> {
   );
 }
 
+export async function fetchJson<T>(
+  url: string,
+  headers?: Record<string, string>,
+): Promise<T> {
+  const timeoutMs = getPackwizDownloadTimeoutMs();
+  return retry("fetchJson", url, async () =>
+    got(url, {
+      timeout: { request: timeoutMs },
+      headers,
+      responseType: "json",
+    }).json<T>(),
+  );
+}
+
 export async function downloadToFile(url: string, destination: string): Promise<void> {
   const timeoutMs = getPackwizDownloadTimeoutMs();
   await fs.mkdir(path.dirname(destination), { recursive: true });

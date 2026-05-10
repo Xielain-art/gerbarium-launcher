@@ -2,6 +2,7 @@ import {
   app,
   BrowserWindow,
 } from "electron";
+import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import log from "electron-log";
@@ -30,6 +31,27 @@ import { registerMainIpcHandlers } from "./runtime/ipc";
 
 const appRoot = path.resolve(__dirname, "..", "..");
 const require = createRequire(__filename);
+
+function loadRuntimeEnv(): void {
+  const candidates = [
+    path.join(process.cwd(), ".env"),
+    path.join(appRoot, ".env"),
+  ];
+
+  for (const envPath of candidates) {
+    if (!existsSync(envPath)) {
+      continue;
+    }
+    try {
+      process.loadEnvFile?.(envPath);
+      return;
+    } catch {
+      // best-effort load; env can still be provided by shell/CI
+    }
+  }
+}
+
+loadRuntimeEnv();
 
 const isSmokeTest = process.env.SMOKE_TEST === "true";
 const isDev = !app.isPackaged && !isSmokeTest;
