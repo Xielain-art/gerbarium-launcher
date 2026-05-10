@@ -30,12 +30,14 @@ export function DashboardSidebar({
   const { isAdmin } = useRouteContext({ from: "/dashboard" });
 
   return (
-    <aside className="fantasy-panel relative z-40 flex h-full w-72 flex-col">
+    <aside className="fantasy-panel relative z-40 flex h-full w-80 flex-col">
       <div className="p-4 pt-6">
         <SidebarProfileCard
           t={t}
           user={user}
           onOpenSettings={onOpenSettings}
+          onOpenAdminPanel={onOpenAdminPanel}
+          canOpenAdminPanel={Boolean(isAdmin && onOpenAdminPanel)}
           onLogout={onLogout}
         />
       </div>
@@ -47,19 +49,6 @@ export function DashboardSidebar({
         version={selectedVersion}
         onOpenDescription={onOpenVersionDescription}
       />
-
-      {(isAdmin && onOpenAdminPanel) && (
-        <div className="mt-auto border-t border-[var(--fantasy-border-soft)] p-4">
-          <Button
-            onClick={onOpenAdminPanel}
-            className="fantasy-button fantasy-button--primary w-full justify-center gap-2 rounded-full font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--theme-bg)] hover:bg-[var(--mc-accent-hi)]"
-            variant="default"
-            size="md"
-          >
-            {t.DASHBOARD.ADMIN_PANEL}
-          </Button>
-        </div>
-      )}
     </aside>
   );
 }

@@ -23,6 +23,7 @@ try {
   CONSTANTS = {
     APP_CONFIG: { DEV_URL: 'http://127.0.0.1:5173', PROD_INDEX: 'dist/index.html', BG_COLOR: '#171614' },
     WINDOW_CONFIG: { WIDTH: 980, HEIGHT: 552 },
+    IPC_CHANNELS: { SYSTEM: { SETTINGS_UPDATED: "system:settings-updated" } },
     DIRECTORIES: { LOGS: 'logs', USER_DATA: 'userData' },
     LOG_FILE_NAMES: { MAIN: 'main.log' },
     LOG_MESSAGES: { APP_STARTING: 'Gerbarium starting...', APP_UNCAUGHT_EXCEPTION: 'Uncaught Exception:', APP_UNHANDLED_REJECTION: 'Unhandled Rejection:' },
@@ -237,7 +238,7 @@ function createTray() {
   });
 }
 
-ipcMain.on('settings-updated', (event, newSettings) => {
+ipcMain.on(CONSTANTS.IPC_CHANNELS.SYSTEM.SETTINGS_UPDATED, (_event, newSettings) => {
   settings = { ...settings, ...newSettings };
   if (settings.minimizeToTray) {
     createTray();

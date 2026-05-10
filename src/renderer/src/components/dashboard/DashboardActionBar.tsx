@@ -3,6 +3,7 @@ import type { TranslationType } from "../../../../shared/constants/translations"
 import type { LaunchPhase } from "../../hooks/dashboard/useGameLaunchFlow";
 import { DownloadingActionState } from "./actionbar/DownloadingActionState";
 import { IdleActionState } from "./actionbar/IdleActionState";
+import { LaunchingActionState } from "./actionbar/LaunchingActionState";
 
 interface DashboardActionBarProps {
   t: TranslationType;
@@ -19,6 +20,8 @@ interface DashboardActionBarProps {
   onPlay: () => void;
   onCloseGame: () => void;
   onCancelDownload: () => void;
+  isConsoleVisible: boolean;
+  onToggleConsole: () => void;
 }
 
 export function DashboardActionBar({
@@ -36,6 +39,8 @@ export function DashboardActionBar({
   onPlay,
   onCloseGame,
   onCancelDownload,
+  isConsoleVisible,
+  onToggleConsole,
 }: DashboardActionBarProps): React.JSX.Element {
   const phaseLabelMap: Record<LaunchPhase, string> = {
     idle: "idle",
@@ -56,13 +61,13 @@ export function DashboardActionBar({
   };
 
   return (
-    <div className="fantasy-panel relative overflow-visible p-5 shadow-2xl transition-none">
+    <div className="fantasy-panel relative overflow-visible p-5 shadow-2xl transition-all duration-300 ease-out">
       <div className="mb-3 flex items-center justify-end">
         <div
           className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em] ${phaseToneMap[launchPhase]}`}
         >
           {phaseLabelMap[launchPhase]}
-          {launchStatus?.trim() ? ` • ${launchStatus.trim()}` : ""}
+          {launchStatus?.trim() ? ` - ${launchStatus.trim()}` : ""}
         </div>
       </div>
       {(errorMessage || playBlockReason) && (
@@ -71,7 +76,23 @@ export function DashboardActionBar({
           {playBlockReason || errorMessage}
         </div>
       )}
-      {!isDownloading ? (
+
+      {isDownloading ? (
+        <DownloadingActionState
+          t={t}
+          progress={progress}
+          onCancelDownload={onCancelDownload}
+        />
+      ) : isLaunching ? (
+        <LaunchingActionState
+          t={t}
+          selectedVersion={selectedVersion}
+          launchProgress={launchProgress}
+          launchStatus={launchStatus}
+          isConsoleVisible={isConsoleVisible}
+          onToggleConsole={onToggleConsole}
+        />
+      ) : (
         <IdleActionState
           t={t}
           selectedVersion={selectedVersion}
@@ -82,12 +103,6 @@ export function DashboardActionBar({
           playBlockReason={playBlockReason}
           onPlay={onPlay}
           onCloseGame={onCloseGame}
-        />
-      ) : (
-        <DownloadingActionState
-          t={t}
-          progress={progress}
-          onCancelDownload={onCancelDownload}
         />
       )}
     </div>

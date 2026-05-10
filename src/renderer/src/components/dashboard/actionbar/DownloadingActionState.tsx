@@ -14,6 +14,10 @@ export function DownloadingActionState({
   progress,
   onCancelDownload,
 }: Props): React.JSX.Element {
+  const rawProgress = progress?.progress ?? 0;
+  const normalizedProgress =
+    rawProgress >= 0 && rawProgress <= 1 ? rawProgress * 100 : rawProgress;
+
   return (
     <div className="flex h-full flex-col justify-center gap-4">
       <div className="flex items-center justify-between">
@@ -43,7 +47,7 @@ export function DownloadingActionState({
         </Button>
       </div>
       <ProgressBar
-        progress={progress?.progress || 0}
+        progress={normalizedProgress}
         className="h-1.5"
       />
     </div>

@@ -12,6 +12,14 @@ interface Props {
   onToggleConsole: () => void;
 }
 
+function normalizeProgressValue(value: number | null): number | null {
+  if (value === null || !Number.isFinite(value)) {
+    return null;
+  }
+  const normalized = value >= 0 && value <= 1 ? value * 100 : value;
+  return Math.max(0, Math.min(100, normalized));
+}
+
 function getLaunchPhase(percent: number | null): string {
   if (percent === null) {
     return "Preparing runtime";
@@ -39,14 +47,7 @@ export function LaunchingActionState({
   isConsoleVisible,
   onToggleConsole,
 }: Props): React.JSX.Element {
-  const launchPercent =
-    launchProgress !== null &&
-    Number.isFinite(launchProgress) &&
-    launchProgress > 0 &&
-    launchProgress < 100
-      ? Math.max(0, Math.min(100, launchProgress))
-      : null;
-
+  const launchPercent = normalizeProgressValue(launchProgress);
   const launchPhase = getLaunchPhase(launchPercent);
 
   return (
@@ -61,7 +62,7 @@ export function LaunchingActionState({
             </div>
             {launchPercent !== null && (
               <div className="font-mono text-[11px] font-bold text-theme">
-                {launchPercent}%
+                {Math.round(launchPercent)}%
               </div>
             )}
           </div>
@@ -69,7 +70,7 @@ export function LaunchingActionState({
             {selectedVersion?.name || "Minecraft"}
           </div>
           <ProgressBar
-            progress={launchPercent !== null ? launchPercent : 0}
+            progress={launchPercent ?? 0}
             className="mt-2 h-1.5"
           />
         </div>

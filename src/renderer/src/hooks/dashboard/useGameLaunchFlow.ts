@@ -28,6 +28,15 @@ type UseGameLaunchFlowOptions = {
   selectVersionAlert: string;
 };
 
+function normalizeProgressPercent(value: unknown): number | null {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null;
+  }
+
+  const normalized = value >= 0 && value <= 1 ? value * 100 : value;
+  return Math.max(0, Math.min(100, normalized));
+}
+
 export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
   phase: LaunchPhase;
   isLaunching: boolean;
@@ -56,6 +65,43 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
   const [isConsoleVisible, setIsConsoleVisible] = useState(true);
   const [isGameRunning, setIsGameRunning] = useState(false);
   const consoleScrollRef = useRef<HTMLDivElement>(null);
+  const phaseRef = useRef<LaunchPhase>("idle");
+  const phaseEnteredAtRef = useRef<number>(Date.now());
+  const phaseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function applyPhase(next: LaunchPhase): void {
+    phaseRef.current = next;
+    phaseEnteredAtRef.current = Date.now();
+    setPhase(next);
+  }
+
+  function setPhaseSmooth(next: LaunchPhase, immediate = false): void {
+    if (phaseRef.current === next) {
+      return;
+    }
+    if (phaseTimeoutRef.current) {
+      clearTimeout(phaseTimeoutRef.current);
+      phaseTimeoutRef.current = null;
+    }
+    const transitionalPhases: LaunchPhase[] = ["precheck", "updating", "launching"];
+    const current = phaseRef.current;
+    const currentIsTransitional = transitionalPhases.includes(current);
+    const elapsed = Date.now() - phaseEnteredAtRef.current;
+    const minPhaseMs = 420;
+    const delay = !immediate && currentIsTransitional && elapsed < minPhaseMs
+      ? minPhaseMs - elapsed
+      : 0;
+
+    if (delay <= 0) {
+      applyPhase(next);
+      return;
+    }
+
+    phaseTimeoutRef.current = setTimeout(() => {
+      phaseTimeoutRef.current = null;
+      applyPhase(next);
+    }, delay);
+  }
 
   useEffect(() => {
     const consoleNode = consoleScrollRef.current;
@@ -66,15 +112,24 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
   }, [logs]);
 
   useEffect(() => {
+    return () => {
+      if (phaseTimeoutRef.current) {
+        clearTimeout(phaseTimeoutRef.current);
+        phaseTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!window.electronAPI?.game) {
       return;
     }
 
     const unsubscribe = window.electronAPI.game.onProgress((data) => {
       if (data.type === "progress") {
-        const percent = data.content.percent;
-        if (typeof percent === "number" && Number.isFinite(percent)) {
-          setLaunchProgress(Math.max(0, Math.min(100, percent)));
+        const normalizedPercent = normalizeProgressPercent(data.content.percent);
+        if (normalizedPercent !== null) {
+          setLaunchProgress(normalizedPercent);
         }
         if (
           typeof data.content.status === "string" &&
@@ -91,16 +146,19 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
       }
 
       if (data.type === "state" && data.content.phase === "spawned") {
-        setPhase("running");
+        setPhaseSmooth("running");
         setIsGameRunning(true);
-        setLaunchProgress(null);
+        setLaunchProgress(100);
         setLaunchStatus("Running...");
+        setTimeout(() => {
+          setLaunchProgress(null);
+        }, 600);
         logAction("GAME_PROCESS_SPAWNED", "Spawn event received");
         return;
       }
 
       if (data.type === "close") {
-        setPhase("idle");
+        setPhaseSmooth("idle", true);
         setIsGameRunning(false);
         setLaunchProgress(null);
         setLaunchStatus("");
@@ -109,7 +167,7 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
       }
 
       if (data.type === "error") {
-        setPhase("error");
+        setPhaseSmooth("error", true);
         setIsGameRunning(false);
         setLaunchProgress(null);
         setLaunchStatus("");
@@ -126,23 +184,23 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
       return;
     }
     if (options.playBlockReason) {
-      setPhase("error");
+      setPhaseSmooth("error", true);
       setLaunchError(options.playBlockReason);
       return;
     }
     if (!options.selectedVersion) {
-      setPhase("error");
+      setPhaseSmooth("error", true);
       setLaunchError(options.selectVersionAlert);
       return;
     }
     if (!options.user?.username) {
-      setPhase("error");
+      setPhaseSmooth("error", true);
       setLaunchError("User is not logged in.");
       return;
     }
 
     setLaunchError(null);
-    setPhase("precheck");
+    setPhaseSmooth("precheck");
     setIsGameRunning(false);
     setLaunchProgress(null);
     setLaunchStatus("Preparing...");
@@ -167,7 +225,7 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
       }
 
       setIsConsoleVisible(true);
-      setPhase("updating");
+      setPhaseSmooth("updating");
       await runPrelaunchModpackUpdate({
         gamePath: settings.gamePath,
         packwizPackUrl: settings.packwizPackUrl,
@@ -182,7 +240,7 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
         queryKey: queryKeys.installedVersions(settings.gamePath),
       });
 
-      setPhase("launching");
+      setPhaseSmooth("launching");
       setLaunchStatus("Starting Minecraft...");
       const result = await window.electronAPI.game.launch({
         username: options.user.username,
@@ -214,7 +272,7 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
       logAction("GAME_LAUNCH_REQUESTED", options.selectedVersion.name);
     } catch (error: unknown) {
       const message = toErrorMessage(error);
-      setPhase("error");
+      setPhaseSmooth("error", true);
       setIsGameRunning(false);
       setLaunchProgress(null);
       setLaunchStatus("");

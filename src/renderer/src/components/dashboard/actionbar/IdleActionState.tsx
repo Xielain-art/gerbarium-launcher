@@ -50,7 +50,7 @@ export function IdleActionState({
 
   return (
     <div className="flex h-full items-center justify-between gap-5">
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="fantasy-rune-label mb-1 text-[10px] font-bold">
           {t.DASHBOARD.SELECTED_VERSION_LABEL}
         </div>
@@ -73,7 +73,7 @@ export function IdleActionState({
           )}
         </div>
         {typeof launchProgress === "number" ? (
-          <div className="mt-2 h-1 w-56 overflow-hidden rounded-full bg-[var(--theme-surface-soft)]">
+          <div className="mt-2 h-1 w-full max-w-xl overflow-hidden rounded-full bg-[var(--theme-surface-soft)]">
             <div
               className="h-full rounded-full bg-[var(--mc-accent)] transition-[width]"
               style={{ width: `${launchProgress}%` }}
@@ -93,7 +93,9 @@ export function IdleActionState({
         )}
         disabled={isPrimaryActionBlocked}
       >
-        <span className="text-lg leading-none">{isGameRunning ? "X" : ">"}</span>
+        {!isGameRunning && (
+          <span className="text-lg leading-none">{">"}</span>
+        )}
         {buttonLabel}
       </Button>
     </div>

@@ -16,6 +16,17 @@ export interface HandlerResult<T> {
   error?: string;
 }
 
+export function redactSensitiveText(value: string | undefined): string {
+  if (!value) {
+    return "n/a";
+  }
+
+  return value
+    .replace(/Bearer\s+[A-Za-z0-9\-._~+/]+=*/gi, "Bearer [REDACTED]")
+    .replace(/(accessToken|refreshToken|idToken|token|cookie|set-cookie)\s*[:=]\s*["']?[^"',\s}]+/gi, "$1=[REDACTED]")
+    .replace(/authorization\s*[:=]\s*["']?[^"',\s}]+/gi, "authorization=[REDACTED]");
+}
+
 /**
  * Logs API failure with status and messages
  */
@@ -27,14 +38,17 @@ export function logApiFailure(
     errorDetails?: string;
   },
 ): void {
+  const safeMessage = redactSensitiveText(result.errorMessage);
+  const safeDetails = redactSensitiveText(result.errorDetails);
+
   log.error(
     context,
     "status:",
     result.status ?? "n/a",
     "message:",
-    result.errorMessage ?? "n/a",
+    safeMessage,
     "details:",
-    result.errorDetails ?? "n/a",
+    safeDetails,
   );
 }
 

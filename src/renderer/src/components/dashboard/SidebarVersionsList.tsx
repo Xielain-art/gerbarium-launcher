@@ -15,24 +15,26 @@ export function SidebarVersionsList({
   onOpenDescription,
 }: Props): React.JSX.Element {
   const installed = Boolean(version?.isInstalled);
+  const versionLabel = version?.version ?? "1.20.1";
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="mt-auto mb-4 flex flex-col">
       <div className="px-5 py-4">
         <h2 className="fantasy-rune-label text-[10px] font-bold">
           {t.DASHBOARD.CURRENT_VERSION_TITLE}
         </h2>
       </div>
-      <div className="px-3 pb-4">
-        <div className="relative overflow-hidden rounded-[1.35rem] border border-[var(--theme-border-soft)] bg-[linear-gradient(135deg,rgba(41,53,73,0.94)_0%,rgba(18,27,42,0.92)_100%)] p-4 shadow-[0_14px_38px_rgba(0,0,0,0.28)]">
-          <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[var(--mc-accent)]/20 blur-2xl" />
-          <div className="relative space-y-4">
-            <div className="space-y-2">
+      <div className="px-3">
+        <div className="relative flex min-h-[220px] flex-col overflow-hidden rounded-[1.35rem] border border-[var(--fantasy-border-crystal)] bg-[linear-gradient(142deg,rgba(23,22,43,0.95)_0%,rgba(20,27,51,0.94)_52%,rgba(14,43,61,0.92)_100%)] p-5 shadow-[0_20px_44px_rgba(4,5,12,0.56)]">
+          <div className="pointer-events-none absolute -right-14 -top-14 h-36 w-36 rounded-full bg-[var(--fantasy-glow-crystal)] blur-3xl" />
+          <div className="pointer-events-none absolute -left-12 bottom-[-2.5rem] h-24 w-24 rounded-full bg-[var(--fantasy-glow-emerald)] blur-2xl" />
+          <div className="relative flex h-full flex-col">
+            <div className="space-y-3">
               <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-theme-muted">
                 {t.DASHBOARD.CURRENT_VERSION_SUBTITLE}
               </p>
-              <p className="truncate font-sans text-2xl font-semibold leading-none text-theme">
-                {version?.version ?? "1.20.1"}
+              <p className="truncate font-sans text-[2rem] font-semibold leading-none text-theme">
+                {versionLabel}
               </p>
               <p
                 className={cn(
@@ -48,7 +50,7 @@ export function SidebarVersionsList({
 
             <Button
               onClick={onOpenDescription}
-              className="fantasy-button fantasy-button--secondary w-full justify-center rounded-xl font-mono text-[10px] font-bold uppercase tracking-[0.16em]"
+              className="fantasy-button fantasy-button--secondary mt-auto w-full justify-center rounded-xl py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em]"
               variant="default"
               size="sm"
             >

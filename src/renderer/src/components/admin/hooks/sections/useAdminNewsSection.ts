@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import type {
-  ApiCreateNewsDto,
   ApiNews,
-  ApiUpdateNewsDto,
 } from "../../../../../../lib/api/news";
 import {
   useAdminNewsMutations,
@@ -22,49 +20,16 @@ import {
   useNewsFormValidation,
   useNewsTagValidation,
 } from "../../../../lib/validation/useNewsFormValidation";
-
-type NewsSortBy = "createdAt" | "updatedAt" | "title";
-type NewsOrder = "ASC" | "DESC";
-
-function toNewsSortBy(value: string): NewsSortBy {
-  if (value === "updatedAt" || value === "title") {
-    return value;
-  }
-  return "createdAt";
-}
-
-function toNewsOrder(value: string): NewsOrder {
-  return value === "ASC" ? "ASC" : "DESC";
-}
-
-function toApiCreateNewsPayload(payload: {
-  title: string;
-  slug: string;
-  content: string;
-  image?: string;
-  tagIds?: string[];
-}): ApiCreateNewsDto {
-  return { ...payload, tagIds: payload.tagIds };
-}
-
-function toApiUpdateNewsPayload(payload: {
-  title?: string;
-  slug?: string;
-  content?: string;
-  image?: string;
-  tagIds?: string[];
-}): ApiUpdateNewsDto {
-  return { ...payload, tagIds: payload.tagIds };
-}
-
-interface AdminNewsFilters {
-  sortBy: NewsSortBy;
-  order: NewsOrder;
-  search: string | undefined;
-  tagId: string | undefined;
-  fromDate: string | undefined;
-  toDate: string | undefined;
-}
+import {
+  DEFAULT_NEWS_FILTERS,
+  type NewsOrder,
+  type NewsSortBy,
+  toApiCreateNewsPayload,
+  toApiUpdateNewsPayload,
+  toIsoOrUndefined,
+  toNewsOrder,
+  toNewsSortBy,
+} from "./newsSection.helpers";
 
 export function useAdminNewsSection(
   activeTab: string,
@@ -96,14 +61,7 @@ export function useAdminNewsSection(
   const [editingTagId, setEditingTagId] = useState<string | null>(null);
   const [editingTagName, setEditingTagName] = useState("");
 
-  const [appliedNewsFilters, setAppliedNewsFilters] = useState<AdminNewsFilters>({
-    sortBy: "createdAt",
-    order: "DESC",
-    search: undefined,
-    tagId: undefined,
-    fromDate: undefined,
-    toDate: undefined,
-  });
+  const [appliedNewsFilters, setAppliedNewsFilters] = useState(DEFAULT_NEWS_FILTERS);
 
   const newsQuery = useAdminNewsQuery(appliedNewsFilters);
   const newsTagsQuery = useAdminNewsTagsQuery();
@@ -129,8 +87,8 @@ export function useAdminNewsSection(
         ...prev,
         search: newsSearch || undefined,
         tagId: newsTag || undefined,
-        fromDate: newsFromDate ? new Date(newsFromDate).toISOString() : undefined,
-        toDate: newsToDate ? new Date(newsToDate).toISOString() : undefined,
+        fromDate: toIsoOrUndefined(newsFromDate),
+        toDate: toIsoOrUndefined(newsToDate),
         sortBy: newsSortDraft,
         order: newsOrderDraft,
       }));
@@ -408,4 +366,3 @@ export function useAdminNewsSection(
     handleDeleteNewsTag,
   };
 }
-

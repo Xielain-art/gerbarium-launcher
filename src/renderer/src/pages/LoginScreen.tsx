@@ -1,4 +1,5 @@
 import { WindowControls } from "../components/layout/WindowControls";
+import { SessionLoadingScreen } from "../components/layout/SessionLoadingScreen";
 import { useLoginScreen } from "../hooks/useLoginScreen";
 import { LoginFormCard } from "../components/login/LoginFormCard";
 
@@ -6,22 +7,7 @@ export function LoginScreen(): React.JSX.Element {
   const vm = useLoginScreen();
 
   if (vm.showSessionSpinner) {
-    return (
-      <div className="fantasy-ui fantasy-shell bg-[var(--theme-bg)] relative flex h-screen w-full items-center justify-center overflow-hidden">
-        <div className="fantasy-orb fantasy-orb--violet left-[-8rem] top-8 h-96 w-96" />
-        <div className="fantasy-orb fantasy-orb--emerald right-[-6rem] top-12 h-80 w-80" />
-        <div className="absolute inset-0 bg-pattern opacity-[0.08]" />
-        <div className="absolute right-4 top-4 z-50">
-          <WindowControls />
-        </div>
-        <div className="relative z-10 flex flex-col items-center gap-4 rounded-[1.5rem] border border-[var(--fantasy-border-soft)] bg-[color:var(--theme-surface)]/80 px-6 py-5 backdrop-blur-xl">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[var(--mc-accent)]/20 border-t-[var(--mc-accent)] shadow-[0_0_24px_rgba(62,207,142,0.2)]" />
-          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-theme-muted">
-            {vm.t.COMMON.LOADING}
-          </div>
-        </div>
-      </div>
-    );
+    return <SessionLoadingScreen message={vm.t.COMMON.LOADING} />;
   }
 
   return (

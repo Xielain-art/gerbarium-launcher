@@ -1,6 +1,6 @@
 import { Avatar } from "../game/Avatar";
 import { Badge as ShadcnBadge } from "@/components/shadcn/ui/badge";
-import { Settings, LogOut } from "lucide-react";
+import { Settings, LogOut, Shield } from "lucide-react";
 import type { AuthUser } from "../../types";
 import type { TranslationType } from "../../../../shared/constants/translations";
 
@@ -22,6 +22,8 @@ interface Props {
   t: TranslationType;
   user: AuthUser | null;
   onOpenSettings: () => void;
+  onOpenAdminPanel?: () => void;
+  canOpenAdminPanel?: boolean;
   onLogout: () => void;
 }
 
@@ -29,6 +31,8 @@ export function SidebarProfileCard({
   t,
   user,
   onOpenSettings,
+  onOpenAdminPanel,
+  canOpenAdminPanel = false,
   onLogout,
 }: Props): React.JSX.Element {
   const roleLabels = getRoleLabels(user);
@@ -74,6 +78,16 @@ export function SidebarProfileCard({
           <Settings className="h-3.5 w-3.5" />
           {t.DASHBOARD.SETTINGS_BUTTON}
         </button>
+        {canOpenAdminPanel && onOpenAdminPanel && (
+          <button
+            onClick={onOpenAdminPanel}
+            className="fantasy-button flex h-8 flex-1 items-center justify-center gap-2 rounded-full font-sans text-xs font-medium text-[var(--fantasy-crystal-violet)]"
+            title="Админка"
+          >
+            <Shield className="h-3.5 w-3.5" />
+            Админка
+          </button>
+        )}
         <button
           onClick={onLogout}
           className="fantasy-button flex h-8 w-10 items-center justify-center rounded-full text-theme-muted transition-colors hover:text-[color:var(--destructive)]"

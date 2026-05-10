@@ -41,7 +41,6 @@ export interface IElectronAPI {
   } | null;
 
   // App controls
-  closeApp: () => void;
   getAppVersion: () => Promise<string>;
   verifyIntegrity: () => Promise<IntegrityCheckResult>;
   getLastCrashReport: () => Promise<{

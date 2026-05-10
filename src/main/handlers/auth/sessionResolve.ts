@@ -4,7 +4,11 @@ import {
   refreshTokenRequest,
 } from "../../../lib/api/auth";
 import { LOG_MESSAGES } from "../../../shared/constants/log-messages";
-import { logApiFailure, readErrorDetails } from "../../utils/apiHandlerUtils";
+import {
+  logApiFailure,
+  readErrorDetails,
+  redactSensitiveText,
+} from "../../utils/apiHandlerUtils";
 import { clearStoredSession, readStoredSession, writeStoredSession } from "./storage";
 import type { AuthSessionPayload } from "./storage";
 import { buildOnlineSession, mapApiUserToSessionUser } from "./sessionBuild";
@@ -95,9 +99,9 @@ export async function resolveOnlineSession(
       "status:",
       refreshedProfile.status ?? "n/a",
       "message:",
-      refreshedProfile.errorMessage ?? "n/a",
+      redactSensitiveText(refreshedProfile.errorMessage),
       "details:",
-      readErrorDetails(refreshedProfile) ?? "n/a",
+      redactSensitiveText(readErrorDetails(refreshedProfile)),
     );
     return null;
   }
@@ -116,9 +120,9 @@ export async function resolveOnlineSession(
     "status:",
     profileResult.status ?? "n/a",
     "message:",
-    profileResult.errorMessage ?? "n/a",
+    redactSensitiveText(profileResult.errorMessage),
     "details:",
-    readErrorDetails(profileResult) ?? "n/a",
+    redactSensitiveText(readErrorDetails(profileResult)),
   );
   return activeSession;
 }

@@ -21,6 +21,11 @@ export const EXTERNAL_URLS = {
   GITHUB_ISSUES: 'https://github.com/Xielain-art/gerbarium-releases/issues/new',
 } as const;
 
+export const EXTERNAL_HOST_ALLOWLIST = [
+  "github.com",
+  "www.github.com",
+] as const;
+
 export const FILE_EXTENSIONS = {
   ZIP: 'zip',
   EXE: 'exe',

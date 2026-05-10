@@ -47,7 +47,7 @@ export function DashboardScreen(): React.JSX.Element {
           <WindowControls />
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto pb-4 pt-20">
+        <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto pb-28 pt-20">
           <div className="mb-6 flex items-center gap-2 px-6">
             <button
               type="button"
@@ -117,7 +117,7 @@ export function DashboardScreen(): React.JSX.Element {
           </div>
         ) : null}
 
-        <div className="shrink-0 px-6 pb-4">
+        <div className="sticky bottom-0 z-30 shrink-0 border-t border-[var(--fantasy-border-soft)] bg-[linear-gradient(180deg,rgba(10,10,16,0.28)_0%,rgba(10,10,16,0.82)_48%,rgba(10,10,16,0.96)_100%)] px-6 pb-4 pt-3 backdrop-blur-xl">
           <DashboardActionBar
             t={vm.t}
             selectedVersion={vm.selectedVersion}
@@ -133,6 +133,8 @@ export function DashboardScreen(): React.JSX.Element {
             onPlay={vm.onPlay}
             onCloseGame={vm.onCloseGame}
             onCancelDownload={vm.onCancelDownload}
+            isConsoleVisible={vm.isConsoleVisible}
+            onToggleConsole={vm.onToggleConsole}
           />
         </div>
       </main>
