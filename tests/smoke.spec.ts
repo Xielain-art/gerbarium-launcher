@@ -98,8 +98,21 @@ test.describe('Smoke Test - Full Auth Flow', () => {
   test('Full registration and login flow', async () => {
     console.log('🚀 Starting Smoke Test...');
 
-    // Wait for initial load
-    await window.waitForSelector('input', { timeout: 20000 });
+    await window.waitForFunction(() => {
+      const w = window as unknown as { electronAPI?: unknown };
+      return Boolean(w.electronAPI);
+    }, { timeout: 30000 });
+
+    // Fail-fast bootstrap: login form must appear quickly.
+    try {
+      await window.waitForSelector('#auth-username', { timeout: 15000 });
+    } catch (error) {
+      const currentUrl = window.url();
+      const bodyPreview = await window.locator('body').innerText().catch(() => '');
+      console.error(`Smoke bootstrap failed. URL: ${currentUrl}`);
+      console.error(`Body preview: ${bodyPreview.slice(0, 400)}`);
+      throw error;
+    }
     
     const timestamp = Date.now();
     const uniqueUsername = `smoke_${timestamp}`;
