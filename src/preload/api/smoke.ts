@@ -6,7 +6,7 @@ export function createSmokeApi() {
 
   return {
     getSmokeTestConfig: () => {
-      if (env.SMOKE_TEST === "true") {
+      if (env.SMOKE_TEST === "true" || env.E2E_FORCE_SMOKE === "true") {
         return {
           isSmokeTest: true,
           testUsername: env.TEST_USERNAME,

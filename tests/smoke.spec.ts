@@ -48,6 +48,7 @@ test.describe('Smoke Test - Full Auth Flow', () => {
       VITE_API_BASE_URL: apiBaseUrl,
       PACKWIZ_PACK_URL: packwizPackUrl,
       SMOKE_TEST: 'true',
+      E2E_FORCE_SMOKE: 'true',
       TEST_USERNAME: 'smoke_user',
       TEST_EMAIL: 'smoke_user@gerbarium.ru',
       TEST_PASSWORD: 'SmokeTestPassword123!',
@@ -114,6 +115,14 @@ test.describe('Smoke Test - Full Auth Flow', () => {
       const w = window as unknown as { electronAPI?: unknown };
       return Boolean(w.electronAPI);
     }, { timeout: 30000 });
+
+    const smokeConfig = await window.evaluate(() => {
+      const w = window as unknown as {
+        electronAPI?: { getSmokeTestConfig?: () => unknown };
+      };
+      return w.electronAPI?.getSmokeTestConfig?.() ?? null;
+    });
+    console.log(`Smoke config: ${JSON.stringify(smokeConfig)}`);
 
     // Fail-fast bootstrap: login form must appear quickly.
     try {
