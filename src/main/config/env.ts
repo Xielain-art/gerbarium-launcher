@@ -58,9 +58,46 @@ function readEnvFromFileCandidates(): Record<string, string> {
   return {};
 }
 
+/**
+ * Builds the runtime env by merging `.env` file values with `process.env`.
+ * `process.env` takes precedence so that env vars injected by CI runners
+ * or by Playwright's `electron.launch({ env })` are respected.
+ */
 function buildRuntimeEnv(): Record<string, string | undefined> {
   const fileEnv = readEnvFromFileCandidates();
-  return fileEnv;
+  const merged: Record<string, string | undefined> = { ...fileEnv };
+
+  for (const key of Object.keys(fileEnv)) {
+    if (process.env[key] !== undefined) {
+      merged[key] = process.env[key];
+    }
+  }
+
+  // Also pick up keys that exist only in process.env (not in .env file)
+  // but are part of the known env schema.
+  const knownKeys = [
+    "API_BASE_URL",
+    "VITE_API_BASE_URL",
+    "PACKWIZ_PACK_URL",
+    "DISCORD_RPC_CLIENT_ID",
+    "CURSEFORGE_API_KEY",
+    "JAVA_HOME",
+    "NODE_ENV",
+    "SMOKE_TEST",
+    "TEST_USERNAME",
+    "TEST_EMAIL",
+    "TEST_PASSWORD",
+    "PACKWIZ_DOWNLOAD_TIMEOUT_MS",
+    "PACKWIZ_ALLOWED_HOSTS",
+  ];
+
+  for (const key of knownKeys) {
+    if (merged[key] === undefined && process.env[key] !== undefined) {
+      merged[key] = process.env[key];
+    }
+  }
+
+  return merged;
 }
 
 export const mainEnv = parseAppEnv(buildRuntimeEnv());
