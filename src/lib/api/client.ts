@@ -32,6 +32,8 @@ function getViteEnvBaseUrl(): string | undefined {
   }
 }
 
+const DEFAULT_API_BASE_URL = "https://gerbarium-api.vercel.app";
+
 function resolveApiBaseUrl(): string {
   const fromProcess = getProcessEnvBaseUrl();
   if (fromProcess && fromProcess.trim()) {
@@ -51,7 +53,13 @@ function resolveApiBaseUrl(): string {
     throw new Error("Invalid VITE_API_BASE_URL in .env");
   }
 
-  throw new Error("API base URL is missing. Set API_BASE_URL/VITE_API_BASE_URL in .env");
+  // Fall back to the default production API URL instead of crashing.
+  // This allows the app to boot in smoke-test / misconfigured envs.
+  console.warn(
+    "[api/client] API base URL is missing from env. Falling back to default:",
+    DEFAULT_API_BASE_URL,
+  );
+  return DEFAULT_API_BASE_URL;
 }
 
 export const API_BASE_URL = resolveApiBaseUrl();
