@@ -50,6 +50,14 @@ jobs:
           PACKWIZ_PACK_URL: ${{ secrets.PACKWIZ_PACK_URL != '' && secrets.PACKWIZ_PACK_URL || vars.PACKWIZ_PACK_URL }}
         run: npm run test:unit
 
+      - name: Build application
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+          DISCORD_RPC_CLIENT_ID: ${{ vars.DISCORD_RPC_CLIENT_ID }}
+          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY != '' && secrets.CURSEFORGE_API_KEY || vars.CURSEFORGE_API_KEY }}
+          PACKWIZ_PACK_URL: ${{ secrets.PACKWIZ_PACK_URL != '' && secrets.PACKWIZ_PACK_URL || vars.PACKWIZ_PACK_URL }}
+        run: npm run build
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
