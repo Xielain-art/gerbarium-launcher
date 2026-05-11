@@ -6,6 +6,7 @@ import { IPC_CHANNELS } from "../../../shared/constants/ipc-chanels";
 import { LOG_MESSAGES, UI_MESSAGES } from "../../../shared/constants/log-messages";
 import { ENVIRONMENTS, FILENAMES, TIMEOUTS } from "../../../shared/constants/system";
 import { toUpdateInfoPayload } from "./payload";
+import { mainEnv } from "../../config/env";
 
 export type UpdateWindowState = {
   getMainWindow: () => BrowserWindow | null;
@@ -21,7 +22,7 @@ export function bindUpdateLifecycle(
   }
   updateEventsBoundRef.value = true;
 
-  if (process.env.NODE_ENV === ENVIRONMENTS.DEVELOPMENT) {
+  if (mainEnv.NODE_ENV === ENVIRONMENTS.DEVELOPMENT) {
     autoUpdater.autoInstallOnAppQuit = false;
     autoUpdater.updateConfigPath = path.join(
       __dirname,

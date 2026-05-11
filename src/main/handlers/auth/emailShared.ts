@@ -1,7 +1,9 @@
+import { mainEnv } from "../../config/env";
+import { isSmokeTestEnabled } from "../../../shared/env";
 export function mergeSmokeCode<T extends { developmentCode?: string }>(
   status: T,
 ): T {
-  if (process.env.SMOKE_TEST !== "true") {
+  if (!isSmokeTestEnabled(mainEnv)) {
     return status;
   }
 

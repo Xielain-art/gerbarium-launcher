@@ -9,6 +9,8 @@ import { logApiFailure, mapAuthFailureCode } from "../../utils/apiHandlerUtils";
 import type { AuthHandlerContext } from "./context";
 import { buildOnlineSession, interceptSmokeTestCode, parseOrNull, writeStoredSession } from "./utils";
 import { mapEmailVerificationPayload } from "./response";
+import { mainEnv } from "../../config/env";
+import { isSmokeTestEnabled } from "../../../shared/env";
 
 function mapSmokeVerification(
   mappedVerification:
@@ -16,7 +18,7 @@ function mapSmokeVerification(
     | undefined,
   smokeDevCode: string | undefined,
 ): ReturnType<typeof mapEmailVerificationPayload> {
-  if (!smokeDevCode || process.env.SMOKE_TEST !== "true") {
+  if (!smokeDevCode || !isSmokeTestEnabled(mainEnv)) {
     return mappedVerification;
   }
 
@@ -53,7 +55,7 @@ export function registerAuthRegisterHandler({
 
         let registerResult;
         let smokeDevCode: string | undefined;
-        if (process.env.SMOKE_TEST === "true") {
+        if (isSmokeTestEnabled(mainEnv)) {
           registerResult = await testRegisterRequest({
             email: validatedPayload.email,
             username: validatedPayload.username,

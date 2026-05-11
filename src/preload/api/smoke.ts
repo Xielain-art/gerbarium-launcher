@@ -1,12 +1,15 @@
+import { mainEnv } from "../../main/config/env";
+import { isSmokeTestEnabled } from "../../shared/env";
+
 export function createSmokeApi() {
   return {
     getSmokeTestConfig: () => {
-      if (process.env.SMOKE_TEST === "true") {
+      if (isSmokeTestEnabled(mainEnv)) {
         return {
           isSmokeTest: true,
-          testUsername: process.env.TEST_USERNAME,
-          testEmail: process.env.TEST_EMAIL,
-          testPassword: process.env.TEST_PASSWORD,
+          testUsername: mainEnv.TEST_USERNAME,
+          testEmail: mainEnv.TEST_EMAIL,
+          testPassword: mainEnv.TEST_PASSWORD,
         };
       }
       return null;

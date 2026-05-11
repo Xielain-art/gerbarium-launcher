@@ -13,8 +13,9 @@ import {
 } from "../../../shared/constants/system";
 import type { LauncherSettings } from "../../../shared/constants/ipc-chanels";
 import { tStoreError } from "../lib/i18nFallback";
+import { rendererEnv } from "../config/env";
 
-const ENV_PACKWIZ_URL = import.meta.env.VITE_BASE_PACKWIZ_URL?.trim() || "";
+const ENV_PACKWIZ_URL = rendererEnv.VITE_BASE_PACKWIZ_URL?.trim() || "";
 
 function logAction(action: string, details?: string): void {
   void window.electronAPI?.system.logAction(action, details);

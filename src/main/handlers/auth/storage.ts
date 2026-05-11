@@ -4,6 +4,8 @@ import path from "node:path";
 import log from "electron-log";
 import { ERROR_CODES } from "../../../shared/constants/errors";
 import { secureStorageLock } from "../../utils/secureStorageLock";
+import { mainEnv } from "../../config/env";
+import { isSmokeTestEnabled } from "../../../shared/env";
 
 export const SECURE_STORAGE_FILE_NAME = "secure-storage.json";
 const AUTH_SESSION_KEY = "auth:session";
@@ -51,7 +53,7 @@ function assertEncryptionAvailable(): void {
 function encryptSession(payload: AuthSessionPayload): string {
   const json = JSON.stringify(payload);
   if (
-    process.env.SMOKE_TEST === "true" &&
+    isSmokeTestEnabled(mainEnv) &&
     !safeStorage.isEncryptionAvailable()
   ) {
     log.warn(
@@ -68,7 +70,7 @@ function encryptSession(payload: AuthSessionPayload): string {
 function decryptSession(encryptedBase64: string): AuthSessionPayload {
   let decrypted: string;
   if (
-    process.env.SMOKE_TEST === "true" &&
+    isSmokeTestEnabled(mainEnv) &&
     !safeStorage.isEncryptionAvailable()
   ) {
     try {

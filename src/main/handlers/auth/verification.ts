@@ -2,6 +2,8 @@ import log from "electron-log";
 import type { ApiEmailVerificationStatus } from "../../../lib/api/auth";
 import { ERROR_CODES } from "../../../shared/constants/errors";
 import type { AuthEmailVerificationStatus, AuthSessionUser } from "../../../shared/constants/ipc-chanels";
+import { mainEnv } from "../../config/env";
+import { isSmokeTestEnabled } from "../../../shared/env";
 
 export function mapEmailVerification(
   status?: ApiEmailVerificationStatus,
@@ -60,7 +62,7 @@ export function mapEmailVerificationFailureCode(status?: number): string {
 }
 
 export function interceptSmokeTestCode(status?: ApiEmailVerificationStatus): void {
-  if (process.env.SMOKE_TEST === "true" && status?.developmentCode) {
+  if (isSmokeTestEnabled(mainEnv) && status?.developmentCode) {
     const devCode = status.developmentCode;
     (global as Record<string, unknown>).lastDevelopmentCode = devCode;
     process.stdout.write(`[SMOKE_TEST_CODE]:${devCode}\n`);

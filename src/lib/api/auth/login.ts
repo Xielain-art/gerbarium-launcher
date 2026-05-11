@@ -1,3 +1,4 @@
+import { isSmokeTestEnabled, parseAppEnv } from "../../../shared/env";
 import { apiClient } from "../client";
 import { buildApiResult, buildNetworkErrorResult } from "../result";
 import type {
@@ -6,6 +7,13 @@ import type {
   ApiRegisterDto,
   ApiResult,
 } from "../types";
+
+function isSmokeTestRuntime(): boolean {
+  if (typeof process === "undefined" || !process.env) {
+    return false;
+  }
+  return isSmokeTestEnabled(parseAppEnv(process.env));
+}
 
 export async function loginRequest(
   payload: ApiLoginDto,
@@ -36,7 +44,7 @@ export async function registerRequest(
       },
     );
 
-    if (process.env.SMOKE_TEST === "true") {
+    if (isSmokeTestRuntime()) {
       process.stdout.write(`[DEBUG_API_REGISTER] Data: ${JSON.stringify(data)}\n`);
     }
 

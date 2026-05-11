@@ -3,6 +3,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import log from "electron-log";
 import { secureStorageLock } from "../../utils/secureStorageLock";
+import { mainEnv } from "../../config/env";
+import { isSmokeTestEnabled } from "../../../shared/env";
 
 type SecureData = Record<string, string>;
 const ALLOWED_SECURE_STORAGE_KEYS = new Set(["auth:session"]);
@@ -46,7 +48,7 @@ export async function setSecureStorageValue(
 ): Promise<void> {
   await secureStorageLock.runExclusive(async () => {
     let encryptedBase64: string;
-    if (process.env.SMOKE_TEST === "true" && !safeStorage.isEncryptionAvailable()) {
+    if (isSmokeTestEnabled(mainEnv) && !safeStorage.isEncryptionAvailable()) {
       log.warn(
         "[SMOKE_TEST] Encryption not available for set, using plain base64",
       );
@@ -72,7 +74,7 @@ export async function getSecureStorageValue(
       return null;
     }
 
-    if (process.env.SMOKE_TEST === "true" && !safeStorage.isEncryptionAvailable()) {
+    if (isSmokeTestEnabled(mainEnv) && !safeStorage.isEncryptionAvailable()) {
       try {
         return Buffer.from(encryptedBase64, "base64").toString("utf-8");
       } catch {

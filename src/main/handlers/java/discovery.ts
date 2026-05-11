@@ -7,6 +7,7 @@ import { DIRECTORIES, FILENAMES, COMMANDS, REGEX, JAVA_CONSTANTS, PLATFORMS } fr
 import type { JavaVersion } from "../../config/javaConfig";
 import log from "electron-log";
 import { LOG_MESSAGES } from "../../../shared/constants/log-messages";
+import { mainEnv } from "../../config/env";
 
 const execPromise = util.promisify(exec);
 
@@ -30,9 +31,9 @@ export async function checkJavaVersion(javaPath: string): Promise<string | null>
 }
 
 export async function findJavaInSystem(): Promise<string | null> {
-  if (process.env.JAVA_HOME) {
+  if (mainEnv.JAVA_HOME) {
     const javaPath = path.join(
-      process.env.JAVA_HOME,
+      mainEnv.JAVA_HOME,
       DIRECTORIES.BIN,
       process.platform === PLATFORMS.WINDOWS
         ? FILENAMES.JAVA_EXE

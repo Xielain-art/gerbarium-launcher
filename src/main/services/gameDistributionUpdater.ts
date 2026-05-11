@@ -1,5 +1,6 @@
 import type { GameUpdateResult } from "../../shared/distribution/manifest";
 import { runPackwizUpdate } from "./packwiz/updater";
+import { mainEnv } from "../config/env";
 
 export type DistributionProgress = {
   percent: number;
@@ -17,10 +18,10 @@ function pickPackUrl(manifestUrl?: string): string | null {
   }
 
   const envCandidates = [
-    process.env.BASE_PACKWIZ_URL,
-    process.env.PACKWIZ_PACK_URL,
-    process.env.GERBARIUM_PACKWIZ_PACK_URL,
-    process.env.GERBARIUM_DISTRIBUTION_URL,
+    mainEnv.BASE_PACKWIZ_URL,
+    mainEnv.PACKWIZ_PACK_URL,
+    mainEnv.GERBARIUM_PACKWIZ_PACK_URL,
+    mainEnv.GERBARIUM_DISTRIBUTION_URL,
   ];
 
   for (const candidate of envCandidates) {

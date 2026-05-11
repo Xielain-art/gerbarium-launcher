@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import log from "electron-log";
 import { LOG_MESSAGES } from "../../shared/constants/log-messages";
+import { mainEnv } from "../config/env";
 
 interface DiscordRpcClient {
   on(event: "ready", listener: () => void): void;
@@ -17,7 +18,7 @@ interface DiscordRpcModule {
 const require = createRequire(__filename);
 
 function readDiscordClientId(): string | null {
-  const raw = process.env.DISCORD_RPC_CLIENT_ID?.trim();
+  const raw = mainEnv.DISCORD_RPC_CLIENT_ID?.trim();
   if (!raw) return null;
   return raw;
 }

@@ -5,6 +5,7 @@ import { pipeline } from "node:stream/promises";
 import got from "got";
 import log from "electron-log";
 import { LOG_MESSAGES } from "../../../shared/constants/log-messages";
+import { mainEnv } from "../../config/env";
 
 const DEFAULT_TIMEOUT_MS = 120_000;
 const DOWNLOAD_RETRIES = 3;
@@ -18,7 +19,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 function getPackwizDownloadTimeoutMs(): number {
-  const raw = process.env.PACKWIZ_DOWNLOAD_TIMEOUT_MS;
+  const raw = mainEnv.PACKWIZ_DOWNLOAD_TIMEOUT_MS;
   if (!raw) {
     return DEFAULT_TIMEOUT_MS;
   }

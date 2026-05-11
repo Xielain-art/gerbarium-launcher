@@ -3,7 +3,6 @@ import {
   BrowserWindow,
 } from "electron";
 import { existsSync } from "node:fs";
-import { createRequire } from "node:module";
 import path from "node:path";
 import log from "electron-log";
 import { MAIN_CONSTANTS } from "./main-constants";
@@ -28,9 +27,10 @@ import {
 } from "./runtime/window";
 import { syncTrayState, type TrayState } from "./runtime/tray";
 import { registerMainIpcHandlers } from "./runtime/ipc";
+import { mainEnv } from "./config/env";
+import { isSmokeTestEnabled } from "../shared/env";
 
 const appRoot = path.resolve(__dirname, "..", "..");
-const require = createRequire(__filename);
 
 function loadRuntimeEnv(): void {
   const candidates = [
@@ -53,7 +53,7 @@ function loadRuntimeEnv(): void {
 
 loadRuntimeEnv();
 
-const isSmokeTest = process.env.SMOKE_TEST === "true";
+const isSmokeTest = isSmokeTestEnabled(mainEnv);
 const isDev = !app.isPackaged && !isSmokeTest;
 app.setAppUserModelId("gerbariumlauncher");
 

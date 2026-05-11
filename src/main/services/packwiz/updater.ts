@@ -7,6 +7,7 @@ import { assertSupportedHashFormat, computeFileHash, normalizeHash } from "./has
 import { downloadToFile, fetchJson, fetchText } from "./downloader";
 import { parseIndexToml, parseModMetafileToml, parsePackToml } from "./parser";
 import type { PackwizIndexFile, PackwizResolvedFile } from "./types";
+import { mainEnv } from "../../config/env";
 
 const SAFE_MANAGED_PREFIXES = [
   "mods/",
@@ -84,7 +85,7 @@ async function resolveMetafileDownloadUrl(
     throw new Error(`Metafile ${entryPath} missing update.curseforge project-id/file-id`);
   }
 
-  const apiKey = process.env.CURSEFORGE_API_KEY?.trim();
+  const apiKey = mainEnv.CURSEFORGE_API_KEY?.trim();
   if (!apiKey) {
     throw new Error("CurseForge metadata downloads require CURSEFORGE_API_KEY or direct download.url");
   }
