@@ -23,6 +23,9 @@ const mainConfig = {
     "process.env.DISCORD_RPC_CLIENT_ID": JSON.stringify(
       process.env.DISCORD_RPC_CLIENT_ID ?? "",
     ),
+    "process.env.CURSEFORGE_API_KEY": JSON.stringify(
+      process.env.CURSEFORGE_API_KEY ?? "",
+    ),
     "process.env.PACKWIZ_PACK_URL": JSON.stringify(
       process.env.PACKWIZ_PACK_URL ?? "",
     ),

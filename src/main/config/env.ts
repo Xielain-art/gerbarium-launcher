@@ -61,6 +61,7 @@ function readEnvFromFileCandidates(): Record<string, string> {
 const bundledMainEnv = {
   API_BASE_URL: process.env.API_BASE_URL,
   DISCORD_RPC_CLIENT_ID: process.env.DISCORD_RPC_CLIENT_ID,
+  CURSEFORGE_API_KEY: process.env.CURSEFORGE_API_KEY,
   PACKWIZ_PACK_URL: process.env.PACKWIZ_PACK_URL,
 } as const;
 
