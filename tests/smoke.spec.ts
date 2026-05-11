@@ -8,6 +8,7 @@ test.describe('Smoke Test - Full Auth Flow', () => {
   const userDataPath = path.join(process.cwd(), 'test-user-data');
   const envFilePath = path.join(process.cwd(), '.env');
   let originalEnvContent: string | null = null;
+  let smokeEnvForElectron: Record<string, string> = {};
 
   function parseDotEnv(content: string): Record<string, string> {
     const out: Record<string, string> = {};
@@ -42,6 +43,16 @@ test.describe('Smoke Test - Full Auth Flow', () => {
       throw new Error('PACKWIZ_PACK_URL is required for smoke test');
     }
 
+    smokeEnvForElectron = {
+      API_BASE_URL: apiBaseUrl,
+      VITE_API_BASE_URL: apiBaseUrl,
+      PACKWIZ_PACK_URL: packwizPackUrl,
+      SMOKE_TEST: 'true',
+      TEST_USERNAME: 'smoke_user',
+      TEST_EMAIL: 'smoke_user@gerbarium.ru',
+      TEST_PASSWORD: 'SmokeTestPassword123!',
+    };
+
     const lines = [
       `API_BASE_URL=${apiBaseUrl}`,
       `VITE_API_BASE_URL=${apiBaseUrl}`,
@@ -70,6 +81,7 @@ test.describe('Smoke Test - Full Auth Flow', () => {
       env: {
         ...process.env,
         NODE_ENV: 'development',
+        ...smokeEnvForElectron,
       }
     });
 
