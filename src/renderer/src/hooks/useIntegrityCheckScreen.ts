@@ -75,8 +75,9 @@ export function useIntegrityCheckScreen(): {
   const setUpdateGatePassed = useStartupGateStore(
     (state) => state.setUpdateGatePassed,
   );
-  const isSmokeTest =
-    window.electronAPI?.getSmokeTestConfig?.()?.isSmokeTest ?? false;
+  const [isSmokeTest, setIsSmokeTest] = useState<boolean>(
+    window.electronAPI?.getSmokeTestConfig?.()?.isSmokeTest ?? false,
+  );
   const [progress, setProgress] = useState(0);
   const [phaseIndex, setPhaseIndex] = useState(0);
   const [statusMessage, setStatusMessage] = useState(
@@ -87,6 +88,22 @@ export function useIntegrityCheckScreen(): {
     () => PHASES[Math.min(phaseIndex, PHASES.length - 1)],
     [phaseIndex],
   );
+
+  useEffect(() => {
+    if (isSmokeTest) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      const next = window.electronAPI?.getSmokeTestConfig?.()?.isSmokeTest ?? false;
+      if (next) {
+        setIsSmokeTest(true);
+        window.clearInterval(timer);
+      }
+    }, 100);
+
+    return () => window.clearInterval(timer);
+  }, [isSmokeTest]);
 
   useEffect(() => {
     if (isSmokeTest) {
