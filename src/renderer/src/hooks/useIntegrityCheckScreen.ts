@@ -89,6 +89,13 @@ export function useIntegrityCheckScreen(): {
   );
 
   useEffect(() => {
+    if (isSmokeTest) {
+      setUpdateGatePassed(true);
+      fadeAndRemoveSplash();
+      void navigate({ to: ROUTES.LOGIN });
+      return;
+    }
+
     const splashTimers = (window as unknown as {
       __gerbSplashTimers?: { phaseTimer?: number; progressTimer?: number };
     }).__gerbSplashTimers;
