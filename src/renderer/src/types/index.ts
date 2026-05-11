@@ -56,10 +56,8 @@ export interface SettingsGeneral {
   discordRPC: boolean;
   jvmArgs: string;
   gamePath?: string;
-  packwizPackUrl?: string;
   cleanUnknownMods?: boolean;
   packwizDownloadConcurrency?: number;
-  distributionUrl?: string;
   devServerAddress?: string;
   devServerPassword?: string;
   gameServerAddress?: string;
@@ -88,7 +86,7 @@ export interface SettingsState {
 }
 
 // Game Version Types
-export type VersionType = 'gerbarium' | 'fabric' | 'forge' | 'vanilla';
+export type VersionType = 'gerbarium' | 'fabric' | 'vanilla';
 
 export interface GameVersion {
   id: string;
@@ -97,9 +95,8 @@ export interface GameVersion {
   icon?: string;
   isInstalled: boolean;
   version?: string;
-  loader?: "fabric" | "forge";
+  loader?: "fabric";
   fabricLoaderVersion?: string;
-  forgeInstallerUrl?: string;
 }
 
 // Download Progress Types

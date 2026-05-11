@@ -11,37 +11,19 @@ export type DistributionProgressReporter = (
   progress: DistributionProgress,
 ) => void;
 
-function pickPackUrl(manifestUrl?: string): string | null {
-  const fromOptions = manifestUrl?.trim();
-  if (fromOptions) {
-    return fromOptions;
-  }
-
-  const envCandidates = [
-    mainEnv.BASE_PACKWIZ_URL,
-    mainEnv.PACKWIZ_PACK_URL,
-    mainEnv.GERBARIUM_PACKWIZ_PACK_URL,
-    mainEnv.GERBARIUM_DISTRIBUTION_URL,
-  ];
-
-  for (const candidate of envCandidates) {
-    const normalized = candidate?.trim();
-    if (normalized) {
-      return normalized;
-    }
-  }
-  return null;
+function pickPackUrl(): string | null {
+  const normalized = mainEnv.PACKWIZ_PACK_URL?.trim();
+  return normalized ? normalized : null;
 }
 
 export async function runDistributionUpdate(options: {
   gameRoot: string;
-  manifestUrl?: string;
   verifyOnly?: boolean;
   cleanUnknownMods?: boolean;
   downloadConcurrency?: number;
   reportProgress?: DistributionProgressReporter;
 }): Promise<GameUpdateResult> {
-  const packUrl = pickPackUrl(options.manifestUrl);
+  const packUrl = pickPackUrl();
   if (!packUrl) {
     return {
       success: true,

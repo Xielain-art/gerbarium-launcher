@@ -13,9 +13,6 @@ import {
 } from "../../../shared/constants/system";
 import type { LauncherSettings } from "../../../shared/constants/ipc-chanels";
 import { tStoreError } from "../lib/i18nFallback";
-import { rendererEnv } from "../config/env";
-
-const ENV_PACKWIZ_URL = rendererEnv.VITE_BASE_PACKWIZ_URL?.trim() || "";
 
 function logAction(action: string, details?: string): void {
   void window.electronAPI?.system.logAction(action, details);
@@ -28,10 +25,8 @@ function toLauncherSettingsPatch(
     minimizeToTray: settings.minimizeToTray,
     gamePath: settings.gamePath,
     discordRPC: settings.discordRPC,
-    packwizPackUrl: settings.packwizPackUrl,
     cleanUnknownMods: settings.cleanUnknownMods,
     packwizDownloadConcurrency: settings.packwizDownloadConcurrency,
-    distributionUrl: settings.distributionUrl,
     devServerAddress: settings.devServerAddress,
     devServerPassword: settings.devServerPassword,
     gameServerAddress: settings.gameServerAddress,
@@ -65,8 +60,6 @@ const defaultSettings: SettingsStateType = {
     discordRPC: true,
     jvmArgs: DEFAULT_SETTINGS.JVM_ARGS,
     gamePath: "",
-    distributionUrl: "",
-    packwizPackUrl: ENV_PACKWIZ_URL,
     cleanUnknownMods: false,
     packwizDownloadConcurrency: 4,
     devServerAddress: "",
@@ -172,10 +165,9 @@ export const useSettingsStore = create<SettingsState>()(
         profile: state.profile,
       }),
       onRehydrateStorage: () => (state) => {
-        if (!state || !ENV_PACKWIZ_URL) {
+        if (!state) {
           return;
         }
-        state.updateGeneral({ packwizPackUrl: ENV_PACKWIZ_URL });
       },
       migrate: (persistedState) => {
         const raw = persistedState as Partial<SettingsStateType> | undefined;
@@ -186,8 +178,6 @@ export const useSettingsStore = create<SettingsState>()(
           general: {
             ...defaultSettings.general,
             ...raw?.general,
-            // Env value must be authoritative for rollout consistency.
-            packwizPackUrl: ENV_PACKWIZ_URL || raw?.general?.packwizPackUrl || "",
             themeMode: normalizeThemeMode(raw?.general?.themeMode),
           },
           mods: {

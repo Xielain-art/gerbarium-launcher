@@ -12,14 +12,11 @@ import {
   toErrorMessage,
 } from "./utils";
 import { runPrelaunchModpackUpdate } from "./prelaunch";
+import { useLaunchPhaseController } from "./launchFlow/phaseController";
+import { handleGameProgressEvent } from "./launchFlow/progressEvents";
+import type { LaunchPhase } from "./launchFlow/types";
 
-export type LaunchPhase =
-  | "idle"
-  | "precheck"
-  | "updating"
-  | "launching"
-  | "running"
-  | "error";
+export type { LaunchPhase } from "./launchFlow/types";
 
 type UseGameLaunchFlowOptions = {
   user: AuthUser | null;
@@ -27,15 +24,6 @@ type UseGameLaunchFlowOptions = {
   playBlockReason: string | null;
   selectVersionAlert: string;
 };
-
-function normalizeProgressPercent(value: unknown): number | null {
-  if (typeof value !== "number" || !Number.isFinite(value)) {
-    return null;
-  }
-
-  const normalized = value >= 0 && value <= 1 ? value * 100 : value;
-  return Math.max(0, Math.min(100, normalized));
-}
 
 export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
   phase: LaunchPhase;
@@ -57,7 +45,7 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
   const queryClient = useQueryClient();
   const { isDownloading, progress, cancelDownload } = useDownloadStore();
 
-  const [phase, setPhase] = useState<LaunchPhase>("idle");
+  const { phase, setPhaseSmooth } = useLaunchPhaseController();
   const [logs, setLogs] = useState<string[]>([]);
   const [launchProgress, setLaunchProgress] = useState<number | null>(null);
   const [launchStatus, setLaunchStatus] = useState("");
@@ -65,43 +53,6 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
   const [isConsoleVisible, setIsConsoleVisible] = useState(true);
   const [isGameRunning, setIsGameRunning] = useState(false);
   const consoleScrollRef = useRef<HTMLDivElement>(null);
-  const phaseRef = useRef<LaunchPhase>("idle");
-  const phaseEnteredAtRef = useRef<number>(Date.now());
-  const phaseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  function applyPhase(next: LaunchPhase): void {
-    phaseRef.current = next;
-    phaseEnteredAtRef.current = Date.now();
-    setPhase(next);
-  }
-
-  function setPhaseSmooth(next: LaunchPhase, immediate = false): void {
-    if (phaseRef.current === next) {
-      return;
-    }
-    if (phaseTimeoutRef.current) {
-      clearTimeout(phaseTimeoutRef.current);
-      phaseTimeoutRef.current = null;
-    }
-    const transitionalPhases: LaunchPhase[] = ["precheck", "updating", "launching"];
-    const current = phaseRef.current;
-    const currentIsTransitional = transitionalPhases.includes(current);
-    const elapsed = Date.now() - phaseEnteredAtRef.current;
-    const minPhaseMs = 420;
-    const delay = !immediate && currentIsTransitional && elapsed < minPhaseMs
-      ? minPhaseMs - elapsed
-      : 0;
-
-    if (delay <= 0) {
-      applyPhase(next);
-      return;
-    }
-
-    phaseTimeoutRef.current = setTimeout(() => {
-      phaseTimeoutRef.current = null;
-      applyPhase(next);
-    }, delay);
-  }
 
   useEffect(() => {
     const consoleNode = consoleScrollRef.current;
@@ -112,72 +63,23 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
   }, [logs]);
 
   useEffect(() => {
-    return () => {
-      if (phaseTimeoutRef.current) {
-        clearTimeout(phaseTimeoutRef.current);
-        phaseTimeoutRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     if (!window.electronAPI?.game) {
       return;
     }
 
     const unsubscribe = window.electronAPI.game.onProgress((data) => {
-      if (data.type === "progress") {
-        const normalizedPercent = normalizeProgressPercent(data.content.percent);
-        if (normalizedPercent !== null) {
-          setLaunchProgress(normalizedPercent);
-        }
-        if (
-          typeof data.content.status === "string" &&
-          data.content.status.trim()
-        ) {
-          setLaunchStatus(data.content.status.trim());
-        }
-        return;
-      }
-
-      if (data.type === "data") {
-        setLogs((prev) => [...prev, data.content]);
-        return;
-      }
-
-      if (data.type === "state" && data.content.phase === "spawned") {
-        setPhaseSmooth("running");
-        setIsGameRunning(true);
-        setLaunchProgress(100);
-        setLaunchStatus("Running...");
-        setTimeout(() => {
-          setLaunchProgress(null);
-        }, 600);
-        logAction("GAME_PROCESS_SPAWNED", "Spawn event received");
-        return;
-      }
-
-      if (data.type === "close") {
-        setPhaseSmooth("idle", true);
-        setIsGameRunning(false);
-        setLaunchProgress(null);
-        setLaunchStatus("");
-        logAction("GAME_PROCESS_CLOSED", "Game process exited");
-        return;
-      }
-
-      if (data.type === "error") {
-        setPhaseSmooth("error", true);
-        setIsGameRunning(false);
-        setLaunchProgress(null);
-        setLaunchStatus("");
-        setLaunchError(`Launch error: ${data.content}`);
-        logAction("GAME_LAUNCH_ERROR", data.content);
-      }
+      handleGameProgressEvent(data, {
+        setPhaseSmooth,
+        setIsGameRunning,
+        setLaunchProgress,
+        setLaunchStatus,
+        setLaunchError,
+        appendLog: (line) => setLogs((prev) => [...prev, line]),
+      });
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [setPhaseSmooth]);
 
   async function onPlay(): Promise<void> {
     if (phase === "launching" || phase === "precheck" || phase === "updating") {
@@ -228,8 +130,6 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
       setPhaseSmooth("updating");
       await runPrelaunchModpackUpdate({
         gamePath: settings.gamePath,
-        packwizPackUrl: settings.packwizPackUrl,
-        distributionUrl: settings.distributionUrl,
         cleanUnknownMods: settings.cleanUnknownMods,
         packwizDownloadConcurrency: settings.packwizDownloadConcurrency,
         selectedVersion: options.selectedVersion,
@@ -248,7 +148,6 @@ export function useGameLaunchFlow(options: UseGameLaunchFlowOptions): {
         minecraftVersion,
         loader: options.selectedVersion.loader,
         fabricLoaderVersion: options.selectedVersion.fabricLoaderVersion,
-        forgeInstallerUrl: options.selectedVersion.forgeInstallerUrl,
         memory: {
           min: `${Math.max(1, Math.floor(settings.ramAllocation / 2))}G`,
           max: `${Math.max(1, settings.ramAllocation)}G`,

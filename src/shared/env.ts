@@ -11,11 +11,7 @@ const urlSchema = z
 const appEnvSchema = z.object({
   API_BASE_URL: urlSchema.optional(),
   VITE_API_BASE_URL: urlSchema.optional(),
-  BASE_PACKWIZ_URL: urlSchema.optional(),
-  VITE_BASE_PACKWIZ_URL: urlSchema.optional(),
   PACKWIZ_PACK_URL: urlSchema.optional(),
-  GERBARIUM_PACKWIZ_PACK_URL: urlSchema.optional(),
-  GERBARIUM_DISTRIBUTION_URL: urlSchema.optional(),
   DISCORD_RPC_CLIENT_ID: z.string().trim().min(1).optional(),
   CURSEFORGE_API_KEY: z.string().trim().min(1).optional(),
   JAVA_HOME: z.string().trim().min(1).optional(),
@@ -29,6 +25,7 @@ const appEnvSchema = z.object({
     .trim()
     .regex(/^\d+$/)
     .optional(),
+  PACKWIZ_ALLOWED_HOSTS: z.string().trim().min(1).optional(),
 });
 
 export type AppEnv = z.infer<typeof appEnvSchema>;

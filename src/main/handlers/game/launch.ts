@@ -64,39 +64,6 @@ type FabricProfile = {
   id: string;
 };
 
-async function ensureForgeInstaller(
-  rootPath: string,
-  forgeInstallerUrl?: string,
-): Promise<string | undefined> {
-  const normalizedUrl = forgeInstallerUrl?.trim();
-  if (!normalizedUrl) {
-    return undefined;
-  }
-
-  const url = new URL(normalizedUrl);
-  if (url.protocol !== "https:") {
-    throw new Error("Forge installer URL must use https");
-  }
-
-  const fileName = path.basename(url.pathname);
-  if (!fileName.endsWith(".jar")) {
-    throw new Error("Forge installer URL must point to a jar file");
-  }
-
-  const forgeCachePath = path.join(rootPath, "cache", "forge");
-  const installerPath = path.join(forgeCachePath, fileName);
-
-  try {
-    await fs.access(installerPath);
-    return installerPath;
-  } catch {
-    await fs.mkdir(forgeCachePath, { recursive: true });
-    const buffer = await got(normalizedUrl, { timeout: { request: 120000 } }).buffer();
-    await fs.writeFile(installerPath, buffer);
-    return installerPath;
-  }
-}
-
 async function ensureFabricProfile(
   rootPath: string,
   minecraftVersion: string,
@@ -201,16 +168,6 @@ export default function setupGameHandlers(mainWindow: BrowserWindow): void {
         const jvmArgs = sanitizeJvmArgs(options.jvmArgs);
         const auth = await Authenticator.getAuth(username);
         const emitProgress = createProgressSender(mainWindow);
-        if (options.loader === "forge") {
-          emitProgress({
-            type: "progress",
-            content: { percent: 8, status: "Preparing Forge installer..." },
-          });
-        }
-        const forge = await ensureForgeInstaller(
-          rootPath,
-          options.forgeInstallerUrl,
-        );
         if (options.loader === "fabric") {
           emitProgress({
             type: "progress",
@@ -237,7 +194,6 @@ export default function setupGameHandlers(mainWindow: BrowserWindow): void {
             type: "release",
             custom: customVersion,
           },
-          forge,
           memory: {
             max: maxMemory,
             min: minMemory,

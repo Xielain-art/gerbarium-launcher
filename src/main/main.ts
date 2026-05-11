@@ -65,7 +65,6 @@ const appState = {
   settings: {
     minimizeToTray: false,
     discordRPC: true,
-    distributionUrl: "",
     devServerAddress: "",
     devServerPassword: "",
     gameServerAddress: "",

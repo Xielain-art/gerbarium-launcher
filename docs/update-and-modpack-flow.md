@@ -56,7 +56,7 @@ Main side:
   - `src/main/services/gameDistributionUpdater.ts`
 
 `runDistributionUpdate(...)` does:
-1. Resolve manifest URL from payload or `GERBARIUM_DISTRIBUTION_URL`.
+1. Resolve pack URL from `PACKWIZ_PACK_URL`.
 2. Download and validate manifest schema.
 3. For each managed file:
    - normalize/sanitize path

@@ -1,7 +1,10 @@
 import { ipcMain, BrowserWindow, type App } from "electron";
 import { IPC_CHANNELS, type WindowState } from "@shared/constants/ipc-chanels";
+import { mainEnv } from "../config/env";
+import { isSmokeTestEnabled } from "../../shared/env";
 
 export default function windowControlsHandler(app: App): void {
+  const isDevToolsAllowed = !app.isPackaged && !isSmokeTestEnabled(mainEnv);
   // Get the main window (assuming single window for now)
   function getMainWindow(): BrowserWindow | null {
     return BrowserWindow.getAllWindows()[0] || null;
@@ -41,6 +44,9 @@ export default function windowControlsHandler(app: App): void {
   });
 
   ipcMain.handle(IPC_CHANNELS.WINDOW.OPEN_DEVTOOLS, (): void => {
+    if (!isDevToolsAllowed) {
+      return;
+    }
     const win = getMainWindow();
     if (win) {
       win.webContents.openDevTools({ mode: "detach" });

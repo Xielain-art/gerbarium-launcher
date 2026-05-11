@@ -86,14 +86,6 @@ export function isVersionInstalled(
     );
   }
 
-  if (version.loader === "forge") {
-    return installedVersions.some(
-      (installedVersion) =>
-        installedVersion.startsWith("forge-") &&
-        installedVersion.includes(version.version ?? version.id),
-    );
-  }
-
   return false;
 }
 
@@ -101,7 +93,6 @@ export function toLauncherSettingsPatch(settings: {
   minimizeToTray: boolean;
   gamePath?: string;
   discordRPC: boolean;
-  distributionUrl?: string;
   devServerAddress?: string;
   devServerPassword?: string;
   gameServerAddress?: string;
@@ -110,7 +101,6 @@ export function toLauncherSettingsPatch(settings: {
     minimizeToTray: settings.minimizeToTray,
     gamePath: settings.gamePath,
     discordRPC: settings.discordRPC,
-    distributionUrl: settings.distributionUrl,
     devServerAddress: settings.devServerAddress,
     devServerPassword: settings.devServerPassword,
     gameServerAddress: settings.gameServerAddress,

@@ -102,23 +102,6 @@ export function GeneralSettingsTab({
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <label className="fantasy-rune-label text-[10px] font-bold">
-                Packwiz Pack URL
-              </label>
-              <Input
-                type="url"
-                value={general.packwizPackUrl || general.distributionUrl || ""}
-                onChange={(e) =>
-                  onUpdateGeneral({ packwizPackUrl: e.target.value })
-                }
-                placeholder="https://cdn.example.org/packs/client/pack.toml"
-                className="fantasy-input-shell flex-1 font-mono text-[13px]"
-              />
-              <p className="text-[11px] text-theme-muted">
-                Launcher reads pack.toml/index.toml and verifies hashes before launch.
-              </p>
-            </div>
             <div className="grid gap-y-5 sm:grid-cols-2">
               <Checkbox
                 label="Clean unknown mods (mods/*.jar)"

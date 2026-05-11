@@ -1,6 +1,6 @@
 export type DistributionFileAction = "sync" | "seed" | "ignore";
 
-export type DistributionLoader = "vanilla" | "forge" | "fabric" | "neoforge";
+export type DistributionLoader = "vanilla" | "fabric" | "neoforge";
 
 export interface DistributionMinecraft {
   version: string;
@@ -30,8 +30,6 @@ export interface DistributionManifest {
 export interface GameUpdateOptions {
   gamePath?: string;
   minecraftVersion?: string;
-  packwizPackUrl?: string;
-  manifestUrl?: string;
   cleanUnknownMods?: boolean;
   downloadConcurrency?: number;
 }

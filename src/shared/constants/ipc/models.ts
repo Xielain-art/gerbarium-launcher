@@ -24,9 +24,8 @@ export interface GameLaunchOptions {
   username: string;
   version: string;
   minecraftVersion?: string;
-  loader?: "fabric" | "forge";
+  loader?: "fabric";
   fabricLoaderVersion?: string;
-  forgeInstallerUrl?: string;
   memory: { min: string; max: string };
   javaPath: string;
   gamePath?: string;
@@ -156,11 +155,9 @@ export type GameProgressPayload =
 export interface LauncherSettings {
   minimizeToTray: boolean;
   gamePath?: string;
-  packwizPackUrl?: string;
   cleanUnknownMods?: boolean;
   packwizDownloadConcurrency?: number;
   discordRPC?: boolean;
-  distributionUrl?: string;
   devServerAddress?: string;
   devServerPassword?: string;
   gameServerAddress?: string;

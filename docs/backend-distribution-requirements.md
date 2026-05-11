@@ -32,7 +32,7 @@ Recommended manifest URL:
 https://<project-ref>.supabase.co/storage/v1/object/public/gerbarium/gerbarium/modpacks/main/channels/stable.json
 ```
 
-The launcher can use that URL directly through `GERBARIUM_DISTRIBUTION_URL` or the in-app distribution URL setting.
+The launcher uses env-configured distribution source only.
 
 ## API
 
@@ -49,10 +49,10 @@ GET /launcher/files/*
 Launcher config:
 
 ```text
-GERBARIUM_DISTRIBUTION_URL=https://api.example.com/launcher/packs/gerbarium/channels/stable
+PACKWIZ_PACK_URL=https://cdn.example.com/packs/client/pack.toml
 ```
 
-If `GERBARIUM_DISTRIBUTION_URL` is absent, the current launcher skips modpack update and keeps normal Minecraft launch working.
+If `PACKWIZ_PACK_URL` is absent, launcher skips modpack update and continues launch flow.
 
 For Supabase, point it at a public object URL in the `gerbarium` bucket.
 
@@ -128,8 +128,7 @@ https://<project-ref>.supabase.co/storage/v1/object/public/gerbarium/gerbarium/m
 https://<project-ref>.supabase.co/storage/v1/object/public/gerbarium/gerbarium/modpacks/main/files/1.0.0/mods/example.jar
 ```
 
-3. Paste the manifest URL into launcher settings.
-   - Field: `Mod Distribution Manifest URL`
+3. Set `PACKWIZ_PACK_URL` in launcher environment.
 
 4. Start launcher and watch update screen.
    - If manifest is valid, it will fetch file list and compare hashes.
@@ -143,4 +142,4 @@ https://<project-ref>.supabase.co/storage/v1/object/public/gerbarium/gerbarium/m
 - 404 on manifest URL: wrong bucket path or object key.
 - 403 on file URL: bucket not public or URL points to private object path.
 - Hash mismatch: file in bucket does not match `sha256` in manifest.
-- Launcher skips update: `Mod Distribution Manifest URL` is empty or malformed.
+- Launcher skips update: `PACKWIZ_PACK_URL` is empty or malformed.

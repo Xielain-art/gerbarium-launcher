@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import crypto from "node:crypto";
 import log from "electron-log";
 import type { GameUpdateResult } from "../../../shared/distribution/manifest";
 import { LOG_MESSAGES } from "../../../shared/constants/log-messages";
@@ -44,8 +45,44 @@ function canCleanupPath(relativePath: string): boolean {
   return SAFE_MANAGED_PREFIXES.some((prefix) => lower.startsWith(prefix));
 }
 
-function resolveUrl(base: string, relativeOrAbsolute: string): string {
-  return new URL(relativeOrAbsolute, base).toString();
+function resolveUrl(
+  base: string,
+  relativeOrAbsolute: string,
+  trustedBaseHost: string,
+): string {
+  const resolved = new URL(relativeOrAbsolute, base);
+  assertRemoteUrlPolicy(resolved, trustedBaseHost);
+  return resolved.toString();
+}
+
+function assertRemoteUrlPolicy(url: URL, trustedBaseHost: string): void {
+  if (url.protocol !== "https:") {
+    throw new Error(`Only https URLs are allowed: ${url.toString()}`);
+  }
+  const allowedHosts = parseHostAllowlist(mainEnv.PACKWIZ_ALLOWED_HOSTS);
+  if (allowedHosts.length === 0) {
+    return;
+  }
+  const isTrustedBase = isAllowedHost(url.hostname, [trustedBaseHost]);
+  const isExplicitAllowed = isAllowedHost(url.hostname, allowedHosts);
+  if (!isTrustedBase && !isExplicitAllowed) {
+    throw new Error(`Blocked download host: ${url.hostname}`);
+  }
+}
+
+function parseHostAllowlist(rawValue: string | undefined): string[] {
+  const parsed = rawValue
+    ?.split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
+  return parsed ? Array.from(new Set(parsed)) : [];
+}
+
+function isAllowedHost(hostname: string, allowlist: readonly string[]): boolean {
+  const normalized = hostname.toLowerCase();
+  return allowlist.some((allowedHost) => {
+    return normalized === allowedHost || normalized.endsWith(`.${allowedHost}`);
+  });
 }
 
 type CurseForgeDownloadUrlResponse = {
@@ -68,10 +105,11 @@ async function resolveMetafileDownloadUrl(
   metaUrl: string,
   entryPath: string,
   meta: ReturnType<typeof parseModMetafileToml>,
+  trustedBaseHost: string,
 ): Promise<string> {
   const directUrl = meta.download?.url?.trim();
   if (directUrl) {
-    return resolveUrl(metaUrl, directUrl);
+    return resolveUrl(metaUrl, directUrl, trustedBaseHost);
   }
 
   if (meta.download?.mode !== "metadata:curseforge") {
@@ -106,6 +144,7 @@ async function resolveMetafileDownloadUrl(
 async function resolveExpectedFile(
   indexFile: PackwizIndexFile,
   packBaseUrl: string,
+  trustedBaseHost: string,
 ): Promise<PackwizResolvedFile | null> {
   const entryPath = normalizeRelativePath(indexFile.file);
   if (!indexFile.metafile) {
@@ -117,14 +156,14 @@ async function resolveExpectedFile(
     return {
       localPath: entryPath,
       displayPath: entryPath,
-      downloadUrl: resolveUrl(packBaseUrl, entryPath),
+      downloadUrl: resolveUrl(packBaseUrl, entryPath, trustedBaseHost),
       hash: normalizeHash(hash),
       hashFormat,
       source: "index",
     };
   }
 
-  const metaUrl = resolveUrl(packBaseUrl, entryPath);
+  const metaUrl = resolveUrl(packBaseUrl, entryPath, trustedBaseHost);
   const metaToml = await fetchText(metaUrl);
   const meta = parseModMetafileToml(metaToml);
   const side = meta.side ?? "both";
@@ -141,7 +180,13 @@ async function resolveExpectedFile(
     throw new Error(`Metafile ${entryPath} missing download.hash`);
   }
 
-  const downloadUrl = await resolveMetafileDownloadUrl(metaUrl, entryPath, meta);
+  const downloadUrl = await resolveMetafileDownloadUrl(
+    metaUrl,
+    entryPath,
+    meta,
+    trustedBaseHost,
+  );
+  assertRemoteUrlPolicy(new URL(downloadUrl), trustedBaseHost);
   const hashFormat = assertSupportedHashFormat(meta.download?.hashFormat ?? "sha256");
   const localPath = normalizeRelativePath(path.posix.join(path.posix.dirname(entryPath), filename));
   return {
@@ -205,12 +250,22 @@ export async function runPackwizUpdate(options: PackwizUpdateOptions): Promise<G
   if (!packUrl) {
     return { success: true, checked: 0, downloaded: 0, skipped: 0, deleted: 0 };
   }
+  // Ensure root pack URL follows strict remote-source policy before first fetch.
+  const trustedBaseHost = new URL(packUrl).hostname;
+  resolveUrl(packUrl, packUrl, trustedBaseHost);
 
   options.reportProgress?.({ percent: 2, status: "Fetching modpack metadata..." });
   const packToml = await fetchText(packUrl);
   const pack = parsePackToml(packToml);
-  const indexUrl = resolveUrl(packUrl, pack.index.file);
+  const indexUrl = resolveUrl(packUrl, pack.index.file, trustedBaseHost);
   const indexToml = await fetchText(indexUrl);
+  if (pack.index.hash?.trim()) {
+    const hashFormat = assertSupportedHashFormat(pack.index.hashFormat ?? "sha256");
+    const actual = crypto.createHash(hashFormat).update(indexToml).digest("hex");
+    if (normalizeHash(actual) !== normalizeHash(pack.index.hash)) {
+      throw new Error("pack.toml index hash mismatch");
+    }
+  }
   const index = parseIndexToml(indexToml);
   if (index.hashFormat) {
     assertSupportedHashFormat(index.hashFormat);
@@ -220,7 +275,7 @@ export async function runPackwizUpdate(options: PackwizUpdateOptions): Promise<G
   const expectedFiles: PackwizResolvedFile[] = [];
   for (const fileEntry of index.files) {
     try {
-      const resolved = await resolveExpectedFile(fileEntry, packBaseUrl);
+        const resolved = await resolveExpectedFile(fileEntry, packBaseUrl, trustedBaseHost);
       if (resolved) {
         expectedFiles.push(resolved);
       }

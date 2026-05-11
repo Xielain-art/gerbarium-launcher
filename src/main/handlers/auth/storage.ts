@@ -41,7 +41,11 @@ async function writeSecureData(
   data: SecureData,
 ): Promise<void> {
   await fs.mkdir(path.dirname(secureDataPath), { recursive: true });
-  await fs.writeFile(secureDataPath, JSON.stringify(data, null, 2), "utf-8");
+  await fs.writeFile(
+    secureDataPath,
+    JSON.stringify(data, null, 2),
+    { encoding: "utf-8", mode: 0o600 },
+  );
 }
 
 function assertEncryptionAvailable(): void {
