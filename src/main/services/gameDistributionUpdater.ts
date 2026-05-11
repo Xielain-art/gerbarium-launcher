@@ -26,11 +26,12 @@ export async function runDistributionUpdate(options: {
   const packUrl = pickPackUrl();
   if (!packUrl) {
     return {
-      success: true,
+      success: false,
       checked: 0,
       downloaded: 0,
       skipped: 0,
       deleted: 0,
+      error: "PACKWIZ_PACK_URL is required",
     };
   }
 

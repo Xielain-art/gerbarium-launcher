@@ -1,4 +1,4 @@
-import { isSmokeTestEnabled, parseAppEnv } from "../../../shared/env";
+import { isSmokeTestEnabled } from "../../../shared/env";
 import { apiClient } from "../client";
 import { buildApiResult, buildNetworkErrorResult } from "../result";
 import type {
@@ -9,10 +9,12 @@ import type {
 } from "../types";
 
 function isSmokeTestRuntime(): boolean {
-  if (typeof process === "undefined" || !process.env) {
-    return false;
-  }
-  return isSmokeTestEnabled(parseAppEnv(process.env));
+  return isSmokeTestEnabled({
+    SMOKE_TEST:
+      typeof process !== "undefined" && process.env
+        ? (process.env.SMOKE_TEST as "true" | "false" | undefined)
+        : undefined,
+  });
 }
 
 export async function loginRequest(

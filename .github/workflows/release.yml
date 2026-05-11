@@ -59,6 +59,16 @@ jobs:
       - name: Install dependencies
         run: npm install --prefer-offline --no-audit
 
+      - name: Validate packwiz env
+        env:
+          PACKWIZ_PACK_URL: ${{ secrets.PACKWIZ_PACK_URL != '' && secrets.PACKWIZ_PACK_URL || vars.PACKWIZ_PACK_URL }}
+        shell: bash
+        run: |
+          if [ -z "${PACKWIZ_PACK_URL:-}" ]; then
+            echo "PACKWIZ_PACK_URL is required"
+            exit 1
+          fi
+
       - name: Build platform package
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}

@@ -83,7 +83,10 @@ export function registerAuthRegisterHandler({
           logApiFailure(LOG_MESSAGES.AUTH_API_ERROR, registerResult);
           return {
             success: false,
-            error: mapAuthFailureCode(registerResult.status),
+            error:
+              registerResult.status !== undefined
+                ? mapAuthFailureCode(registerResult.status)
+                : registerResult.errorMessage || ERROR_CODES.AUTH_API_REQUEST_FAILED,
           };
         }
 
@@ -145,7 +148,10 @@ export function registerAuthRegisterHandler({
           logApiFailure("[TEST_AUTH] API error", registerResult);
           return {
             success: false,
-            error: mapAuthFailureCode(registerResult.status),
+            error:
+              registerResult.status !== undefined
+                ? mapAuthFailureCode(registerResult.status)
+                : registerResult.errorMessage || ERROR_CODES.AUTH_API_REQUEST_FAILED,
           };
         }
 

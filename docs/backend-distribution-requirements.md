@@ -52,7 +52,7 @@ Launcher config:
 PACKWIZ_PACK_URL=https://cdn.example.com/packs/client/pack.toml
 ```
 
-If `PACKWIZ_PACK_URL` is absent, launcher skips modpack update and continues launch flow.
+If `PACKWIZ_PACK_URL` is absent, launcher fails update and blocks launch.
 
 For Supabase, point it at a public object URL in the `gerbarium` bucket.
 
@@ -142,4 +142,4 @@ https://<project-ref>.supabase.co/storage/v1/object/public/gerbarium/gerbarium/m
 - 404 on manifest URL: wrong bucket path or object key.
 - 403 on file URL: bucket not public or URL points to private object path.
 - Hash mismatch: file in bucket does not match `sha256` in manifest.
-- Launcher skips update: `PACKWIZ_PACK_URL` is empty or malformed.
+- Launcher blocks update: `PACKWIZ_PACK_URL` is empty or malformed.

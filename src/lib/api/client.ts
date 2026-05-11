@@ -1,8 +1,5 @@
 import createClient from "openapi-fetch";
-import { parseAppEnv } from "../../shared/env";
 import { paths } from "./v1";
-
-const DEFAULT_API_BASE_URL = "https://gerbarium-api.vercel.app";
 
 function normalizeBaseUrl(value: string): string {
   return value.trim().replace(/\/+$/, "");
@@ -21,14 +18,14 @@ function getProcessEnvBaseUrl(): string | undefined {
   if (typeof process === "undefined" || !process.env) {
     return undefined;
   }
-  return parseAppEnv(process.env).API_BASE_URL;
+  return process.env.API_BASE_URL;
 }
 
 function getViteEnvBaseUrl(): string | undefined {
   try {
-    const env = parseAppEnv(
-      ((import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env ?? {}),
-    );
+    const env =
+      (import.meta as ImportMeta & { env?: Record<string, string | undefined> })
+        .env ?? {};
     return env.VITE_API_BASE_URL ?? env.API_BASE_URL;
   } catch {
     return undefined;
@@ -42,6 +39,7 @@ function resolveApiBaseUrl(): string {
     if (isSafeBaseUrl(normalized)) {
       return normalized;
     }
+    throw new Error("Invalid API_BASE_URL in .env");
   }
 
   const fromVite = getViteEnvBaseUrl();
@@ -50,9 +48,10 @@ function resolveApiBaseUrl(): string {
     if (isSafeBaseUrl(normalized)) {
       return normalized;
     }
+    throw new Error("Invalid VITE_API_BASE_URL in .env");
   }
 
-  return DEFAULT_API_BASE_URL;
+  throw new Error("API base URL is missing. Set API_BASE_URL/VITE_API_BASE_URL in .env");
 }
 
 export const API_BASE_URL = resolveApiBaseUrl();

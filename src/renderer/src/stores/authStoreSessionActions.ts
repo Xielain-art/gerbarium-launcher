@@ -4,7 +4,7 @@ import { authDefaultState } from "./authStoreTypes";
 import type { GetState, SetState } from "./authStoreActionTypes";
 
 function logAction(action: string, details?: string): void {
-  window.electronAPI.system.logAction(action, details);
+  window.electronAPI?.system?.logAction(action, details);
 }
 
 export function createAuthStoreSessionActions(set: SetState, get: GetState) {
@@ -21,7 +21,7 @@ export function createAuthStoreSessionActions(set: SetState, get: GetState) {
       }
 
       sessionLoadInFlight = (async () => {
-        set({ isSessionLoading: true });
+        set({ isSessionLoading: true, hasCheckedSession: true });
         try {
           const result = await window.electronAPI.auth.getSession();
           if (result.success && result.isAuthenticated && result.user) {
@@ -40,6 +40,8 @@ export function createAuthStoreSessionActions(set: SetState, get: GetState) {
             }
             return;
           }
+
+          await window.electronAPI.auth.logout().catch(() => {});
           set({
             isAuthenticated: false,
             user: null,
@@ -50,6 +52,7 @@ export function createAuthStoreSessionActions(set: SetState, get: GetState) {
         } catch (err) {
           const errorMsg = err instanceof Error ? err.message : "Unknown error";
           logAction(LOG_ACTIONS.TOKEN_LOAD_ERROR, errorMsg);
+          await window.electronAPI.auth.logout().catch(() => {});
           set({
             isAuthenticated: false,
             user: null,

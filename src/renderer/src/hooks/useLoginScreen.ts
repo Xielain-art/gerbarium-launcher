@@ -96,10 +96,10 @@ export function useLoginScreen(): LoginScreenResult {
 
   // Load session on mount
   useEffect(() => {
-    if (!hasCheckedSession) {
+    if (!hasCheckedSession && !isSessionLoading) {
       void loadToken();
     }
-  }, [loadToken, hasCheckedSession]);
+  }, [loadToken, hasCheckedSession, isSessionLoading]);
 
   // Navigate to dashboard if already authenticated
   useEffect(() => {
@@ -381,6 +381,3 @@ export function useLoginScreen(): LoginScreenResult {
     validations,
   };
 }
-
-
-

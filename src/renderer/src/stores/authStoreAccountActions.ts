@@ -35,8 +35,11 @@ export function createAuthStoreAccountActions(set: SetState, _get: GetState) {
         });
         logAction(LOG_ACTIONS.LOGIN_SUCCESS, `User logged in: ${user.username}`);
         return { success: true };
-      } catch {
-        const errorMessage = ERROR_CODES.AUTH_API_REQUEST_FAILED;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error && err.message.trim().length > 0
+            ? err.message
+            : ERROR_CODES.AUTH_API_REQUEST_FAILED;
         set({ isLoading: false, error: errorMessage });
         logAction(LOG_ACTIONS.LOGIN_ERROR, errorMessage);
         return { success: false, error: errorMessage };
@@ -66,8 +69,11 @@ export function createAuthStoreAccountActions(set: SetState, _get: GetState) {
         });
         logAction(LOG_ACTIONS.REGISTER_SUCCESS, `User registered: ${user.username}`);
         return { success: true };
-      } catch {
-        const errorMessage = ERROR_CODES.AUTH_API_REQUEST_FAILED;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error && err.message.trim().length > 0
+            ? err.message
+            : ERROR_CODES.AUTH_API_REQUEST_FAILED;
         set({ isLoading: false, error: errorMessage });
         logAction(LOG_ACTIONS.REGISTER_ERROR, errorMessage);
         return { success: false, error: errorMessage };
@@ -92,8 +98,11 @@ export function createAuthStoreAccountActions(set: SetState, _get: GetState) {
         set({ user, isAuthenticated: true, emailVerification: null, isLoading: false });
         logAction(LOG_ACTIONS.LOGIN_OFFLINE, `Offline login: ${username}`);
         return { success: true };
-      } catch {
-        const errorMessage = ERROR_CODES.AUTH_API_REQUEST_FAILED;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error && err.message.trim().length > 0
+            ? err.message
+            : ERROR_CODES.AUTH_API_REQUEST_FAILED;
         set({ isLoading: false, error: errorMessage });
         logAction(LOG_ACTIONS.LOGIN_OFFLINE_ERROR, errorMessage);
         return { success: false, error: errorMessage };

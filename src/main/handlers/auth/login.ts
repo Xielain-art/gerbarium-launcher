@@ -35,7 +35,10 @@ export function registerAuthLoginHandler({
           logApiFailure(LOG_MESSAGES.AUTH_API_ERROR, authResult);
           return {
             success: false,
-            error: mapAuthFailureCode(authResult.status),
+            error:
+              authResult.status !== undefined
+                ? mapAuthFailureCode(authResult.status)
+                : authResult.errorMessage || ERROR_CODES.AUTH_API_REQUEST_FAILED,
           };
         }
 
