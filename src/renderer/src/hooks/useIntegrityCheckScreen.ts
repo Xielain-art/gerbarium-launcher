@@ -337,6 +337,11 @@ export function useIntegrityCheckScreen(): {
     };
 
     async function runCheck(): Promise<void> {
+      if (isSmokeTest) {
+        startPostIntegrityFlow();
+        return;
+      }
+
       if (!window.electronAPI?.verifyIntegrity) {
         startPostIntegrityFlow();
         return;
