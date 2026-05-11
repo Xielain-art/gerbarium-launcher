@@ -12,8 +12,57 @@ on:
         type: string
 
 jobs:
+  release-gate:
+    name: Release Gate (Unit + Smoke)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --prefer-offline --no-audit
+
+      - name: Validate packwiz env
+        env:
+          PACKWIZ_PACK_URL: ${{ secrets.PACKWIZ_PACK_URL != '' && secrets.PACKWIZ_PACK_URL || vars.PACKWIZ_PACK_URL }}
+        shell: bash
+        run: |
+          if [ -z "${PACKWIZ_PACK_URL:-}" ]; then
+            echo "PACKWIZ_PACK_URL is required"
+            exit 1
+          fi
+
+      - name: Run unit tests
+        env:
+          NODE_ENV: development
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY != '' && secrets.CURSEFORGE_API_KEY || vars.CURSEFORGE_API_KEY }}
+          PACKWIZ_PACK_URL: ${{ secrets.PACKWIZ_PACK_URL != '' && secrets.PACKWIZ_PACK_URL || vars.PACKWIZ_PACK_URL }}
+        run: npm run test:unit
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run smoke test
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY != '' && secrets.CURSEFORGE_API_KEY || vars.CURSEFORGE_API_KEY }}
+          PACKWIZ_PACK_URL: ${{ secrets.PACKWIZ_PACK_URL != '' && secrets.PACKWIZ_PACK_URL || vars.PACKWIZ_PACK_URL }}
+        run: xvfb-run npm run test:smoke
+
   create-release:
     name: Create Draft Release
+    needs: release-gate
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,7 +81,7 @@ jobs:
 
   package:
     name: Package and Upload (${{ matrix.os }})
-    needs: create-release
+    needs: [release-gate, create-release]
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read

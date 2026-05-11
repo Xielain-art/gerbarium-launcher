@@ -6,17 +6,70 @@ test.describe('Smoke Test - Full Auth Flow', () => {
   let app: ElectronApplication;
   let window: Page;
   const userDataPath = path.join(process.cwd(), 'test-user-data');
+  const envFilePath = path.join(process.cwd(), '.env');
+  let originalEnvContent: string | null = null;
+
+  function parseDotEnv(content: string): Record<string, string> {
+    const out: Record<string, string> = {};
+    for (const rawLine of content.split(/\r?\n/)) {
+      const line = rawLine.trim();
+      if (!line || line.startsWith('#')) continue;
+      const eq = line.indexOf('=');
+      if (eq <= 0) continue;
+      const key = line.slice(0, eq).trim();
+      let value = line.slice(eq + 1).trim();
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+      out[key] = value;
+    }
+    return out;
+  }
+
+  function writeSmokeEnvFile(): void {
+    const existingEnv = fs.existsSync(envFilePath)
+      ? parseDotEnv(fs.readFileSync(envFilePath, 'utf8'))
+      : {};
+    const apiBaseUrl =
+      process.env.API_BASE_URL || existingEnv.API_BASE_URL || existingEnv.VITE_API_BASE_URL || 'https://gerbarium-api.vercel.app';
+    const packwizPackUrl =
+      process.env.PACKWIZ_PACK_URL || existingEnv.PACKWIZ_PACK_URL || '';
+
+    if (!packwizPackUrl) {
+      throw new Error('PACKWIZ_PACK_URL is required for smoke test');
+    }
+
+    const lines = [
+      `API_BASE_URL=${apiBaseUrl}`,
+      `VITE_API_BASE_URL=${apiBaseUrl}`,
+      `PACKWIZ_PACK_URL=${packwizPackUrl}`,
+      'SMOKE_TEST=true',
+      'TEST_USERNAME=smoke_user',
+      'TEST_EMAIL=smoke_user@gerbarium.ru',
+      'TEST_PASSWORD=SmokeTestPassword123!',
+    ];
+
+    fs.writeFileSync(envFilePath, `${lines.join('\n')}\n`, 'utf8');
+  }
 
   test.beforeAll(async () => {
     if (fs.existsSync(userDataPath)) {
       fs.rmSync(userDataPath, { recursive: true, force: true });
     }
+
+    if (fs.existsSync(envFilePath)) {
+      originalEnvContent = fs.readFileSync(envFilePath, 'utf8');
+    }
+    writeSmokeEnvFile();
+
     app = await electron.launch({
       args: ['.', '--no-sandbox', `--user-data-dir=${userDataPath}`],
       env: {
         ...process.env,
         NODE_ENV: 'development',
-        SMOKE_TEST: 'true',
       }
     });
 
@@ -26,6 +79,15 @@ test.describe('Smoke Test - Full Auth Flow', () => {
 
   test.afterAll(async () => {
     if (app) await app.close();
+    if (originalEnvContent !== null) {
+      try { fs.writeFileSync(envFilePath, originalEnvContent, 'utf8'); } catch (_err) {
+        // Ignore errors during cleanup
+      }
+    } else if (fs.existsSync(envFilePath)) {
+      try { fs.rmSync(envFilePath, { force: true }); } catch (_err) {
+        // Ignore errors during cleanup
+      }
+    }
     if (fs.existsSync(userDataPath)) {
       try { fs.rmSync(userDataPath, { recursive: true, force: true }); } catch (_err) {
         // Ignore errors during cleanup
