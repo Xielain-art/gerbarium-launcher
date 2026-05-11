@@ -58,6 +58,12 @@ function readEnvFromFileCandidates(): Record<string, string> {
   return {};
 }
 
+const bundledMainEnv = {
+  API_BASE_URL: process.env.API_BASE_URL,
+  DISCORD_RPC_CLIENT_ID: process.env.DISCORD_RPC_CLIENT_ID,
+  PACKWIZ_PACK_URL: process.env.PACKWIZ_PACK_URL,
+} as const;
+
 /**
  * Builds the runtime env by merging `.env` file values with `process.env`.
  * `process.env` takes precedence so that env vars injected by CI runners
@@ -94,6 +100,12 @@ function buildRuntimeEnv(): Record<string, string | undefined> {
   for (const key of knownKeys) {
     if (merged[key] === undefined && process.env[key] !== undefined) {
       merged[key] = process.env[key];
+    }
+  }
+
+  for (const [key, value] of Object.entries(bundledMainEnv)) {
+    if (merged[key] === undefined && value !== undefined) {
+      merged[key] = value;
     }
   }
 
